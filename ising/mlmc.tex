@@ -1,0 +1,92 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb}
+\renewcommand{\vec}[1]{\boldsymbol{#1}}
+\usepackage[cm]{fullpage}
+
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Ising Model}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Consider the $2$-dimensional Ising model for spins $s^{(h)}_i\in\{-1,+1\}$ for $i\in\mathbb{N}$ which are located at sites of a lattice $L_h$ with spacing $h$, i.e. $\vec{x}^{(h)}_i\in L_h$ where $L_h = (h k_1,h k_2)$ with $(k_1,k_2)\in\mathbb{Z}\times \mathbb{Z}$. Let $\vec{S}^{(h)}=(s^{(h)}_1,s^{(h)}_2,\dots)$ be the state of the system. Then the Hamiltonian (i.e. basically the energy) is given by:
+\begin{equation}
+  H^{(h)}(\vec{S}^{(h)}) = -J_1(h)\sum_{i,j: \nu_1(i,j)} s^{(h)}_i s^{(h)}_j 
+\end{equation}
+The sum runs over all spin indices $i,j$ such that the sites $\vec{x}^{(h)}_i$, $\vec{x}^{(h)}_j$ are adjacent. This is denoted by the connection function $\nu_1(i,j)$ which is true if $\vec{x}^{(h)}_i-\vec{x}^{(h)}_j=h \vec{e}_k$ for some $k\in\{1,2\}$ where $\vec{e}_k$ is the unit vector in direction $k$.
+We are interested in calculating expectation values of functions $f(\vec{S})$, which can be written as
+\begin{equation}
+  \langle f \rangle = \sum_{\vec{S}} P_h(\vec{S}^{(h)})f(\vec{S}^{(h)} = \sum_{\vec{S}} f(\vec{S}) Z_h^{-1} \exp\left[-H^{(h)}(\vec{S}^{(h)})\right]
+\end{equation}
+Note that we have absorbed the inverse temperature $\beta = 1/(k_BT)$ in the constant $J_1(h)$. $Z_h^{-1}$ is a normalisation constant which ensures that $\langle 1 \rangle=1$, i.e.
+\begin{equation}
+  P_h(\vec{S}^{(h)}) = Z_h^{-1}\exp\left[-H^{(h)}(\vec{S}^{(h)})\right]
+\end{equation}
+is a probability.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Coarse graining}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Now consider the lattice on which all sites $\vec{x}_i^{(h)}=(hn_{i,1},hn_{i,2})$ for which $n_{i,1}+n_{i,2}$ is even. Denote those sites and associated spins by $\vec{x}^{(2h)}_i$ and all other sites by $\tilde{\vec{x}}^{(2h)}_i$. Let $\vec{S}^{(2h)}=\vec{S}^{(h)}_{\text{even}} = (s^{(2h)}_1,s^{(2h)}_2,\dots)$ be the vector of ``even'' spins. The other (``odd'') spins are collected in $\vec{S}^{(h)}_{\text{odd}}$. Then we can define an effective coarse grid Hamiltonian $H^{(2h)}$ which only contains those ``even'' spin variables; this is achieved by summing over all ``odd'' spins, i.e. all $i$ such that $n_{1,i}+n_{2,i}$ is odd. The coarse Hamiltonian is
+\begin{equation}
+  \exp\left[-H^{(2h)}(\vec{S}^{(2h)})\right] = \sum_{i\;\text{odd}} \exp\left[- H^{(h)}(\vec{S}^{(h)})\right]
+\end{equation}
+Also define the coarse probability as
+\begin{equation}
+  P_{2h}(\vec{S}^{(2h)}) = Z_{2h}^{-1}\exp\left[-H^{(2h)}(\vec{S}^{(2h)})\right].
+\end{equation}
+with the normalisation constant $Z_{2h}$ which guarantees that $P_{2h}$ integrates to 1.
+If we are only interested in the ``even'' spins, then by construction drawing samples from $P_{2h}$ is the same as drawing samples from $P_h$ and discarding the ``odd'' spins.
+We also have
+\begin{equation}
+  P_{h}(\vec{S}^{(h)}) = P_{h}(\vec{S}^{(h)}_{\text{odd}}|\vec{S}^{(h)}_{\text{even}}) P_{2h}(\vec{S}^{(2h)})
+\end{equation}
+The conditional probability factorises, since each odd spin is only coupled to even spins on the fine level:
+\begin{equation}
+  P_{h}(\vec{S}^{(h)}_{\text{odd}}|\vec{S}^{(h)}_{\text{even}})
+  = Z_h^{-1}\prod_{i\;\text{odd}}\exp\left[-J_1(h)s_i^{(h)}\sum_{j:\nu_1(i,j)} s_j^{(h)}\right]=
+  Z_h^{-1}\prod_{i\;\text{odd}} P_{h,i}(s_i^{(h)}|s_{j:\nu_1(i,j)}^{(h)})
+\end{equation}
+Here the sum over $j$ in the exponent runs over all ``even'' spins $j$ which are direct neighbours of the ``odd'' spin $i$.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Two-level method}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Case I: Known coarse level Hamiltonian}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Assuming we know the coarse Hamiltonian, we can now use the following two-level method to generate samples:
+\begin{itemize}
+\item Use the coarse level Hamiltonian to generate the next sample at the ``even'' points with a MCMC method.
+\item For this coarse level sample generate a complete fine level sample by also samping from the independent distributions $P_{h,i}(s^{(h)}_i|s^{(h)}_{j\sim i})$ for each ``odd'' site, given the spin values at the ``even'' sites which we got from the coarse level.
+  \item Use this complete sample for MCMC inference, i.e. evaluate the function $f(\vec{S})$ on it.
+\end{itemize}
+In the one-dimensional Ising model this Hamiltonian can be written down exactly, i.e. turns out that in this case $H^{(2h)}$ has exactly the same structure as $H^{(h)}$, but the coupling constants differ, $J_1(2h)= \dots J_1(h)$. However, the 1d Ising model is not very interesting since it can be solved exactly.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Case II: Unknown coarse level Hamiltonian}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+If the coarse level Hamiltonian is unknown but we can approximate it, then the algorithm is modified as follows:
+\begin{itemize}
+\item Use the coarse level Hamiltonian to generate a trial sample at the ``even'' points with a MCMC method.
+\item For this coarse level sample generate a complete fine level trial sample by also samping from the independent distributions $P_{h,i}(s^{(h)}_i|s^{(h)}_{j\sim i})$ for each ``odd'' site, given the spin values at the ``even'' sites which we got from the coarse level.
+  \item Accept or reject this complete trial sample by evaluating the full fine level Hamiltonian.
+  \item Use this complete trial sample for MCMC inference, i.e. evaluate the function $f(\vec{S})$ on it.
+\end{itemize}
+The accept/reject steps guarantees that the complete sample is distributed according to the true fine-level probability density. However, if the approximate coarse level Hamiltonian such that it is close to the true coarse level Hamiltonian, then the acceptance probability will be high. On the other hand, the coarse level Hamiltonian helps since it allows to sample long-range connections which are not explored with local updates in the fine-level Hamiltonian alone.
+
+Both two-level methods could be iterated, i.e. you start with a sample on the coarsest level and then move it to the next finer level where it is accepted/rejected according to the probability on that level.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Constructing the coarse level Hamiltonian}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+In two dimensions the coarse level Hamiltonian does not have the same structure as the fine level Hamiltonian. Instead, we get additional terms which couple four spins and ones that couple diagonally connected spins, i.e.
+\begin{equation}
+  H^{(2h)}(\vec{S}^{(2h)}) = -J_1(2h)\sum_{i,j: \nu_1(i,j)} s_i^{(2h)} s_j^{(2h)}
+  -J_2(2h)\sum_{i,j: \nu_2(i,j)} s_i^{(2h)} s_j^{(2h)} - J_3(2h)\sum_{i,j,k,\ell:\nu_3(i,j,k,\ell)} s_i^{(2h)} s_j^{(2h)} s_k^{(2h)} s_\ell^{(2h)}
+\end{equation}
+We could in principle work out the functions $J_i(2h)$ given $J_1(h)$ on the finest level, but in practice that is not possible since it involves high-dimensional integrals. This method can be iterated, i.e. give the Hamiltonian on the $2h$ level we can write down a Hamiltonian on then $4h$ level which is obtained by integrating out the ``odd'' spins on the $2h$ level and so on. This Hamiltonian will be even more complicated and contain couplings between larger groups of spins. In general, we find that on some level denoted by $\tilde{h}=2^\lambda h$ we will have
+\begin{equation}
+  H^{(\lambda)}(\vec{S}(\tilde{h})) = -\sum_{\alpha} J_\alpha(\tilde{h}) \sum_{i_1,i_2,\dots,i_{d_\alpha}: \nu_{\alpha}(i_1,i_2,\dots,i_{d_\alpha})} s_{i_1}^{(\tilde{h})}s_{i_2}^{(\tilde{h})}\cdot\dots\cdot s_{i_{d_\alpha}}^{(\tilde{h})}
+\end{equation}
+We can also in principle calculate the coefficients $J_\alpha(\tilde{h})$, but again it is not practically possible.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Renormalisation flow and fixed points}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+If write $j_\alpha(\lambda) = J_\alpha(\tilde{h})$ and interpret $\lambda$ as a continuous parameter, then you could consider the flow of the vector $\vec{j}(\lambda)$ as $\lambda$ varies. The interesting thing is now that there are certain fixed points under this flow as $h\rightarrow 0$. In one dimension you can work this out exactly, but unfortunately the only fixed point is trivial. In 2d this is not the case, there is a non-trivial fixed point. This means that if you start with the correct $J_1$ on the finest level, then the Hamiltonian on the next coarser grid is exactly the same as the one on the finer grid. Physically, this means that you have correlations on each length scale, i.e. the system looks self-similar if you zoom in and out. Interestingly, this is the case which is very hard to sample since local updates will be very inefficient.
+\end{document}
