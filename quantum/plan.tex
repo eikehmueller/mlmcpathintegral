@@ -13,7 +13,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Challenge and Motivation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Quantum Field Theories (QFTs) \cite{Peskin1995}, such as Quantum Chromo Dynamics (QCD) predict fundamental properties of matter and are of paramount importance in High Energy Physics. If it is discretised on a lattice, QCD allows first principles calculations of strongly interacting particles and is crucial for precise calculations, for example in New Physics predictions or to simulate the hadronic background in accelerators such as the Large Hadron Collider.
+Quantum Field Theories (QFTs) \cite{Peskin1995}, such as Quantum Chromo Dynamics (QCD) predict fundamental properties of matter and are of paramount importance in High Energy Physics. If discretised on a space-time lattice, QCD allows first principles calculations of strongly interacting particles and is crucial for precise calculations, for example in New Physics predictions or to simulate the hadronic background in accelerators such as the Large Hadron Collider.
 Using Feynman's Path Integral technique \cite{Feynman2010}, QFTs can be be formulated as statistical systems in $d=4$ space-time dimensions. Predictions of physical quantities are then calculated by generating a set of samples with Markov-Chain Monte Carlo Methods and evaluating the relevant quantity of interest on those samples. To obtain physically meaningful results, calculations need to be carried out for increasingly small lattice spacings $a$ and extrapolated to the continuum limit $a\rightarrow 0$. There are two key issues which make the accurate calculation challenging:
 \begin{figure}
   \begin{center}
@@ -24,23 +24,25 @@ Using Feynman's Path Integral technique \cite{Feynman2010}, QFTs can be be formu
 \end{figure}
 \begin{itemize}
 \item Since the probability density is peaked around the classical trajectory, in the Metropolis-Hastings algorithm naively generated samples are highly correlated since the acceptance probability is small. This issue can be overcome by the Hybrid Monte Carlo method \cite{Duane1987}. However, the number of samples $N$ required to reduce the statistical sampling error below a tolerance $\epsilon$ still grows as $\mathcal{O}(\epsilon^{-2})$ due to fundamental law of large numbers. 
-\item Since the number of lattice sites on a grid with spacing $a$ is $\propto a^{-d}$, the cost to generate one sample grows as $\mathcal{O}(a^{-d})$. This already assumes that optimal algorithms are used when, for example, inverting large sparse matrices to calculate Fermion propagators. While if $3+1$ spacetime dimensions $d=4$, in some formulations (Domain Wall Fermions \cite{Kaplan1992}) the dimension of the system is even $d=5$.
+\item Since the number $M$ of lattice sites on a grid with spacing $a$ is $M \propto a^{-d}$, the cost to generate one sample grows as $\mathcal{O}(a^{-d})$. This already assumes that optimal algorithms are used when, for example, inverting large sparse matrices to calculate Fermion propagators. While if $3+1$ spacetime dimensions $d=4$, in some formulations (Domain Wall Fermions \cite{Kaplan1992}) the dimension of the system is even $d=5$.
 \end{itemize}
-If both the statistical and discretisation error (which we assume here to be linear in the lattice spacing) are to be reduced below a tolerance of $\epsilon\propto a$, the total cost of the method is $\mathcal{O}(a^{-(d+2)})$ where $d=4,5$. Together this leads to prohibitively high costs for Lattice QCD calculations which limit the range of available lattice spacings and extrapolations to the continuum limit.
+If both the statistical and discretisation error (which we assume here to be linear in the lattice spacing) are to be reduced below a tolerance of $\epsilon\propto a$, the total cost of the method is $\mathcal{O}(\epsilon^{-(d+2)})$ where $d=4,5$. Together this leads to prohibitively high costs for Lattice QCD calculations which limit the range of available lattice spacings and extrapolations to the continuum limit.
+
+In the following we explore Multilevel Monte Carlo sampling methods \cite{Heinrich2001,Giles2008,Giles2015}. As shown in \cite{Dodwell2015}, a Multilevel MCMC method has the potential to reduce the computational complexity from $\mathcal{O}(\epsilon^{-(d+2)})$ to $\mathcal{O}(\epsilon^2 |\log(\epsilon)|)$. Multilevel Monte Carlo uses a hierarchy of levels to construct an unbiased estimator. This requires calculation of the expectation value of differences between subsequent levels, which have a much smaller variance than the QoI itsself. An important requirement is that the theories used on two subsequent levels are ``close'', i.e. the coarse level theory should provide a good approximation for the coarse modes on the next-finer level. In QFT this can be achieved naturally by constructing the coarse theory as an effective theory of the fine-level model. While construction of the exact effective theory by integrating out the high-frequency modes is not possible (except in very simple cases), in many cases perturbation theory can be used to construct an approximate effective theory. In particular we expect this to be the case in QCD, which is asymptotically free. A whole machinery is available for carrying out perturbation theory on a lattice, see e.g. \cite{Rothe2005,Hart2009}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Methods}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-To set the scene and introduce key concepts, we first discuss the much simpler case of quantum mechanics. Since this is effectively a one-dimensional theory, gain are expected to be smaller here. We discuss the generalisations required for the more interesting case of a $d$-dimensional Quantum Field Theory in Section \ref{sec:QFT}. 
+To set the scene and introduce key concepts, we first discuss the much simpler case of quantum mechanics and show how it can be formulated as a statistical theory. Since this is effectively a one-dimensional field-theory, the gains are expected to be smaller here ($\mathcal{O}(\epsilon^{-3})\rightarrow\mathcal{O}(\epsilon^{-2}|\log(\epsilon)|)$). We discuss the generalisations required for the more interesting case of a $d$-dimensional Quantum Field Theory in Section \ref{sec:QFT}. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Path integrals in Quantum Mechanics}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Consider a particle of mass $m_0$ which moves in a potential $V(x)$ where $x(t)$ is the particle's position at time $t$.
-Feynman's path integral allows the calculation of the transition amplitude for starting at the point $x_i$ at time $t=0$ and ending at point $x_f$ at time $t=T$ as a sum over all possible paths $x(t)$ with $x(0)=x_i$,  $x(T)=x_f$, as shown in Fig. \ref{fig:path_integral} (left). This sum is denoted by $\int \mathcal{D}x(t)$. The crucial observation, exploited for example in \cite{Creutz1981}, is that by formulating the theory in imaginary time, the highly-oscillatory integrand is replaced by a real exponential and the path integral looks like a finite-temperature statistical system of temperature $T\propto \hbar$. 
+Feynman's path integral \cite{Feynman2010} allows the calculation of the transition amplitude for starting at the point $x_i$ at time $t=0$ and ending at point $x_f$ at time $t=T$ as a sum over all possible paths $x(t)$ with $x(0)=x_i$,  $x(T)=x_f$, as shown in Fig. \ref{fig:path_integral} (left). This sum is denoted by $\int \mathcal{D}x(t)$. The crucial observation, exploited for example in \cite{Creutz1981}, is that by formulating the theory in imaginary time, the highly-oscillatory integrand is replaced by a real exponential and the path integral looks like a statistical system of temperature\footnote{In the ``zero-temperature'' limit quantum fluctuations disappear and only the classical trajectory contributes to the path integral.} $T\propto \hbar$.  The transition amplitude is given by
 \begin{equation}
   \mathcal{A}(x_f\leftarrow x_i)=\langle x_f| e^{-HT} |x_i\rangle = \int\mathcal{D}x(t)\;e^{-S[x(t)]}.\label{eqn:path_integral_continuum}
 \end{equation}
 For simplicity we have chosen units in which Planck's constant $\hbar=1$.
-For a given path $x(t)$ the action $S[x(t)]$ is given by
+For a given path $x(t)$ the action $S[x(t)]$ is
 \begin{equation}
   S[x(t)] = \int_{0}^{T} \left(\frac{1}{2}m_0 \dot{x}(t)^2 + V(x(t))\right)\;dt
 \end{equation}
@@ -60,8 +62,9 @@ For example, the two-point correlation function $A=x(0)x(t)$ allows the extratio
 \begin{equation}
   \langle x(0) x(t) \rangle = \sum_{n\ne 0} C_n e^{-(E_n-E_0)t}.\label{eqn:spectrum}
 \end{equation}
-This formula is also crucial in QFT, for example in QCD it can be used to extract the mass-spectra of bound particle states which can be compared to experimental data (see e.g. \cite{Davies2004}).
-We can then express the expectation value of the observable $A$ in Eq. (\ref{eqn:expectation_A}) as
+This formula is also crucial in QFT, for example in QCD it can be used to extract the mass-spectra of bound particle states by fitting the function $C(t) = \langle x(0)x(t)\rangle$ to a sum of exponentials. The theoretical predictions can then be compared to experimental data (see e.g. \cite{Davies2004}).
+
+Using more abstract notation, we can express the expectation value of the observable $A$ in Eq. (\ref{eqn:expectation_A}) as
 \begin{equation}
    \langle A \rangle = \mathbb{E}_{\rho}\left[A\right]
 \end{equation}
@@ -79,7 +82,7 @@ Clearly the infinite dimensional integral in Eq. (\ref{eqn:expectation_A}) can n
 Here $a$ is the lattice spacing. The quantity $\vec{X}$ is the state vector of the system, i.e. the path integral is the sum over all states with an appropriate exponential weighting.
 Then Eq. (\ref{eqn:expectation_A}) becomes the $M$-dimensional integral
 \begin{equation}
-  \langle A\rangle \approx \frac{\int d^M\vec{X} \;A[X]\exp\left[-S[\vec{X}]\right]}{\int d^M\vec{X'} \;\exp\left[-S[\vec{X'}]\right]}
+  \langle A\rangle \approx \frac{\int d^M\vec{X} \;A[X]e^{-S[\vec{X}]}}{\int d^M\vec{X'} \;e^{-S[\vec{X'}]}}
   \qquad\text{where $d^M\vec{X}=dX_0\;dX_1\;\dots\;dX_{M-1}$}\label{eqn:generating_functional_disc}
 \end{equation}
 with
@@ -118,7 +121,7 @@ To apply the multilevel MCMC method from \cite{Dodwell2015}, introduce a hierarc
 \begin{equation}
   \begin{aligned}
     \theta_L &= \theta = (X_0,X_1,\dots,X_{M-1}) = (X^L_0,X^L_1,\dots,X^L_{M_L-1})\\
-    \theta_\ell & = (X_0^\ell,X_1^\ell,\dots,X^\ell_{M_\ell-1})\qquad\text{with $X^{\ell-1}_j = X_{2j}^\ell$}
+    \theta_\ell & = (X_0^\ell,X_1^\ell,\dots,X^\ell_{M_\ell-1})\qquad\text{with $X^{\ell}_j = X_{2j}^{\ell+1}$}\qquad\text{for $\ell=0,\dots,L-1$}
   \end{aligned}
 \end{equation}
 We also split $\theta_\ell$ into even and odd sites as
@@ -148,7 +151,7 @@ starting with
 \end{xalignat}
 This allows the construction of probability densities on all levels as
 \begin{equation}
-  \pi^\ell(\theta^\ell) = \frac{e^{-S^\ell[\theta^\ell]}}{Z_\ell}
+  \pi^\ell(\theta^\ell) = \frac{e^{-S^\ell[\theta^\ell]}}{Z_\ell}\qquad\text{with $Z_\ell=\int d\theta'_\ell\;e^{-S_\ell[\theta'_\ell]}$}
 \end{equation}
 which are used in the Multilevel MCMC algorithm in \cite{Dodwell2015}.
 
@@ -173,7 +176,7 @@ is then unbiased. The variance of $\hat{Y}_{\ell,N_\ell}^{MC}$ is small if the s
   \begin{itemize}
   \item Contruct a new trial state
     $\theta'_\ell = (\Theta_{\ell-1}^{n+1},\theta'_{\ell,F}) = (X_0^{\ell-1,n+1},{X'}_1^{\ell},X_2^{\ell-1,n+1},{X'}_3^{\ell},\dots,{X'}_{M_\ell-1}^{\ell})$ by taking the positions at the even sites from $\theta_\ell^{n+1}$ and drawing the positions $\theta'_{\ell,F}$ on the odd sites from some proposal distribution.
-  \item Accept or reject the new state $\theta'_\ell$ with the probability given in \cite{Dodwell2015}. Note that is only contains ratios of $\pi^\ell(\theta'_\ell)$ and $\pi^\ell(\theta_\ell^n)$
+  \item Accept or reject the new state $\theta'_\ell$ with the probability given in \cite{Dodwell2015}. Note that this only contains ratios of $\pi^\ell(\theta'_\ell)$ and $\pi^\ell(\theta_\ell^n)$, i.e. we do not need to know the normalisation factor $Z_\ell$.
   \end{itemize}
 \end{enumerate}
 \begin{figure}
@@ -266,6 +269,10 @@ Again consider theories of increasing complexity:
 \item \textit{The non-linear sigma model}. Consider this model in $d=2$ dimensions where it is asymptotically free if the number $N_{\text{spin}}$ of spin components is three or more. In higher dimensions there also appears to be a non-trivial critical point, which might be worth studying and this could potentially be analysed asymptotically for $N_{\text{spin}}\gg 1$
   \item \textit{Lattice QCD}. Study full blown QCD, in particular think about the implications of the $SU(3)$ symmetry for Multilevel Monte Carlo sampling
 \end{enumerate}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Code development}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Implement the techniques by either developing a bespoke multilevel software for lattice QCD or incorporate it into existing codes such as CHROMA \cite{Edwards2005}. Run code on clusters to obtain calculations of benchmark quantities to higher accuracy. \note{Link to CRAY/GW4 Isambard?}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Tasks/Questions}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
