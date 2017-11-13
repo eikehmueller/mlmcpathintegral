@@ -1,0 +1,8 @@
+*~
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+quantum/plan.pdf
+quantum/plots/*.pdf
