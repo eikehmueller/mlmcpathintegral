@@ -3,6 +3,8 @@
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{color}
+\usepackage{algorithm}
+\usepackage{algcompatible}
 \usepackage[colorlinks,bookmarksopen,bookmarksnumbered,citecolor=red,urlcolor=red,breaklinks=true]{hyperref}
 \newcommand{\cblue}[1]{{\color{blue}#1}}
 \renewcommand{\vec}[1]{{#1}}
@@ -14,7 +16,7 @@
 \section{Challenge and Motivation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Quantum Field Theories (QFTs) \cite{Peskin1995}, such as Quantum Chromo Dynamics (QCD) predict fundamental properties of matter and are of paramount importance in High Energy Physics. If discretised on a space-time lattice, QCD allows first principles calculations of strongly interacting particles and is crucial for precise calculations, for example in New Physics predictions or to simulate the hadronic background in accelerators such as the Large Hadron Collider. 
-Due to the strong coupling of QCD at large distances, only lattice calculations allow first-principles predictions. Using Feynman's Path Integral technique \cite{Feynman2010}, QFTs can be be formulated as statistical systems in $d=4$ space-time dimensions. Predictions of physical quantities are then calculated by generating a set of samples with Markov-Chain Monte Carlo Methods and evaluating the relevant quantity of interest (such as a two-point correlation function, which allows the extraction of particle energies) on those samples. To obtain physically meaningful results, calculations need to be carried out for increasingly small lattice spacings $a$ and extrapolated to the continuum limit $a\rightarrow 0$. There are two key issues which make the accurate calculation challenging:
+Due to the strong coupling of QCD at large distances, only lattice calculations allow first-principles predictions, but they are computationally demanding. Using Feynman's Path Integral technique \cite{Feynman2010}, QFTs can be be formulated as statistical systems in $d=4$ space-time dimensions. Predictions of physical quantities are then calculated by generating a set of samples with Markov-Chain Monte Carlo Methods. The relevant quantity of interest (such as a two-point correlation function, which allows the extraction of particle energies) is then evaluated on those samples. To obtain physically meaningful results, calculations need to be carried out for increasingly small lattice spacings $a$ and extrapolated to the continuum limit $a\rightarrow 0$, which can amplify sampling errors. There are two fundamental issues which make accurate numerical calculations challenging:
 \begin{figure}
   \begin{center}
     \includegraphics[width=0.3\linewidth]{lattice.pdf}
@@ -24,25 +26,40 @@ Due to the strong coupling of QCD at large distances, only lattice calculations 
 \end{figure}
 \begin{itemize}
 \item Since the probability density is peaked around the classical trajectory, in the Metropolis-Hastings algorithm naively generated samples are highly correlated since the acceptance probability is small. This issue can be overcome by the Hybrid Monte Carlo method \cite{Duane1987}. However, the number of samples $N$ required to reduce the statistical sampling error below a tolerance $\epsilon$ still grows as $\mathcal{O}(\epsilon^{-2})$ due to fundamental law of large numbers. 
-\item Since the number $M$ of lattice sites on a grid with spacing $a$ is $M \propto a^{-d}$, the cost to generate one sample grows as $\mathcal{O}(a^{-d})$. This already assumes that optimal algorithms are used when, for example, inverting large sparse matrices to calculate Fermion propagators. While most theories are formulated in $d=3+1=4$ spacetime dimensions $d=4$, in some case (such as Domain Wall Fermions \cite{Kaplan1992}) the dimension of the system is even $d=5$.
+\item Since the number $M$ of lattice sites on a grid with spacing $a$ is $M \propto a^{-d}$, the cost to generate one sample grows as $\mathcal{O}(a^{-d})$. This already assumes that optimal algorithms are used when, for example, inverting large sparse matrices to calculate Fermion propagators, which is usually the computational bottleneck in unquenched simulations (see e.g. \cite{Brannick2008} on multigrid methods). While most theories are formulated in $d=3+1=4$ spacetime dimensions, in some case (such as Domain Wall Fermions \cite{Kaplan1992}) the dimension of the system is even $d=5$.
 \end{itemize}
-If both the statistical and discretisation error (which we assume here to be linear in the lattice spacing) are to be reduced below a tolerance of $\epsilon\propto a$, the total cost of the method is $\mathcal{O}(\epsilon^{-(d+2)})$ where $d=4,5$. Together this leads to prohibitively high costs for Lattice QCD calculations which limit the range of available lattice spacings and extrapolations to the continuum limit.
+If both the statistical and discretisation error (which we assume here to be linear in the lattice spacing) are to be reduced below a tolerance of $\epsilon\propto a$, the total cost of the method is \mbox{$\mathcal{O}(N\cdot M) = \mathcal{O}(\epsilon^{-(d+2)})$} where $d=4,5$. Together this leads to prohibitively high costs for Lattice QCD calculations which limit the range of available lattice spacings and extrapolations to the continuum limit.
+\note{What are the typical lattices/samples sizes used nowadays? Are there any specific physics questions that need more statistics/resolution?}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Multilevel Monte Carlo and renormalisation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-In the following we explore Multilevel Monte Carlo sampling methods \cite{Heinrich2001,Giles2008,Giles2015}. As shown in \cite{Dodwell2015}, a Multilevel MCMC method has the potential to reduce the computational complexity from $\mathcal{O}(\epsilon^{-(d+2)})$ to $\mathcal{O}(\epsilon^2 |\log(\epsilon)|)$. Multilevel Monte Carlo uses a hierarchy of levels to construct an unbiased estimator. This requires calculation of the expectation value of differences between subsequent levels, which have a much smaller variance than the QoI itsself. An important requirement is that the theories used on two subsequent levels are ``close'', i.e. the coarse level theory should provide a good approximation for the coarse modes on the next-finer level. In QFT this can be achieved naturally by constructing the coarse theory as an effective theory of the fine-level model. While construction of the exact effective theory by integrating out the high-frequency modes is not possible (except in very simple cases), in many cases perturbation theory can be used to construct an approximate effective theory. In particular we expect this to be the case in QCD, which is asymptotically free.
+In the following we explore Multilevel Monte Carlo sampling methods \cite{Heinrich2001,Giles2008,Giles2015}. As shown in \cite{Dodwell2015}, a Multilevel MCMC method has the potential to reduce the computational complexity from $\mathcal{O}(\epsilon^{-(d+2)})$ to $\mathcal{O}(\epsilon^2 |\log(\epsilon)|)$. Multilevel Monte Carlo uses a hierarchy of levels to construct an unbiased estimator. This requires calculation of the expectation value of differences $Y_\ell$ between subsequent levels $\ell$ and $\ell-1$, which have a much smaller variance than the QoI itsself. An important requirement is that the theories used on two subsequent levels are ``close'', i.e. the coarse level theory should provide a good approximation for the coarse modes on the next-finer level. In QFT this can be achieved naturally by constructing the coarse theory as an effective theory of the fine-level model. While construction of the exact effective theory by integrating out the high-frequency modes is not possible (except in very simple toy models), in many cases perturbation theory can be used to construct an approximate effective theory. In particular we expect this to be the case for fine lattice spacings $a$ in QCD, since the theory is asymptotically free (i.e. the strong coupling constant decreases as $a\rightarrow 0$).
 A whole machinery is available for carrying out perturbation theory on a lattice, see e.g. \cite{Rothe2005,Hart2009}.
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.9\linewidth]{multilevel_schematic.pdf}
+\caption{Schematic multilevel algorithm}
+\label{fig:multilevel_schematic}
+\end{center}
+\end{figure}
+Multilevel sampling also avoids strong correlation of subsequent samples in the MCMC chains (which is traditionally overcome with the HMC algorithm) since the samples are constructed hierarchically. The next proposal states on a level takes into account all fluctuations on the coarser levels.
 
-More generally, renormalisation theory provides a tool for the systematic construction of coarse grained theories. It also applies to statistical systems (such as the Ising- or Heisenberg-model) and is important for the study of critical phenomena. One key observation here is that close to a critical point the theory is scale invariant, and again it is possible to write down a coarse grained version. This is interesting, because sampling at a critical point suffers from critical slowdown. In the past, hierarchical sampling techniques have been developed for the Ising model \cite{Schmidt1983,Faas1986}, but they do not exploit the additional variance reduction from the multilevel algorithm.
+More generally, renormalisation theory provides a tool for the systematic construction of coarse grained theories. It also applies to statistical systems (such as the Ising- or Heisenberg-model) and is important for the study of critical phenomena. One key observation here is that close to a critical point the theory is scale invariant, and again it is possible to write down a coarse grained version. This is interesting, because sampling at a critical point suffers from critical slowdown, yet this is exactly the point where the coarse-level theory is known and multilevel methods are expected to be efficient. In the past, hierarchical sampling techniques have been developed for the Ising model \cite{Schmidt1983,Faas1986}, but they do not exploit the additional variance reduction from the multilevel algorithm.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Methods}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-To set the scene and introduce key concepts, we first discuss the much simpler case of quantum mechanics and show how it can be formulated as a statistical theory. Since this is effectively a one-dimensional field-theory, the gains are expected to be smaller here ($\mathcal{O}(\epsilon^{-3})\rightarrow\mathcal{O}(\epsilon^{-2}|\log(\epsilon)|)$). We discuss the generalisations required for the more interesting case of a $d$-dimensional Quantum Field Theory in Section \ref{sec:QFT}. 
+To set the scene and introduce key concepts, we first discuss the much simpler case of quantum mechanics and show how it can be formulated as a statistical theory. As an instructive example, the derivation of an effective theory for the quantum mechanical harmonic oscillator is described in appendix \ref{sec:harmonic_oscillator_effective}.
+
+Since quantum mechanics is effectively a one-dimensional field-theory, the gains are expected to be smaller here ($\mathcal{O}(\epsilon^{-3})\rightarrow\mathcal{O}(\epsilon^{-2}|\log(\epsilon)|)$). We discuss the generalisations required for the more interesting case of a $d$-dimensional Quantum Field Theory in Section \ref{sec:QFT}. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Path integrals in Quantum Mechanics}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Consider a particle of mass $m_0$ which moves in a potential $V(x)$ where $x(t)$ is the particle's position at time $t$.
-Feynman's path integral \cite{Feynman2010} allows the calculation of the transition amplitude for starting at the point $x_i$ at time $t=0$ and ending at point $x_f$ at time $t=T$ as a sum over all possible paths $x(t)$ with $x(0)=x_i$,  $x(T)=x_f$, as shown in Fig. \ref{fig:path_integral} (left)\footnote{The figure is slightly misleading since the paths are continuous but not necessarily smooth (differentiable).}. This sum is denoted by $\int \mathcal{D}x(t)$. The crucial observation, exploited for example in \cite{Creutz1981}, is that by formulating the theory in imaginary time, the highly-oscillatory integrand is replaced by a real exponential and the path integral is equivalent to a statistical system of temperature\footnote{In the ``zero-temperature'' limit quantum fluctuations disappear and only the classical trajectory which minimises the action in Eq. (\ref{eqn:action}) contributes to the path integral.} proportional to Planck's constant $\hbar$.  The transition amplitude is given by
+Feynman's path integral \cite{Feynman2010} allows the calculation of the quantum mechanical transition amplitude for starting at the point $x_i$ at time $t=0$ and ending at point $x_f$ at time $t=T$ as a sum over all possible paths $x(t)$ with $x(0)=x_i$,  $x(T)=x_f$, denoted by the integral
+\begin{equation} 
+\sum_{\text{all paths $x(t)$}}\leftrightarrow  \int \mathcal{D}x(t).
+\end{equation}
+This is shown schematically in Fig. \ref{fig:path_integral} (left)\footnote{The figure is slightly misleading since the paths are continuous but not necessarily smooth (differentiable).}. The crucial observation, exploited for example in \cite{Creutz1981}, is that by formulating the theory in imaginary time, the highly-oscillatory integrand is replaced by a real exponential and the path integral is equivalent to a statistical system of temperature\footnote{In the ``zero-temperature'' limit quantum fluctuations disappear and only the classical trajectory which minimises the action in Eq. (\ref{eqn:action}) contributes to the path integral.} proportional to Planck's constant $\hbar$.  The transition amplitude is given by
 \begin{equation}
   \mathcal{A}(x_f\leftarrow x_i)=\langle x_f| e^{-HT} |x_i\rangle = \int\mathcal{D}x(t)\;e^{-S[x(t)]}.\label{eqn:path_integral_continuum}
 \end{equation}
@@ -58,12 +75,12 @@ For a given path $x(t)$ the action $S[x(t)]$ is
     \label{fig:path_integral}
   \end{center}
 \end{figure}
-From now on we will also use periodic boundary conditions $x_i=x_f$ and integrate over $x_i$ as well in Eq. (\ref{eqn:path_integral_continuum}); in the infinite-volume limit $T\rightarrow \infty$ the boundary conditions do not matter.
+From now on we will also use periodic boundary conditions $x_i=x_f$ and integrate over $x_i$ as well in Eq. (\ref{eqn:path_integral_continuum}). This is much easier than using ``Dirichlet-like'' boundary conditions where the particle's position is fixed at $t=0$ and $t=T$; in the infinite-volume limit $T\rightarrow \infty$ the boundary conditions do not matter.
 Path-dependent observables $A=A[x(t)]$ (or ``quantities of interest'', QoIs) can be calculated as expectation values
 \begin{equation}
   \langle A \rangle = \frac{\int \mathcal{D}x(t) A[x(t)] e^{-S[x(t)]}}{\int \mathcal{D}x(t) e^{-S[x(t)]}}\label{eqn:expectation_A}
 \end{equation}
-For example, the two-point correlation function $A=x(0)x(t)$ allows the extration of the system energies $E_n$ for $t\gg 1$ since it can be shown that\footnote{Strictly speaking only true if $\langle x(t)\rangle=0$, which is the case for symmetric potentials.}
+For example, the two-point correlation function $A=x(0)x(t)$ allows the extration of the system energies $E_n$ since it can be shown that\footnote{Strictly speaking only true if $\langle x(t)\rangle=0$, which is the case for symmetric potentials.}
 \begin{equation}
   \langle x(0) x(t) \rangle = \sum_{n\ne 0} C_n e^{-(E_n-E_0)t}.\label{eqn:spectrum}
 \end{equation}
@@ -75,7 +92,7 @@ Using more abstract notation, we can express the expectation value of the observ
 \end{equation}
 where $\rho$ is the probability measure defined by
 \begin{equation}
-  \rho(x(t)) = \frac{e^{-S[x(t)]}}{Z}\mathcal{D}x(t)\qquad\text{with normalisation constant $Z = \int \mathcal{D}x'(t)\; e^{-S[x'(t)]}$}. 
+  \rho(x(t)) = \frac{e^{-S[x(t)]}}{Z}\mathcal{D}x(t)\qquad\text{with normalisation constant $Z = \int \mathcal{D}x'(t)\; e^{-S[x'(t)]}$}. \label{eqn:measure_continuum}
 \end{equation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Discretisation}
@@ -84,29 +101,34 @@ Clearly the infinite dimensional integral in Eq. (\ref{eqn:expectation_A}) can n
 \begin{equation}
   x(t) \mapsto \vec{X} = (X_0,X_1,\dots,X_{M-1})\qquad\text{with $X_j=x(ja)$}.
 \end{equation}
-Here $a$ is the lattice spacing. The quantity $\vec{X}$ is the state vector of the system. The path integral is the sum over all states $X$ with an appropriate exponential weighting $e^{-S[X]}$.
-On the lattice the infinite dimensional integral in Eq. (\ref{eqn:expectation_A}) becomes the $M$-dimensional integral
+Here $a$ is the lattice spacing. The quantity $\vec{X}$ is the state vector of the system and the path integral is the sum over all states $X$ with an appropriate exponential weighting $e^{-S[X]}$.
+More specifically, on the lattice the infinite dimensional integral in Eq. (\ref{eqn:expectation_A}) becomes the $M$-dimensional integral
 \begin{equation}
   \langle A\rangle \approx \frac{\int d^M\vec{X} \;A[X]e^{-S[\vec{X}]}}{\int d^M\vec{X'} \;e^{-S[\vec{X'}]}}
   \qquad\text{where $d^M\vec{X}=dX_0\;dX_1\;\dots\;dX_{M-1}$}\label{eqn:generating_functional_disc}
 \end{equation}
 with the discretised action\footnote{Obviously, other discretisations could be used for the time derivative $\dot{x}(t)$.}
 \begin{equation}
-  S[\vec{X}] = \sum_{j=0}^{M-1} a \left(\frac{1}{2}m_0\frac{(X_{j+1}-X_j)^2}{a^2}+V(X_j)\right)\label{eqn:action}
+  S[\vec{X}] = \sum_{j=0}^{M-1} a \left(\frac{1}{2}m_0\frac{(X_{j+1}-X_j)^2}{a^2}+V(X_j)\right)\label{eqn:action_discrete}
 \end{equation}
+This integral is solved exactly for the quantum mechanical harmonic oscillator $V(x)=\frac{1}{2}\mu^2 x^2$ in \cite{Creutz1981} (see also appendix \ref{sec:harmonic_oscillator}), i.e. in this case we know the bias (and also any finite volume errors).
+
 In general, for a QFT on a $d$-dimensional space-time lattice Eq. (\ref{eqn:generating_functional_disc}) is a $M\propto a^{-d}$ dimensional integral. Replacing Eq. (\ref{eqn:expectation_A}) by Eq. (\ref{eqn:generating_functional_disc}) introduces a bias $a^{\kappa} \propto M^{-\alpha}$ where $\alpha=\kappa/d$. \note{the bias might actually be $\propto a^\kappa(\log(a))^s$ due to renormalisation.}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Sampling with Markov chains}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{MCMC sampling}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-For a general potential $V(x)$ expectation values can not be calculated directly (but see Appendix \ref{sec:harmonic_oscillator} for a brief discussion of the harmonic oscillator for $V(x)=\frac{1}{2}\mu x^2$ - this is an important test case since all integrals are Gaussian and can be calculated exactly). Instead, we use MCMC estimators to evaluate the high-dimensional integral in Eq. (\ref{eqn:generating_functional_disc}). We first ensure that the notation is consistent with \cite{Dodwell2015}. For this, observe that since we know the posterior distribution, we have in the language of \cite{Dodwell2015} $X=\theta$, and $M=R$. The random variable representing the state is
+For a general potential $V(x)$ expectation values can not be calculated directly. Instead, we use MCMC estimators to evaluate the high-dimensional integral in Eq. (\ref{eqn:generating_functional_disc}). We first ensure that the notation is consistent with \cite{Dodwell2015}. For this, observe that since (in contrast to \cite{Dodwell2015}) we know the posterior distribution, we have $X=X(\theta)=\theta$, and $M=R$, i.e. the input-vector is the same as the output-vector. The random variable representing the state is
 \begin{equation}
   \theta = \vec{X} = (X_0,X_1,\dots,X_{M-1})
 \end{equation}
-and the probability measure
+and the probability measure (which is an approximation to the unknown continuum measure $\rho$ in Eq. (\ref{eqn:measure_continuum}))
 \begin{equation}
   \nu(\theta) = \pi(\theta)d\theta =\frac{e^{-S[\theta]}}{Z}d\theta\qquad\text{with normalisation $Z=\int d\theta'\; e^{-S[\theta']}$}.
 \end{equation}
-The action $S[\theta]=S[X]$ is defined in Eq. (\ref{eqn:action}). We can now use the standard MCMC algorithm (possible accelerated by hybrid sampling) to calculate estimators for QoIs such as the two point-correlation function
+The action $S[\theta]=S[X]$ is defined in Eq. (\ref{eqn:action_discrete}). We can now use the standard MCMC algorithm (possible accelerated by hybrid sampling) to calculate estimators for QoIs such as the two point-correlation function
 \begin{equation}
   Q_M = X_0 X_j
 \end{equation}
@@ -114,129 +136,136 @@ If $t=aj$, this allows extraction of the spectrum according to Eq. (\ref{eqn:spe
 The corresponding MCMC estimator is
 \begin{equation}
   \hat{Q}_{M,N}^{MC} = \frac{1}{N}\sum_{n=n_0+1}^{N+n_0} \hat{Q}_M^n =
-  \frac{1}{N} \sum_{n=n_0+1}^{N+n_0} X_0^n X_j^n = \langle x(t) x(0)\rangle + \text{(bias error)} + \text{(sampling error)}
+  \frac{1}{N} \sum_{n=n_0+1}^{N+n_0} X_0^n X_j^n = \langle x(t) x(0)\rangle + 
+\begin{pmatrix}\text{bias}\\\text{error}\end{pmatrix}
++ \begin{pmatrix}\text{sampling}\\\text{error}\end{pmatrix}
 \end{equation}
-where $X^n (= \theta^n)$ is the $n$-th sample in the chain after a burn-in of $n_0$ samples. \note{We might want to increase statistics by considering $Q_M = \frac{1}{M}\sum_{\ell=0}^{M-1} X_\ell X_{\ell+j}$ instead. Since this depends on $M$, how does this impact on cost estimates?}
+where $X^n (= \theta^n)$ is the $n$-th sample in the chain after a burn-in of $n_0$ samples\footnote{We assume that $n_0\gg 1$ is large enough to ensure that we are indeed sampling from the stationary distribution $\nu(\theta)$.}. \note{We might want to increase statistics by considering $Q_M = \frac{1}{M}\sum_{\ell=0}^{M-1} X_\ell X_{\ell+j}$ instead. Since this depends on $M$, how does this impact on cost estimates?}
+
+The details of the cost calculation can be found in section 2 of \cite{Dodwell2015}. Assuming a cost per sample of $\mathcal{O}(M)$, which one would expect if the Hybrid MC algorithm is used to propose the next state, the computational complexity at fixed root mean square error tolerance $\epsilon$ is $\mathcal{O}(N\cdot M)=\mathcal{O}(\epsilon^{-3})$.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Multilevel Monte Carlo}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Multilevel Monte Carlo (MLMC) methods \cite{Heinrich2001,Giles2008,Giles2015} use a hierarchy of coarser levels to calculate an observable. On subsequent levels only corrections with a smaller variance have to be computed. Depending on the decay of this variance, most of the cost can be shifted to the coarser levels with lattice spacing $A$, there cost for one sample is $\mathcal{O}(A^{-d})$. If this is the dominnant cost, then these methods have the potential to reduce the numerical complexity to $\mathcal{O}(\epsilon^{-2}\log(\epsilon))$ where $\epsilon$ is the tolerance on the root mean square error, which combines inaccuracies both from the finite-$a$ bias and sampling. Since in the multilevel MCMC algorithm \cite{Dodwell2015} coarse samples are used to construct the fine samples, this might also help with the high correlation on the fine levels which is traditionally overcome with HMC sampling. If successful, this will reduce the cost of Lattice QCD calculations dramatically and allow calculations at unprecedented accuracies. Since MLMC automatically calculates quantities on a hierarchy of levels, continuum extrapolations are simplified since the results are available on a range of lattice spacings.
+Multilevel Monte Carlo (MLMC) methods \cite{Heinrich2001,Giles2008,Giles2015} use a hierarchy of coarser levels to calculate an observable. On subsequent levels only corrections with a smaller variance have to be computed. Depending on the decay of this variance, most of the cost can be shifted to the coarser levels with lattice spacing $A$, where cost for one sample is $\mathcal{O}(A^{-1})$. If this is the dominant cost, then these methods have the potential to reduce the numerical complexity to $\mathcal{O}(\epsilon^{-2}|\log(\epsilon)|)$ where $\epsilon$ is the tolerance on the root mean square error, which combines inaccuracies both from the finite-$a$ bias and sampling. Note that (under the assumptions specified in Theorem 3.4 of \cite{Dodwell2015}) the multilevel MC complexity $\mathcal{O}(\epsilon^{-2}|\log(\epsilon)|)$ is independent of the dimension, so we would expect the same in a QFT with $d>1$. Since in the multilevel MCMC algorithm \cite{Dodwell2015} coarse samples are used to construct the fine samples, this will also help with the high autocorrelation on the fine levels which is traditionally overcome with HMC sampling. If successful, this will reduce the cost of Lattice QCD calculations dramatically and allow calculations at unprecedented accuracies. Since MLMC automatically calculates quantities on a hierarchy of levels, continuum extrapolations are simplified since the results are available on a range of lattice spacings.
 
-To apply the multilevel MCMC method from \cite{Dodwell2015}, introduce a hierarchy of levels $\ell=0,\dots,L$ and define $M=M_L=2^LM_0$ where $M_\ell = 2M_{\ell-1}$ and the level-dependent lattice spacing $a_\ell = T/M_\ell$. The states on level $\ell$ are defined recursively as
+To apply the multilevel MCMC method from \cite{Dodwell2015}, introduce a hierarchy of levels $\ell=0,\dots,L$ and define $M_\ell:=2^\ell M_0$ where the number of sites on the finest level $L$ is $M_L = M$. The level-dependent lattice spacing is $a_\ell = T/M_\ell$ with $a_L=a=T/M$. The states on level $\ell$ are defined recursively as
 \begin{equation}
   \begin{aligned}
-    \theta_L &= \theta = (X_0,X_1,\dots,X_{M-1}) = (X^L_0,X^L_1,\dots,X^L_{M_L-1})\\
+    \theta_L &= (X^L_0,X^L_1,\dots,X^L_{M_L-1}) = \theta = (X_0,X_1,\dots,X_{M-1})\\
     \theta_\ell & = (X_0^\ell,X_1^\ell,\dots,X^\ell_{M_\ell-1})\qquad\text{with $X^{\ell}_j = X_{2j}^{\ell+1}$}\qquad\text{for $\ell=0,\dots,L-1$}
   \end{aligned}
 \end{equation}
-We also split $\theta_\ell$ into even and odd sites as
+We also partition $\theta_\ell$ into fine (``F'') and  coarse (``C'') modes as
 \begin{equation}
   \theta_\ell = [\theta_{\ell,C},\theta_{\ell,F}]\qquad\text{with $\theta_{\ell,C}=(X_0^\ell,X_2^\ell,\dots,X^\ell_{M_{\ell}/2})$ and $\theta_{\ell,F}=(X_1^\ell,X_3^\ell,\dots,X^\ell_{M_{\ell}/2+1})$}
 \end{equation}
-Assume that it is possible to write down a coarse grained action on level $\ell$ as
+Note that the coarse modes correspond to paths on the next-coarser level, and this will be crucial for the coupling in the hierarchical MC estimator described below.
+Further assume that it is possible to write down a coarse grained action on level $\ell$ as
 \begin{equation}
-  S^\ell[\theta^\ell] = \sum_{j=0}^{M_\ell-1} a_\ell \left(\frac{1}{2}m^{(\ell)}_0\frac{(X^\ell_{j+1}-X^\ell_{j})^2}{a_\ell^2}+  V^{(\ell)}\left(X_j^\ell\right)\right)
+  S^\ell[\theta_\ell] = \sum_{j=0}^{M_\ell-1} a_\ell \left(\frac{1}{2}m^{(\ell)}_0\frac{(X^\ell_{j+1}-X^\ell_{j})^2}{a_\ell^2}+  V^{(\ell)}\left(X_j^\ell\right)\right);\label{eqn:MultilevelCoarseAction}
 \end{equation}
-The exact construction of the effectice coarse-level action is discussed in section \ref{sec:coarse_graining}.
-For example, for the quartic oscillator we can define recursively
-\begin{equation}
-  V(x) = \frac{1}{2}\mu^{(\ell)}_0 x^2 + \frac{1}{4}\lambda_0^{(\ell)} x^4
-\end{equation}
-and the mass $m_0^{(\ell)}$ and coupling constants $\mu_0^{(\ell)}$, $\lambda_0^{(\ell)}$ can be calculated perturbatively as in Eq. (\ref{eqn:renormalised_couplings})
-\begin{xalignat}{3}
-  m_0^{(\ell-1)} &= m_0^{(\ell-1)}(m_0^{(\ell)},\mu_0^{(\ell)},\lambda_0^{(\ell)}), &
-  \mu_0^{(\ell-1)} &= \mu_0^{(\ell-1)}(m_0^{(\ell)},\mu_0^{(\ell)},\lambda_0^{(\ell)}), &
-  \lambda_0^{(\ell-1)} &= \lambda_0^{(\ell-1)}(m_0^{(\ell)},\mu_0^{(\ell)},\lambda_0^{(\ell)})
-\end{xalignat}
-starting with
-\begin{xalignat}{3}
-  m_0^{(L)} &= m_0, &
-  \mu_0^{(L)} &= \mu_0, &
-  \lambda_0^{(L)} &= \lambda_0.
-\end{xalignat}
+the exact construction of this effectice coarse-level action is discussed in Section \ref{sec:coarse_graining}.
+
 This allows the construction of probability densities on all levels as
 \begin{equation}
-  \pi^\ell(\theta^\ell) = \frac{e^{-S^\ell[\theta^\ell]}}{Z_\ell}\qquad\text{with $Z_\ell=\int d\theta'_\ell\;e^{-S_\ell[\theta'_\ell]}$}
+  \pi^\ell(\theta_\ell) = \frac{e^{-S^\ell[\theta_\ell]}}{Z_\ell}\qquad\text{with $Z_\ell=\int d\theta'_\ell\;e^{-S_\ell[\theta'_\ell]}$}
 \end{equation}
 which are used in the Multilevel MCMC algorithm in \cite{Dodwell2015}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Hierarchical sampling}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The multilevel MCMC sampling is based on the following idea:
 
-The multilevel MCMC sampling now proceeds as follows:
-
-On level $\ell$, sample states $\theta_\ell^n$ and $\Theta_\ell^n$ which are both distributed according to $\pi^\ell$. Using this, construct estimators
+On a given level $\ell$, generate samples $\{\theta_\ell^n\}_{n\in\mathbb{N}}$ and $\{\Theta_\ell^n\}_{n\in\mathbb{N}}$ which are both distributed according to the same density $\pi^\ell$; this is achieved by using Algorithm \ref{alg:MLMC_sampling}. Using this, construct estimators
 \begin{equation}
-  \hat{Y}_{\ell,N_\ell}^{MC} := \frac{1}{N_\ell}\sum_{n=n_0^\ell+1}^{n_0^\ell+N_\ell} \hat{Y}_\ell^n = \frac{1}{N_\ell}\sum_{n=n_0^\ell+1}^{n_0^\ell+N_\ell} \left(\hat{Q}_\ell(\theta_\ell^n) - \hat{Q}_{\ell-1}(\Theta_{\ell-1}^n)\right)
-  \qquad\text{for all levels $\ell=1,\dots,L$}.
+  \hat{Y}_{\ell,N_\ell}^{MC} := \frac{1}{N_\ell}\sum_{n=n_0^\ell+1}^{n_0^\ell+N_\ell} \hat{Y}_\ell^n = \frac{1}{N_\ell}\sum_{n=n_0^\ell+1}^{n_0^\ell+N_\ell} \left(Q_\ell(\theta_\ell^n) - Q_{\ell-1}(\Theta_{\ell-1}^n)\right)
+  \qquad\text{for all levels $\ell=1,\dots,L$}.\label{eqn:difference_estimator}
 \end{equation}
-The full Multilevel MCMC estimator
+where $Q_\ell(\cdot)$ is the QoI on level $\ell$. Since both $\Theta_\ell^n$ and $\theta_\ell^n$ are drawn from the same distribution, the full Multilevel MCMC estimator
 \begin{equation}
-  \hat{Q}_{L,\{N_\ell\}}^{ML} := \hat{Q}_{0,N_0}^{MC} + \sum_{\ell=1}^L \hat{Y}_{\ell,N_\ell}^{MC}
+  \hat{Q}_{L,\{N_\ell\}}^{ML} := \hat{Q}_{0,N_0}^{MC} + \sum_{\ell=1}^L \hat{Y}_{\ell,N_\ell}^{MC}\label{eqn:MLMCMCestimator})
 \end{equation}
-is then unbiased. The variance of $\hat{Y}_{\ell,N_\ell}^{MC}$ is small if the samples $\theta_\ell^n$ and $\Theta_{\ell-1}^n$ are correlated. This can be achieved as follows:
-\begin{enumerate}
-\item \textbf{On level $\ell-1$}:
+is then unbiased. The variance of $\hat{Y}_{\ell,N_\ell}^{MC}$ is small if the samples $\theta_\ell^n$ and $\Theta_{\ell-1}^n$ are correlated. This can be achieved by using Algorithm \ref{alg:MLMC_sampling} for sampling.
+\begin{algorithm}
+\caption{MLMC sampling}\label{alg:MLMC_sampling}
+\begin{center}
+\begin{algorithmic}[1]
+\FORALL{levels $\ell$}
+\STATE{\textbf{On level $\ell-1$}:
   \begin{itemize}
     \item Draw a new sample path $\Theta_\ell^{n+1} = (X_0^{\ell-1,n+1},\dots,X_{M_{\ell-1}-1}^{\ell-1,n+1})$ from the distribution $\pi^{\ell-1}$
   \end{itemize}
-\item \textbf{On level $\ell$}:
+}
+\STATE{\textbf{On level $\ell$}:
   \begin{itemize}
   \item Contruct a new trial state
     $\theta'_\ell = (\Theta_{\ell-1}^{n+1},\theta'_{\ell,F}) = (X_0^{\ell-1,n+1},{X'}_1^{\ell},X_2^{\ell-1,n+1},{X'}_3^{\ell},\dots,{X'}_{M_\ell-1}^{\ell})$ by taking the positions at the even sites from $\theta_\ell^{n+1}$ and drawing the positions $\theta'_{\ell,F}$ on the odd sites from some proposal distribution.
   \item Accept or reject the new state $\theta'_\ell$ with the probability given in \cite{Dodwell2015}. Note that this only contains ratios of $\pi^\ell(\theta'_\ell)$ and $\pi^\ell(\theta_\ell^n)$, i.e. we do not need to know the normalisation factor $Z_\ell$.
   \end{itemize}
-\end{enumerate}
-\begin{figure}
-\begin{center}
-  \includegraphics[width=0.7\linewidth]{multilevel_paths.pdf}
-  \caption{Multilevel paths}
-  \label{fig:multilevel_paths}
+}
+\ENDFOR
+\end{algorithmic}
 \end{center}
-\end{figure}
-Note that the Metropolis acceptance step guarantees that the samples $\theta_\ell^n$ on level $\ell$ are indeed distributed according to $\pi^\ell$.
+\end{algorithm}
+Coupling is ensured by drawing the coarse-level part of the proposal state from the distribution on the next-coarser level but the Metropolis acceptance step guarantees that the samples $\theta_\ell^n$ on level $\ell$ are indeed distributed according to $\pi^\ell$, which is necessary to make the estimator in Eq. (\ref{eqn:MLMCMCestimator}) unbiased.
 
-Above we assumed that it is possible to sample independently from $\pi^{\ell-1}$. This can be achieved by using the above procedure to create two chains on level $\ell$: (a) the chain $\theta_\ell$ which we will use together with the chain $\Theta_{\ell-1}$ to calculate $\hat{Y}_{\ell,N_\ell}^{MC}$ and (b) another chain $\Theta_{\ell}$, for which we only take every $k$-th sample where $k$ is large compared to the autocorrelation time. To a very good approximation this chain then samples from $\pi^\ell$. The procedure is shown schematically in Fig. \ref{fig:chains} and as the authors of \cite{Dodwell2015} remark, the bias error due to any remaining auto-correlation is small.
+Above we assumed that it is possible to sample independently from $\pi^{\ell-1}$. This can be achieved by using the above procedure to create two chains on each level $\ell$: (a) the chain $\theta_\ell$ which we will use together with the chain $\Theta_{\ell-1}$ to calculate $\hat{Y}_{\ell,N_\ell}^{MC}$ and (b) another chain $\Theta_{\ell}$, for which we only take every $k$-th sample where $k$ is large compared to the autocorrelation time. To a very good approximation this chain then samples from $\pi^\ell$. The procedure is shown schematically in Fig. \ref{fig:chains} and as the authors of \cite{Dodwell2015} remark, the bias error due to any remaining auto-correlation is small.
 \begin{figure}
   \begin{center}
     \includegraphics[width=0.3\linewidth]{chains.pdf}
-    \caption{Recursive construction of $\theta_\ell$ and $\Theta_\ell$}
+    \caption{Recursive construction of the chains $\{\theta_\ell^n\}_{n\in\mathbb{N}}$ and $\{\Theta_\ell^n\}_{n\in\mathbb{N}}$. The arrows indicate coupled sampling according to Algorithm \ref{alg:MLMC_sampling}.}
     \label{fig:chains}
   \end{center}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Coarse graining}\label{sec:coarse_graining}
+\subsection{Coarse graining and effective theories}\label{sec:coarse_graining}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Defining the following \textit{generating functional}
+We now discuss the recursive construction of the coarse level theory in Eq. (\ref{eqn:MultilevelCoarseAction}). For the multilevel method to be effective, the coarse action has to be ``good'' in the sense that it accurately describes the coarse modes in the original model. Only then will the variance of the difference estimators $\hat{Y}^{MC}_{\ell,N_\ell}$ in Eq. (\ref{eqn:difference_estimator}) be small enough to satisfy the Complexity Theorem 3.4 in \cite{Dodwell2015}. We describe a recursive matching procedure for the construction of an effective coarse level theory.
+
+Define the following \textit{generating functional}
 \begin{equation}
   Z[J] = \int \mathcal{D}x(t)\;\exp\left[-S[x(t)]+\int_0^T J(t)x(t)\;dt \right]\label{eqn:generating_functional_cont}
 \end{equation}
-allows the expression of expectation values as
+This can be seen as a response function for an external current $J(t)$.
+$Z[J]$ allows the formal expression of expectation values as functional derivatives
 \begin{equation}
-\langle A[x(t)] \rangle = (Z[0])^{-1}A\left(\frac{\delta}{\delta J(t)}\right) Z[J]_{J=0}
+\langle A[x(t)] \rangle = (Z[0])^{-1}A\left[\frac{\delta}{\delta J(t)}\right] Z[J]\Big|_{J=0}
+\end{equation}
+since
+\begin{equation}
+\frac{\delta J(t')}{\delta J(t)} = \delta(t'-t).
 \end{equation}
 For example, if $A[x(t)]=x(t_1)x(t_2)$ then
 \begin{equation}
 \langle x(t_1)x(t_2)\rangle = (Z[0])^{-1} \frac{\delta}{\delta J(t_1)}
-\frac{\delta}{\delta J(t_2)} Z[J]_{J=0}
+\frac{\delta}{\delta J(t_2)} Z[J]\Big|_{J=0}
 \end{equation}
 In other words, the generating functional contains all useful information on the theory\footnote{In QFT one often works with the connected $n$-point functions
 \begin{equation}
-  \Gamma_c^{(n)} = \frac{\delta}{\delta J(x_1)}\dots\frac{\delta}{\delta J(x_n)} \log\left(Z[J]\right)_{J=0}.
+  \Gamma_c^{(n)} = \frac{\delta}{\delta J(t_1)}\dots\frac{\delta}{\delta J(t_n)} \log\left(Z[J]\right)_{J=0},\qquad\text{e.g.}\quad\Gamma_c^{(2)} = \langle x(t_1)x(t_2)\rangle-\langle x(t_1)\rangle\langle x(t_2)\rangle
 \end{equation}}.
 
 We can also write down the generating functional for the discrete theory as
 \begin{equation}
-  Z[\vec{J}] = \int d^{M}\vec{X} \exp\left[-S[\vec{X}]+(\vec{J}^T\vec{X}\right].
+  Z[\vec{J}] = \int d^{M}\vec{X} \exp\left[-S[\vec{X}]+\vec{J}^T\vec{X}\right]
 \end{equation}
-
-To coarse-grain the theory, replace the state vector $\vec{X}=(X_0,X_1,X_2,\dots,X_{M-1})$ by the coarse vector $\vec{X}^{(c)}=(X_0,X_2,X_4,\dots,X_{M/2})$ which only contains the even lattice sites. We now also need to write down a coarse action to define the theory on the coarse lattice. There are two ways of doing this
+where now $J=(J_0,J_1,J_2,\dots,J_{M-1})$ is a $M$-dimensional vector.
+To coarse-grain the theory, replace the state vector $\vec{X}=(X_0,X_1,X_2,\dots,X_{M-1})$ by the coarse vector
+\begin{equation}
+  \vec{X}^{(c)}=(X_0^{(c)},X_1^{(c)},\dots,X_{M/2}^{(c)}) = (X_0,X_2,X_4,\dots,X_{M/2})
+\end{equation}
+which only describes the path on the even lattice sites. 
+There are two ways of writing down a coarse action:
 \begin{itemize}
-\item \textit{naive}. Simply take the action in Eq. (\ref{eqn:action}) with $2a$ instead of $a$, i.e.
+\item \textit{naive}. Simply take the action in Eq. (\ref{eqn:action_discrete}) with $2a$ instead of $a$, i.e.
   \begin{equation}
     S^{(c)}[\vec{X}^{(c)}] = \sum_{j=0}^{M/2} 2a \left(\frac{1}{2}m_0\frac{(X_{2j+1}-X_{2j})^2}{(2a)^2}+V(X_{2j})\right)
     \end{equation}
-\item \textit{effective}. Construct the coarse action $S^{(c)}$ such that
+\item \textit{effective}. Construct the coarse action $S^{(c)}$ such that it has the same response to a coarse level current $J^{(c)}=(J_0^{(c)},J_1^{(c)},\dots,J_{M/2}^{(c)})$
   \begin{equation}
-    Z^{(c)}[\vec{J}^{(c)}] = \int d^{M/2}\vec{X}^{(c)} \exp\left[-S^{(c)}[\vec{X}^{(c)}]+(\vec{J}^{(c)})^T\vec{X}^{(c)}\right] = Z[\vec{J}^{(c)}]
+    Z^{(c)}[\vec{J}^{(c)}] = \int d^{M/2}\vec{X}^{(c)} \exp\left[-S^{(c)}[\vec{X}^{(c)}]+(\vec{J}^{(c)})^T\vec{X}^{(c)}\right] = Z[\hat{\vec{J}}^{(c)}]
   \end{equation}
+where $\hat{J}^{(c)}=(J_0^{(c)},0,J_1^{(c)},0,\dots,J_{M/2}^{(c)},0)$, i.e. this is an external current on the fine grid which is only non-zero on the coarse level nodes\footnote{Actually, since normalisation factors cancel out, $Z^{(c)}[J^{(c)}]=C(a) Z[\hat{J}^{(c)}]$ where $C(a)$ is a constant is sufficient.}.
   This results in
   \begin{equation}
     S^{(c)}[\vec{X}^{(c)}] = -\log \left(\int d^{M/2}\vec{X}^{(f)}\; \exp\left[-S[\vec{X}]\right]\right)\qquad\text{where $d^{M/2}\vec{X}^{(f)}=dX_1\;dX_3\;\dots\;dX_{M-1}$}
@@ -260,6 +289,25 @@ where
   \lambda_0^{(c)} &= \lambda_0^{(c)}(m_0,\mu_0,\lambda_0)\label{eqn:renormalised_couplings}
 \end{xalignat}
 can be calculated using perturbation theory.
+
+For example, for the quartic oscillator we can define recursively
+\begin{equation}
+  V(x) = \frac{1}{2}\mu^{(\ell)}_0 x^2 + \frac{1}{4}\lambda_0^{(\ell)} x^4
+\end{equation}
+and the mass $m_0^{(\ell)}$ and coupling constants $\mu_0^{(\ell)}$, $\lambda_0^{(\ell)}$ can be calculated perturbatively as in Eq. (\ref{eqn:renormalised_couplings})
+\begin{xalignat}{3}
+  m_0^{(\ell-1)} &= m_0^{(\ell-1)}(m_0^{(\ell)},\mu_0^{(\ell)},\lambda_0^{(\ell)}), &
+  \mu_0^{(\ell-1)} &= \mu_0^{(\ell-1)}(m_0^{(\ell)},\mu_0^{(\ell)},\lambda_0^{(\ell)}), &
+  \lambda_0^{(\ell-1)} &= \lambda_0^{(\ell-1)}(m_0^{(\ell)},\mu_0^{(\ell)},\lambda_0^{(\ell)})
+\end{xalignat}
+starting with
+\begin{xalignat}{3}
+  m_0^{(L)} &= m_0, &
+  \mu_0^{(L)} &= \mu_0, &
+  \lambda_0^{(L)} &= \lambda_0.
+\end{xalignat}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Quantum field theory}\label{sec:QFT}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
