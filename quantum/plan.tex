@@ -28,7 +28,11 @@ Due to the strong coupling of QCD at large distances, only lattice calculations 
 \item Since the probability density is peaked around the classical trajectory, in the Metropolis-Hastings algorithm naively generated samples are highly correlated since the acceptance probability is small. This issue can be overcome by the Hybrid Monte Carlo method \cite{Duane1987}. However, the number of samples $N$ required to reduce the statistical sampling error below a tolerance $\epsilon$ still grows as $\mathcal{O}(\epsilon^{-2})$ due to fundamental law of large numbers. 
 \item Since the number $M$ of lattice sites on a grid with spacing $a$ is $M \propto a^{-d}$, the cost to generate one sample grows as $\mathcal{O}(a^{-d})$. This already assumes that optimal algorithms are used when, for example, inverting large sparse matrices to calculate Fermion propagators, which is usually the computational bottleneck in unquenched simulations (see e.g. \cite{Brannick2008} on multigrid methods). While most theories are formulated in $d=3+1=4$ spacetime dimensions, in some case (such as Domain Wall Fermions \cite{Kaplan1992}) the dimension of the system is even $d=5$.
 \end{itemize}
-If both the statistical and discretisation error (which we assume here to be linear in the lattice spacing) are to be reduced below a tolerance of $\epsilon\propto a$, the total cost of the method is \mbox{$\mathcal{O}(N\cdot M) = \mathcal{O}(\epsilon^{-(d+2)})$} where $d=4,5$. Together this leads to prohibitively high costs for Lattice QCD calculations which limit the range of available lattice spacings and extrapolations to the continuum limit.
+We assume that the discretisation error is linear in the lattice spacing. Note that as discussed in \cite{Lepage1994}, for a quantum field theory this is only true if the theory is renormalised correctly. If both the statistical and discretisation error are to be reduced below a tolerance of $\epsilon\propto a$, the total cost of the method is \mbox{$\mathcal{O}(N\cdot M) = \mathcal{O}(\epsilon^{-(d+2)})$} where $d=4,5$. Together this leads to prohibitively high costs for Lattice QCD calculations which limit the range of available lattice spacings and extrapolations to the continuum limit. Since the lattice calculation is carried out in a finite volume, this introduces an additional error, which is, however, suppressed exponentially like
+\begin{equation}
+  \text{(finite volume error)} \propto \exp\left[-m_\pi L\right]
+\end{equation}
+where $L$ is the size of the simulation box and $m_\pi$ is the mass of the lightest hardron \cite{Lepage1994}.
 \note{What are the typical lattices/samples sizes used nowadays? Are there any specific physics questions that need more statistics/resolution?}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Multilevel Monte Carlo and renormalisation}
@@ -75,16 +79,16 @@ For a given path $x(t)$ the action $S[x(t)]$ is
     \label{fig:path_integral}
   \end{center}
 \end{figure}
-From now on we will also use periodic boundary conditions $x_i=x_f$ and integrate over $x_i$ as well in Eq. (\ref{eqn:path_integral_continuum}). This is much easier than using ``Dirichlet-like'' boundary conditions where the particle's position is fixed at $t=0$ and $t=T$; in the infinite-volume limit $T\rightarrow \infty$ the boundary conditions do not matter.
+From now on we will also use periodic boundary conditions $x_i=x_f$ and integrate over $x_i$ as well in Eq. (\ref{eqn:path_integral_continuum}). This is much easier than using ``Dirichlet-like'' boundary conditions where the particle's position is fixed at $t=0$ and $t=T$; in the infinite-volume limit $T\rightarrow \infty$ the boundary conditions do not matter since the finite volume error is exponentially suppressed \cite{Lepage1994}.
 Path-dependent observables $A=A[x(t)]$ (or ``quantities of interest'', QoIs) can be calculated as expectation values
 \begin{equation}
   \langle A \rangle = \frac{\int \mathcal{D}x(t) A[x(t)] e^{-S[x(t)]}}{\int \mathcal{D}x(t) e^{-S[x(t)]}}\label{eqn:expectation_A}
 \end{equation}
 For example, the two-point correlation function $A=x(0)x(t)$ allows the extration of the system energies $E_n$ since it can be shown that\footnote{Strictly speaking only true if $\langle x(t)\rangle=0$, which is the case for symmetric potentials.}
 \begin{equation}
-  \langle x(0) x(t) \rangle = \sum_{n\ne 0} C_n e^{-(E_n-E_0)t}.\label{eqn:spectrum}
+  C(t) = \langle x(0) x(t) \rangle = \sum_{n\ne 0} C_n e^{-(E_n-E_0)t}.\label{eqn:spectrum}
 \end{equation}
-This formula is also crucial in QFT, for example in QCD it can be used to extract the mass-spectra of bound particle states by fitting the function $C(t) = \langle x(0)x(t)\rangle$ to a sum of exponentials. The theoretical predictions can then be compared to experimental data (see e.g. \cite{Davies2004}).
+This formula is also crucial in QFT, for example in QCD it can be used to extract the mass-spectra of bound particle states by fitting the correlation function $C(t) = \langle x(0)x(t)\rangle$ to a sum of exponentials (see \cite{Fodor2012} for a review on how this is done). The theoretical predictions can then be compared to experimental data (see e.g. \cite{Davies2004}).
 
 Using more abstract notation, we can express the expectation value of the observable $A$ in Eq. (\ref{eqn:expectation_A}) as
 \begin{equation}
@@ -111,9 +115,9 @@ with the discretised action\footnote{Obviously, other discretisations could be u
 \begin{equation}
   S[\vec{X}] = \sum_{j=0}^{M-1} a \left(\frac{1}{2}m_0\frac{(X_{j+1}-X_j)^2}{a^2}+V(X_j)\right)\label{eqn:action_discrete}
 \end{equation}
-This integral is solved exactly for the quantum mechanical harmonic oscillator $V(x)=\frac{1}{2}\mu^2 x^2$ in \cite{Creutz1981} (see also appendix \ref{sec:harmonic_oscillator}), i.e. in this case we know the bias (and also any finite volume errors).
+This integral is solved exactly for the quantum mechanical harmonic oscillator $V(x)=\frac{1}{2}m_0\mu^2 x^2$ in \cite{Creutz1981} (see also appendix \ref{sec:harmonic_oscillator}), i.e. in this case we know the bias (and also any finite volume errors).
 
-In general, for a QFT on a $d$-dimensional space-time lattice Eq. (\ref{eqn:generating_functional_disc}) is a $M\propto a^{-d}$ dimensional integral. Replacing Eq. (\ref{eqn:expectation_A}) by Eq. (\ref{eqn:generating_functional_disc}) introduces a bias $a^{\kappa} \propto M^{-\alpha}$ where $\alpha=\kappa/d$. \note{the bias might actually be $\propto a^\kappa(\log(a))^s$ due to renormalisation.}
+In general, for a QFT on a $d$-dimensional space-time lattice Eq. (\ref{eqn:generating_functional_disc}) is a $M\propto a^{-d}$ dimensional integral. Replacing Eq. (\ref{eqn:expectation_A}) by Eq. (\ref{eqn:generating_functional_disc}) introduces a bias $a^{\kappa} \propto M^{-\alpha}$ where $\alpha=\kappa/d$, see \cite{Lepage1994} for a careful discussion of errors in QFT.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Sampling with Markov chains}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -207,6 +211,15 @@ is then unbiased. The variance of $\hat{Y}_{\ell,N_\ell}^{MC}$ is small if the s
 \end{algorithmic}
 \end{center}
 \end{algorithm}
+The sampling algorithm is shown schematically in Fig. \ref{fig:multilevel_path_sampling}.
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=0.6\linewidth]{multilevel_paths.pdf}
+    \caption{Multilevel sampling of paths}
+    \label{fig:multilevel_path_sampling}
+  \end{center}
+\end{figure}
+
 Coupling is ensured by drawing the coarse-level part of the proposal state from the distribution on the next-coarser level but the Metropolis acceptance step guarantees that the samples $\theta_\ell^n$ on level $\ell$ are indeed distributed according to $\pi^\ell$, which is necessary to make the estimator in Eq. (\ref{eqn:MLMCMCestimator}) unbiased.
 
 Above we assumed that it is possible to sample independently from $\pi^{\ell-1}$. This can be achieved by using the above procedure to create two chains on each level $\ell$: (a) the chain $\theta_\ell$ which we will use together with the chain $\Theta_{\ell-1}$ to calculate $\hat{Y}_{\ell,N_\ell}^{MC}$ and (b) another chain $\Theta_{\ell}$, for which we only take every $k$-th sample where $k$ is large compared to the autocorrelation time. To a very good approximation this chain then samples from $\pi^\ell$. The procedure is shown schematically in Fig. \ref{fig:chains} and as the authors of \cite{Dodwell2015} remark, the bias error due to any remaining auto-correlation is small.
@@ -290,11 +303,11 @@ where
 \end{xalignat}
 can be calculated using perturbation theory.
 
-For example, for the quartic oscillator we can define recursively
+For example, for the quartic oscillator we can define a potential on level $\ell$ by
 \begin{equation}
-  V(x) = \frac{1}{2}\mu^{(\ell)}_0 x^2 + \frac{1}{4}\lambda_0^{(\ell)} x^4
+  V^\ell(x) = \frac{1}{2}\mu^{(\ell)}_0 x^2 + \frac{1}{4}\lambda_0^{(\ell)} x^4
 \end{equation}
-and the mass $m_0^{(\ell)}$ and coupling constants $\mu_0^{(\ell)}$, $\lambda_0^{(\ell)}$ can be calculated perturbatively as in Eq. (\ref{eqn:renormalised_couplings})
+and then calculate mass $m_0^{(\ell)}$ and coupling constants $\mu_0^{(\ell)}$, $\lambda_0^{(\ell)}$ perturbatively as in Eq. (\ref{eqn:renormalised_couplings})
 \begin{xalignat}{3}
   m_0^{(\ell-1)} &= m_0^{(\ell-1)}(m_0^{(\ell)},\mu_0^{(\ell)},\lambda_0^{(\ell)}), &
   \mu_0^{(\ell-1)} &= \mu_0^{(\ell-1)}(m_0^{(\ell)},\mu_0^{(\ell)},\lambda_0^{(\ell)}), &
@@ -318,19 +331,13 @@ Z[J] = \int\mathcal{D}\phi(\vec{x},t)\;\exp\left[-S[\phi(\vec{x},t)]+\int
 \end{equation}
 Where the action $S[\phi(\vec{x},t)]$ is an integral over four-dimensional space-time. Discretisation works exactly as above, but now we have a four-dimensional space-time lattice. Coarse-graining by removing lattice sites will be much more effective in four dimensions since the number of points is reduced by a factor 16 instead of 2.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Renormalisation and Effective Theories}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-One key requirement in Multilevel Monte Carlo calculations is that the ``coarse'' theory is similar to the theory on the finest level. Only in this case the correct variance decay can be guaranteed. In many applications a natural hierarchy exists. For example, if a stochastic differential equation is solved using MLMC, the next coarsest level is simply obtained by halving the time step size, while keeping the other parameters of the system constant.
-In QFTs the coarse-graining procedure which halves the lattice spacing corresponds to a renormalisation group transformation, integrating out all fluctations in the energy shell between $1/a$ and $1/(2a)$. The result is an effective theory, which is usually more complicated than the original theory since it contains additional couplings.
-However, in some cases only a small set of couplings remain relevant as $a\rightarrow 0$ and the effective theory can be calculated with perturbative methods as long as $a<a_*$. This is the case for QCD, which is an asymptotically free theory. Hence, the idea for the coarse theory construction is to use perturbation theory, and coarsen the theory up to the point where the perturbative expansion breaks down. The critical lattice spacing $a_*$ is a fixed physical parameter, and hence we expect the cost of the MLMCMC calculation to become $\mathcal{O}(\epsilon^{-2}a_*^{-d})=\mathcal{O}(\epsilon^{-2})$ as $\epsilon\rightarrow 0$.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Connections to statistical physics}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Workplan}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Lattice QCD is a highly complicated theory, in particular it contains a non-trivial gauge theory under $SU(3)$ transformations which as to be taken into account during the sampling process. Perturbative calculations of the lattice are also non-trivial. We therefore propose to approach the problem in several stages of increasing complexity:
+Lattice QCD is a highly complicated theory, in particular it is invariant under non-trivial local $SU(3)$ gauge transformations, i.e. there are certain equivalent field configurations which have exactly the same action. This as to be taken into account during the sampling process. Perturbative calculations of the lattice are also non-trivial. We therefore propose to approach the problem in several stages of increasing complexity:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Simple quantum mechanical systems}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -362,7 +369,7 @@ Implement the techniques by either developing a bespoke multilevel software for 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Harmonic Oscillator}\label{sec:harmonic_oscillator}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-For a harmonic oscillator with $V(x) = \frac{1}{2}\mu^2 x^2$ the 
+For a harmonic oscillator with $V(x) = \frac{1}{2}m_0\mu^2 x^2$ the 
 action can be written as
 \begin{equation}
   S[X] = \sum_{j=0}^{M} a \left( \frac{1}{2}m_0 \frac{(X_{j+1}-X_j)^2}{a^2}+\frac{1}{2}\mu^2 X_j^2\right) := \frac{1}{2}X^T G X\label{eqn:ho_action}
@@ -374,22 +381,26 @@ The generating functional is a Gaussian integral and can be evaluated exactly
 with the $M\times M$ correlation matrix
 \begin{equation}
   G = \begin{pmatrix}
-    a\mu^2 + 2m_0/a & -m_0/a & & \dots & & -m_0/a\\
-    -m_0/a & a\mu^2 + 2m_0/a & -m_0/a & &\\
-    & -m_0/a & a\mu^2 + 2m_0/a & -m_0/a & & \vdots\\
-    \vdots & & & \ddots\\
-    & & & -m_0/a & a\mu^2 + 2m_0/a & -m_0/a\\
-        -m_0/a & & \dots & & -m_0/a & a\mu^2 + 2m_0/a\\
+    d & c & & \dots & & c\\
+    c & d & c & &\\
+    & c & d & c & & \\
+    \vdots & & & \ddots & & \vdots\\
+    & & & c & d & c\\
+        c & & \dots & & c & d\\
   \end{pmatrix}\label{eqn:HO_G}
 \end{equation}
-and hence
+with
+\begin{xalignat}{2}
+d &= am_0\mu^2 + 2m_0/a, & c &= -m_0/a\label{eqn:c_d_def}.
+\end{xalignat}
+This implies that
 \begin{equation}
   \log\left(Z[\vec{J}]\right) = C(a) + \frac{1}{2}\vec{J}^T G^{-1} \vec{J}
 \end{equation}
 where $C(a)$ is a constant.
 This immediately allows the calculation of
 \begin{equation}
-  \langle X^2\rangle = \langle X_j^2 \rangle = \left(G^{-1}\right)_{jj} = \frac{1}{M}\operatorname{trace}\left(G^{-1}\right) = \sum_{k=0}^{N-1} \left(\mu^2 + \frac{4m_0\sin^2(ka/2)}{a^2}\right)^{-1}
+  \langle X^2\rangle = \langle X_j^2 \rangle = \left(G^{-1}\right)_{jj} = \frac{1}{M}\operatorname{trace}\left(G^{-1}\right) = \sum_{k=0}^{N-1} \left(m_0\mu^2 + \frac{4m_0\sin^2(ka/2)}{a^2}\right)^{-1}
 \end{equation}
 Upon suitable scaling $\langle X^2\rangle$ is related to the ground state energy. Note that due to translational invariance $\langle X_j^2\rangle =\langle X_0^2\rangle$ and $\left(G^{-1}\right)_{jj}=\left(G^{-1}\right)_{00}=\frac{1}{M}\operatorname{trace}\left(G^{-1}\right)$ for any $j=0,\dots,M-1$.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -427,10 +438,7 @@ c & c \\
 c & & & &   & c
 \end{pmatrix}
 \end{xalignat}
-with
-\begin{xalignat}{2}
-d &= a\mu^2 + 2m_0/a, & c &= -m_0/a
-\end{xalignat}
+with $c$ and $d$ as defined in Eq. (\ref{eqn:c_d_def}).
 Then integrate out the fine (odd) modes to obtain by completing the square in the exponential and carrying out the Gaussian integral over the fine modes:
 \begin{equation}
 \begin{aligned}
@@ -450,14 +458,15 @@ Here $G^{(c)}$ is the Schur-complement of the matrix $G$,
 \end{equation}
 Furthermore, it is easy to see that $G^{(c)}$ has exactly the same structure as $G$ in Eq. (\ref{eqn:HO_G}), but with $a\mapsto 2a$, $m_0\mapsto m_0^{(c)}$, $\mu\mapsto \mu^{(c)}$. The coarse level couplings are
 \begin{xalignat}{2}
-m_0^{(c)} &= m_0\left(1+\frac{a^2\mu^2}{2m_0}\right)^{-1}, &
-\left(\mu^{(c)}\right)^2 &= \mu^2 \left(1+\frac{a^2\mu^2}{4m_0}\right)\left(1+\frac{a^2\mu^2}{2m_0}\right)^{-1}
+m_0^{(c)} &= m_0\left(1+\frac{a^2\mu^2}{2}\right)^{-1}, &
+\left(\mu^{(c)}\right)^2 &= \mu^2 \left(1+\frac{a^2\mu^2}{4}\right)
 \end{xalignat}
 Hence, the coarse level action also has the same structure as in Eq. (\ref{eqn:ho_action}) and can be written as 
 \begin{equation}
-  S^{(c)}[X^{(c)}] = \sum_{j=0}^{M/2} 2a \left( \frac{1}{2}m^{(c)}_0 \frac{(X^{(c)}_{j+1}-X^{(c)}_j)^2}{(2a)^2}+\frac{1}{2}\left(\mu^{(c)}\right)^2 \left(X^{(c)}_j\right)^2\right)
+  S^{(c)}[X^{(c)}] = \sum_{j=0}^{M/2} 2a \left( \frac{1}{2}m^{(c)}_0 \frac{(X^{(c)}_{j+1}-X^{(c)}_j)^2}{(2a)^2}+\frac{1}{2}m_0^{(c)}\left(\mu^{(c)}\right)^2 \left(X^{(c)}_j\right)^2\right)
 \end{equation}
-In Fig. \ref{fig:harmonic_oscillator_flow} we show the evolution of the coupling constants as a function of $a$, where we've chosen $m_0(a^*)=0.01$ and $\mu^2(a^*) = 1.0$ and $a^*\ll 1$ is the grid spacing at which we want to carry out our simulation ($m_0$ was chosen small to see the running of the coupling constants for $a<1$). Note that for $a\sim 1$ taking the naive action with $m_0=m_0(a^*)$, $\mu^2=\mu^2(a^*)$ is likely to lead to bad results.
+In Fig. \ref{fig:harmonic_oscillator_flow} we show the evolution of the coupling constants as a function of $a$, where we've chosen $m_0(a^*)=10$ and $\mu^2(a^*) = 6$ and $a^*\ll 1$ is the grid spacing at which we want to carry out our simulation.
+Note that for $a\sim 1$ taking the naive action with $m_0=m_0(a^*)$, $\mu^2=\mu^2(a^*)$ is likely to lead to bad results.
 \begin{figure}
 \begin{center}
 \includegraphics[width=0.5\linewidth]{harmonic_oscillator_flow.pdf}
