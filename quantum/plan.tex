@@ -15,7 +15,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Challenge and Motivation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Quantum Field Theories (QFTs) \cite{Peskin1995}, such as Quantum Chromo Dynamics (QCD) predict fundamental properties of matter and are of paramount importance in High Energy Physics. If discretised on a space-time lattice, QCD allows first principles calculations of strongly interacting particles and is crucial for precise calculations, for example in New Physics predictions or to simulate the hadronic background in accelerators such as the Large Hadron Collider. 
+Quantum Field Theories (QFTs) \cite{Peskin1995}, such as Quantum Chromo Dynamics (QCD) predict fundamental properties of subnuclear matter and are of paramount importance in High Energy Physics. If discretised on a space-time lattice, QCD allows first principles calculations of strongly interacting particles and is crucial for precise calculations, for example in New Physics predictions or to simulate the hadronic background in accelerators such as the Large Hadron Collider. 
 Due to the strong coupling of QCD at large distances, only lattice calculations allow first-principles predictions, but they are computationally demanding. Using Feynman's Path Integral technique \cite{Feynman2010}, QFTs can be be formulated as statistical systems in $d=4$ space-time dimensions. Predictions of physical quantities are then calculated by generating a set of samples with Markov-Chain Monte Carlo Methods. The relevant quantity of interest (such as a two-point correlation function, which allows the extraction of particle energies) is then evaluated on those samples. To obtain physically meaningful results, calculations need to be carried out for increasingly small lattice spacings $a$ and extrapolated to the continuum limit $a\rightarrow 0$, which can amplify sampling errors. There are two fundamental issues which make accurate numerical calculations challenging:
 \begin{figure}
   \begin{center}
@@ -35,7 +35,8 @@ We assume that the discretisation error is linear in the lattice spacing. Note t
 where $L$ is the size of the simulation box and $m_\pi$ is the mass of the lightest hardron (i.e. the pion) \cite{Lepage1994}.
 
 Typical lattice sizes and sample numbers can be found in \cite{Bazavov2013} where the authors of the MILC collaboration report on the generation of ensembles with an improved quark action. As table 1 in \cite{Bazavov2013} shows, the largest lattices consist of $96^3\times 192$ points and $\sim 1,000$ independent gauge configurations are created. The lattice spacing of those largest configurations is $\approx 0.06\operatorname{fm}$ and the pion mass $135 \operatorname{MeV}$, the reported value of $m_\pi L$ which enters in Eq. (\ref{eqn:finite_size}) is $m_\pi L=3.95$.
-\note{This paper is realy 5 years old, so numbers might have changed a bit, but unlikely they have gone up by more than a factor two or so.}
+\note{This paper is nearly 5 years old now, so numbers might have changed a bit, but unlikely they have gone up by more than a factor two or so.}
+Five-dimensional domain-wall fermion simulations use even larger lattice spacings with $32^3\times 64\times 12$ or $24^3\times 64\times 24$ lattice sites \cite{Jung2017}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Multilevel Monte Carlo and renormalisation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
