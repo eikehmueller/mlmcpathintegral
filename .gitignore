@@ -4,5 +4,6 @@
 *.blg
 *.log
 *.out
-quantum/plan.pdf
-quantum/plots/*.pdf
+*.pyc
+quantum/doc/plan.pdf
+quantum/doc/plots/*.pdf
