@@ -232,6 +232,14 @@ The sampling algorithm is shown schematically in Fig. \ref{fig:multilevel_path_s
 
 Coupling is ensured by drawing the coarse-level part of the proposal state from the distribution on the next-coarser level but the Metropolis acceptance step guarantees that the samples $\theta_\ell^n$ on level $\ell$ are indeed distributed according to $\pi^\ell$, which is necessary to make the estimator in Eq. (\ref{eqn:MLMCMCestimator}) unbiased.
 
+\begin{equation}
+  \alpha = \frac{\pi^\ell(\theta'_\ell)q_{\text{ML}}^\ell(\theta_\ell^n)}{\pi^\ell(\theta_\ell^n)q_{\text{ML}}^\ell(\theta'_\ell)}
+= \frac{\pi^\ell(\theta'_\ell)\pi^{\ell-1}(\theta_{\ell,C}^n)\pi^\ell_{\text{free}}(\theta_{\ell,F}^n|\theta_{\ell,C}^n)}{\pi^\ell(\theta_\ell^n)\pi^{\ell-1}(\theta'_{\ell,C})\pi^\ell_{\text{free}}(\theta'_{\ell,F}|\theta'_{\ell,C})}
+\end{equation}
+
+\begin{equation}
+\pi_{\text{free}}(x|x_-,x_+) = \sqrt{\frac{m_0}{\pi a}}\exp\left[-\frac{m_0}{a}\left(x-\frac{x_-+x_+}{2}\right)^2\right]
+\end{equation}
 Above we assumed that it is possible to sample independently from $\pi^{\ell-1}$. This can be achieved by using the above procedure to create two chains on each level $\ell$: (a) the chain $\theta_\ell$ which we will use together with the chain $\Theta_{\ell-1}$ to calculate $\hat{Y}_{\ell,N_\ell}^{MC}$ and (b) another chain $\Theta_{\ell}$, for which we only take every $k$-th sample where $k$ is large compared to the autocorrelation time. To a very good approximation this chain then samples from $\pi^\ell$. The procedure is shown schematically in Fig. \ref{fig:chains} and as the authors of \cite{Dodwell2015} remark, the bias error due to any remaining auto-correlation is small.
 \begin{figure}
   \begin{center}
