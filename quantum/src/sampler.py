@@ -35,16 +35,16 @@ class TwoLevelMetropolisSampler(object):
         self._coarse_action = coarse_action
         self._fine_action = fine_action
         self._verbosity = verbosity
-        self.N = self._fine_action.N
+        self.M = self._fine_action.M
         self.delta = math.sqrt(self._fine_action.a)
         # Initial fine state
-        self.theta_fine = np.zeros(self.N)
+        self.theta_fine = np.zeros(self.M)
         self._free_width = math.sqrt(0.5*self._fine_action.a/self._fine_action.m0)
 
     def _conditioned_free_action(self,theta):
         '''Calculate action 
         
-        S = m_0/a*\sum_{j=0}^{N/2}(theta_{2j}-0.5*(theta_{2j}+theta_{2j+1}))^2
+        S = m_0/a*\sum_{j=0}^{M/2}(theta_{2j}-0.5*(theta_{2j}+theta_{2j+1}))^2
         
         which gives the conditioned distribution of the free particles at the 
         fine sites,
@@ -56,8 +56,8 @@ class TwoLevelMetropolisSampler(object):
         :arg theta: State vector
         '''
         S = 0.0
-        for j in range(self.N/2):
-            S += (theta[2*j+1] - 0.5*(theta[2*j]+theta[(2*j+2)%self.N]))**2
+        for j in range(self.M/2):
+            S += (theta[2*j+1] - 0.5*(theta[2*j]+theta[(2*j+2)%self.M]))**2
         return self._fine_action.m0/self._fine_action.a*S
 
     def generate(self):
@@ -75,20 +75,20 @@ class TwoLevelMetropolisSampler(object):
         correct distribution.
         
         List of variables                          length
-           theta_coarse    = \Theta_{\ell}^{n+1}   N/2
-           theta_prime     = \theta'_{\ell}        N
-           self.theta_fine = \theta_{\ell}^{n}     N
+           theta_coarse    = \Theta_{\ell}^{n+1}   M/2
+           theta_prime     = \theta'_{\ell}        M
+           self.theta_fine = \theta_{\ell}^{n}     M
         '''
 
         # Obtain new coarse level sample \Theta_{\ell-1}^{n+1}
         theta_coarse = self._coarse_sampler.sample()
         # Populate fine level trial state \theta'_{\ell}
         theta_prime = self.theta_fine.copy()
-        for j in range(self.N/2):
+        for j in range(self.M/2):
             # coarse modes (C)
             theta_prime[2*j] = theta_coarse[j]
             # fine modes (F)
-            mu = 0.5*(theta_coarse[j]+theta_coarse[(j+1)%(self.N/2)])
+            mu = 0.5*(theta_coarse[j]+theta_coarse[(j+1)%(self.M/2)])
             theta_prime[2*j+1] = np.random.normal(mu,self._free_width)
         # Calculate the difference in level-\ell actions,
         # required to calculate the ratio

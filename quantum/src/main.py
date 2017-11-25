@@ -2,19 +2,19 @@ import numpy as np
 import math
 from action import *
 
-N = 32
+M = 32
 T = 1.0
 m0 = 1.0
 mu2 = 1.0
 n_burnin = 1000
 n_samples = 10000
 
-action = HarmonicOscillatorAction(N,T,m0,mu2)
-coarse_action = HarmonicOscillatorAction(N/2,T,m0,mu2)
+action = HarmonicOscillatorAction(M,T,m0,mu2)
+coarse_action = HarmonicOscillatorAction(M/2,T,m0,mu2)
 
 # Print out parameters
 
-print 'Number of timesteps = ', N
+print 'Number of timesteps = ', M
 print 'Final time T        = ', T
 print 'mass m_0            = ', m0
 print 'mu^2                = ', mu2
@@ -29,7 +29,7 @@ print
 x_sq = 0.0
 for i in range(n_samples):
     x = action.sample()
-    x_sq += 1./N*np.dot(x,x)
+    x_sq += 1./M*np.dot(x,x)
 
 x_sq /= n_samples
 
@@ -47,7 +47,7 @@ for i in range(n_burnin):
     x_coarse, x_fine = twolevel_sampler.generate()
 for i in range(n_samples):
     x_coarse, x_fine = twolevel_sampler.generate()
-    x_sq += 1./N*np.dot(x_fine,x_fine)
+    x_sq += 1./M*np.dot(x_fine,x_fine)
 
 x_sq /= n_samples
 
