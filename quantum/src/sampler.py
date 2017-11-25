@@ -6,7 +6,7 @@ class Sampler(object):
     def __init__(self):
         pass
 
-    def sample(self):
+    def draw(self):
         pass
 
 class TwoLevelMetropolisSampler(object):
@@ -81,7 +81,7 @@ class TwoLevelMetropolisSampler(object):
         '''
 
         # Obtain new coarse level sample \Theta_{\ell-1}^{n+1}
-        theta_coarse = self._coarse_sampler.sample()
+        theta_coarse = self._coarse_sampler.draw()
         # Populate fine level trial state \theta'_{\ell}
         theta_prime = self.theta_fine.copy()
         for j in range(self.M/2):

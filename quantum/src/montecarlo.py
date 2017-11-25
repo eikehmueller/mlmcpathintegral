@@ -27,7 +27,7 @@ class MonteCarloSingleLevel(object):
         by burning in and then evaluating the QoI on n_samples samples
         '''
         for i in range(self._n_burnin):
-            self._sampler.sample()
+            self._sampler.draw()
         S = 0.0
         S_sq = 0.0
         for i in range(self._n_samples):
@@ -83,3 +83,21 @@ class MonteCarloTwoLevel(object):
         mean = S/self._n_samples
         variance = 1./(self._n_samples*(self._n_samples-1))*(S_sq - self._n_samples*mean**2)
         return mean, math.sqrt(variance)
+
+    def evaluate_difference(self):
+        '''Calculate the difference between the QoI on the fine- and coarse
+        level and return this difference and its variance.
+        '''
+        for i in range(self._n_burnin):
+            x_coarse, x_fine = self._twolevel_sampler.draw()
+        S = 0.0
+        S_sq = 0.0
+        for i in range(self._n_samples):
+            x_coarse, x_fine = self._twolevel_sampler.draw()
+            qoi_tmp = self._qoi(x_fine)-self._qoi(x_coarse)
+            S += qoi_tmp
+            S_sq += qoi_tmp**2
+
+        mean = S/self._n_samples
+        variance = 1./(self._n_samples-1)*(S_sq - self._n_samples*mean**2)
+        return mean, variance
