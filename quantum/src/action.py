@@ -57,7 +57,7 @@ class HarmonicOscillatorAction(Action,Sampler):
         S *= 0.5*self.a*self.m0
         return S
        
-    def sample(self):
+    def draw(self):
         '''Generate a sample x from the Gaussian distribution induced
         by the action, i.e. from C*exp(-1/2*x^T.\Sigma^{-1}.x)
         where the matrix \Sigma is defined by \Sigma = G^{-1}

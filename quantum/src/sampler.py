@@ -60,7 +60,7 @@ class TwoLevelMetropolisSampler(object):
             S += (theta[2*j+1] - 0.5*(theta[2*j]+theta[(2*j+2)%self.M]))**2
         return self._fine_action.m0/self._fine_action.a*S
 
-    def generate(self):
+    def draw(self):
         '''Create new correlated fine- and coarse-level state pair.
 
         Draw a sample from the coarse level distribution.
