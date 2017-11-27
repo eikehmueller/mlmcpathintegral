@@ -36,7 +36,6 @@ class TwoLevelMetropolisSampler(object):
         self._fine_action = fine_action
         self._verbosity = verbosity
         self.M = self._fine_action.M
-        self.delta = math.sqrt(self._fine_action.a)
         # Initial fine state
         self.theta_fine = np.zeros(self.M)
         self._free_width = math.sqrt(0.5*self._fine_action.a/self._fine_action.m0)
@@ -83,7 +82,6 @@ class TwoLevelMetropolisSampler(object):
         # Obtain new coarse level sample \Theta_{\ell-1}^{n+1}
         theta_coarse = self._coarse_sampler.draw()
         # Populate fine level trial state \theta'_{\ell}
-        theta_prime = self.theta_fine.copy()
         for j in range(self.M/2):
             # coarse modes (C)
             theta_prime[2*j] = theta_coarse[j]
