@@ -61,6 +61,16 @@ void TwoLevelMetropolisSampler::draw(std::vector<Path*> x_path) {
     accept = (uniform_dist(engine) < threshold);
   }
   if (accept) {
+    std::copy(theta_prime->data,
+              theta_prime->data+M_lat,
+              theta_fine->data);
   }
+  // Copy back to path
+  std::copy(theta_fine->data,
+            theta_fine->data+M_lat,
+            x_path[0]->data);
+  std::copy(theta_coarse->data,
+            theta_coarse->data+M_lat/2,
+            x_path[1]->data);
 }
 

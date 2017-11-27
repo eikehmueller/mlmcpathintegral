@@ -1,5 +1,6 @@
 #ifndef SAMPLER_HH
 #define SAMPLER_HH SAMPLER_HH
+#include "path.hh"
 #include <vector>
 
 /** @class Sampler

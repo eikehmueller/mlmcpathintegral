@@ -5,6 +5,7 @@
 #include "sampler.hh"
 #include "action.hh"
 #include "quantityofinterest.hh"
+#include "twolevelmetropolissampler.hh"
 
 /** @class MonteCarlo
  * 
@@ -42,7 +43,7 @@ public:
                         QoI& qoi_,
                         unsigned int n_samples_,
                         unsigned int n_burnin_) :
-    sampler(sampler_), qoi(qoi_), MonteCarlo(n_samples_,n_burnin_)
+    MonteCarlo(n_samples_,n_burnin_), sampler(sampler_), qoi(qoi_)
   {}
 
   /** @brief Calculate QoI
@@ -63,7 +64,7 @@ private:
  * 
  */
 class MonteCarloTwoLevel : public MonteCarlo {
-private:
+public:
   /** \brief Create new instance 
    *
    * @param[in] coarse_sample_ Sampler on coarse level
@@ -77,22 +78,31 @@ private:
   MonteCarloTwoLevel(Sampler& coarse_sampler_,
                      Action& coarse_action_,
                      Action& fine_action_,
-                     QoI& coarse_qoi_,
-                     QoI& fine_qoi_,
+                     QoI& qoi_,
                      unsigned int n_samples_,
                      unsigned int n_burnin_) : 
+    MonteCarlo(n_samples_,n_burnin_),
     coarse_sampler(coarse_sampler_),
     coarse_action(coarse_action_),
     fine_action(fine_action_),
-    coarse_qoi(coarse_qoi_),
-    fine_qoi(fine_qoi_),
-    MonteCarlo(n_samples_,n_burnin_) {}
+    qoi(qoi_),
+    twolevel_sampler(coarse_sampler_,
+                     coarse_action_,
+                     fine_action_) {}
+
+  /** @brief Calculate mean and variance of difference
+   *
+   * Calculate the mean and variance of the difference in the QoI 
+   * evaluated at two subsequent levels.
+   */
+  std::pair<double,double> evaluate_difference();
+
 private:
   Sampler& coarse_sampler;
   Action& coarse_action;
   Action& fine_action;
-  QoI& coarse_qoi;
-  QoI& fine_qoi;
+  QoI& qoi;
+  TwoLevelMetropolisSampler twolevel_sampler;
 };
 
 #endif // MONTECARLO_HH

@@ -5,6 +5,7 @@
  * @brief Abstract base class for path-dependent quantity of interest
  *
  */
+#include "path.hh"
 
 class QoI {
 public: 
@@ -18,7 +19,7 @@ public:
    *
    * @param x_path Path \f$\f$ on which to evaluate the QoI
    */
-  const double virtual evaluate(const double* x_path) = 0;
+  const double virtual evaluate(const Path* x_path) = 0;
   
 protected:
   const unsigned int M_lat;
@@ -42,7 +43,7 @@ public:
    *
    * @param x_path Path \f$\f$ on which to evaluate the QoI
    */
-  const double virtual evaluate(const double* x_path);
+  const double virtual evaluate(const Path* x_path);
 };
 
 

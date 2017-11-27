@@ -3,6 +3,6 @@
  */
 
 /* Evaluate QoI */
-const double QoIXsquared::evaluate(const double* x_path) {
-  return x_path[0]*x_path[0];
+const double QoIXsquared::evaluate(const Path* x_path) {
+  return x_path->data[0]*x_path->data[0];
 }
