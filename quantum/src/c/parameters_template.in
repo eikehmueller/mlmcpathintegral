@@ -1,0 +1,6 @@
+M_lat             8
+T_final         1.0
+m0              1.0
+mu2             1.0
+n_burnin        1000
+n_samples       200000

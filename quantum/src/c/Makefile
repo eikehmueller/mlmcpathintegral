@@ -20,6 +20,7 @@ OBJS=\
 	quantityofinterest.o \
 	twolevelmetropolissampler.o \
 	montecarlo.o \
+	parameters.o \
 	driver.o
 
 all: $(MAIN)
@@ -31,6 +32,7 @@ driver.o: \
 	harmonicoscillatoraction.o \
 	quantityofinterest.o \
 	twolevelmetropolissampler.o \
+	parameters.o \
 	montecarlo.o
 
 %.o: %.cc %.hh
