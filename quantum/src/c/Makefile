@@ -1,13 +1,12 @@
-# Eike's MacBook
-# EIGEN_DIR=/usr/local/include/eigen3/
-# University of Bath desktop
-EIGEN_DIR=/home/em459/Library/eigen-3.3.4/include/eigen3/
+# Include local, machine dependent Makefile.
+# Use this for machine-dependent settings by copying over one of the files
+# local_XXX.mk
+include local.mk
+
 CFLAGS_OPT=-O3 -std=c++11 -I$(EIGEN_DIR)
 CFLAGS_DEBUG=-g -Wall -O0 -std=c++11 -I$(EIGEN_DIR)
 LFLAGS=
 CPP=g++
-
-#DEBUG=True
 
 ifeq ($(DEBUG),True)
 	CFLAGS=$(CFLAGS_DEBUG)
