@@ -9,4 +9,5 @@
 *.x
 quantum/doc/plan.pdf
 quantum/doc/plots/*.pdf
+quantum/src/c/parameters.in
 local.mk
