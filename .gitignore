@@ -4,6 +4,8 @@
 *.blg
 *.log
 *.out
+*.fdb_latexmk
+*.fls
 *.pyc
 *.o
 *.x
