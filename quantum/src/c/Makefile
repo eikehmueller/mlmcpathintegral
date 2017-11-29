@@ -19,7 +19,7 @@ SOURCES=$(wildcard *.hh *.cc)
 MAIN=driver.x
 OBJS=$(patsubst %.cc,%.o,$(wildcard *.cc))
 
-all: $(MAIN) doc
+all: $(MAIN)
 
 montecarlo.o: \
 	quantityofinterest.o \
