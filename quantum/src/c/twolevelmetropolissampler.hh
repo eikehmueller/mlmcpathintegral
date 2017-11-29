@@ -25,13 +25,15 @@
  * odd modes are drawn from the free action, conditioned on the two
  * neighbouring odd modes \f$x_-\f$ and \f$x_+\f$, i.e. 
  *
- * \f$p(x) \sim \exp\left[-m_0/a (x-(x_-+x_+)/2)^2\right]\f$.
+ * \f[
+   p(x) \sim \exp\left[-\frac{m_0}{a} \left(x-\frac{x_-+x_+}{2}\right)^2\right].
+   \f]
  *
  * Finally, accept and reject according to \f$\min\left\{1,\beta\right\}\f$ with
  *
- * \f$
+ * \f[
       \beta = \frac{\pi^{\ell}(\theta'_\ell)\pi^{\ell-1}(\theta^n_{\ell,C})\pi_{free}^{\ell}(\theta^n_{\ell,F}|\theta^n_{\ell,C})}{\pi^{\ell}(\theta^n_\ell)\pi^{\ell-1}(\theta'_{\ell,C})\pi_{free}^{\ell}(\theta'_{\ell,F}|\theta'_{\ell,C})}
- * \f$
+ * \f]
  *
  * This guarantees that the fine level samples have the correct distribution.
  */
@@ -79,9 +81,9 @@ private:
   /** @brief Evaluate conditioned free action
    *
    * Let
-   * \f$
-     S_{free}[\theta] = m_0/a\sum_{j=0}^{M/2}(\theta_{2j}-\frac{\theta_{2j}+\theta_{2j+2}}{2})^2
-     \f$
+   * \f[
+     S_{free}[\theta] = \frac{m_0}{a}\sum_{j=0}^{M/2}(\theta_{2j}-\frac{\theta_{2j}+\theta_{2j+2}}{2})^2
+     \f]
    * 
    * This can be used to calculate the conditioned free probability as
    * \f$\pi_{free}^{\ell}(\theta_F|\theta_C) = e^{-S_{free}[\theta]}\f$

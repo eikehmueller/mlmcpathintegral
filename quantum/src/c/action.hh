@@ -16,9 +16,9 @@
  * @brief Base class for action
  *
  * Allows calculation of action
- *   \f$
+ *   \f[
         S[X]=\sum_{j=0}^{M-1}\left(\frac{m_0}{2}\frac{(X_{j+1}-X_j)}{a^2}+V(x)\right)
-      \f$ 
+      \f]
  * for one-dimensional quantum problem with periodic boundary conditions.
  */
 class Action {

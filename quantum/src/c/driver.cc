@@ -26,6 +26,10 @@ int main(int argc, char* argv[]) {
                                                param.n_samples,
                                                param.n_burnin);
   std::pair<double,double> result;
+  double exact_result = action.Xsquared_exact();
+  std::cout << std::endl;
+  std::cout << " Exact result  <x^2> = " << exact_result << std::endl;
+  std::cout << std::endl;
   result = montecarlo_singlelevel.evaluate();
   std::cout << " <x^2> = " << result.first << " +/- " << result.second << std::endl;
   std::cout << std::endl;

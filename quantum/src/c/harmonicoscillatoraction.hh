@@ -64,6 +64,20 @@ public:
    */
   const virtual void draw(std::vector<Path*> x_path);
 
+  /** @brief Exact expression for expectation value of \f$X^2\f$
+   *
+   * Return the exact expression from Creutz and Freedman:
+   *
+   \f[
+   \langle X^2 \rangle = \frac{1}{2m_0\mu\sqrt{1+\frac{a^2\mu^2}{4}}}\cdot \frac{1+R^M}{1-R^M}
+   \f]
+   * where
+   \f[
+   R = 1 + \frac{a^2\mu^2}{2}-a\mu\sqrt{1+\frac{a^2\mu^2}{4}}
+   \f]
+   */
+  const double Xsquared_exact();
+
 private:
   /** @brief Construct Cholesky factor of covariance matrix */
   void build_covariance();
