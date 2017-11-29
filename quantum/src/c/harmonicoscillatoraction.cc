@@ -1,6 +1,8 @@
 #include "harmonicoscillatoraction.hh"
 #include <iostream>
-/** \brief Implementation of action.hh */
+/** @file harmonicoscillatoraction.cc
+ * @brief Implementation of harmonicoscillatoraction.hh
+ */
 
 /** Evaluate action */
 const double HarmonicOscillatorAction::evaluate(const Path* x_path) const {
@@ -35,7 +37,7 @@ void HarmonicOscillatorAction::build_covariance() {
   L_cov = llt.matrixL();
 }
 
-/** draw sample from distribution */
+/** Draw sample from distribution */
 const void HarmonicOscillatorAction::draw(std::vector<Path*> x_path) {
   Eigen::Map<Vector> x(x_path[0]->data,Action::M_lat);
   for (unsigned int i=0; i<Action::M_lat;++i) {

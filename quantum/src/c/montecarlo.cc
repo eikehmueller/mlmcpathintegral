@@ -1,5 +1,8 @@
 #include "montecarlo.hh"
-/** @brief Implementation of montecarlo.hh */
+
+/** @file montecarlo.cc
+ * @brief Implementation of montecarlo.hh 
+ */
 
 /** Calculate Monte Carlo estimate with single level method */
 std::pair<double,double> MonteCarloSingleLevel::evaluate() {

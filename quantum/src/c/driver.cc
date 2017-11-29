@@ -5,7 +5,8 @@
 #include "montecarlo.hh"
 #include "parameters.hh"
 
-/** Main program
+/** @file driver.cc
+ * @brief Main program
  */
 
 int main(int argc, char* argv[]) {

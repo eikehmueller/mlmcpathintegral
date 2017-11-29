@@ -8,20 +8,26 @@
 #include "sampler.hh"
 #include "action.hh"
 
+/** @file harmonicoscillatoraction.hh
+ * @brief Header file for harmonic oscillator action base class
+ */
+
+
 /** @class HarmonicOscillatorAction
+ *
  * @brief Action class for harmonic oscillator 
  *
  * Action class for potential \f$V(x)=\frac{m_0}{2}\mu^2x^2\f$
  */
 class HarmonicOscillatorAction : public Action, public Sampler {
 public:
-  /* @brief Initialise class
+  /** @brief Initialise class
    *
    * 
-   * @param[in] M_lat Number of time slices \f$M\f$
-   * @param[in] T_final Final time \f$T\f$
-   * @param[in] m0: Mass of particle \f$m_0\f$
-   * @param[in] mu2: Frequency \f$\mu^2\f$
+   * @param[in] M_lat_ Number of time slices \f$M\f$
+   * @param[in] T_final_ Final time \f$T\f$
+   * @param[in] m0_ Mass of particle \f$m_0\f$
+   * @param[in] mu2_ Frequency \f$\mu^2\f$
    */
   HarmonicOscillatorAction(const unsigned int M_lat_,
                            const double T_final_,
@@ -36,43 +42,51 @@ public:
 
   /** @brief Tidy up
    * 
-   * Delete temporary arrays
+   * Delete any temporary arrays
    */
   ~HarmonicOscillatorAction() {
     delete y_tmp;
   }
-  /* @brief Evaluate action for a specific path
+  /** @brief Evaluate action for a specific path
    * 
-   * Calculate \$S[X]\f$ for a specific path
+   * Calculate \f$S[X]\f$ for a specific path
    *
-   * @param x_path: path \f$X\f$, has to be am array of length \f$M\f$
+   * @param[in] x_path path \f$X\f$, has to be am array of length \f$M\f$
    */
   const double virtual evaluate(const Path* x_path) const;
 
-  /* @brief Draw sample from distribution
+  /** @brief Draw sample from distribution
    *
    * Generate path which is distruted according to
    * \f$\pi(X) \sim e^{-S[X]}\f$
    *
-   * @param x_path: path to populate
+   * @param[out] x_path: path to populate
    */
   const virtual void draw(std::vector<Path*> x_path);
 
+private:
   /** @brief Construct Cholesky factor of covariance matrix */
   void build_covariance();
+
 private:
+  /** @brief Oscillator frequency */
   const double mu2;
+  /** @brief Eigen matrix type */
   typedef Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> Matrix;
+  /** @brief Eigen vector type */
   typedef Eigen::Matrix<double,Eigen::Dynamic,1> Vector;
-  /** Cholesky factor of the covariance matrix */
+  /** @brief Cholesky factor of the covariance matrix \f$\Sigma=L^TL\f$ */
   Matrix L_cov;
-  /** Random number engine */
+  /** @brief Type for Mersenne twister engine */
   typedef std::mt19937_64 Engine;
+  /** @brief Random number engine */
   mutable Engine engine;
-  /** Normal distribution */
+  /** @brief Type for normal distribution */
   typedef std::normal_distribution<double> Normal;
+  /** @brief Normal distribution */
   mutable Normal normal_dist;
-  Path* y_tmp; // temporary array used for direct sampling
+  /** @brief temporary array used for direct sampling */
+  Path* y_tmp; 
 };
 
 #endif // HARMONICOSCILLATORACTION_HH

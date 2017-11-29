@@ -7,22 +7,28 @@
 #include "path.hh"
 #include "sampler.hh"
 
+/** @file action.hh
+ * @brief Header file for action base class
+ */
+
 /** @class Action
  *
  * @brief Base class for action
  *
  * Allows calculation of action
- *   \f$S[X]=\sum_{j=0}^{M-1}\left(\frac{m_0}{2}\frac{(X_{j+1}-X_j)}{a^2}+V(x)\right)\f$ 
+ *   \f$
+        S[X]=\sum_{j=0}^{M-1}\left(\frac{m_0}{2}\frac{(X_{j+1}-X_j)}{a^2}+V(x)\right)
+      \f$ 
  * for one-dimensional quantum problem with periodic boundary conditions.
  */
 class Action {
 public:
-  /* @brief Initialise class
+  /** @brief Initialise class
    *
    * 
-   * @param[in] M_lat Number of time slices \f$M\f$
-   * @param[in] T_final Final time \f$T\f$
-   * @param[in] m0: Mass of particle \f$m_0\f$
+   * @param[in] M_lat_ Number of time slices \f$M\f$
+   * @param[in] T_final_ Final time \f$T\f$
+   * @param[in] m0_ Mass of particle \f$m_0\f$
    */
   Action(const unsigned int M_lat_,
          const double T_final_,
@@ -32,7 +38,7 @@ public:
     assert(T_final>0.0);
   }
 
-  /** @brief Return number of timeslices */
+  /** @brief Return number of timeslices \f$M\f$ */
   unsigned int getM_lat() const { return M_lat; }
 
   /** @brief Return mass \f$m_0\f$ */
@@ -41,17 +47,21 @@ public:
   /** @brief Return lattice spacing \f$a\f$ */
   double geta_lat() const { return a_lat;}
 
-  /* @brief Evaluate action for a specific path
+  /** @brief Evaluate action for a specific path
    * 
-   * Calculate \$S[X]\f$ for a specific path
+   * Calculate \f$S[X]\f$ for a specific path
    *
-   * @param x_path: Path, has to be am array of length \f$M\f$
+   * @param x_path Path, has to be am array of length \f$M\f$
    */
   const double virtual evaluate(const Path* x_path) const = 0;
 protected:
+  /** @brief Number of time slices */
   const unsigned int M_lat;
+  /** @brief Final time */
   const double T_final;
+  /** @brief Particle mass */
   const double m0;
+  /** @brief lattice spacing */
   const double a_lat;
 };
 

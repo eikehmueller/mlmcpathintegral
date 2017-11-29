@@ -1,4 +1,6 @@
-/** Implementation of parameters.hh */
+/** @file parameters.cc
+ * @brief Implementation of parameters.hh
+ */
 #include "parameters.hh"
 
 void Parameters::readfile() {

@@ -7,6 +7,10 @@
 #include "quantityofinterest.hh"
 #include "twolevelmetropolissampler.hh"
 
+/** @file montecarlo.hh
+ * @brief Header file for Monte Carlo classes
+ */
+
 /** @class MonteCarlo
  * 
  * @brief Monte Carlo base class
@@ -14,12 +18,19 @@
 
 class MonteCarlo {
 public:
+  /** @brief Create new instance
+   *
+   * @param[in] n_samples_ Number of samples
+   * @param[in] n_burnin_ Number of burn-in steps
+   */
   MonteCarlo(unsigned int n_samples_,
              unsigned int n_burnin_) : 
     n_samples(n_samples_), 
     n_burnin(n_burnin_) {}
 protected:
+  /** @brief Number of samples */
   const unsigned int n_samples;
+  /** @brief Number of burn-in steps */
   const unsigned int n_burnin;
 };
 
@@ -34,10 +45,10 @@ class MonteCarloSingleLevel : public MonteCarlo {
 public:
   /** @brief Create new instance
    *
-   * @param[in] sampler Sampler to draw from
-   * @param[in] qoi Quantity of interest to evaluate on samples
-   * @param[in] n_samples Number of samples to evaluate
-   * @param[in] n_burnin Number of burnin samples (QoI not evaluated on those)
+   * @param[in] sampler_ Sampler to draw from
+   * @param[in] qoi_ Quantity of interest to evaluate on samples
+   * @param[in] n_samples_ Number of samples to evaluate
+   * @param[in] n_burnin_ Number of burnin samples (QoI not evaluated on those)
    */
   MonteCarloSingleLevel(Sampler& sampler_,
                         QoI& qoi_,
@@ -53,7 +64,9 @@ public:
    */
   std::pair<double,double> evaluate();
 private:
+  /** @brief Sampler class for creating samples */
   Sampler& sampler;
+  /** @brief Quantity of interest */
   QoI& qoi;
 };
 
@@ -67,13 +80,12 @@ class MonteCarloTwoLevel : public MonteCarlo {
 public:
   /** \brief Create new instance 
    *
-   * @param[in] coarse_sample_ Sampler on coarse level
+   * @param[in] coarse_sampler_ Sampler on coarse level
    * @param[in] coarse_action_ Action on coarse level
    * @param[in] fine_action_ Action on fine level
-   * @param[in] coarse_qoi_ Quantity of interest on coarse level
-   * @param[in] fine_qoi_ Quantity of interest on fine level
-   * @param[in] n_samples Number of samples to evaluate
-   * @param[in] n_burnin Number of burnin samples (QoI not evaluated on those)
+   * @param[in] qoi_ Quantity of interest
+   * @param[in] n_samples_ Number of samples to evaluate
+   * @param[in] n_burnin_ Number of burnin samples (QoI not evaluated on those)
    */
   MonteCarloTwoLevel(Sampler& coarse_sampler_,
                      Action& coarse_action_,
@@ -98,10 +110,15 @@ public:
   std::pair<double,double> evaluate_difference();
 
 private:
+  /** @brief Sampler on coarse level */
   Sampler& coarse_sampler;
+  /** @brief Action on coarse level */
   Action& coarse_action;
+  /** @brief Action on fine level */
   Action& fine_action;
+  /** @brief Quantity of interest */
   QoI& qoi;
+  /** Two-level sampler */
   TwoLevelMetropolisSampler twolevel_sampler;
 };
 

@@ -12,4 +12,5 @@
 quantum/doc/plan.pdf
 quantum/doc/plots/*.pdf
 quantum/src/c/parameters.in
+quantum/src/c/doc
 local.mk

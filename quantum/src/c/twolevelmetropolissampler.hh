@@ -4,6 +4,10 @@
 #include "action.hh"
 #include "sampler.hh"
 
+/** @file twolevelmetropolissampler.hh
+ * @brief Header file for two level Metropolis sampler
+ */
+
 /** @class TwoLevelMetropolisSampler 
  *
  * @brief Two level sampler
@@ -23,10 +27,10 @@
  *
  * \f$p(x) \sim \exp\left[-m_0/a (x-(x_-+x_+)/2)^2\right]\f$.
  *
- * Finally, accept and reject according to \f$min\left\{\right1,\beta\}\f$ with
+ * Finally, accept and reject according to \f$\min\left\{1,\beta\right\}\f$ with
  *
  * \f$
- *    \beta = \frac{\pi^{\ell}(\theta'_\ell)\pi^{\ell-1}(\theta^n_{\ell,C})\pi_{free}^{\ell}(\theta^n_{\ell,F}|\theta^n_{\ell,C})}{\pi^{\ell}(\theta^n_\ell)\pi^{\ell-1}(\theta'_{\ell,C})\pi_{free}^{\ell}(\theta'_{\ell,F}|\theta'_{\ell,C})}
+      \beta = \frac{\pi^{\ell}(\theta'_\ell)\pi^{\ell-1}(\theta^n_{\ell,C})\pi_{free}^{\ell}(\theta^n_{\ell,F}|\theta^n_{\ell,C})}{\pi^{\ell}(\theta^n_\ell)\pi^{\ell-1}(\theta'_{\ell,C})\pi_{free}^{\ell}(\theta'_{\ell,F}|\theta'_{\ell,C})}
  * \f$
  *
  * This guarantees that the fine level samples have the correct distribution.
@@ -35,9 +39,9 @@ class TwoLevelMetropolisSampler {
 public:
   /** @brief Create a new instance
    *
-   * @param[in] coarse_sampler Sampler on coarse level \f$\ell-1\f$
-   * @param[in] coarse_action Action on coarse level \f$\ell-1\f$
-   * @param[in] fine_action Action on fine level \f$\ell\f$
+   * @param[in] coarse_sampler_ Sampler on coarse level \f$\ell-1\f$
+   * @param[in] coarse_action_ Action on coarse level \f$\ell-1\f$
+   * @param[in] fine_action_ Action on fine level \f$\ell\f$
    */
   TwoLevelMetropolisSampler(Sampler& coarse_sampler_,
                             const Action& coarse_action_,
@@ -76,8 +80,8 @@ private:
    *
    * Let
    * \f$
-   * S_{free}[\theta] = m_0/a\sum_{j=0}^{M/2}(\theta_{2j}-(\theta_{2j}+\theta_{2j+2})/2)^2
-   * \f$
+     S_{free}[\theta] = m_0/a\sum_{j=0}^{M/2}(\theta_{2j}-\frac{\theta_{2j}+\theta_{2j+2}}{2})^2
+     \f$
    * 
    * This can be used to calculate the conditioned free probability as
    * \f$\pi_{free}^{\ell}(\theta_F|\theta_C) = e^{-S_{free}[\theta]}\f$
@@ -90,21 +94,31 @@ private:
   const double conditioned_free_action(const Path* x_path);
                             
 protected:
+  /** @brief Sampler on coarse level */
   Sampler& coarse_sampler;
+  /** @brief Action on coarse level */
   const Action& coarse_action;
+  /** @brief Action on fine level */
   const Action& fine_action;
-  /** Different temporary state vectors */
+  /** @brief Temporary state vector on coarse level \f$\theta^n_{\ell-1}\f$ */
   mutable Path* theta_coarse;
+  /** @brief Temporary state vector on fine level \f$\theta^n_{\ell}\f$ */
   mutable Path* theta_fine;
+  /** @brief Coarse part of state vector on fine level \f$\theta^n_{\ell,C}\f$ */
   mutable Path* theta_fine_C;
+  /** @brief Trial state vector on fine level \f$\theta'_{\ell}\f$ */
   mutable Path* theta_prime;
-  /** Random number engine */
+  /** @brief Random number engine */
   typedef std::mt19937_64 Engine;
+  /** @brief Type of Mersenne twister engine */
   mutable Engine engine;
-  /** Normal distribution */
+  /** @brief Type of normal distribution */
   typedef std::normal_distribution<double> Normal;
+  /** @brief Type of uniform distribution */
   typedef std::uniform_real_distribution<double> Uniform;
+  /** @brief Normal distribution for drawing from conditioned free distribution */
   mutable Normal normal_dist;
+  /** @brief Normal distribution in [0,1] for accept/reject step */
   mutable Uniform uniform_dist;
 
 };

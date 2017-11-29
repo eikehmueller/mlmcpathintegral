@@ -1,5 +1,6 @@
 #include "quantityofinterest.hh"
-/** @brief Implementation of quantityofinterest.hh
+/** @file quantityofinterest.cc
+ * @brief Implementation of quantityofinterest.hh
  */
 
 /* Evaluate QoI */

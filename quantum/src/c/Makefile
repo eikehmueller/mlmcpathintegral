@@ -14,16 +14,12 @@ else
 	CFLAGS=$(CFLAGS_OPT)
 endif
 
-MAIN=driver.x
-OBJS=\
-	harmonicoscillatoraction.o \
-	quantityofinterest.o \
-	twolevelmetropolissampler.o \
-	montecarlo.o \
-	parameters.o \
-	driver.o
+SOURCES=$(wildcard *.hh *.cc)
 
-all: $(MAIN)
+MAIN=driver.x
+OBJS=$(patsubst %.cc,%.o,$(wildcard *.cc))
+
+all: $(MAIN) doc
 
 montecarlo.o: \
 	quantityofinterest.o \
@@ -44,6 +40,13 @@ driver.o: \
 $(MAIN): $(OBJS)
 	$(CPP) $(LFLAGS) -o $(MAIN) $(OBJS)
 
+doc: $(SOURCES)
+	doxygen doxygen.cfg
+
 .phony: clean
 clean:
 	rm -rf *~ *.o $(MAIN)
+
+.phony: cleandoc
+cleandoc:
+	rm -rf doc/

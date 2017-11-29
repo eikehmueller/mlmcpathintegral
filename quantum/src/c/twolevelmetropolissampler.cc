@@ -1,4 +1,7 @@
 #include "twolevelmetropolissampler.hh"
+/** @file twolevelmetropolissampler.cc
+ * @brief Implementation of twolevelmetropolissampler.hh
+ */
 
 /** Evaluate conditioned free action on a given fine path */
 const double TwoLevelMetropolisSampler::conditioned_free_action(const Path* x_path) {

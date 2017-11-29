@@ -3,6 +3,10 @@
 #include "path.hh"
 #include <vector>
 
+/** @file sampler.hh
+ * @brief Header file for sampler base class
+ */
+
 /** @class Sampler
  * @brief Base class for sampler
  *
@@ -12,7 +16,7 @@ class Sampler {
 public:
   /** @brief Create new instance
    *
-   * @param M_lat Number \f$M\f$ of time slices
+   * @param[in] M_lat_ Number \f$M\f$ of time slices
    */
   Sampler(const unsigned int M_lat_) : M_lat(M_lat_) {}
 
@@ -22,11 +26,13 @@ public:
   /** @brief Draw a sample 
    *
    * returns a sample path \f$X\f$
+   *
    * @param[out] x_path Path \f$X\f$ drawn from distribution
    */
-  const virtual void draw(std::vector<Path*> X_path) = 0;
+  const virtual void draw(std::vector<Path*> x_path) = 0;
 
 protected:
+  /** @brief Number of time slices */
   const unsigned int M_lat;
 };
 

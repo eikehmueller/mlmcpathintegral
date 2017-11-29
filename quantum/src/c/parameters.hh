@@ -4,6 +4,10 @@
 #include <fstream>
 #include <string>
 
+/** @file parameters.hh
+ * @brief Header file for parameter class
+ */
+
 /** @class Parameters
  *
  * @brief Storage for parameters, which can be read from a file 
@@ -14,12 +18,14 @@ public:
    *
    * Read parameters from specified file. The content of the file has to be:
    *
-   * M_lat     VALUE
-   * T_final   VALUE
-   * m0        VALUE
-   * mu2       VALUE
-   * n_burnin  VALUE
-   * n_samples VALUE
+   @verbatim
+     M_lat     VALUE
+     T_final   VALUE
+     m0        VALUE
+     mu2       VALUE
+     n_burnin  VALUE
+     n_samples VALUE
+   @endverbatim
    *
    * @param[in] filename_ Name of file to read
    */
@@ -34,12 +40,19 @@ public:
   void show();
 
 public:
-  std::string filename; /** Name of file to read */
-  unsigned int M_lat; /** Number of time slices */
-  double T_final; /** Final time */
-  double m0; /** Particle mass */
-  double mu2; /** parameter \f$\mu^2\f$ in harmonic oscillator potential */
-  unsigned int n_burnin; /** Number of burnin-samples */
-  unsigned int n_samples; /** Number of samples */
+  /** @brief Name of file to read */
+  std::string filename;
+  /** @brief Number of time slices */
+  unsigned int M_lat;
+  /** @brief Final time */
+  double T_final;
+  /** @brief Particle mass */
+  double m0;
+  /** @brief parameter \f$\mu^2\f$ in harmonic oscillator potential */
+  double mu2;
+  /** @brief Number of burn-in samples */
+  unsigned int n_burnin;
+  /** @brief Number of samples */
+  unsigned int n_samples;
 };
 #endif // PARAMETERS_HH
