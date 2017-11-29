@@ -1,7 +1,9 @@
-=== Compilation ===
+# Readme file #
+
+### Compilation ###
 Copy the machine-specific Makefile local_MACHINE.mk to local.mk and edit if necessary. "make all" will build the code, "make doc" will build the documentation in the subdirectory doc.
 
-=== Running ===
+### Running ##
 To run, type
 
 ./driver.x
