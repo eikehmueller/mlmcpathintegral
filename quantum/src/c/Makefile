@@ -21,6 +21,12 @@ OBJS=$(patsubst %.cc,%.o,$(wildcard *.cc))
 
 all: $(MAIN)
 
+action.o: \
+	path.o
+
+montecarlo.o: \
+	path.o
+
 montecarlo.o: \
 	quantityofinterest.o \
 

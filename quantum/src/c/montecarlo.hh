@@ -51,18 +51,23 @@ class MonteCarloSingleLevel : public MonteCarlo {
 public:
   /** @brief Create new instance
    *
+   * @param[in] action_ Action to use
    * @param[in] sampler_ Sampler to draw from
    * @param[in] qoi_ Quantity of interest to evaluate on samples
    * @param[in] n_samples_ Number of samples to evaluate
    * @param[in] n_burnin_ Number of burnin samples (QoI not evaluated on those)
    * @param[in] record_stats_ Record statistics of sampler
    */
-  MonteCarloSingleLevel(Sampler& sampler_,
+  MonteCarloSingleLevel(Action& action_,
+                        Sampler& sampler_,
                         QoI& qoi_,
                         const unsigned int n_samples_,
                         const unsigned int n_burnin_,
                         const bool record_stats_=false) :
-    MonteCarlo(n_samples_,n_burnin_,record_stats_), sampler(sampler_), qoi(qoi_)
+    MonteCarlo(n_samples_,n_burnin_,record_stats_), 
+    action(action_), 
+    sampler(sampler_), 
+    qoi(qoi_)
   {}
 
   /** @brief Calculate QoI
@@ -72,6 +77,8 @@ public:
    */
   std::pair<double,double> evaluate();
 private:
+  /** @brief Action action to use */
+  Action& action;
   /** @brief Sampler class for creating samples */
   Sampler& sampler;
   /** @brief Quantity of interest */

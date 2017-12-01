@@ -41,6 +41,9 @@ public:
   /** @brief Return number of timeslices \f$M\f$ */
   unsigned int getM_lat() const { return M_lat; }
 
+  /** @return final time \f$T\f$ */
+  double getT_final() const { return T_final; }
+
   /** @brief Return mass \f$m_0\f$ */
   double getm0() const { return m0;}
 

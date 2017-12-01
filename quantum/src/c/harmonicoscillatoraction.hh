@@ -37,7 +37,7 @@ public:
     assert(mu2>0.0);
     build_covariance();
     engine.seed(124129017);
-    y_tmp = new Path(M_lat_);
+    y_tmp = new Path(M_lat_,T_final_);
   }
 
   /** @brief Tidy up

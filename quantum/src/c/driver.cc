@@ -22,7 +22,9 @@ int main(int argc, char* argv[]) {
                                          param.T_final,
                                          param.m0,
                                          param.mu2);
-  MonteCarloSingleLevel montecarlo_singlelevel(action,qoi,
+  MonteCarloSingleLevel montecarlo_singlelevel(action,
+                                               action,
+                                               qoi,
                                                param.n_samples,
                                                param.n_burnin);
   std::pair<double,double> result;

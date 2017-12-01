@@ -56,10 +56,14 @@ public:
     record_stats(record_stats_) {
     assert(2*coarse_action.getM_lat()==fine_action.getM_lat());
     assert(coarse_sampler.getM_lat()==coarse_action.getM_lat());
-    theta_coarse = new Path(coarse_action.getM_lat());
-    theta_fine = new Path(fine_action.getM_lat());
-    theta_fine_C = new Path(coarse_action.getM_lat());
-    theta_prime = new Path(fine_action.getM_lat());
+    theta_coarse = new Path(coarse_action.getM_lat(),
+                            coarse_action.getT_final());
+    theta_fine = new Path(fine_action.getM_lat(),
+                          coarse_action.getT_final());
+    theta_fine_C = new Path(coarse_action.getM_lat(),
+                            coarse_action.getT_final());
+    theta_prime = new Path(fine_action.getM_lat(),
+                           coarse_action.getT_final());
     engine.seed(89216491);
     reset_stats();
   }
