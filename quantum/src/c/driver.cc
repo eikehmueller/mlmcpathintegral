@@ -39,8 +39,11 @@ int main(int argc, char* argv[]) {
                                          action,
                                          qoi,
                                          param.n_samples,
-                                         param.n_burnin);  
+                                         param.n_burnin,
+                                         true);  
   result = montecarlo_twolevel.evaluate_difference();
   std::cout << " difference <x^2> " << std::endl;
   std::cout << " mean = " << result.first << " variance " << result.second << std::endl;
+
+  montecarlo_twolevel.show_stats();
 }

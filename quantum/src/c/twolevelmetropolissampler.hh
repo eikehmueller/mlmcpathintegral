@@ -44,13 +44,16 @@ public:
    * @param[in] coarse_sampler_ Sampler on coarse level \f$\ell-1\f$
    * @param[in] coarse_action_ Action on coarse level \f$\ell-1\f$
    * @param[in] fine_action_ Action on fine level \f$\ell\f$
+   * @param[in] record_stats_ Record statistics?
    */
   TwoLevelMetropolisSampler(Sampler& coarse_sampler_,
                             const Action& coarse_action_,
-                            const Action& fine_action_) :
+                            const Action& fine_action_,
+                            const bool record_stats_=false) :
     coarse_sampler(coarse_sampler_),
     coarse_action(coarse_action_),
-    fine_action(fine_action_) {
+    fine_action(fine_action_),
+    record_stats(record_stats_) {
     assert(2*coarse_action.getM_lat()==fine_action.getM_lat());
     assert(coarse_sampler.getM_lat()==coarse_action.getM_lat());
     theta_coarse = new Path(coarse_action.getM_lat());
@@ -58,6 +61,7 @@ public:
     theta_fine_C = new Path(coarse_action.getM_lat());
     theta_prime = new Path(fine_action.getM_lat());
     engine.seed(89216491);
+    reset_stats();
   }
 
   /** @brief Destroy intance
@@ -76,6 +80,18 @@ public:
    * @param[out] x_path Vector of pointers to fine- and coarse- path
    */
   virtual void draw(std::vector<Path*> x_path);
+
+  /** @brief reset statistics
+   * 
+   * Reset all sampling statistics
+   */
+  void reset_stats() {
+    n_total_samples = 0;
+    n_accepted_samples = 0;
+  }
+
+  /** @brief Return acceptance probability */
+  double p_accept() { return n_accepted_samples/(1.*n_total_samples); }
   
 private:
   /** @brief Evaluate conditioned free action
@@ -122,6 +138,11 @@ protected:
   mutable Normal normal_dist;
   /** @brief Normal distribution in [0,1] for accept/reject step */
   mutable Uniform uniform_dist;
-
+  /** @brief Collect statistics on acceptance probability and autocorrelation */
+  const bool record_stats;
+  /** @brief Number of accepted samples */
+  mutable unsigned int n_accepted_samples;
+  /** @brief Number of total samples */  
+  mutable unsigned int n_total_samples;
 };
 #endif // TWOLEVELMETROPOLISSAMPLER_HH

@@ -2,6 +2,7 @@
 #define MONTECARLO_HH MONTECARLO_HH
 #include <utility>
 #include <cmath>
+#include <iostream>
 #include "sampler.hh"
 #include "action.hh"
 #include "quantityofinterest.hh"
@@ -22,16 +23,21 @@ public:
    *
    * @param[in] n_samples_ Number of samples
    * @param[in] n_burnin_ Number of burn-in steps
+   * @param[in] record_stats_ Record statistics of sampler
    */
-  MonteCarlo(unsigned int n_samples_,
-             unsigned int n_burnin_) : 
+  MonteCarlo(const unsigned int n_samples_,
+             const unsigned int n_burnin_,
+             const bool record_stats_=false) :
     n_samples(n_samples_), 
-    n_burnin(n_burnin_) {}
+    n_burnin(n_burnin_),
+    record_stats(record_stats_) {}
 protected:
   /** @brief Number of samples */
   const unsigned int n_samples;
   /** @brief Number of burn-in steps */
   const unsigned int n_burnin;
+  /** @brief Record statistics */
+  const bool record_stats;
 };
 
 /** @class MonteCarloSingleLevel
@@ -49,12 +55,14 @@ public:
    * @param[in] qoi_ Quantity of interest to evaluate on samples
    * @param[in] n_samples_ Number of samples to evaluate
    * @param[in] n_burnin_ Number of burnin samples (QoI not evaluated on those)
+   * @param[in] record_stats_ Record statistics of sampler
    */
   MonteCarloSingleLevel(Sampler& sampler_,
                         QoI& qoi_,
-                        unsigned int n_samples_,
-                        unsigned int n_burnin_) :
-    MonteCarlo(n_samples_,n_burnin_), sampler(sampler_), qoi(qoi_)
+                        const unsigned int n_samples_,
+                        const unsigned int n_burnin_,
+                        const bool record_stats_=false) :
+    MonteCarlo(n_samples_,n_burnin_,record_stats_), sampler(sampler_), qoi(qoi_)
   {}
 
   /** @brief Calculate QoI
@@ -86,21 +94,24 @@ public:
    * @param[in] qoi_ Quantity of interest
    * @param[in] n_samples_ Number of samples to evaluate
    * @param[in] n_burnin_ Number of burnin samples (QoI not evaluated on those)
+   * @param[in] record_stats_ Record statistics of sampler
    */
   MonteCarloTwoLevel(Sampler& coarse_sampler_,
                      Action& coarse_action_,
                      Action& fine_action_,
                      QoI& qoi_,
-                     unsigned int n_samples_,
-                     unsigned int n_burnin_) : 
-    MonteCarlo(n_samples_,n_burnin_),
+                     const unsigned int n_samples_,
+                     const unsigned int n_burnin_,
+                     const bool record_stats_=false) :
+    MonteCarlo(n_samples_,n_burnin_,record_stats_),
     coarse_sampler(coarse_sampler_),
     coarse_action(coarse_action_),
     fine_action(fine_action_),
     qoi(qoi_),
     twolevel_sampler(coarse_sampler_,
                      coarse_action_,
-                     fine_action_) {}
+                     fine_action_,
+                     record_stats_) {}
 
   /** @brief Calculate mean and variance of difference
    *
@@ -108,6 +119,12 @@ public:
    * evaluated at two subsequent levels.
    */
   std::pair<double,double> evaluate_difference();
+
+  /** @brief Show statistics 
+   *
+   * Print out statistics of two-level samples
+   */
+  void show_stats();
 
 private:
   /** @brief Sampler on coarse level */
