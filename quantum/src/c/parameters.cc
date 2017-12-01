@@ -20,7 +20,6 @@ void Parameters::readfile() {
     infile >> dummy >> n_burnin;
     infile >> dummy >> n_samples;
     infile.close();
-    std::cout << " dummy =  " << dummy << " M_lat = " << M_lat << std::endl;
   } catch (std::ifstream::failure e) {      
     std::cerr << "ERROR opening or reading file \'" << filename << "\': " << e.what() << std::endl;
   }
