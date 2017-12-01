@@ -52,3 +52,8 @@ const double HarmonicOscillatorAction::Xsquared_exact() {
     double R = 1.+0.5*a_lat*a_lat*mu2 - a_lat*sqrt(mu2)*sqrt(1.+0.25*a_lat*a_lat*mu2);
     return 1./(2.*m0*sqrt(mu2)*sqrt(1+0.25*a_lat*a_lat*mu2))*(1.+pow(R,Action::M_lat))/(1.-pow(R,Action::M_lat));
   }
+
+/** Continuum limit of expectation value of \f$X^2\f$ */
+const double HarmonicOscillatorAction::Xsquared_exact_continuum() {
+  return 1./(2.*m0*sqrt(mu2))*(1.+exp(-sqrt(mu2)*T_final))/(1.-exp(-sqrt(mu2)*T_final));
+  }

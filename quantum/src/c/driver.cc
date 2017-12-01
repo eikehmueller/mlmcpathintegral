@@ -27,11 +27,14 @@ int main(int argc, char* argv[]) {
                                                qoi,
                                                param.n_samples,
                                                param.n_burnin);
-  std::pair<double,double> result;
   double exact_result = action.Xsquared_exact();
+  double exact_result_continuum = action.Xsquared_exact_continuum();
   std::cout << std::endl;
-  std::cout << " Exact result  <x^2> = " << exact_result << std::endl;
+  std::cout << " Exact result             <x^2> = " << exact_result << std::endl;
+  std::cout << " Continuum limit [a -> 0] <x^2> = " << exact_result_continuum << std::endl;
   std::cout << std::endl;
+
+  std::pair<double,double> result;
   result = montecarlo_singlelevel.evaluate();
   std::cout << " <x^2> = " << result.first << " +/- " << result.second << std::endl;
   std::cout << std::endl;

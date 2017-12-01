@@ -78,6 +78,21 @@ public:
    */
   const double Xsquared_exact();
 
+  /** @brief Continuum limitof expectation value of \f$X^2\f$
+   *
+   * Return the continuum limit of \f$\langle X^2\rangle\f$ from
+   * Creutz and Freedman:
+   *
+   \f[
+   \lim_{a\rightarrow 0}\langle X^2 \rangle = \frac{1}{2m_0\mu}\cdot \frac{1-e^{-\mu T}}{1+e^{-\mu T}}
+   \f]
+   * where
+   \f[
+   R = 1 + \frac{a^2\mu^2}{2}-a\mu\sqrt{1+\frac{a^2\mu^2}{4}}
+   \f]
+   */
+  const double Xsquared_exact_continuum();
+
 private:
   /** @brief Construct Cholesky factor of covariance matrix */
   void build_covariance();
