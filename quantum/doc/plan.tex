@@ -489,19 +489,19 @@ as claimed above. Upon suitable scaling $\langle X^2\rangle$ is related to the g
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Cost analysis}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-For the single level method we find that the bias of $\langle X^2\rangle$ decreases quadratically with the lattice spacing
+For the single level method we find that the bias $\delta E_{\text{bias}}$ of $\langle X^2\rangle$ decreases quadratically with the lattice spacing $a=T/M$
 \begin{equation}
-  \delta E_{\text{bias}}(M) \approx C_{\text{bias}} M^{-2}
+  \delta E_{\text{bias}}(M) \approx \frac{C_{\text{bias}}}{M^2}
 \end{equation}
 where $C_{\text{bias}}$ is a numerical constant that depends on $m_0$, $\mu^2$ and $T$.
-We also know that the squared sampling error decrases linearly with the number of samples
+We also know from the law of large numbers that the squared sampling error is proportional of the variance $V$ of the quantity of interest and decrases linearly with the number of samples $N$
 \begin{equation}
-  \left(\delta E^{\text{StMC}}_{\text{sampling}}\right)^2(N) \approx \frac{V}{N}
+  \left(\delta E^{\text{StMC}}_{\text{sampling}}(N)\right)^2 \approx \frac{V}{N}
 \end{equation}
-with $V$ the variance of $X^2$. Since everything is Gaussian, we know that $V=2\langle X\rangle^2$ which depends on $a$, $m_0$, $\mu^2$ and $T$. However, for the following analysis we can use the continuum limit ($a=0$) of $V$ given in Eq. (\ref{eqn:Xsquared_continuum}). To reduce the total root mean square error below a tolerance $\epsilon$, pick $N$ and $M$ such that
+with $V$ the variance of $X^2$. Since everything is Gaussian, we know that $V=2\langle X^2\rangle^2$ which depends on $a$, $m_0$, $\mu^2$ and $T$. However, for the following analysis we use the continuum limit ($a=0$) of $\langle X^2\rangle$ given in Eq. (\ref{eqn:Xsquared_continuum}). To reduce the total root mean square error below a tolerance $\epsilon$, pick $N$ and $M$ such that
 \begin{xalignat}{2}
-  \delta E_{\text{bias}}^2(M) &= \frac{\epsilon^2}{2}, &
-    \left(\delta E^{\text{StMC}}_{\text{sampling}}\right)^2(N) &= \frac{\epsilon^2}{2}.
+  \left(\delta E_{\text{bias}}(M)\right)^2 &= \frac{\epsilon^2}{2}, &
+    \left(\delta E^{\text{StMC}}_{\text{sampling}}(N)\right)^2 &= \frac{\epsilon^2}{2}.
 \end{xalignat}
 This choice results in a cost of
 \begin{equation}
@@ -509,36 +509,40 @@ This choice results in a cost of
 \end{equation}
 For the multilevel method with $L+1$ levels such that $M_\ell=2^\ell M_0$ on level $\ell$ the bias error is given by the bias on the finest level
 \begin{equation}
-  \delta E_{\text{bias}}(M_L) = C_{\text{bias}} M_L^{-2} = C_{\text{bias}} M_0^{-2} 4^{-L}  \label{eqn:MLMC_bias}
+  \delta E_{\text{bias}}(M_L) = \frac{C_{\text{bias}}}{M_L^2} = \frac{C_{\text{bias}}}{M_0^2} 4^{-L}  \label{eqn:MLMC_bias}
 \end{equation}
-The total sampling error is
+Using $N_\ell$ samples on level $\ell$ the total squared sampling error is
 \begin{equation}
-  \left(\delta E^{\text{MLMC}}_{\text{sampling}}\right)^2(\{N_\ell\}) \approx \frac{V}{N_0} + \sum_{\ell=1}^{L} \frac{\delta V_\ell}{N_\ell}
+  \left(\delta E^{\text{MLMC}}_{\text{sampling}}(\{N_\ell\})\right)^2 \approx \frac{V}{N_0} + \sum_{\ell=1}^{L} \frac{\delta V_\ell}{N_\ell}
   \approx \frac{V}{N_0} + \frac{C_{\delta V}}{M_0} \sum_{\ell=1}^{L} \frac{2^{-\ell}}{N_\ell}.
   \label{eqn:MLMC_sampling_error}
 \end{equation}
-Here we assumed that the variance $\delta V_\ell$ of the difference of the QoI on two subsequent levels $\ell$ and $\ell-1$ decays as $V_\ell = C_{\delta V}M_{\ell}^{-1} = C_{\delta V}/M_0 2^{-\ell}$ as is confirmed by the numerical experiments.
-If we assume that calculating a sampe for the difference estimator on two subsequent levels is about twice as expensive as calculating a sample on one level, the total cost is
+Here we assumed that the variance $\delta V_\ell$ of the difference of the QoI on two subsequent levels $\ell$ and $\ell-1$ decays as
 \begin{equation}
-  \text{Cost}^{\text{MLMC}} = M_0N_0 + 2\sum_{\ell=1}^{L} M_\ell N_\ell =
+  \delta V_\ell = \frac{C_{\delta V}}{M_{\ell}} = \frac{C_{\delta V}}{M_0} 2^{-\ell}
+\end{equation}
+as is confirmed by the numerical experiments.
+If we assume that calculating a sample for the difference estimator on two subsequent levels is about twice as expensive as calculating a sample on one level, the total cost is
+\begin{equation}
+  \text{Cost}^{\text{MLMC}}(\{N_\ell\}) = M_0N_0 + 2\sum_{\ell=1}^{L} M_\ell N_\ell =
   M_0 \left(N_0 + 2\sum_{\ell=1}^{L} 2^\ell N_\ell\right)
 \end{equation}
 Minimising the cost under the constraint that both the square of the bias-error in Eq. (\ref{eqn:MLMC_bias}) and the squared sampling-error in Eq. (\ref{eqn:MLMC_sampling_error}) do not exceed $\epsilon^2/2$ gives
 \begin{equation}
   \begin{aligned}
     N_0 &= \frac{2}{\epsilon^2}\left(V+\sqrt{\frac{2VC_{\delta V}}{M_0}}L\right)\\
-    N_{\ell} &= \frac{2}{\epsilon^2}\sqrt{\frac{C_{\delta V}}{2M_0^2}} 2^{-\ell}\left(\sqrt{VM_0}+\sqrt{2C_{\delta V}}L\right)
+    N_{\ell} &= \frac{2}{\epsilon^2}\left(\sqrt{\frac{V C_{\delta V}}{2M_0}}+\frac{C_{\delta V}}{M_0}L\right)2^{-\ell}
   \end{aligned}
 \end{equation}
 Given a tolerance $\epsilon$, the number of levels $L$ can be found using Eq. (\ref{eqn:MLMC_bias}) as
 \begin{equation}
-  L = \frac{ \log_2\left(2C_{\text{bias}}^2M_0^{-4}\right)}{4}-\frac{1}{2}\log_2(\epsilon)
+  L = \frac{1}{4} \left(1+\log_2\left(C_{\text{bias}}^2M_0^{-4}\right)\right)-\frac{1}{2}\log_2(\epsilon)
 \end{equation}
 This results in a total cost of
 \begin{equation}
-  \text{Cost}^{\text{MLMC}} = \frac{2VM_0}{\epsilon^2}\left(1+\sqrt{\frac{2C_{\delta V}}{M_0 V}}L\right)^2 \rightarrow C_{\delta V}\epsilon^{-2}|\log(\epsilon)|^2\quad\text{as $\epsilon\rightarrow 0$}.
+  \text{Cost}^{\text{MLMC}} = \frac{4C_{\delta V}}{\epsilon^2}\left(L+\sqrt{\frac{M_0V}{2C_{\delta V}}}\right)^2 \rightarrow C_{\delta V}\epsilon^{-2}|\log(\epsilon)|^2\quad\text{as $\epsilon\rightarrow 0$}.
 \end{equation}
-Note that we can calculate this if we know the numerical values of $C_{\text{bias}}$, $V$ and $C_{\delta V}$.
+We can calculate the costs of the standard- and multilevel-Monte Carlo method if we know the numerical values of $C_{\text{bias}}$, $V$ and $C_{\delta V}$.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Effective theory}\label{sec:harmonic_oscillator_effective}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
