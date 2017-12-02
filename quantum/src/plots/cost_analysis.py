@@ -66,45 +66,6 @@ class SingleLevel(object):
                    'upper right')
         plt.savefig('bias.pdf',bbox_inches='tight')
 
-    def plot_cost(self):
-        '''Plot the cost as a function of the lattice spacing.
-
-        If M is the number of time slices and N the number of MC samples, 
-        then balancing the bias- and sampling-error gives a cost of
-
-        Cost = N*M 
-        '''
-        M_lat = np.array([8,16,32,64,128,256])
-        C_bias = abs(self.Xsquared_bias_constant())
-        variance = 2.*self.Xsquared_continuum()
-        epsilon = math.sqrt(2.)*C_bias*(1.0*M_lat)**(-2)
-        cost = 2.**(5./4.)*variance*math.sqrt(C_bias)*epsilon**(-2.5)
-        plt.clf()
-        ax = plt.gca()
-        ax.set_xscale('log')
-        ax.set_yscale('log')
-        p_bias = plt.plot(epsilon,cost,
-                          linewidth=2,
-                          color='blue',
-                          marker='o',
-                          markersize=8)[0]
-        eps_ref = epsilon[-1]
-        cost_ref = cost[-1]
-        rho = 10.0
-        p_theory = plt.plot([eps_ref,rho*eps_ref],
-                            [0.25*cost_ref,0.25*rho**(-2.5)*cost_ref],
-                            linewidth=2,
-                            color='black')[0]
-        ax.set_xlabel(r'tolerance $\epsilon$')
-        ax.set_ylabel(r'Cost $N\cdot M$')
-        plt.legend((p_bias,p_theory),
-                   ('cost',r'$\propto \epsilon^{-2.5}$'),
-                   'upper right')
-        plt.savefig('cost_singlelevel.pdf',bbox_inches='tight')
-
-
-        pass
-
 class MultiLevel(object):
     '''Class for analysing and plotting multilevel data
 
@@ -240,12 +201,91 @@ class MultiLevel(object):
         if (self._C_deltaV == None):
             self.plot_variance_decay()
         return self._C_deltaV
+
+class CostAnalysis(object):
+    '''
+    Class for comparative cost analysis
+
+    :arg T_final: Final time
+    :arg m0: Particle mass m_0
+    :arg mu2: Quadratic potential parameter \mu^2
+    '''
+    def __init__(self,T_final,m0,mu2):
+        self.T_final = T_final
+        self.m0 = m0
+        self.mu2 = mu2
+        self.M0 = 8
+        self.singlelevel = SingleLevel(self.T_final,self.m0,self.mu2)
+        self.multilevel = MultiLevel(self.T_final,self.m0,self.mu2)
+
+    def cost_singlelevel(self,epsilon):
+        '''Theoretical cost estimate for single level method
+
+        :arg epsilon: Tolerance on root mean square error
+        '''
+        C_bias = abs(self.singlelevel.Xsquared_bias_constant())
+        variance = 2.*self.singlelevel.Xsquared_continuum()
+        return 2.**(5./4.)*variance*math.sqrt(C_bias)*epsilon**(-2.5)
+
+    def cost_multilevel(self,epsilon):
+        '''Theoretical cost estimate for multi level method
+
+        :arg epsilon: Tolerance on root mean square error
+        '''
+        C_bias = self.singlelevel.Xsquared_bias_constant()
+        variance = 2.*self.singlelevel.Xsquared_continuum()
+        C_deltaV = self.multilevel.C_deltaV
+        L_level = 0.25*(1.+math.log(C_bias**2*self.M0**(-4)))/math.log(2.) - 0.5*math.log(epsilon)/math.log(2.)
+        return 4.*C_deltaV*epsilon**(-2)*(L_level + math.sqrt(self.M0*variance/(2.*C_deltaV)))**2
+        
+    def plot_cost(self):
+        '''Plot the cost as a function of the lattice spacing.
+
+        If M is the number of time slices and N the number of MC samples, 
+        then balancing the bias- and sampling-error gives a cost of
+        '''
+        M_lat = np.array([8,16,32,64,128,256,512])
+
+        # Single level cost
+        C_bias = abs(self.singlelevel.Xsquared_bias_constant())
+        epsilon = math.sqrt(2.)*C_bias*(1.*M_lat)**(-2)
+        cost_singlelevel = np.vectorize(self.cost_singlelevel)(epsilon)
+        cost_multilevel = np.vectorize(self.cost_multilevel)(epsilon)
+        
+        plt.clf()
+        ax = plt.gca()
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        p_single = plt.plot(epsilon,cost_singlelevel,
+                            linewidth=2,
+                            color='blue',
+                            marker='o',
+                            markersize=8)[0]
+        p_multi = plt.plot(epsilon,cost_multilevel,
+                           linewidth=2,
+                           color='red',
+                           marker='o',
+                           markersize=8)[0]
+        eps_ref = epsilon[-1]
+        cost_ref = cost_singlelevel[-1]
+        rho = 10.0
+        p_theory = plt.plot([eps_ref,rho*eps_ref],
+                            [0.25*cost_ref,0.25*rho**(-2.5)*cost_ref],
+                            linewidth=2,
+                            color='black')[0]
+        ax.set_xlabel(r'tolerance $\epsilon$')
+        ax.set_ylabel(r'Cost')
+        plt.legend((p_single,p_multi,p_theory),
+                   (r'$\operatorname{Cost}^{\operatorname{StMC}}$',r'$\propto \epsilon^{-2.5}$'),
+                   'upper right')
+        plt.savefig('cost_singlelevel.pdf',bbox_inches='tight')
+
     
 if (__name__ == '__main__'):
     # Numerical values for parameters
     T_final = 1.0
     m0 = 1.0
-    mu2 = 1.0
+    mu2 = 10.0
 
     print " m0      = ", m0
     print " mu^2    = ", mu2
@@ -256,8 +296,11 @@ if (__name__ == '__main__'):
     print " C_{bias} = ",singlelevel.Xsquared_bias_constant()
     print " V        = ",2.*singlelevel.Xsquared_continuum()**2
     singlelevel.plot_bias()
-    singlelevel.plot_cost()
 
     multilevel = MultiLevel(T_final,m0,mu2)
     multilevel.plot_variance_decay()
     print "delta C_V = ",multilevel.C_deltaV
+
+    cost_analysis = CostAnalysis(T_final,m0,mu2)
+    cost_analysis.plot_cost()
+    
