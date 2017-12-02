@@ -1,8 +1,12 @@
-'''Theoretical performance anAalysis of Monte Carlo methods'''
+'''Theoretical performance Analysis of Monte Carlo methods'''
+import sys
+import subprocess
 import math
 import numpy as np
-from sympy import *
+import re
 from matplotlib import pyplot as plt
+import matplotlib as mpl
+mpl.rcParams.update({'font.size': 22})
 
 class SingleLevel(object):
     def __init__(self,T_final,m0,mu2):
@@ -100,7 +104,143 @@ class SingleLevel(object):
 
 
         pass
+
+class MultiLevel(object):
+    '''Class for analysing and plotting multilevel data
+
+    :arg T_final: Final time
+    :arg m0: Particle mass m_0
+    :arg mu2: Quadratic potential parameter \mu^2
+    '''
+    def __init__(self,T_final,m0,mu2):
+        self.T_final = T_final
+        self.m0 = m0
+        self.mu2 = mu2
+        self.n_burnin = 10000
+        self.n_samples = 1000000
+        self.M_lat_list = (8,16,32,64,128)
+        self._C_deltaV = None
+        self.executable = "../c/driver.x"
+
+    def _run_variance(self,M_lat):
+        '''Run code and return variance
         
+        :arg M_lat: Number of lattice points
+        '''
+        parameters = '''
+        M_lat           %(M_LAT)d
+        T_final         %(T_FINAL)f
+        m0              %(M0)f
+        mu2             %(MU2)f
+        n_burnin        %(N_BURNIN)d
+        n_samples       %(N_SAMPLES)d
+        ''' % {'M_LAT': M_lat,
+               'T_FINAL':self.T_final,
+               'M0':self.m0,
+               'MU2':self.mu2,
+               'N_BURNIN':self.n_burnin,
+               'N_SAMPLES':self.n_samples}
+        with open('parameters.in','w') as f:
+            print >> f, parameters 
+        output = subprocess.check_output([self.executable])
+        for line in output.split('\n'):
+            m = re.match('^ *mean *= *(.*) *variance *(.*)$',line)
+            if m:
+                mean = float(m.group(1))
+                variance = float(m.group(2))
+        return variance
+
+    def _run_all(self):
+        '''
+        Run code for a range of different lattice size and save both
+        the lattice size and the variance to a file
+        '''
+        # Check if file already exists and was generated for the same
+        # parameters
+        tolerance = 1.E-12
+        recreate_data = False
+        match_T_final = False
+        match_m0 = False
+        match_mu2 = False
+        try:
+            with open('variance.dat','r') as f:
+                for line in f.readlines():
+                    m = re.match(' *# *T_final *= *(.*)',line)
+                    if m:
+                        match_T_final = abs(self.T_final - float(m.group(1))) < tolerance
+                    m = re.match(' *# *m0 *= *(.*)',line)
+                    if m:
+                        match_m0 = abs(self.m0 - float(m.group(1))) < tolerance
+                    m = re.match(' *# *mu2 *= *(.*)',line)
+                    if m:
+                        match_mu2 = abs(self.mu2 - float(m.group(1))) < tolerance
+        except:
+            recreate_data = True
+        recreate_data = not (match_T_final and match_m0 and match_mu2)
+        if (recreate_data):
+            with open('variance.dat','w') as f:
+                print >> f, "# T_final = ",self.T_final
+                print >> f, "# m0      = ",self.m0
+                print >> f, "# mu2     = ",self.mu2
+                for M_lat in self.M_lat_list:
+                    variance = self._run_variance(M_lat)
+                    print >> f, ('%12.8f' % M_lat)+'  '+('%12.8f' % variance)
+
+    def plot_variance_decay(self):
+        '''Plot variance of differences as a function of the lattice size
+        '''
+        self._run_all()
+        M_lat = []
+        variance = []
+        with open('variance.dat') as f:
+            for line in f.readlines():
+                if (not (re.match(' *#.*',line))):
+                    M_lat_tmp, variance_tmp = line.split()
+                    M_lat.append(int(float(M_lat_tmp)))
+                    variance.append(float(variance_tmp))
+        M_lat = np.array(M_lat)
+        variance = np.array(variance)
+        plt.clf()
+        ax = plt.gca()
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.set_xlabel(r'number of time slices $M_\ell$')
+        ax.set_ylabel(r'Var($Y_\ell$)')
+        p_var = plt.plot(M_lat,variance,
+                         linewidth=2,
+                         color='blue',
+                         marker='o',
+                         markeredgewidth=2,
+                         markeredgecolor='blue',
+                         markerfacecolor='white')[0]
+        ax.set_xlim(0.5*M_lat[0],2.*M_lat[-1])
+        ax.set_xticks(M_lat)
+        ax.set_xticklabels([str(x) for x in M_lat])
+        M_ref = M_lat[0]
+        var_ref = variance[0]
+        rho = 8.
+        p_lin = plt.plot([M_ref,rho*M_ref],[0.5*var_ref,0.5/rho*var_ref],
+                         linewidth=2,
+                         color='black')[0]
+        # Linear fit to data
+        log_variance = np.log(variance)
+        log_M_lat = np.log(M_lat)
+        a_1,a_0 = np.polyfit(log_M_lat,log_variance,1)
+        M_lat = np.exp(np.arange(math.log(M_lat[0])-0.25,math.log(M_lat[-1])+0.25,0.01))
+        self._C_deltaV = math.exp(a_0)
+        p_fit = plt.plot(M_lat,self._C_deltaV*M_lat**a_1,
+                         linewidth=2,
+                         color='red')[0]
+
+        plt.legend((p_var,p_lin,p_fit),('variance','linear decay','fit'),'upper right')
+        plt.savefig('variance_decay.pdf',bbox_inches='tight')
+
+    @property
+    def C_deltaV(self):
+        if (self._C_deltaV == None):
+            self.plot_variance_decay()
+        return self._C_deltaV
+    
 if (__name__ == '__main__'):
     # Numerical values for parameters
     T_final = 1.0
@@ -117,3 +257,7 @@ if (__name__ == '__main__'):
     print " V        = ",2.*singlelevel.Xsquared_continuum()**2
     singlelevel.plot_bias()
     singlelevel.plot_cost()
+
+    multilevel = MultiLevel(T_final,m0,mu2)
+    multilevel.plot_variance_decay()
+    print "delta C_V = ",multilevel.C_deltaV
