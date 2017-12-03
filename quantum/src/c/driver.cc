@@ -6,7 +6,7 @@
 #include "parameters.hh"
 
 /** @file driver.cc
- * @brief Main program
+ * @brief File with main program
  */
 
 int main(int argc, char* argv[]) {
