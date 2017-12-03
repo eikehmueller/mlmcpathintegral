@@ -77,6 +77,7 @@ class MultiLevel(object):
         self.T_final = T_final
         self.m0 = m0
         self.mu2 = mu2
+        self.perturbative = 0
         self.n_burnin = 10000
         self.n_samples = 1000000
         self.M_lat_list = (8,16,32,64,128)
@@ -93,12 +94,14 @@ class MultiLevel(object):
         T_final         %(T_FINAL)f
         m0              %(M0)f
         mu2             %(MU2)f
+        perturbative    %(PERTURBATIVE)d
         n_burnin        %(N_BURNIN)d
         n_samples       %(N_SAMPLES)d
         ''' % {'M_LAT': M_lat,
                'T_FINAL':self.T_final,
                'M0':self.m0,
                'MU2':self.mu2,
+               'PERTURBATIVE':self.perturbative,
                'N_BURNIN':self.n_burnin,
                'N_SAMPLES':self.n_samples}
         with open('parameters.in','w') as f:

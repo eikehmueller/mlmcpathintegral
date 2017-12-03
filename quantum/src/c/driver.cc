@@ -4,24 +4,31 @@
 #include "quantityofinterest.hh"
 #include "montecarlo.hh"
 #include "parameters.hh"
+#include "renormalisation.hh"
 
 /** @file driver.cc
  * @brief File with main program
  */
 
+/** Main program */
 int main(int argc, char* argv[]) {
   std::cout << "*** Path integral multilevel MCMC ***" << std::endl;  
   Parameters param("parameters.in");
   param.show();
   QoIXsquared qoi(param.M_lat);
+  RenormalisedHOParameters coarse_param(param.M_lat,
+                                        param.T_final,
+                                        param.m0,
+                                        param.mu2,
+                                        param.perturbative);
   HarmonicOscillatorAction action(param.M_lat,
                                   param.T_final,
                                   param.m0,
                                   param.mu2);
   HarmonicOscillatorAction coarse_action(param.M_lat/2,
                                          param.T_final,
-                                         param.m0,
-                                         param.mu2);
+                                         coarse_param.m0_coarse(),
+                                         coarse_param.mu2_coarse());
   MonteCarloSingleLevel montecarlo_singlelevel(action,
                                                action,
                                                qoi,
