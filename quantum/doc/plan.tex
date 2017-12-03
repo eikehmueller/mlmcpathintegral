@@ -470,7 +470,7 @@ This immediately allows the calculation of
 \end{equation}
 In \cite{Creutz1981} the exact value of $\langle X^2 \rangle$ is calculated as
 \begin{equation}
-  \langle X^2\rangle = \frac{1}{2m_0\mu\sqrt{1+\frac{a^2\mu^2}{4}}}\cdot\frac{1+R^N}{1-R^N}\label{eqn:Xsquared_exact}
+  \langle X^2\rangle = \frac{1}{2m_0\mu\sqrt{1+\frac{a^2\mu^2}{4}}}\cdot\frac{1+R^M}{1-R^M}\label{eqn:Xsquared_exact}
 \end{equation}
 with
 \begin{equation}
@@ -479,7 +479,9 @@ R = 1+\frac{a^2\mu^2}{2}-a\mu\sqrt{1+\frac{a^2\mu^2}{4}}.
 Note that the expression in Eq. (\ref{eqn:Xsquared_exact}) contains both finite resolution ($a>0$) and finite volume ($L<\infty$) effects. In the continuum- and infinite-volume- limit the standard result (see e.g. Section 2.3 in \cite{Sakurai1994}) is recovered
 \begin{equation}
 \langle X^2\rangle\;\; \underset{a\rightarrow 0}{\longrightarrow}\;\;
- \frac{1}{2m_0\mu}\frac{1+e^{-\mu T}}{1-e^{-\mu T}}\;\; \underset{L\rightarrow \infty}{\longrightarrow}\;\;\frac{1}{2m_0 \mu}.\label{eqn:Xsquared_continuum}
+\frac{1}{2m_0\mu}\frac{1+e^{-\mu T}}{1-e^{-\mu T}}
+=\frac{1}{2m_0\mu}\coth\left(-\frac{1}{2}\mu T\right)
+\;\; \underset{T\rightarrow \infty}{\longrightarrow}\;\;\frac{1}{2m_0 \mu}.\label{eqn:Xsquared_continuum}
 \end{equation}
 Observe that since the ground state energy is $E_0=\frac{1}{2}\mu$, fine volume effects are indeed exponentially expressed by
 \begin{equation}
