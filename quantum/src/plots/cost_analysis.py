@@ -288,7 +288,7 @@ if (__name__ == '__main__'):
     # Numerical values for parameters
     T_final = 1.0
     m0 = 1.0
-    mu2 = 10.0
+    mu2 = 1.0
 
     print " m0      = ", m0
     print " mu^2    = ", mu2
