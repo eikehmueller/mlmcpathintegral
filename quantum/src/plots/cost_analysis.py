@@ -281,7 +281,7 @@ class CostAnalysis(object):
         plt.legend((p_single,p_multi,p_theory),
                    (r'$\operatorname{Cost}^{\operatorname{StMC}}$',r'$\propto \epsilon^{-2.5}$'),
                    'upper right')
-        plt.savefig('cost_singlelevel.pdf',bbox_inches='tight')
+        plt.savefig('cost.pdf',bbox_inches='tight')
 
     
 if (__name__ == '__main__'):
