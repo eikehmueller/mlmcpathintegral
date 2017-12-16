@@ -6,7 +6,7 @@ import numpy as np
 import re
 from matplotlib import pyplot as plt
 import matplotlib as mpl
-mpl.rcParams.update({'font.size': 22})
+mpl.rcParams.update({'font.size': 18})
 
 class SingleLevel(object):
     def __init__(self,T_final,m0,mu2):
