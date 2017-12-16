@@ -480,8 +480,13 @@ Note that the expression in Eq. (\ref{eqn:Xsquared_exact}) contains both finite 
 \begin{equation}
 \langle X^2\rangle\;\; \underset{a\rightarrow 0}{\longrightarrow}\;\;
 \frac{1}{2m_0\mu}\frac{1+e^{-\mu T}}{1-e^{-\mu T}}
-=\frac{1}{2m_0\mu}\coth\left(-\frac{1}{2}\mu T\right)
+=\frac{1}{2m_0\mu}\coth\left(-\frac{1}{2}\mu T\right)=\langle X^2\rangle_{\text{cont.}}
 \;\; \underset{T\rightarrow \infty}{\longrightarrow}\;\;\frac{1}{2m_0 \mu}.\label{eqn:Xsquared_continuum}
+\end{equation}
+Taylor-expanding we can also calculate the leading-order corrections in the lattice spacing as
+\begin{equation}
+  \langle X^2\rangle = \langle X^2\rangle_{\text{cont.}} + \frac{\mu a^2}{16 m_0}\left(\coth\left(\rho\right)-\frac{\rho}{3\sinh^2\left(\rho\right)}\right)
+  \qquad\text{with $\rho=\frac{\mu T}{2}$} \label{eqn:finitea_corrections}
 \end{equation}
 Observe that since the ground state energy is $E_0=\frac{1}{2}\mu$, fine volume effects are indeed exponentially expressed by
 \begin{equation}
@@ -495,8 +500,12 @@ For the single level method we find that the bias $\delta E_{\text{bias}}$ of $\
 \begin{equation}
   \delta E_{\text{bias}}(M) \approx \frac{C_{\text{bias}}}{M^2}
 \end{equation}
-where $C_{\text{bias}}$ is a numerical constant that depends on $m_0$, $\mu^2$ and $T$.
-We also know from the law of large numbers that the squared sampling error is proportional of the variance $V$ of the quantity of interest and decrases linearly with the number of samples $N$
+where $C_{\text{bias}}$ is a numerical constant that depends on $m_0$, $\mu^2$ and $T$. It can read off from Eq. (\ref{eqn:finitea_corrections}) as
+\begin{equation}
+  C_{\text{bias}} = \frac{\mu T^2}{16 m_0}\left(\coth\left(\rho\right)-\frac{\rho}{3\sinh^2\left(\rho\right)}\right)
+  \qquad\text{with $\rho=\frac{\mu T}{2}$}.
+\end{equation}
+We also know from the law of large numbers that the squared sampling error is proportional to the variance $V$ of the quantity of interest and decrases linearly with the number of samples $N$
 \begin{equation}
   \left(\delta E^{\text{StMC}}_{\text{sampling}}(N)\right)^2 \approx \frac{V}{N}
 \end{equation}
