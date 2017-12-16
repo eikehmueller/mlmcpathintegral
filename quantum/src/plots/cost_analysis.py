@@ -227,7 +227,7 @@ class CostAnalysis(object):
         :arg epsilon: Tolerance on root mean square error
         '''
         C_bias = abs(self.singlelevel.Xsquared_bias_constant())
-        variance = 2.*self.singlelevel.Xsquared_continuum()
+        variance = 2.*self.singlelevel.Xsquared_continuum()**2
         return 2.**(5./4.)*variance*math.sqrt(C_bias)*epsilon**(-2.5)
 
     def cost_multilevel(self,epsilon):
@@ -236,7 +236,7 @@ class CostAnalysis(object):
         :arg epsilon: Tolerance on root mean square error
         '''
         C_bias = self.singlelevel.Xsquared_bias_constant()
-        variance = 2.*self.singlelevel.Xsquared_continuum()
+        variance = 2.*self.singlelevel.Xsquared_continuum()**2
         C_deltaV = self.multilevel.C_deltaV
         L_level = 0.25*(1.+math.log(C_bias**2*self.M0**(-4)))/math.log(2.) - 0.5*math.log(epsilon)/math.log(2.)
         return 4.*C_deltaV*epsilon**(-2)*(L_level + math.sqrt(self.M0*variance/(2.*C_deltaV)))**2
