@@ -86,6 +86,7 @@ class MultiLevel(object):
         self.M_lat_list = (8,16,32,64,128)
         self._C_deltaV = None
         self.executable = "../c/driver.x"
+        self._singlelevel = SingleLevel(self.T_final,self.m0,self.mu2)
 
     def _run_variance(self,M_lat):
         '''Run code and return variance
@@ -180,6 +181,10 @@ class MultiLevel(object):
                          markeredgewidth=2,
                          markeredgecolor='blue',
                          markerfacecolor='white')[0]
+        var0 = 2.*self._singlelevel.Xsquared_continuum()**2
+        p_var0 = plt.plot([M_lat[0],M_lat[-1]],[var0,var0],
+                          linewidth=2,
+                          linestyle='--')[0]
         ax.set_xlim(0.5*M_lat[0],2.*M_lat[-1])
         ax.set_xticks(M_lat)
         ax.set_xticklabels([str(x) for x in M_lat])
@@ -199,7 +204,11 @@ class MultiLevel(object):
                          linewidth=2,
                          color='red')[0]
 
-        plt.legend((p_var,p_lin,p_fit),('variance','linear decay','fit'),'upper right')
+        plt.legend((p_var,p_var0,p_fit,p_lin),
+                   (r'Var[$Y_\ell$]',
+                    r'Var[$\langle X^2\rangle$]',
+                    'linear fit',
+                    r'$\propto M_\ell^{-1}$'),'center right')
         plt.savefig('variance_decay.pdf',bbox_inches='tight')
 
     @property
