@@ -35,7 +35,10 @@ class SingleLevel(object):
         This method calculates C_{bias} by numerical differentiation
         '''
         M_ref = 1024
-        return (self.Xsquared(M_ref)-self.Xsquared_continuum())*M_ref**2
+        numerical = (self.Xsquared(M_ref)-self.Xsquared_continuum())*M_ref**2
+        tmp = 0.5*math.sqrt(self.mu2)*self.T_final
+        analytical = math.sqrt(self.mu2)*self.T_final**2/(16.*self.m0)*(-1./3.*tmp/math.sinh(tmp)**2 + 1./math.tanh(tmp))
+        return abs(numerical)
     
     def plot_bias(self):
         '''Produce plot of bias for a range of different grid sizes'''
