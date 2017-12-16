@@ -282,7 +282,9 @@ class CostAnalysis(object):
         ax.set_xlabel(r'tolerance $\epsilon$')
         ax.set_ylabel(r'Cost')
         plt.legend((p_single,p_multi,p_theory),
-                   (r'$\operatorname{Cost}^{\operatorname{StMC}}$',r'$\propto \epsilon^{-2.5}$'),
+                   (r'$\operatorname{Cost}^{\operatorname{StMC}}$',
+                    r'$\operatorname{Cost}^{\operatorname{MLMC}}$',
+                    r'$\propto \epsilon^{-2.5}$'),
                    'upper right')
         plt.savefig('cost.pdf',bbox_inches='tight')
 
