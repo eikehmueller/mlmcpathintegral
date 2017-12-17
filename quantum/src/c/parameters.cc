@@ -17,6 +17,7 @@ void Parameters::readfile() {
     infile >> dummy >> T_final;
     infile >> dummy >> m0;
     infile >> dummy >> mu2;
+    infile >> dummy >> lambda;
     infile >> dummy >> perturbative;
     infile >> dummy >> n_burnin;
     infile >> dummy >> n_samples;
@@ -36,6 +37,7 @@ void Parameters::show() {
   std::cout << " T_final       = " << T_final << std::endl;
   std::cout << " m0            = " << m0 << std::endl;
   std::cout << " mu2           = " << mu2 << std::endl;
+  std::cout << " lambda        = " << lambda << std::endl;
   std::cout << " perturbative  = " << perturbative << std::endl;
   std::cout << " n_burnin      = " << n_burnin << std::endl;
   std::cout << " n_samples     = " << n_samples << std::endl;

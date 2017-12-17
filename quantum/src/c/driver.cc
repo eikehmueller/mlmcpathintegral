@@ -2,12 +2,14 @@
 #include <utility>
 #include <memory>
 #include "harmonicoscillatoraction.hh"
+#include "quarticoscillatoraction.hh"
 #include "quantityofinterest.hh"
 #include "montecarlo.hh"
 #include "parameters.hh"
 #include "renormalisation.hh"
 #include "twolevelmetropolissampler.hh"
 #include "hmcsampler.hh"
+#include "config.h"
 
 /** @file driver.cc
  * @brief File with main program
@@ -24,10 +26,26 @@ int main(int argc, char* argv[]) {
                                         param.m0,
                                         param.mu2,
                                         param.perturbative);
+  std::cout << std::endl;
+  /* *** HARMONIC OSCILLATOR *** */
+#ifdef ACTION_HARMONIC_OSCILLATOR
   HarmonicOscillatorAction action(param.M_lat,
                                   param.T_final,
                                   param.m0,
                                   param.mu2);
+  std::cout << "Action = harmonic oscillator" << std::endl;
+#endif // ACTION_HARMONIC_OSCILLATOR
+    /* *** QUARTIC OSCILLATOR *** */
+#ifdef ACTION_QUARTIC_OSCILLATOR
+  QuarticOscillatorAction action(param.M_lat,
+                                 param.T_final,
+                                 param.m0,
+                                 param.mu2,
+                                 param.lambda);
+    std::cout << "action = quartic oscillator" << std::endl;
+#endif // QUARTIC_HARMONIC_OSCILLATOR
+  std::cout << std::endl;
+  
   Sampler* sampler;
   if (param.hmc_sampling) {
     sampler = new HMCSampler(action,
@@ -35,7 +53,12 @@ int main(int argc, char* argv[]) {
                              param.dt_hmc,
                              param.n_burnin_hmc);
   } else {
+#ifdef ACTION_HARMONIC_OSCILLATOR
     sampler = &action;
+#else
+    std::cout << " ERROR: can only sample directly from harmonic oscillator action." << std::endl;
+#endif // ACTION_HARMONIC_OSCILLATOR
+#
   }
   HarmonicOscillatorAction coarse_action(param.M_lat/2,
                                          param.T_final,
@@ -46,13 +69,14 @@ int main(int argc, char* argv[]) {
                                                qoi,
                                                param.n_samples,
                                                param.n_burnin);
+#ifdef ACTION_HARMONIC_OSCILLATOR
   double exact_result = action.Xsquared_exact();
   double exact_result_continuum = action.Xsquared_exact_continuum();
   std::cout << std::endl;
   std::cout << " Exact result             <x^2> = " << exact_result << std::endl;
   std::cout << " Continuum limit [a -> 0] <x^2> = " << exact_result_continuum << std::endl;
   std::cout << std::endl;
-
+#endif // ACTION_HARMONIC_OSCILLATOR
   std::pair<double,double> result;
   result = montecarlo_singlelevel.evaluate();
   std::cout << " <x^2> = " << result.first << " +/- " << result.second << std::endl;
@@ -86,6 +110,8 @@ int main(int argc, char* argv[]) {
   std::cout << "=== Two level sampler statistics === " << std::endl; 
   montecarlo_twolevel.get_twolevelsampler().show_stats();
   std::cout << std::endl;
+
+  // Tidy up
   if (param.hmc_sampling) {
     delete sampler;
     delete coarse_sampler;

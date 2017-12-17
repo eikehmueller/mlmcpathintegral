@@ -23,6 +23,7 @@ public:
      T_final      VALUE
      m0           VALUE
      mu2          VALUE
+     lambda       VALUE
      perturbative VALUE
      n_burnin     VALUE
      n_samples    VALUE
@@ -55,6 +56,8 @@ public:
   double m0;
   /** @brief parameter \f$\mu^2\f$ in harmonic oscillator potential */
   double mu2;
+  /** @brief parameter \f$\lambda\f$ in quartic oscillator potential */
+  double lambda;
   /** @brief Use perturbative renormalisation? */
   bool perturbative;
   /** @brief Number of burn-in samples */
