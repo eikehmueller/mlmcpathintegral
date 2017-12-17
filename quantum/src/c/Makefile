@@ -6,7 +6,12 @@ include local.mk
 CFLAGS_OPT=-O3 -std=c++11 -I$(EIGEN_DIR)
 CFLAGS_DEBUG=-g -Wall -O0 -std=c++11 -I$(EIGEN_DIR)
 LFLAGS=
-CPP=g++
+CXX=g++
+
+SOURCES=$(wildcard *.hh *.cc)
+MAIN=driver.x
+OBJS=$(patsubst %.cc,%.o,$(wildcard *.cc))
+
 
 ifeq ($(DEBUG),True)
 	CFLAGS=$(CFLAGS_DEBUG)
@@ -14,50 +19,37 @@ else
 	CFLAGS=$(CFLAGS_OPT)
 endif
 
-SOURCES=$(wildcard *.hh *.cc)
-
-MAIN=driver.x
-OBJS=$(patsubst %.cc,%.o,$(wildcard *.cc))
-
 all: $(MAIN)
 
-action.o: \
-	path.o
-
-montecarlo.o: \
-	path.o \
-	sampler.o \
-	quantityofinterest.o 
-
-hmcsampler.o: \
-	sampler.o
-
-twolevelmetropolissampler.o: \
-	sampler.o
-
-driver.o: \
-	harmonicoscillatoraction.o \
-	quantityofinterest.o \
-	hmcsampler.o \
-	twolevelmetropolissampler.o \
-	parameters.o \
-	montecarlo.o
+# Sort out dependencies, see
+# http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
+DEPDIR := dep
+$(shell mkdir -p $(DEPDIR) >/dev/null)
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
+POSTCOMPILE = @mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
 
 %.o: %.cc %.hh
-	$(CPP) $(CFLAGS) -c -o $@ $<
+	$(CXX) $(DEPFLAGS) $(CFLAGS) -c -o $@ $<
+	$(POSTCOMPILE)
 
 %.o: %.cc
-	$(CPP) $(CFLAGS) -c -o $@ $<
+	$(CXX) $(DEPFLAGS) $(CFLAGS) -c -o $@ $<
+	$(POSTCOMPILE)
 
-$(MAIN): $(OBJS)
-	$(CPP) $(LFLAGS) -o $(MAIN) $(OBJS)
+$(DEPDIR)/%.d: ;
+.PRECIOUS: $(DEPDIR)/%.d
+
+include $(wildcard $(patsubst %,$(DEPDIR)/%.d,$(basename $(SOURCES))))
+
+$(MAIN): $(OBJS) config.h
+	$(CXX) $(LFLAGS) -o $(MAIN) $(OBJS)
 
 doc: $(SOURCES)
 	doxygen doxygen.cfg
 
 .phony: clean
 clean:
-	rm -rf *~ *.o $(MAIN)
+	rm -rf *~ *.o $(DEPDIR) $(MAIN)
 
 .phony: cleandoc
 cleandoc:
