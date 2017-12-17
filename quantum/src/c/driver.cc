@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
                                         param.m0,
                                         param.mu2,
                                         param.lambda);
-  std::cout << "action = quartic oscillator" << std::endl;
+  std::cout << "Action = quartic oscillator" << std::endl;
 #endif // QUARTIC_HARMONIC_OSCILLATOR
   std::cout << std::endl;
   
