@@ -73,7 +73,7 @@ public:
   /** @brief Calculate QoI
    * 
    * Calculate the Quantity of interest by Monte Carlo sampling. Return
-   * estimator for the mean and standard deviation.
+   * estimator for the mean and variance
    */
   std::pair<double,double> evaluate();
 private:

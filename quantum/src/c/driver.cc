@@ -91,7 +91,9 @@ int main(int argc, char* argv[]) {
 #endif // ACTION_HARMONIC_OSCILLATOR
   std::pair<double,double> result;
   result = montecarlo_singlelevel.evaluate();
-  std::cout << " <x^2> = " << result.first << " +/- " << result.second << std::endl;
+  double error = sqrt(result.second/(1.*param.n_samples));
+  std::cout << "   E[x^2] = " << result.first << " +/- " << error << std::endl;
+  std::cout << " Var[x^2] = " << result.second << std::endl;
   std::cout << std::endl;
   Sampler* coarse_sampler;
   if (param.hmc_sampling) {

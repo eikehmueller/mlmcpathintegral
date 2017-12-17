@@ -25,8 +25,8 @@ std::pair<double,double> MonteCarloSingleLevel::evaluate() {
     S2 += tmp*tmp;
   }
   double mean = S/n_samples;
-  double error = sqrt(1./(n_samples*(n_samples-1.))*(S2-S*S/n_samples));
-  return std::make_pair(mean,error);
+  double variance = (S2-S*S/n_samples)/(n_samples-1.);
+  return std::make_pair(mean,variance);
 }
 
 /** Calculate mean and variance of difference in QoI */
@@ -54,5 +54,4 @@ std::pair<double,double> MonteCarloTwoLevel::evaluate_difference() {
   double mean = S/n_samples;
   double variance = 1./(n_samples-1.)*(S2-S*S/n_samples);
   return std::make_pair(mean,variance);
-  
 }
