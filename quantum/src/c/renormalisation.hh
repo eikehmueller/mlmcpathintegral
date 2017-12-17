@@ -15,7 +15,7 @@
  \f]
  * 
  \f[
-  left(\mu^{(c)}\right)^2 = \mu^2\left(1+\frac{a^2\mu^2}{4}\right)^{-1} 
+  \left(\mu^{(c)}\right)^2 = \mu^2\left(1+\frac{a^2\mu^2}{4}\right)^{-1} 
  \f]
  *
  * Instead of those exact formulae, the perturbative expansion in \f$\mu\f$
