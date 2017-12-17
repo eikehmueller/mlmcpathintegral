@@ -23,7 +23,7 @@ all: $(MAIN)
 
 # Sort out dependencies, see
 # http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
-DEPDIR := dep
+DEPDIR := .dependencies
 $(shell mkdir -p $(DEPDIR) >/dev/null)
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
 POSTCOMPILE = @mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
