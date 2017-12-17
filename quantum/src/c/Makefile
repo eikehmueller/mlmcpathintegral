@@ -44,7 +44,7 @@ include $(wildcard $(patsubst %,$(DEPDIR)/%.d,$(basename $(SOURCES))))
 $(MAIN): $(OBJS) config.h
 	$(CXX) $(LFLAGS) -o $(MAIN) $(OBJS)
 
-doc: $(SOURCES)
+doc: $(SOURCES) config.h
 	doxygen doxygen.cfg
 
 .phony: clean

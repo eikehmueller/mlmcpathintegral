@@ -13,6 +13,10 @@
 
 /** @file driver.cc
  * @brief File with main program
+ *
+ * @mainpage
+ * Several classes for implementating Multilevel MCMC for the path-integral
+ * formulation of quantum mechanics.
  */
 
 /** Main program */
