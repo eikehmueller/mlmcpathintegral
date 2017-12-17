@@ -13,4 +13,6 @@ quantum/doc/plan.pdf
 quantum/doc/plots/*.pdf
 quantum/src/c/parameters.in
 quantum/src/c/doc
+quantum/src/c/.dependencies
+quantum/src/plots/*.pdf
 local.mk
