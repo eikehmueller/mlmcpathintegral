@@ -17,7 +17,10 @@
 
 /** Main program */
 int main(int argc, char* argv[]) {
-  std::cout << "*** Path integral multilevel MCMC ***" << std::endl;  
+  std::cout << "+-----------------------------------+!" << std::endl;  
+  std::cout << "!   Path integral multilevel MCMC   !" << std::endl;
+  std::cout << "+-----------------------------------+!" << std::endl;  
+  std::cout << std::endl;
   Parameters param("parameters.in");
   param.show();
   QoIXsquared qoi(param.M_lat);
