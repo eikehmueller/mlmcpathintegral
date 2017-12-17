@@ -20,7 +20,7 @@ const double HarmonicOscillatorAction::evaluate(const Path* x_path) const {
 void HarmonicOscillatorAction::force(const Path* x_path,
                                      Path* p_path) const {
   double tmp_1 = m0/a_lat;
-  double tmp_2 = 2.+0.5*a_lat*a_lat*mu2;
+  double tmp_2 = 2.+a_lat*a_lat*mu2;
   p_path->data[0] = tmp_1*(tmp_2*x_path->data[0] - x_path->data[M_lat-1] - x_path->data[1]);
   // Interior points
   for (unsigned int j=1;j<M_lat-1;++j) {
