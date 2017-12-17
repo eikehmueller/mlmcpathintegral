@@ -178,7 +178,7 @@ class MultiLevel(object):
                    (r'Var[$Y_\ell$]',
                     r'Var[$\langle X^2\rangle$]',
                     'linear fit',
-                    r'$\propto M_\ell^{-1}$'),'lower left',ncol=1,fontsize=18)
+                    r'$\propto M_\ell^{-1}$'),'upper left',ncol=2,fontsize=18)
         plt.savefig('variance_decay.pdf',bbox_inches='tight')
 
     @property
