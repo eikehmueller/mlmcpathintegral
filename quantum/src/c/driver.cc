@@ -36,6 +36,10 @@ int main(int argc, char* argv[]) {
                                   param.T_final,
                                   param.m0,
                                   param.mu2);
+  HarmonicOscillatorAction coarse_action(param.M_lat/2,
+                                         param.T_final,
+                                         coarse_param.m0_coarse(),
+                                         coarse_param.mu2_coarse());
   std::cout << "Action = harmonic oscillator" << std::endl;
 #endif // ACTION_HARMONIC_OSCILLATOR
     /* *** QUARTIC OSCILLATOR *** */
@@ -45,7 +49,12 @@ int main(int argc, char* argv[]) {
                                  param.m0,
                                  param.mu2,
                                  param.lambda);
-    std::cout << "action = quartic oscillator" << std::endl;
+  QuarticOscillatorAction coarse_action(param.M_lat/2,
+                                        param.T_final,
+                                        param.m0,
+                                        param.mu2,
+                                        param.lambda);
+  std::cout << "action = quartic oscillator" << std::endl;
 #endif // QUARTIC_HARMONIC_OSCILLATOR
   std::cout << std::endl;
   
@@ -60,13 +69,9 @@ int main(int argc, char* argv[]) {
     sampler = &action;
 #else
     std::cout << " ERROR: can only sample directly from harmonic oscillator action." << std::endl;
+    exit(-1);
 #endif // ACTION_HARMONIC_OSCILLATOR
-#
   }
-  HarmonicOscillatorAction coarse_action(param.M_lat/2,
-                                         param.T_final,
-                                         coarse_param.m0_coarse(),
-                                         coarse_param.mu2_coarse());
   MonteCarloSingleLevel montecarlo_singlelevel(action,
                                                *sampler,
                                                qoi,
@@ -91,7 +96,12 @@ int main(int argc, char* argv[]) {
                                     param.dt_hmc,
                                     param.n_burnin_hmc);
   } else {
+#ifdef ACTION_HARMONIC_OSCILLATOR
     coarse_sampler = &coarse_action;
+#else
+    std::cout << " ERROR: can only sample directly from harmonic oscillator action." << std::endl;
+    exit(-1);
+#endif // ACTION_HARMONIC_OSCILLATOR
   }
   MonteCarloTwoLevel montecarlo_twolevel(coarse_action,
                                          *coarse_sampler,
