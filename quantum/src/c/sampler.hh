@@ -17,7 +17,7 @@ class Sampler {
 public:
   /** @brief Create new instance
    *
-   * @param[in] record_stats Record statistics? 
+   * @param[in] record_stats_ Record statistics? 
    */
   Sampler(const bool record_stats_) : record_stats(record_stats_) {
     reset_stats();
