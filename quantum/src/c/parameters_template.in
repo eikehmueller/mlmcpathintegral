@@ -5,3 +5,7 @@ mu2             1.0
 perturbative    0
 n_burnin        1000
 n_samples       200000
+hmc_sampling    0
+T_hmc           10.0
+dt_hmc          0.01
+n_burnin_hmc    1000

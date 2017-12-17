@@ -26,6 +26,10 @@ public:
      perturbative VALUE
      n_burnin     VALUE
      n_samples    VALUE
+     hmc_sampling VALUE
+     T_hmc        VALUE
+     dt_hmc       VALUE
+     n_burnin_hmc VALUE
    @endverbatim
    *
    * @param[in] filename_ Name of file to read
@@ -57,5 +61,13 @@ public:
   unsigned int n_burnin;
   /** @brief Number of samples */
   unsigned int n_samples;
+  /** @brief Use Hybrid Monte Carlo (HMC) sampling? */
+  bool hmc_sampling;
+  /** @brief Length \f$T_{hmc}\f$ of HMC trajectories */
+  double T_hmc;
+  /** @brief Time step size \f$\Delta t_{hmc}\f$ of HMC trajectories */
+  double dt_hmc;
+  /** @brief HMC burnin samples */
+  unsigned int n_burnin_hmc;
 };
 #endif // PARAMETERS_HH
