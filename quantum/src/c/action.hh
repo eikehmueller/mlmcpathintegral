@@ -54,9 +54,22 @@ public:
    * 
    * Calculate \f$S[X]\f$ for a specific path
    *
-   * @param x_path Path, has to be am array of length \f$M\f$
+   * @param x_path Path, has to be an array of length \f$M\f$
    */
   const double virtual evaluate(const Path* x_path) const = 0;
+
+  /** @brief Calculate force for HMC integrator for a specific path
+   *
+   * Calculate \f$P = \frac{\partial S[X]}{\partial X}\f$ for a specific
+   * path and return the resulting force as a path.
+   *
+   * @param x_path Path \f$X\f$ on which to evaluate the force
+   * @param p_path Resulting force \f$P\f$ at every point
+   *
+   */
+  void virtual force(const Path* x_path,
+                     Path* p_path) const = 0;
+
 protected:
   /** @brief Number of time slices */
   const unsigned int M_lat;
