@@ -22,15 +22,25 @@ void HMCSampler::draw(std::vector<Path*> x_path) {
   std::copy(x_path_cur->data,
             x_path_cur->data+M_lat,
             x_path_trial->data);
-  const unsigned int hmc_steps = floor(T_hmc/dt_hmc);
-  for (unsigned int k=0;k<hmc_steps;++k) {
+  double t = 0.0;
+  // Do initial half-step
+  // Momentum update P -> P - 0.5*dt_{hmc}*dS(X)/dX
+  action.force(x_path_trial,dp_path);
+  for(unsigned int j=0;j<M_lat;++j) {
+    p_path_cur->data[j] -= 0.5*dt_hmc*dp_path->data[j];
+  }
+  t += 0.5*dt_hmc;
+  while(t+0.5*dt_hmc<T_hmc) {
+    // Position update X -> X + dt_{hmc}*P
+    for(unsigned int j=0;j<M_lat;++j) {
+      x_path_trial->data[j] += dt_hmc*p_path_cur->data[j];
+    }
     // Momentum update P -> P - dt_{hmc}*dS(X)/dX
     action.force(x_path_trial,dp_path);
     for(unsigned int j=0;j<M_lat;++j) {
       p_path_cur->data[j] -= dt_hmc*dp_path->data[j];
-      // Position update X -> X + dt_{hmc}*P
-      x_path_trial->data[j] += dt_hmc*p_path_cur->data[j];
     }
+    t += dt_hmc;
   }
   // STEP 2: Accept-reject step
   bool accept = false;
