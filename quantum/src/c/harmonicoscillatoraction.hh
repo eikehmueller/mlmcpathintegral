@@ -33,7 +33,7 @@ public:
                            const double T_final_,
                            const double m0_,
                            const double mu2_)
-    : Action(M_lat_,T_final_,m0_), Sampler(M_lat_), mu2(mu2_) {
+    : Action(M_lat_,T_final_,m0_), Sampler(false), mu2(mu2_) {
     assert(mu2>0.0);
     build_covariance();
     engine.seed(124129017);
