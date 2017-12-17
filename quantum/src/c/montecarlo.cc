@@ -56,15 +56,3 @@ std::pair<double,double> MonteCarloTwoLevel::evaluate_difference() {
   return std::make_pair(mean,variance);
   
 }
-
-/** Show statistics */
-void MonteCarloTwoLevel::show_stats() {
-  if (record_stats) {
-    std::cout << "=== Sampling statistics ===" << std::endl;
-    std::cout << "  acceptance probability  p = " << twolevel_sampler.p_accept() << std::endl;
-    std::cout << "  rejection probability 1-p = " << 1.-twolevel_sampler.p_accept() << std::endl;
-
-  } else {
-    std::cout << "No sampling statistics available." << std::endl;
-  }
-}

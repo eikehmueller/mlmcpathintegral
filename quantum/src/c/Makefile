@@ -25,14 +25,20 @@ action.o: \
 	path.o
 
 montecarlo.o: \
-	path.o
+	path.o \
+	sampler.o \
+	quantityofinterest.o 
 
-montecarlo.o: \
-	quantityofinterest.o \
+hmcsampler.o: \
+	sampler.o
+
+twolevelmetropolissampler.o: \
+	sampler.o
 
 driver.o: \
 	harmonicoscillatoraction.o \
 	quantityofinterest.o \
+	hmcsampler.o \
 	twolevelmetropolissampler.o \
 	parameters.o \
 	montecarlo.o

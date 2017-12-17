@@ -1,6 +1,7 @@
 #ifndef TWOLEVELMETROPOLISSAMPLER_HH
 #define TWOLEVELMETROPOLISSAMPLER_HH TWOLEVELMETROPOLISSAMPLER_HH
 
+#include <random>
 #include "action.hh"
 #include "sampler.hh"
 
@@ -37,8 +38,10 @@
  *
  * This guarantees that the fine level samples have the correct distribution.
  */
-class TwoLevelMetropolisSampler {
+class TwoLevelMetropolisSampler : public Sampler {
 public:
+  /** @brief Base type */
+  typedef Sampler Base;
   /** @brief Create a new instance
    *
    * @param[in] coarse_sampler_ Sampler on coarse level \f$\ell-1\f$
@@ -50,12 +53,11 @@ public:
                             const Action& coarse_action_,
                             const Action& fine_action_,
                             const bool record_stats_=false) :
+    Base(record_stats_),
     coarse_sampler(coarse_sampler_),
     coarse_action(coarse_action_),
-    fine_action(fine_action_),
-    record_stats(record_stats_) {
+    fine_action(fine_action_) {
     assert(2*coarse_action.getM_lat()==fine_action.getM_lat());
-    assert(coarse_sampler.getM_lat()==coarse_action.getM_lat());
     theta_coarse = new Path(coarse_action.getM_lat(),
                             coarse_action.getT_final());
     theta_fine = new Path(fine_action.getM_lat(),
@@ -72,7 +74,7 @@ public:
    * 
    * Deallocate all temporary memory
    */
-  ~TwoLevelMetropolisSampler() {
+  virtual ~TwoLevelMetropolisSampler() {
     delete theta_coarse;
     delete theta_fine;
     delete theta_fine_C;
@@ -84,18 +86,6 @@ public:
    * @param[out] x_path Vector of pointers to fine- and coarse- path
    */
   virtual void draw(std::vector<Path*> x_path);
-
-  /** @brief reset statistics
-   * 
-   * Reset all sampling statistics
-   */
-  void reset_stats() {
-    n_total_samples = 0;
-    n_accepted_samples = 0;
-  }
-
-  /** @brief Return acceptance probability */
-  double p_accept() { return n_accepted_samples/(1.*n_total_samples); }
   
 private:
   /** @brief Evaluate conditioned free action
@@ -142,11 +132,5 @@ protected:
   mutable Normal normal_dist;
   /** @brief Normal distribution in [0,1] for accept/reject step */
   mutable Uniform uniform_dist;
-  /** @brief Collect statistics on acceptance probability and autocorrelation */
-  const bool record_stats;
-  /** @brief Number of accepted samples */
-  mutable unsigned int n_accepted_samples;
-  /** @brief Number of total samples */  
-  mutable unsigned int n_total_samples;
 };
 #endif // TWOLEVELMETROPOLISSAMPLER_HH

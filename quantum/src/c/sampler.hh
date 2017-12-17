@@ -1,6 +1,7 @@
 #ifndef SAMPLER_HH
 #define SAMPLER_HH SAMPLER_HH
 #include "path.hh"
+#include <iostream>
 #include <vector>
 
 /** @file sampler.hh
@@ -16,12 +17,14 @@ class Sampler {
 public:
   /** @brief Create new instance
    *
-   * @param[in] M_lat_ Number \f$M\f$ of time slices
+   * @param[in] record_stats Record statistics? 
    */
-  Sampler(const unsigned int M_lat_) : M_lat(M_lat_) {}
+  Sampler(const bool record_stats_) : record_stats(record_stats_) {
+    reset_stats();
+  }
 
-  /** @brief Return number of timeslices */
-  unsigned int getM_lat() const { return M_lat; }
+  /** @brief Delete instance */
+  virtual ~Sampler() {};
 
   /** @brief Draw a sample 
    *
@@ -29,11 +32,35 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ drawn from distribution
    */
-  const virtual void draw(std::vector<Path*> x_path) = 0;
+  virtual void draw(std::vector<Path*> x_path) = 0;
 
+  /** @brief reset statistics
+   * 
+   * Reset all sampling statistics
+   */
+  void reset_stats() {
+    n_total_samples = 0;
+    n_accepted_samples = 0;
+  }
+
+  /** @brief Return acceptance probability */
+  double p_accept() { return n_accepted_samples/(1.*n_total_samples); }
+
+  /** @brief Show statistics 
+   *
+   * Print out statistics 
+   */
+  void show_stats();
+  
+  
 protected:
-  /** @brief Number of time slices */
-  const unsigned int M_lat;
+  /** @brief Collect statistics on acceptance probability and autocorrelation */
+  const bool record_stats;
+  /** @brief Number of accepted samples */
+  mutable unsigned int n_accepted_samples;
+  /** @brief Number of total samples */  
+  mutable unsigned int n_total_samples;
+
 };
 
 #endif // SAMPLER_HH

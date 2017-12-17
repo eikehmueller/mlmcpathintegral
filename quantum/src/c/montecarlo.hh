@@ -95,16 +95,16 @@ class MonteCarloTwoLevel : public MonteCarlo {
 public:
   /** \brief Create new instance 
    *
-   * @param[in] coarse_sampler_ Sampler on coarse level
    * @param[in] coarse_action_ Action on coarse level
+   * @param[in] coarse_sampler_ Sampler on coarse level
    * @param[in] fine_action_ Action on fine level
    * @param[in] qoi_ Quantity of interest
    * @param[in] n_samples_ Number of samples to evaluate
    * @param[in] n_burnin_ Number of burnin samples (QoI not evaluated on those)
    * @param[in] record_stats_ Record statistics of sampler
    */
-  MonteCarloTwoLevel(Sampler& coarse_sampler_,
-                     Action& coarse_action_,
+  MonteCarloTwoLevel(Action& coarse_action_,
+                     Sampler& coarse_sampler_,
                      Action& fine_action_,
                      QoI& qoi_,
                      const unsigned int n_samples_,
@@ -127,12 +127,12 @@ public:
    */
   std::pair<double,double> evaluate_difference();
 
-  /** @brief Show statistics 
-   *
-   * Print out statistics of two-level samples
+  /** @brief Return reference to two-level sampler 
    */
-  void show_stats();
-
+  TwoLevelMetropolisSampler& get_twolevelsampler() {
+    return twolevel_sampler;
+  }
+    
 private:
   /** @brief Sampler on coarse level */
   Sampler& coarse_sampler;

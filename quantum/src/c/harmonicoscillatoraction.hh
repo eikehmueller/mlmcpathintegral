@@ -78,7 +78,7 @@ public:
    *
    * @param[out] x_path: path to populate
    */
-  const virtual void draw(std::vector<Path*> x_path);
+  virtual void draw(std::vector<Path*> x_path);
 
   /** @brief Exact expression for expectation value of \f$X^2\f$
    *
