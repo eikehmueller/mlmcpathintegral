@@ -19,7 +19,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Motivation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-By using Feynman's path integral formulation of quantum mechanics \cite{Feynman2010}, lattice field theories predict the fundamental properties of subatomic particles. Numerical results are obtained by Markov Chain Monte Carlo (MCMC) sampling of discretised fields on a space-time grid. To produce physically relevant results, both the number of lattice points and the number of Monte Carlo samples have to be increased, making accurate simulations prohibitively expensive. In similar contexts the Multilevel Monte Carlo (MLMC) algorithm \cite{Giles2015} has been shown to lead to a considerable reduction in computational complexity. The key idea is the construction of a set of coarse grained theories which accelerate sampling without introducing any additional bias errors. It should be stressed that MLMC is a proper variance reduction technique and goes beyond hierarchical samplers such as \cite{Faas1986}.
+By using Feynman's path integral formulation of quantum mechanics \cite{Feynman2010}, lattice field theories predict the fundamental interactions of subatomic particles. Numerical results are obtained by Markov Chain Monte Carlo (MCMC) sampling of discretised fields on a space-time grid. To produce physically relevant results, both the number of lattice points and the number of Monte Carlo samples have to be increased, making accurate simulations prohibitively expensive. In similar contexts the Multilevel Monte Carlo (MLMC) algorithm \cite{Giles2015} has been shown to lead to a considerable reduction in computational complexity. The key idea is the construction of a set of coarse grained theories which accelerate sampling without introducing any additional bias errors. It should be stressed that MLMC is a proper variance reduction technique and goes beyond hierarchical samplers such as \cite{Faas1986}.
 Recently the multilevel approach has been adapted to an MCMC setting in \cite{Dodwell2015}. We aim to apply the same methods in the context of lattice field theory, exploiting the natural hierarchy of coarse grained effectve theories obtained by renormalisation. In contrast to the Standard Monte Carlo (StMC) method, the computational complexity of MLMC is independent of the space-time dimension $d$. This makes the approach very promising for larger $d$, such as five-dimensional domain-wall fermion formulations \cite{Kaplan1992} of QCD. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Methods}
@@ -28,16 +28,16 @@ Recently the multilevel approach has been adapted to an MCMC setting in \cite{Do
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Lattice Field Theory}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Let $\theta=\theta(x)$ the field which is defined at any point $x$ in a $d$-dimensional box. The physically measurable expectation value $\langle Q\rangle$ of an observable $Q$ can be written as a sum over all possible field configurations $\theta$ weighted by the exponential of the action $S[\theta]$ (with normalisation factor $Z$).
+Let $\theta=\theta(x)$ the quantum field which is defined at any point $x$ in a $d$-dimensional box. The physically measurable expectation value $\langle Q\rangle$ of an observable (or ``quantity of interest'') $Q$ can be written as a sum over all possible field configurations $\theta$ weighted by the exponential of the action $S[\theta]$ (with normalisation factor $Z$):
 \begin{equation}
-  \langle Q\rangle = Z^{-1} \int_{\text{all $\theta$}} Q[\theta]e^{-S[\theta]}\;d\theta \approx \frac{1}{N} \sum_{n=1}^N Q[\theta^{(L),n}] = \hat{Q}^{\text{StMC}}_{L,N} \qquad \mathbb{R}^{M}\ni \theta^{(L),n}\sim e^{-S[\cdot]},\quad M=L^d
+  \langle Q\rangle = Z^{-1} \int_{\text{all $\theta$}} Q[\theta]e^{-S[\theta]} \approx \frac{1}{N} \sum_{n=1}^N Q[\theta_L^n] = \hat{Q}^{\text{StMC}}_{L,N} \qquad \mathbb{R}^{M}\ni \theta_L^n\sim e^{-S[\cdot]}
 \end{equation}
-To calculate this quantity, two approximations are made to obtain an estimator $\hat{Q}^{\text{StMC}}_{N,M}$ for $\langle Q\rangle$:
-\begin{enumerate}
-    \item The field is represented by its values $\theta^{(L)}_j$ at the $j=1,\dots,M$ points of a $d$-dimensional space-time lattice with grid spacing $a=2^{-L}$
-    \item The integral is evaluated with a Monte Carlo method by summing the value of the observables for $n=1,\dots,N$ random fields $\theta^{(L),n}$ which are distributed according to $e^{-S[\cdot ]}$
-\end{enumerate}
-To reduce both the discretisation error and the sampling error, the number of lattice sites $M$ and the number of MC samples $N$ have to be large. Sophisticated methods such as Hybrid Monte Carlo \cite{Duane1987} and improved actions \cite{Davies2004} have been developed to reduce both errors.
+In this equation two approximations are made to obtain an estimator $\hat{Q}^{\text{StMC}}_{L,N}$ for $\langle Q\rangle$:
+\begin{itemize}
+    \item \textbf{Discretisation}. The field $\theta$ is represented by its values $(\theta_L)_j$ at the $j=1,\dots,M=2^{L\cdot d}$ points of a $d$-dimensional space-time lattice with grid spacing $a=2^{-L}$. This introduces bias errors of $\mathcal{O}(a^\alpha)=\mathcal{O}(M^{-\alpha/d})$.
+    \item \textbf{Stochastic integration}. The integral is evaluated by summing the value of the observables for $N$ random fields $\{\theta_L^n\}_{n=1}^N$ which are distributed according to $e^{-S[\cdot ]}$. The sampling error is $\propto{1/\sqrt{N}}$.
+\end{itemize}
+To control both errors the number of lattice sites $M$ and the number of MC samples $N$ have to be large. Sophisticated methods such as Hybrid Monte Carlo \cite{Duane1987} and improved actions \cite{Davies2004} have been developed to minimise those errors. The computational cost to reduce both below some tolerance $\epsilon$ is $\text{Cost}^{\text{StMC}}\propto M\cdot N=\mathcal{O}(\epsilon^{-2-d/\alpha})$.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Multilevel Monte Carlo}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -55,7 +55,7 @@ To reduce both the discretisation error and the sampling error, the number of la
 \end{figure}
 Consider for example a one-dimensional quantum mechanical problem with quartic potential $V$. In this case the action is
 \begin{equation}
-  S\left[\theta^{(L)}\right] = \sum_{j=1}^M \frac{m_0}{2a}\left(\theta^{(L)}_j-\theta^{(L)}_{j-1}\right)^2 + aV\left(\theta^{(L)}_j\right)\qquad V(\theta) = \frac{1}{2}m_0\mu^2\theta^2+\frac{1}{4}\lambda^2\theta^4
+  S\left[\theta_L\right] = \sum_{j=1}^M \frac{m_0}{2a}\left((\theta_L)_j-(\theta_L)_{j-1}\right)^2 + aV\left((\theta_L)_j\right)\qquad V(\theta) = \frac{1}{2}m_0\mu^2\theta^2+\frac{1}{4}\lambda^2\theta^4
 \end{equation}
 \begin{figure}
   \begin{center}

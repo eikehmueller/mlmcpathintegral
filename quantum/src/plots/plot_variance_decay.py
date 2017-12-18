@@ -10,10 +10,10 @@ if (__name__ == '__main__'):
     # Numerical values for parameters
     T_final = 1.0
     m0 = 1.0
-    mu2 = -1.0
+    mu2 = 1.0
     lmbda = 1.0
 
-    action = 'quartic oscillator'
+    action = 'harmonic oscillator'
 
     print " action  = ", action
     print " m0      = ", m0
