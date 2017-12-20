@@ -70,6 +70,30 @@ public:
   void virtual force(const Path* x_path,
                      Path* p_path) const = 0;
 
+  /** @brief Second derivative \f$W''_{\overline{x}}(x)\f$ of conditioned action
+   *
+   * The second derivative (=curvature) of the conditioned action
+   \f[ 
+     W_{\overline{x}}(x)=\frac{m_0}{2a}\left((x-x_+)^2+(x-x_-)^2\right)+aV(x)
+   \f]   
+   * is required for sampling of the fine lattice sites.
+   *
+   * @param[in] x Point at which to calculate the curvature
+   */
+  double virtual inline getWcurvature(const double x) const = 0;
+
+  /** @brief Find minimum of conditioned action \f$W_\overline{x}(x)\f$
+   *
+   * Given \f$\overline{x}=\frac{1}{2}(x_++x_-)\f$, find the minimum \f$x_0\f$ 
+   * of the conditioned action
+   \f[ 
+     W_{\overline{x}}(x)=\frac{m_0}{2a}\left((x-x_+)^2+(x-x_-)^2\right)+aV(x)
+   \f]
+   *
+   * @param[in] xbar Value of \f$\overline{x}=\frac{1}{2}(x_++x_-)\f$
+   */
+  double virtual inline getWminimum(const double xbar) const = 0;
+  
 protected:
   /** @brief Number of time slices */
   const unsigned int M_lat;

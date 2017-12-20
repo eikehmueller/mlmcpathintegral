@@ -3,22 +3,25 @@
  * @brief Implementation of twolevelmetropolissampler.hh
  */
 
-/** Evaluate conditioned free action on a given fine path */
+/** Evaluate conditioned modified action on a given fine path */
 const double TwoLevelMetropolisSampler::conditioned_free_action(const Path* x_path) {
   unsigned int M_lat = fine_action.getM_lat();
-  double tmp = x_path->data[M_lat-1] - 0.5*(x_path->data[0]+x_path->data[M_lat-2]);
-  double S = tmp*tmp;
+  double x0 = fine_action.getWminimum(0.5*(x_path->data[0]+x_path->data[M_lat-2]));
+  double tmp = x_path->data[M_lat-1] - x0;
+  double curvature = fine_action.getWcurvature(x0);
+  double S = 0.5*curvature*tmp*tmp + 0.5*log(curvature);
   for (unsigned int j=0; j<M_lat/2-1; ++j) {
-    double tmp = x_path->data[2*j+1] - 0.5*(x_path->data[2*j]+x_path->data[2*j+2]);
-    S += tmp*tmp;
+    double x0 = fine_action.getWminimum(0.5*(x_path->data[2*j]+x_path->data[2*j+2]));
+    double tmp = x_path->data[2*j+1] - x0;
+    double curvature = fine_action.getWcurvature(x0);
+    S += 0.5*curvature*tmp*tmp+0.5*log(curvature);
   }
-  return fine_action.getm0()/fine_action.geta_lat()*S;
+  return S;
 }
 
 /** Draw new sample pair */
 void TwoLevelMetropolisSampler::draw(std::vector<Path*> x_path) {
   unsigned int M_lat = fine_action.getM_lat();
-  double free_width = sqrt(0.5*fine_action.geta_lat()/fine_action.getm0());
   // Draw new coarse level sample
   std::vector<Path*> coarse_path;
   coarse_path.push_back(theta_coarse);
@@ -26,8 +29,8 @@ void TwoLevelMetropolisSampler::draw(std::vector<Path*> x_path) {
   // Populate the fine level trial state
   for (unsigned int j=0; j<M_lat/2; ++j) {
     theta_prime->data[2*j] = theta_coarse->data[j];
-    double mu = 0.5*(theta_coarse->data[j]+theta_coarse->data[(j+1)%(M_lat/2)]);
-    theta_prime->data[2*j+1] = mu + normal_dist(engine)*free_width;
+    double x0 = fine_action.getWminimum(0.5*(theta_coarse->data[j]+theta_coarse->data[(j+1)%(M_lat/2)]));
+    theta_prime->data[2*j+1] = x0 + normal_dist(engine)/sqrt(fine_action.getWcurvature(x0));
   }
   /*
    * Calculate the difference in level-\ell actions,

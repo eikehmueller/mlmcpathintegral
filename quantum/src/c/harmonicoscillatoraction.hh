@@ -33,7 +33,9 @@ public:
                            const double T_final_,
                            const double m0_,
                            const double mu2_)
-    : Action(M_lat_,T_final_,m0_), Sampler(false), mu2(mu2_) {
+    : Action(M_lat_,T_final_,m0_), Sampler(false), mu2(mu2_),
+      Wcurvature((2./a_lat + a_lat*mu2)*m0),
+      Wminimum_scaling(1./(1.+0.5*a_lat*a_lat*mu2)) {
     assert(mu2>0.0);
     build_covariance();
     engine.seed(124129017);
@@ -70,7 +72,35 @@ public:
    */
   void virtual force(const Path* x_path,
                      Path* p_path) const;
-  
+
+  /** @brief Second derivative \f$W''_{\overline{x}}(x)\f$ of conditioned action
+   *
+   * For the harmonic oscillator potential the curvature of the modified
+   * action (see Action::getWcurvature()) is 
+   \f[
+   W''_{\overline{x}} = \frac{2m_0}{a}+am_0\mu^2
+   \f]
+   *
+   * @param[in] x Point at which to calculate the curvature
+   */
+  double virtual inline getWcurvature(const double x) const {
+    return Wcurvature;
+  }
+
+  /** @brief Find minimum of conditioned action \f$W_\overline{x}(x)\f$
+   *
+   * For the harmonic oscillator potential the minimum of the modified
+   * action (see Action::getWminimum()) can be found at
+   \f[
+      x_0 = \left(1+\frac{1}{2}a^2\mu^2\right)^{-1}\overline{x}
+   \f]
+   *
+   * @param[in] xbar Value of \f$\overline{x}=\frac{1}{2}(x_++x_-)\f$
+   */
+  double virtual inline getWminimum(const double xbar) const {
+    return Wminimum_scaling*xbar;
+  }
+    
   /** @brief Draw sample from distribution
    *
    * Generate path which is distruted according to
@@ -131,7 +161,11 @@ private:
   /** @brief Normal distribution */
   mutable Normal normal_dist;
   /** @brief temporary array used for direct sampling */
-  Path* y_tmp; 
+  Path* y_tmp;
+  /** @brief Curvature of modified potential */
+  const double Wcurvature;
+  /** @brief Scaling factor for calculation of mimimum of modified potential */
+  const double Wminimum_scaling;
 };
 
 #endif // HARMONICOSCILLATORACTION_HH
