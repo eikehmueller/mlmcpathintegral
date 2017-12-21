@@ -50,7 +50,7 @@ public:
    *
    * Note that for this action we have
      \f[
-         P_j = \frac{m_0}{a}\left(2X_j-X_{j-1}-X_{j+1}\right) + am_0\mu^2 X_j + \lambda X_j^3
+         P_j = \frac{m_0}{a}\left(2X_j-X_{j-1}-X_{j+1}\right) + am_0\mu^2 X_j + a\lambda X_j^3
      \f]
    *
    * @param x_path Path \f$X\f$ on which to evaluate the force
@@ -64,7 +64,7 @@ public:
    * For the harmonic oscillator potential the curvature of the modified
    * action (see Action::getWcurvature()) is 
    \f[
-   W''_{\overline{x}} = \frac{2m_0}{a}+am_0\mu^2 + 3\lambda x^2
+   W''_{\overline{x}} = \frac{2m_0}{a}+am_0\mu^2 + 3a\lambda x^2
    \f]
    *
    * @param[in] x Point at which to calculate the curvature
