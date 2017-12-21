@@ -87,7 +87,7 @@ public:
     return Wcurvature;
   }
 
-  /** @brief Find minimum of conditioned action \f$W_\overline{x}(x)\f$
+  /** @brief Find minimum of conditioned action \f$W_{\overline{x}}(x)\f$
    *
    * For the harmonic oscillator potential the minimum of the modified
    * action (see Action::getWminimum()) can be found at

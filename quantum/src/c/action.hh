@@ -82,7 +82,7 @@ public:
    */
   double virtual inline getWcurvature(const double x) const = 0;
 
-  /** @brief Find minimum of conditioned action \f$W_\overline{x}(x)\f$
+  /** @brief Find minimum of conditioned action \f$W_{\overline{x}}(x)\f$
    *
    * Given \f$\overline{x}=\frac{1}{2}(x_++x_-)\f$, find the minimum \f$x_0\f$ 
    * of the conditioned action

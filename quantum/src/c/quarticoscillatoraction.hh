@@ -73,7 +73,7 @@ public:
     return (2./a_lat + a_lat*mu2)*m0 + 3.*lambda*a_lat*x*x;
   }
 
-  /** @brief Find minimum of conditioned action \f$W_\overline{x}(x)\f$
+  /** @brief Find minimum of conditioned action \f$W_{\overline{x}}(x)\f$
    *
    * For the quartic oscillator potential the minimum \f$x_0\f$ of the modified
    * action (see Action::getWminimum()) can be found as the solution of
