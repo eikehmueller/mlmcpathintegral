@@ -81,19 +81,22 @@ public:
       x_0\left(1+\frac{1}{2}a^2\mu^2\right) + \frac{1}{2} \lambda a^2 x_0^3 = \overline{x}
    \f]
    * Here, we calculate an approximate value by setting
-   * \f$z = \rho\overline{x}\f$ and then computing
-   * 
+   * \f$x_0^{(0)} = \overline{x}\f$ and then computing
+   * and iterating
    \f[
-   x_0 \approx \rho\overline{x} - \frac{1}{2}a^2\lambda z^3 \\
-    = \rho\left( \overline{x} - \frac{1}{2}a^2\lambda \rho^3 \overline{x}^3\right)
+     x_0^{(n+1)} = \left(1+\frac{1}{2}a^2\mu^2\right)^{-1}(\overline{x} - \frac{1}{2}a^2\lambda (x_0^{(n)})^3
    \f]
+   * for \f$n=0,\dots,2\f$
    *
    * @param[in] xbar Value of \f$\overline{x}=\frac{1}{2}(x_++x_-)\f$
    */
   double virtual inline getWminimum(const double xbar) const {
     const double rho = 1./(1.+0.5*a_lat*a_lat*mu2);
-    double rho_xbar = rho*xbar;
-    return rho*(xbar - 0.5*a_lat*a_lat*lambda/m0*rho_xbar*rho_xbar*rho_xbar);
+    double x = xbar;
+    for (int i=0;i<4;++i) {
+      x = rho*(xbar - 0.5*a_lat*a_lat*lambda/m0*x*x*x);
+    }
+    return x;
   }
 
 private:
