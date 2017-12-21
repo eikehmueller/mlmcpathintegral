@@ -6,12 +6,14 @@
 /** Evaluate action */
 const double QuarticOscillatorAction::evaluate(const Path* x_path) const {
   double ainv2 = 1./(a_lat*a_lat);
+  double x_j = x_path->data[0];
+  double x_j_squared = x_j*x_j;
   double x_diff = x_path->data[0]-x_path->data[M_lat-1];
-  double S = ainv2*x_diff*x_diff + mu2*x_path->data[0]*x_path->data[0];
+  double S = m0*(ainv2*x_diff*x_diff + mu2*x_j_squared) + 0.5*lambda*x_j_squared*x_j_squared;
   for (unsigned int j=1;j<M_lat;++j) {
     double x_j = x_path->data[j];
-    double x_diff = x_j-x_path->data[j-1];
     double x_j_squared = x_j*x_j;
+    double x_diff = x_j-x_path->data[j-1];
     S += m0*(ainv2*x_diff*x_diff+mu2*x_j_squared)+0.5*lambda*x_j_squared*x_j_squared;
   }
   return 0.5*a_lat*S;

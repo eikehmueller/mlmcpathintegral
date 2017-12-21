@@ -50,7 +50,7 @@ public:
    *
    * Note that for this action we have
      \f[
-         P_j = \frac{m_0}{a}\left(2X_j-X_{j-1}-X_{j+1}\right) + \frac{1}{2}am_0\mu^2 X_j + \lambda X_j^3
+         P_j = \frac{m_0}{a}\left(2X_j-X_{j-1}-X_{j+1}\right) + am_0\mu^2 X_j + \lambda X_j^3
      \f]
    *
    * @param x_path Path \f$X\f$ on which to evaluate the force
