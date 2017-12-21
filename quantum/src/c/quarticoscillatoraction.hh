@@ -78,7 +78,7 @@ public:
    * For the quartic oscillator potential the minimum \f$x_0\f$ of the modified
    * action (see Action::getWminimum()) can be found as the solution of
    \f[
-      x_0\left(1+\frac{1}{2}a^2\mu^2\right) + \frac{1}{2} \lambda x_0^3 = \overline{x}
+      x_0\left(1+\frac{1}{2}a^2\mu^2\right) + \frac{1}{2} \lambda a^2 x_0^3 = \overline{x}
    \f]
    * Here, we calculate an approximate value by setting
    * \f$z = \rho\overline{x}\f$ and then computing
