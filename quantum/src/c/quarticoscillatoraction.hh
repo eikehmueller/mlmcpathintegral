@@ -78,13 +78,13 @@ public:
    * For the quartic oscillator potential the minimum \f$x_0\f$ of the modified
    * action (see Action::getWminimum()) can be found as the solution of
    \f[
-      x_0\left(1+\frac{1}{2}a^2\mu^2\right) + \frac{1}{2} \lambda a^2 x_0^3 = \overline{x}
+      x_0\left(1+\frac{1}{2}a^2\mu^2\right) + \frac{\lambda a^2}{2m_0}  x_0^3 = \overline{x}
    \f]
    * Here, we calculate an approximate value by setting
    * \f$x_0^{(0)} = \overline{x}\f$ and then computing
    * and iterating
    \f[
-     x_0^{(n+1)} = \left(1+\frac{1}{2}a^2\mu^2\right)^{-1}(\overline{x} - \frac{1}{2}a^2\lambda (x_0^{(n)})^3
+     x_0^{(n+1)} = \left(1+\frac{1}{2}a^2\mu^2\right)^{-1}\left(\overline{x} - \frac{\lambda a^2}{2m_0} \left(x_0^{(n)}\right)^3\right)
    \f]
    * for \f$n=0,\dots,2\f$
    *
