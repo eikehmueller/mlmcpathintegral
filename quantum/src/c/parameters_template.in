@@ -3,6 +3,7 @@ T_final         1.0
 m0              1.0
 mu2             1.0
 lambda          0.0
+sigma           1.0
 renormalisation 0
 n_burnin        1000
 n_samples       200000

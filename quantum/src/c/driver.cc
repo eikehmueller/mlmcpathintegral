@@ -3,6 +3,7 @@
 #include <memory>
 #include "harmonicoscillatoraction.hh"
 #include "quarticoscillatoraction.hh"
+#include "doublewellaction.hh"
 #include "quantityofinterest.hh"
 #include "montecarlo.hh"
 #include "parameters.hh"
@@ -59,7 +60,23 @@ int main(int argc, char* argv[]) {
                                         param.mu2,
                                         param.lambda);
   std::cout << "Action = quartic oscillator" << std::endl;
-#endif // QUARTIC_HARMONIC_OSCILLATOR
+#endif // ACTION_QUARTIC_OSCILLATOR
+  /* *** DOUBLE WELL *** */
+#ifdef ACTION_DOUBLE_WELL
+  DoubleWellAction action(param.M_lat,
+                          param.T_final,
+                          param.m0,
+                          param.mu2,
+                          param.lambda,
+                          param.sigma);
+  DoubleWellAction coarse_action(param.M_lat/2,
+                                 param.T_final,
+                                 param.m0,
+                                 param.mu2,
+                                 param.lambda,
+                                 param.sigma);
+  std::cout << "Action = double well" << std::endl;
+#endif // ACTION_DOUBLE_WELL
   std::cout << std::endl;
   
   Sampler* sampler;

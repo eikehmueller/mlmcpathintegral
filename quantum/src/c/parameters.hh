@@ -35,7 +35,8 @@ public:
      m0              VALUE
      mu2             VALUE
      lambda          VALUE
-     renormalisayion VALUE
+     sigma           VALUE
+     renormalisation VALUE
      n_burnin        VALUE
      n_samples       VALUE
      hmc_sampling    VALUE
@@ -69,6 +70,8 @@ public:
   double mu2;
   /** @brief parameter \f$\lambda\f$ in quartic oscillator potential */
   double lambda;
+  /** @brief width parameter \f$\sigma\f$ in double well potential */
+  double sigma;
   /** @brief Renormalisation type (harmonic oscillator only) */
   RenormalisationType renormalisation;
   /** @brief Number of burn-in samples */

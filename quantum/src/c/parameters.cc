@@ -19,6 +19,7 @@ void Parameters::readfile() {
     infile >> dummy >> m0;
     infile >> dummy >> mu2;
     infile >> dummy >> lambda;
+    infile >> dummy >> sigma;
     infile >> dummy >> renormalisation_int;
     infile >> dummy >> n_burnin;
     infile >> dummy >> n_samples;
@@ -54,6 +55,7 @@ void Parameters::show() {
   std::cout << " m0               = " << m0 << std::endl;
   std::cout << " mu2              = " << mu2 << std::endl;
   std::cout << " lambda           = " << lambda << std::endl;
+  std::cout << " sigma            = " << sigma << std::endl;
   std::cout << " renormalisation  = " << renorm_label << std::endl;
   std::cout << " n_burnin         = " << n_burnin << std::endl;
   std::cout << " n_samples        = " << n_samples << std::endl;
