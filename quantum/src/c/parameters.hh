@@ -8,6 +8,17 @@
  * @brief Header file for parameter class
  */
 
+/** @brief Enum for renormalisations:
+ *  - 0: No renormalisation
+ *  - 1: Perturbative renormalisation
+ *  - 2: Exact renormalisation
+*/
+enum RenormalisationType {
+  RenormalisationNone = 0,
+  RenormalisationPerturbative = 1,
+  RenormalisationExact = 2
+};
+
 /** @class Parameters
  *
  * @brief Storage for parameters, which can be read from a file 
@@ -19,18 +30,18 @@ public:
    * Read parameters from specified file. The content of the file has to be:
    *
    @verbatim
-     M_lat        VALUE
-     T_final      VALUE
-     m0           VALUE
-     mu2          VALUE
-     lambda       VALUE
-     perturbative VALUE
-     n_burnin     VALUE
-     n_samples    VALUE
-     hmc_sampling VALUE
-     T_hmc        VALUE
-     dt_hmc       VALUE
-     n_burnin_hmc VALUE
+     M_lat           VALUE
+     T_final         VALUE
+     m0              VALUE
+     mu2             VALUE
+     lambda          VALUE
+     renormalisayion VALUE
+     n_burnin        VALUE
+     n_samples       VALUE
+     hmc_sampling    VALUE
+     T_hmc           VALUE
+     dt_hmc          VALUE
+     n_burnin_hmc    VALUE
    @endverbatim
    *
    * @param[in] filename_ Name of file to read
@@ -58,8 +69,8 @@ public:
   double mu2;
   /** @brief parameter \f$\lambda\f$ in quartic oscillator potential */
   double lambda;
-  /** @brief Use perturbative renormalisation? */
-  bool perturbative;
+  /** @brief Renormalisation type (harmonic oscillator only) */
+  RenormalisationType renormalisation;
   /** @brief Number of burn-in samples */
   unsigned int n_burnin;
   /** @brief Number of samples */

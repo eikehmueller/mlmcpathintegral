@@ -1,5 +1,6 @@
 #ifndef RENORMALISATION_HH
 #define RENORMALISATION_HH RENORMALISATION_HH
+#include "parameters.hh"
 /** @file renormalisation.hh
  * @brief Methods for calculation renormalised parameters
  */
@@ -29,27 +30,47 @@ public:
    * @param[in] T_final_ Final time \f$T\f$
    * @param[in] m0_ Mass \f$m_0\f$
    * @param[in] mu2_ Harmonic oscillator potential parameter \f$\mu^2\f$
-   * @param[in] perturbative_ Use perturbative expansion?
+   * @param[in] Renormalisation to use (0: none, 1: perturbatibe, 2: exact)
    */
   RenormalisedHOParameters(const unsigned int M_lat_,
                            const double T_final_,
                            const double m0_,
                            const double mu2_,
-                           const bool perturbative_) :
+                           const RenormalisationType renormalisation_) :
     m0(m0_), mu2(mu2_), T_final(T_final_), M_lat(M_lat_),
-    a_lat(T_final_/M_lat_), perturbative(perturbative_) {}
+    a_lat(T_final_/M_lat_), renormalisation(renormalisation_) {}
   /** @brief Renormalised coarse level mass \f$m_0^{(c)}\f$*/
   double m0_coarse() {
-    if (perturbative) {
-      return m0*(1.-0.5*a_lat*a_lat*mu2);
-    } else {
-      return m0/(1.+0.5*a_lat*a_lat*mu2);
+    double m0coarse;
+    switch (renormalisation) {
+    case RenormalisationNone:
+      m0coarse = m0;
+      break;
+    case RenormalisationPerturbative:
+      m0coarse = m0*(1.-0.5*a_lat*a_lat*mu2);
+      break;
+    case RenormalisationExact:
+      m0coarse = m0/(1.+0.5*a_lat*a_lat*mu2);
+      break;
     }
+    return m0coarse;
   }
   /** @brief Renormalised coarse level oscillator parameter
    * \f$\left(\mu^{(c)}\right)^2\f$ */
   double mu2_coarse() {
-    return mu2*(1.+0.25*a_lat*a_lat*mu2);
+    double mu2coarse;
+    switch (renormalisation) {
+    case RenormalisationNone:
+      mu2coarse = mu2;
+      break;
+    case RenormalisationPerturbative:
+      mu2coarse = mu2*(1.+0.25*a_lat*a_lat*mu2); 
+      break;
+    case RenormalisationExact:
+      mu2coarse = mu2*(1.+0.25*a_lat*a_lat*mu2);
+      break;
+    }
+    return mu2coarse;
   }
   
 private:
@@ -63,8 +84,8 @@ private:
   const double mu2;
   /** @brief Lattice spacing */
   const double a_lat;
-  /** @brief Use perturbative expansion? */
-  const bool perturbative;
+  /** @brief Type of renormalisation */
+  const RenormalisationType renormalisation;
 };
 
 #endif // RENORMALISATION_HH

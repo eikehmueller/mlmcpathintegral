@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
                                         param.T_final,
                                         param.m0,
                                         param.mu2,
-                                        param.perturbative);
+                                        param.renormalisation);
   std::cout << std::endl;
   /* *** HARMONIC OSCILLATOR *** */
 #ifdef ACTION_HARMONIC_OSCILLATOR
