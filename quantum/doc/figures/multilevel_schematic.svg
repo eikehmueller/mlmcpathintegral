@@ -13,8 +13,8 @@
    height="506.41971"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="New document 1">
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="multilevel_schematic.svg">
   <defs
      id="defs4">
     <marker
@@ -54,7 +54,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.7"
-     inkscape:cx="511.45864"
+     inkscape:cx="968.6015"
      inkscape:cy="219.03345"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -64,10 +64,10 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:window-width="1341"
-     inkscape:window-height="909"
-     inkscape:window-x="117"
-     inkscape:window-y="74"
+     inkscape:window-width="1280"
+     inkscape:window-height="756"
+     inkscape:window-x="81"
+     inkscape:window-y="0"
      inkscape:window-maximized="0">
     <inkscape:grid
        type="xygrid"
@@ -88,7 +88,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -358,18 +358,22 @@
          x="142.40178"
          y="63.148003"
          style="font-size:36px">level L</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="562.23651"
-       y="59.280704"
-       id="text4715"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan4717"
-         x="562.23651"
+    <g
+       id="g4348"
+       transform="translate(-21.428571,0)">
+      <text
+         sodipodi:linespacing="125%"
+         id="text4715"
          y="59.280704"
-         style="font-size:36px">level L-1</tspan></text>
+         x="562.23651"
+         style="font-style:normal;font-weight:normal;font-size:24px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+         xml:space="preserve"><tspan
+           style="font-size:36px"
+           y="59.280704"
+           x="562.23651"
+           id="tspan4717"
+           sodipodi:role="line">level ℓ=L-1</tspan></text>
+    </g>
     <text
        sodipodi:linespacing="125%"
        id="text4719"
@@ -457,19 +461,19 @@
     <text
        sodipodi:linespacing="125%"
        id="text5305"
-       y="1275.5906"
-       x="-379.13385"
-       style="font-size:24px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       y="1267.5906"
+       x="-397.13385"
+       style="font-style:normal;font-weight:normal;font-size:24px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
        xml:space="preserve"
        transform="matrix(0,-1,1,0,0,0)"><tspan
          id="tspan5307"
-         y="1275.5906"
-         x="-379.13385"
+         y="1267.5906"
+         x="-397.13385"
          sodipodi:role="line">MC estimator</tspan><tspan
-         y="1305.5906"
-         x="-379.13385"
+         y="1297.5906"
+         x="-397.13385"
          sodipodi:role="line"
-         id="tspan5309">on figest level</tspan></text>
+         id="tspan5309">on coarsest level</tspan></text>
     <g
        id="g5313">
       <g
