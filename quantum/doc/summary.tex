@@ -17,7 +17,7 @@
 \begin{document}
 \maketitle
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Motivation}
+\section{Motivation and Overview}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 By using Feynman's path integral formulation of quantum mechanics \cite{Feynman2010}, lattice field theories predict the fundamental properties and interactions of subatomic particles. Numerical results are obtained by Markov Chain Monte Carlo (MCMC) sampling of discretised fields on a space-time grid. To produce physically relevant results, both the number of lattice points and the number of Monte Carlo samples have to be increased, making accurate simulations challenging.
 
@@ -41,7 +41,7 @@ In this equation two approximations are made to obtain an estimator $\hat{Q}^{\t
     \item \textbf{Monte Carlo integration}. The integral is evaluated by summing the value of the observable for $N$ random fields $\{\theta_L^n\}_{n=1}^N$ which are distributed according to $e^{-S[\cdot ]}$. The sampling error is $\propto{1/\sqrt{N}}$.
 \end{itemize}
 Sophisticated methods such as Hybrid MC \cite{Duane1987} (to reduce autocorrelations in the Markov chain) and improved actions \cite{Lepage1994} (to increase the discretisation order $\alpha$) have been developed to minimise both errors.
-The computational cost to calculate $\langle Q\rangle$ to accuracy $\epsilon$ by reducing both errors below $\epsilon/2$ is $\text{C}^{\text{StMC}}\propto N\cdot M=\mathcal{O}(\epsilon^{-2-d/\alpha})$. As we will argue now, Markov chain MLMC \cite{Dodwell2015} has the potential to reduce this to $\mathcal{O}(\epsilon^{-2}|\log(\epsilon)|)$.
+The computational cost to calculate $\langle Q\rangle$ to accuracy $\epsilon$ by reducing both errors below $\frac{1}{2}\epsilon$ is $\text{C}^{\text{StMC}}\propto N\cdot M=\mathcal{O}(\epsilon^{-2-d/\alpha})$. As shown in \cite{Dodwell2015} Markov chain MLMC has the potential to reduce this cost to $\mathcal{O}(\epsilon^{-2}|\log(\epsilon)|)$.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Multilevel Monte Carlo}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -72,9 +72,9 @@ As shown in the Complexity Theorem in \cite{Dodwell2015}, the computational cost
 \begin{equation}
   S\left[\theta_\ell\right] = \sum_{j=1}^{M_\ell} a_\ell\left\{\frac{m_0}{2}\left(\frac{(\theta_\ell)_j-(\theta_\ell)_{j-1}}{a_\ell}\right)^2 + V\left((\theta_\ell)_j\right)\right\}\qquad \text{with}\quad V(\theta) = \frac{1}{2}m_0\mu^2\theta^2+\frac{1}{4}\lambda\theta^4.\label{eqn:quantum_action}
 \end{equation}
-As Fig. \ref{fig:multilevel} (right) illustrates, in the Metropolis Hasting algorithm the fine level trial state $\theta'_\ell=[\theta'_{\ell,C},\theta'_{\ell,F}]$ is constructed by taking the values $\theta'_{\ell,C}$ at the even nodes from the next coarse level path $\Theta_\ell^{n+1}$. The odd modes $\theta'_{\ell,F}$ are drawn from an approximate quadratic action $q_{\ell}^{\text{MF}}$ conditioned on the coarse modes. A subsequent Metropolis accept/reject with the fine level action ensures that the next state $\theta_\ell^n$ in the fine level Markov chain is drawn from the correct distribution; this guarantees the telescoping-sum property and avoids additional bias.
+As Fig. \ref{fig:multilevel} (right) illustrates, in the Metropolis algorithm the fine level trial state $\theta'_\ell=[\theta'_{\ell,C},\theta'_{\ell,F}]$ is constructed by taking the values $\theta'_{\ell,C}$ at the even nodes from the next coarse level path $\Theta_\ell^{n+1}$. The odd modes $\theta'_{\ell,F}$ are drawn from an approximate quadratic action $q_{\ell}^{\text{MF}}$ conditioned on the coarse modes. A subsequent Metropolis accept/reject step with the fine level action ensures that the next state $\theta_\ell^n$ in the fine level Markov chain is drawn from the correct distribution; this guarantees the telescoping-sum property and avoids additional bias.
 
-As Fig. \ref{fig:quantum_results} confirms, the variance of the differences $Y_\ell$ decays $\propto M_\ell^{-1}$ or $\propto M_\ell^{-2}$ and is much smaller than the variance of the observable itself both for the harmonic oscillator ($\mu=1$, $\lambda=0$) and for a double-well potential ($\mu=-1$, $\lambda=1$). In the latter case the coarse modes $\Theta_{\ell-1}$ as sampled using Hybrid Monte Carlo \cite{Duane1987}.
+As Fig. \ref{fig:quantum_results} confirms, the variance of the differences $Y_\ell$ decays $\propto M_\ell^{-2}$ or $\propto M_\ell^{-1}$ and is much smaller than the variance of the observable itself both for the harmonic oscillator ($\mu^2=1$, $\lambda=0$) and for a double-well potential ($\mu^2=-1$, $\lambda=1$). In the latter case the coarse modes $\Theta_{\ell-1}$ as sampled using Hybrid Monte Carlo \cite{Duane1987}.
 \begin{figure}
   \begin{center}
   \begin{minipage}{0.45\linewidth}
@@ -96,14 +96,14 @@ As Fig. \ref{fig:quantum_results} confirms, the variance of the differences $Y_\
       \includegraphics[width=0.4\linewidth]{\figdir/potential_quartic.pdf}
     \end{textblock}
   \end{minipage}
-  \caption{Variance decay of difference estimator $Y_\ell$ between subsequent levels $\ell$ for the harmonic oscillator (left) and quartic double-well potential (right). The (much larger) variance of the observable itself is shown as a dashed line at the top.}
+  \caption{Variance decay of difference estimator $Y_\ell$ between subsequent levels $\ell$ for the harmonic oscillator (left) and quartic double-well potential (right). The (much larger) variance of the observable $X^2$ itself is shown as a dashed line at the top.}
   \label{fig:quantum_results}
   \end{center}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Effective Field Theories and renormalisation}
+\subsection{Effective Field Theories and Renormalisation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-To guarantee optimal coupling between subsequent levels and hence reduce the variance $Y_\ell$ requires that the theories on the subsequent levels are ``similar''. In other words, the theory on level $\ell-1$ should describe the same physics as the slowly varying, low energy modes on level $\ell$. This is the concept of an effective theory: the coarse theory on level $\ell-1$ is obtained by integrating out the quantum fluctuations of high frequency modes on level $\ell$. For some cases (harmonic oscillator or free quantum field) this can be done exactly, as Fig. \ref{fig:quantum_results} (left) demonstrates, this leads to a further variance reduction and thus increased performance of the MLMC algorithm. Neglecting irrelevant operators, the parameters of the coarse level theory (e.g. $m_0$, $\mu$ and $\lambda$ in Eq. (\ref{eqn:quantum_action})) can be obtained by the renomalisation group transformation from scale $a_\ell$ to $a_{\ell-1}$. Due to the great practical relevance of Quantum Chromodynamics (QCD), asymptotically free theories are of particular interest. In this case there is a well developed machinery for lattice perturbation theory, see e.g. \cite{Hart2009}. Other cases of interest are theories close to a finite non-trivial critical point where the parameters are scale invariant, but naive Markov chain Monte Carlo sampling is very challenging due to long range correlations.
+To guarantee optimal coupling between subsequent levels and hence reduce the variance $Y_\ell$ requires that the theories on the subsequent levels are ``similar''. In other words, the theory on level $\ell-1$ should describe the same physics as the slowly varying, low energy modes on level $\ell$. This is the concept of an effective theory: the coarse theory on level $\ell-1$ is obtained by integrating out the quantum fluctuations of high frequency modes on level $\ell$. For some cases (harmonic oscillator or free quantum field) this can be done exactly. As Fig. \ref{fig:quantum_results} (left) demonstrates, this leads to a further variance reduction and thus increased performance of the MLMC algorithm. Neglecting irrelevant operators, the parameters of the coarse level theory (e.g. $m_0$, $\mu$ and $\lambda$ in Eq. (\ref{eqn:quantum_action})) can be obtained by the renomalisation group transformation from scale $a_\ell$ to $a_{\ell-1}$. Due to the great practical relevance of Quantum Chromodynamics (QCD), asymptotically free theories are of particular interest. In this case there is a well developed machinery for lattice perturbation theory, see e.g. \cite{Hart2009}. Other cases of interest are theories close to a finite non-trivial critical point where the parameters are scale invariant, but naive Markov chain Monte Carlo sampling is very challenging due to long range correlations.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Workplan}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
