@@ -1,0 +1,91 @@
+\documentclass[11pt]{article}
+\usepackage{amssymb,amsmath}
+\usepackage[cm]{fullpage}
+\renewcommand{\vec}[1]{\boldsymbol{#1}}
+\title{Quantum mechanical rotor}
+\begin{document}
+\maketitle
+\section*{Problem}
+We consider the discretised action in \cite{Ammon2016}
+\begin{equation}
+S[\phi] = \frac{I}{a}\sum_{i=0}^{d-1} \left(
+1-\cos(\phi_{i+1}-\phi_i)
+\right)\label{eqn:action_discrete}
+\end{equation}
+for the state variable $\phi_i\in[-\pi,\pi)$ for $i=0,\dots,d-1$ with periodic boundery conditions. $I=M_0R^2$ is the angular moment and $a$ the lattice spacing. Since
+\begin{equation}
+\frac{1}{a^2}\left(1-\cos(\phi_{i+1}-\phi_i)\right) =
+\frac{1}{2}\left(\frac{\phi_{i+1}-\phi_i}{a}\right)^2 + a^2 \left(
+\frac{\phi_{i+1}-\phi_i}{a}\right)^4 + \mathcal{O}(a^4),
+\end{equation}
+Eq. \eqref{eqn:action_discrete} is a discretisation of the continuum action
+\begin{equation*}
+S_{\text{cont}}(\phi) = \frac{I}{2}\int_{0}^{T} \left(\frac{d\phi}{dt}\right)^2\;dt\qquad\text{with $T=a\cdot d$}
+\end{equation*}
+which naturally constrains the angle to $[-\pi,\pi)$.
+\section*{Fine-level sampling}
+To generate the conditioned fine level sample at the odd sites, we need to sample from a distribution with the probability density
+\begin{equation*}
+p(\phi|\phi_+,\phi_-) = \mathcal{Z}^{-1}\exp\left[-\frac{I}{a}f(\phi;\phi_+,\phi_-)\right]
+\end{equation*}
+with
+\begin{equation}
+f(\phi;\phi_+,\phi_-) = 2-\cos(\phi_+-\phi)-\cos(\phi-\phi_-).
+\label{eqn:f}
+\end{equation}
+where $\mathcal{Z}=\mathcal{Z}(\phi_+,\phi_-)$ is a normalisation constant.
+We can now rewrite Eq. \eqref{eqn:f} as follows:
+\begin{equation*}
+\begin{aligned}
+f(\phi;\phi_+,\phi_-) &= 2 - \cos(\phi_+)\cos(\phi)-\sin(\phi_+)\sin(\phi) - \cos(\phi_-)\cos(\phi)-\sin(\phi_-)\sin(\phi)\\
+&= 2 - (\cos(\phi_+)+\cos(\phi_-))\cos(\phi) - (\sin(\phi_+)+\sin(\phi_-))\sin(\phi)\\
+&= 2 - C \cos(\phi-\delta \phi)
+\end{aligned}
+\end{equation*}
+for some constants $C=C(\phi_+,\phi_-)$ and $\delta\phi=\delta\phi(\phi_+,\phi_-)$. More specifically
+\begin{xalignat*}{2}
+\tan(\delta\phi) &= \frac{\sin(\phi_+)+\sin(\phi_-)}{\cos(\phi_+)+\cos(\phi_-)},&
+C &= 2 \cos\left(\frac{|\phi_+-\phi_-|}{2}\right).
+\end{xalignat*}
+Inserting this into Eq. \eqref{eqn:f} gives
+\begin{equation*}
+f(\phi;\phi_+,\phi_-) = 4\sin^2\left(\frac{\phi_+-\phi_-}{4}\right)+\cos\left(\frac{|\phi_+-\phi_-|}{2}\right)\sin^2\left(\frac{\phi-\delta\phi}{2}\right).
+\end{equation*}
+Hence, the density we need to sample from can be written as
+\begin{equation*}
+p(\phi|\phi_+,\phi_-) = \tilde{\mathcal{Z}}^{-1}\exp\left[
+-\frac{I}{2a}C \sin^2\left(\frac{\phi-\delta\phi}{2}\right)]
+\right].
+\end{equation*}
+Due to the obvious symmetries, it would be sufficient if we could sample from the density
+\begin{equation}
+p_\sigma(\psi) = \mathcal{Z}^{-1}_{\sigma} \exp\left[
+-\sigma \sin^2\left(\frac{\psi}{2}\right)
+\right]\qquad\text{for $\psi\in[0,\pi]$ and $\sigma\ge 0$.}
+\label{eqn:dist_psi}
+\end{equation}
+The normalisation constant $\mathcal{Z}_\sigma$ can be calculated by observing that
+\begin{equation*}
+  \int_0^{\pi} \exp\left[-\sigma\sin^2\left(\frac{\psi}{2}\right)\right] = \pi \exp\left[-\frac{\sigma}{2}\right]I_0\left(\frac{\sigma}{2}\right)
+\end{equation*}
+where $I_0$ is the modified Bessel function of the first kind. We might now sample approximately from the distribution in Eq. \eqref{eqn:dist_psi} by replacing $\sin^2(\psi/2)\mapsto \psi^2/4$ in the exponential. This is a good approximation if $\sigma$ is large (more specifically, $\sigma^{-1/2}\ll\pi$), but will not work so well for small value of $\sigma$, which can occur if $\phi_+-\phi_-\approx \pi$. Note that $\sigma\propto a^{-1}$, and hence for small lattice spacings $a$ Gaussian sampling is likely to become increasingly better (but we might still get some bad distributions from $\phi_+-\phi_-\approx\pi$).
+
+Another possible solution is rejection sampling. For this, choose a number of points $\psi_i$, $i=0,\dots,M$ such that $\psi_0=0$, $\psi_M=\pi$ and construct the approximate, piecewise constance density
+\begin{equation}
+q_\sigma(\psi) = \tilde{Z}_{\sigma}^{-1} \exp\left[
+-\sigma \sin^2\left(\frac{\psi_j}{2}\right)
+\right]\qquad\text{for $\psi\in[\psi_{j},\psi_{j+1})$.}
+\end{equation}
+The normalisation constant can be calculated by observing that
+\begin{equation*}
+\sum_{j=0}^{M-1} (\psi_{j+1}-\psi_j) q_\sigma(\psi_j) = 1.
+\end{equation*}
+Since $\sin^2(\psi/2)$ is a montonously increasing function of $\psi$, we have that $p_\sigma(\psi)\le q_\sigma(\psi)$. Hence, rejection sampling would work like this:
+\begin{enumerate}
+\item Draw a sample $\hat{\psi}$ from $q_\sigma$. Since this is a piecewise constant distribution, this can be done very easily.
+  \item Accept this sample with the probability $p_\sigma(\hat{\psi})/q_\sigma(\hat{\psi})$. Otherwise, continue with Step 1 (and repeat until a sample is accepted).
+\end{enumerate}
+The points $\psi_i$ should probably be chosen such that they are clustered closer together where the slope of $\sin^2(\psi/2)$ is large. This will ensure that the ratio $p_\sigma(\psi)/q_\sigma(\psi)$ is not too far from one, i.e. we accept as many points as possible.
+\bibliographystyle{unsrt}
+\bibliography{rotor}
+\end{document}
