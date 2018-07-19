@@ -45,34 +45,38 @@ f(\phi;\phi_+,\phi_-) &= 2 - \cos(\phi_+)\cos(\phi)-\sin(\phi_+)\sin(\phi) - \co
 for some constants $C=C(\phi_+,\phi_-)$ and $\delta\phi=\delta\phi(\phi_+,\phi_-)$. More specifically
 \begin{xalignat*}{2}
 \tan(\delta\phi) &= \frac{\sin(\phi_+)+\sin(\phi_-)}{\cos(\phi_+)+\cos(\phi_-)},&
-C &= 2 \cos\left(\frac{|\phi_+-\phi_-|}{2}\right).
+C &= 2 \left|\cos\left(\frac{\phi_+-\phi_-}{2}\right)\right|.
 \end{xalignat*}
 Inserting this into Eq. \eqref{eqn:f} gives
 \begin{equation*}
-f(\phi;\phi_+,\phi_-) = 4\sin^2\left(\frac{\phi_+-\phi_-}{4}\right)+\cos\left(\frac{|\phi_+-\phi_-|}{2}\right)\sin^2\left(\frac{\phi-\delta\phi}{2}\right).
+  f(\phi;\phi_+,\phi_-) = 2-C+2C\sin^2\left(\frac{\phi-\delta\phi}{2}\right).
 \end{equation*}
 Hence, the density we need to sample from can be written as
 \begin{equation*}
 p(\phi|\phi_+,\phi_-) = \tilde{\mathcal{Z}}^{-1}\exp\left[
--\frac{I}{2a}C \sin^2\left(\frac{\phi-\delta\phi}{2}\right)]
+-\frac{2IC}{a} \sin^2\left(\frac{\phi-\delta\phi}{2}\right)
 \right].
 \end{equation*}
 Due to the obvious symmetries, it would be sufficient if we could sample from the density
 \begin{equation}
 p_\sigma(\psi) = \mathcal{Z}^{-1}_{\sigma} \exp\left[
 -\sigma \sin^2\left(\frac{\psi}{2}\right)
-\right]\qquad\text{for $\psi\in[0,\pi]$ and $\sigma\ge 0$.}
+\right]\qquad\text{for $\psi\in[-\pi,\pi]$ and $\sigma=\frac{2IC}{a}\ge 0$.}
 \label{eqn:dist_psi}
 \end{equation}
 The normalisation constant $\mathcal{Z}_\sigma$ can be calculated by observing that
 \begin{equation*}
-  \int_0^{\pi} \exp\left[-\sigma\sin^2\left(\frac{\psi}{2}\right)\right] = \pi \exp\left[-\frac{\sigma}{2}\right]I_0\left(\frac{\sigma}{2}\right)
+  \mathcal{Z}_\sigma = \int_{-\pi}^{\pi} \exp\left[-\sigma\sin^2\left(\frac{\psi}{2}\right)\right] = 2\pi \exp\left[-\frac{\sigma}{2}\right]I_0\left(\frac{\sigma}{2}\right)
 \end{equation*}
-where $I_0$ is the modified Bessel function of the first kind. We might now sample approximately from the distribution in Eq. \eqref{eqn:dist_psi} by replacing $\sin^2(\psi/2)\mapsto \psi^2/4$ in the exponential. This is a good approximation if $\sigma$ is large (more specifically, $\sigma^{-1/2}\ll\pi$), but will not work so well for small value of $\sigma$, which can occur if $\phi_+-\phi_-\approx \pi$. Note that $\sigma\propto a^{-1}$, and hence for small lattice spacings $a$ Gaussian sampling is likely to become increasingly better (but we might still get some bad distributions from $\phi_+-\phi_-\approx\pi$).
+where $I_0$ is the modified Bessel function of the first kind. We might now sample approximately from the distribution in Eq. \eqref{eqn:dist_psi} by replacing $\sin^2(\psi/2)\mapsto \psi^2/4$ in the exponential, to obtain a Gaussian distribution with width $\sqrt{\frac{2}{\sigma}}$:
+\begin{equation*}
+  p_{\text{Gauss},\sigma} = \mathcal{Z}_{\text{Gauss},\sigma}^{-1} \exp\left[-\frac{\sigma}{4}\psi^2\right]\qquad\text{with $\mathcal{Z}_{\text{Gauss},\sigma}^{-1}=\sqrt{\frac{\sigma}{4\pi}}$}.
+\end{equation*}
+This is a good approximation if $\sigma$ is large (more specifically, $\sigma^{-1/2}\ll\pi$), but will not work so well for small value of $\sigma$, which can occur if $\phi_+-\phi_-\approx \pi$. Note that $\sigma\propto a^{-1}$, and hence for small lattice spacings $a$ Gaussian sampling is likely to become increasingly better (but we might still get some bad distributions from $\phi_+-\phi_-\approx\pi$).
 
-Another possible solution is rejection sampling. For this, choose a number of points $\psi_i$, $i=0,\dots,M$ such that $\psi_0=0$, $\psi_M=\pi$ and construct the approximate, piecewise constance density
+Another possible solution is rejection sampling. For this, choose a number of points $\psi_i$, $i=0,\dots,M$ such that $\psi_0=0$, $\psi_M=\pi$ and construct the approximate, piecewise constant density
 \begin{equation}
-q_\sigma(\psi) = \tilde{Z}_{\sigma}^{-1} \exp\left[
+q_\sigma(\psi) = Z_{q,\sigma}^{-1} \exp\left[
 -\sigma \sin^2\left(\frac{\psi_j}{2}\right)
 \right]\qquad\text{for $\psi\in[\psi_{j},\psi_{j+1})$.}
 \end{equation}
