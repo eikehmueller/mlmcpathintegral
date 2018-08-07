@@ -87,7 +87,7 @@ public:
    * @param[in] x_p Value of \f$x_+\f$
    */
   double virtual inline getWcurvature(const double x_m,
-                                      const double x_p) const = 0;
+                                      const double x_p) const {};
 
   /** @brief Find minimum of conditioned action \f$W_{x_-,x_+}(x)\f$
    *
@@ -98,7 +98,7 @@ public:
    * @param[in] x_p Value of \f$x_+\f$
    */
   double virtual inline getWminimum(const double x_m,
-                                    const double x_p) const = 0;
+                                    const double x_p) const {};
   
 protected:
   /** @brief Number of time slices */
