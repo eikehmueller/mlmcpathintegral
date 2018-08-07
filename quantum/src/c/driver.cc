@@ -4,6 +4,7 @@
 #include "harmonicoscillatoraction.hh"
 #include "quarticoscillatoraction.hh"
 #include "doublewellaction.hh"
+#include "rotoraction.hh"
 #include "quantityofinterest.hh"
 #include "montecarlo.hh"
 #include "parameters.hh"
@@ -77,6 +78,16 @@ int main(int argc, char* argv[]) {
                                  param.sigma);
   std::cout << "Action = double well" << std::endl;
 #endif // ACTION_DOUBLE_WELL
+  /* *** ROTOR *** */
+#ifdef ACTION_ROTOR
+  RotorAction action(param.M_lat,
+                     param.T_final,
+                     param.m0);
+  RotorAction coarse_action(param.M_lat/2,
+                            param.T_final,
+                            param.m0);
+  std::cout << "Action = rotor" << std::endl;
+#endif // ACTION_ROTOR
   std::cout << std::endl;
   
   Sampler* sampler;
