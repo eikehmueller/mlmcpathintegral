@@ -35,7 +35,7 @@ public:
                            const double mu2_)
     : Action(M_lat_,T_final_,m0_), Sampler(false), mu2(mu2_),
       Wcurvature((2./a_lat + a_lat*mu2)*m0),
-      Wminimum_scaling(1./(1.+0.5*a_lat*a_lat*mu2)) {
+      Wminimum_scaling(0.5/(1.+0.5*a_lat*a_lat*mu2)) {
     assert(mu2>0.0);
     build_covariance();
     engine.seed(124129017);
@@ -73,32 +73,36 @@ public:
   void virtual force(const Path* x_path,
                      Path* p_path) const;
 
-  /** @brief Second derivative \f$W''_{\overline{x}}(x)\f$ of conditioned action
+  /** @brief Second derivative \f$W''_{x_-,x_+}(x)\f$ of conditioned action
    *
    * For the harmonic oscillator potential the curvature of the modified
    * action (see Action::getWcurvature()) is 
    \f[
-   W''_{\overline{x}} = \frac{2m_0}{a}+am_0\mu^2
+   W''_{x_-,x_+} = \frac{2m_0}{a}+am_0\mu^2
    \f]
    *
-   * @param[in] x Point at which to calculate the curvature
+   * @param[in] x_m Value of \f$x_-\f$
+   * @param[in] x_p Value of \f$x_+\f$
    */
-  double virtual inline getWcurvature(const double x) const {
+  double virtual inline getWcurvature(const double x_m,
+                                      const double x_p) const {
     return Wcurvature;
   }
 
-  /** @brief Find minimum of conditioned action \f$W_{\overline{x}}(x)\f$
+  /** @brief Find minimum of conditioned action \f$W_{x_-,x_+}(x)\f$
    *
    * For the harmonic oscillator potential the minimum of the modified
    * action (see Action::getWminimum()) can be found at
    \f[
       x_0 = \left(1+\frac{1}{2}a^2\mu^2\right)^{-1}\overline{x}
    \f]
-   *
-   * @param[in] xbar Value of \f$\overline{x}=\frac{1}{2}(x_++x_-)\f$
+   * where \f$\overline{x}=\frac{x_++x_-}{2}\f$.
+   * @param[in] x_m Value of \f$x_-\f$
+   * @param[in] x_p Value of \f$x_+\f$
    */
-  double virtual inline getWminimum(const double xbar) const {
-    return Wminimum_scaling*xbar;
+  double virtual inline getWminimum(const double x_m,
+                                    const double x_p) const {
+    return Wminimum_scaling*(x_m+x_p);
   }
     
   /** @brief Draw sample from distribution

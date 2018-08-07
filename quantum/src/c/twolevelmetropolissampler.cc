@@ -6,15 +6,17 @@
 /** Evaluate conditioned modified action on a given fine path */
 const double TwoLevelMetropolisSampler::conditioned_free_action(const Path* x_path) {
   unsigned int M_lat = fine_action.getM_lat();
-  double x0 = fine_action.getWminimum(0.5*(x_path->data[0]+x_path->data[M_lat-2]));
-  double tmp = x_path->data[M_lat-1] - x0;
-  double curvature = fine_action.getWcurvature(x0);
-  double S = 0.5*curvature*tmp*tmp + 0.5*log(curvature);
+  double x_m = x_path->data[M_lat-2];
+  double x_p = x_path->data[0];
+  double dx = x_path->data[M_lat-1] - fine_action.getWminimum(x_m,x_p);
+  double curvature = fine_action.getWcurvature(x_m,x_p);
+  double S = 0.5*curvature*dx*dx + 0.5*log(curvature);
   for (unsigned int j=0; j<M_lat/2-1; ++j) {
-    double x0 = fine_action.getWminimum(0.5*(x_path->data[2*j]+x_path->data[2*j+2]));
-    double tmp = x_path->data[2*j+1] - x0;
-    double curvature = fine_action.getWcurvature(x0);
-    S += 0.5*curvature*tmp*tmp+0.5*log(curvature);
+    x_m = x_path->data[2*j];
+    x_p = x_path->data[2*j+2];
+    double dx = x_path->data[2*j+1] - fine_action.getWminimum(x_m,x_p);
+    double curvature = fine_action.getWcurvature(x_m,x_p);
+    S += 0.5*curvature*dx*dx+0.5*log(curvature);
   }
   return S;
 }
@@ -28,9 +30,12 @@ void TwoLevelMetropolisSampler::draw(std::vector<Path*> x_path) {
   coarse_sampler.draw(coarse_path);
   // Populate the fine level trial state
   for (unsigned int j=0; j<M_lat/2; ++j) {
-    theta_prime->data[2*j] = theta_coarse->data[j];
-    double x0 = fine_action.getWminimum(0.5*(theta_coarse->data[j]+theta_coarse->data[(j+1)%(M_lat/2)]));
-    theta_prime->data[2*j+1] = x0 + normal_dist(engine)/sqrt(fine_action.getWcurvature(x0));
+    theta_prime->data[2*j] = theta_coarse->data[j];    
+    double x_m = theta_coarse->data[j];
+    double x_p = theta_coarse->data[(j+1)%(M_lat/2)];
+    double x0 = fine_action.getWminimum(x_m,x_p);
+    double sigma = 1./sqrt(fine_action.getWcurvature(x_m,x_p));
+    theta_prime->data[2*j+1] = x0 + normal_dist(engine)*sigma;
   }
   /*
    * Calculate the difference in level-\ell actions,

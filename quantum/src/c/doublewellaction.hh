@@ -62,21 +62,26 @@ public:
   void virtual force(const Path* x_path,
                      Path* p_path) const;
 
-    /** @brief Second derivative \f$W''_{\overline{x}}(x)\f$ of conditioned action
+  /** @brief Second derivative \f$W''_{x_-,x_+}(x)\f$ of conditioned action
+   * at the minimum
    *
    * For the harmonic oscillator potential the curvature of the modified
-   * action (see Action::getWcurvature()) is 
+   * action (see Action::getWcurvature()) at the minimum is 
    \f[
-   W''_{\overline{x}} = \frac{2m_0}{a}+am_0\mu^2 + \frac{a\lambda}{\sigma^2}\left(\frac{x^2}{\sigma^2}-1\right)\exp\left(-\frac{x^2}{2\sigma^2}\right)
+   W''_{x_-,x_+} = \frac{2m_0}{a}+am_0\mu^2 + \frac{a\lambda}{\sigma^2}\left(\frac{\overline{x}^2}{\sigma^2}-1\right)\exp\left(-\frac{\overline{x}^2}{2\sigma^2}\right)
    \f]
-   *
-   * @param[in] x Point at which to calculate the curvature
+   * where \f$\overline{x}=\frac{x_-+x_+}{2}\f$.
+   * 
+   * @param[in] x_m Value of \f$x_-\f$
+   * @param[in] x_p Value of \f$x_+\f$
    */
-  double virtual inline getWcurvature(const double x) const {
+  double virtual inline getWcurvature(const double x_m,
+                                      const double x_p) const {
+    double x = getWminimum(x_m,x_p);
     return (2./a_lat + a_lat*mu2)*m0 + lambda*a_lat*inv_sigma2*(inv_sigma2*x*x-1.)*exp(-0.5*inv_sigma2*x*x);
   }
 
-  /** @brief Find minimum of conditioned action \f$W_{\overline{x}}(x)\f$
+  /** @brief Find minimum of conditioned action \f$W_{x_-,x_+}(x)\f$
    *
    * For the quartic oscillator potential the minimum \f$x_0\f$ of the modified
    * action (see Action::getWminimum()) can be found as the solution of
@@ -88,11 +93,13 @@ public:
    \f[
      x_0^{(n+1)} = \left(1+\frac{1}{2}a^2\mu^2\right)^{-1}\left(\overline{x} + \frac{\lambda a^2}{2m_0 \sigma^2} x_0^{(n)}\exp\left(-\frac{\left(x_0^{(n)}\right)^2}{2\sigma^2}\right)\right)
    \f]
-   * for \f$n=0,\dots,2\f$
+   * for \f$n=0,\dots,2\f$ where \f$\overline{x}=\frac{x_++x_-}{2}\f$.
    *
    * @param[in] xbar Value of \f$\overline{x}=\frac{1}{2}(x_++x_-)\f$
    */
-  double virtual inline getWminimum(const double xbar) const {
+  double virtual inline getWminimum(const double x_m,
+                                    const double x_p) const {
+    double xbar = 0.5*(x_m+x_p);
     const double rho = 1./(1.+0.5*a_lat*a_lat*mu2);
     double x = xbar;
     for (int i=0;i<4;++i) {

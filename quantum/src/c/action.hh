@@ -70,29 +70,35 @@ public:
   void virtual force(const Path* x_path,
                      Path* p_path) const = 0;
 
-  /** @brief Second derivative \f$W''_{\overline{x}}(x)\f$ of conditioned action
+  /** @brief Second derivative \f$W''_{x_-,x_+}(x)\f$ of conditioned
+   * action at its minimum.
    *
    * The second derivative (=curvature) of the conditioned action
-   \f[ 
-     W_{\overline{x}}(x)=\frac{m_0}{2a}\left((x-x_+)^2+(x-x_-)^2\right)+aV(x)
-   \f]   
-   * is required for sampling of the fine lattice sites.
-   *
-   * @param[in] x Point at which to calculate the curvature
-   */
-  double virtual inline getWcurvature(const double x) const = 0;
-
-  /** @brief Find minimum of conditioned action \f$W_{\overline{x}}(x)\f$
-   *
-   * Given \f$\overline{x}=\frac{1}{2}(x_++x_-)\f$, find the minimum \f$x_0\f$ 
-   * of the conditioned action
+   * \f$W_{x_-,x_+}(x)=S(\dots,x_-,x,x_+,\dots)\f$ at its minimum. In the
+   * special case of a Lagrangian of the form \f$\frac{m_0}{2}\dot{x}^2+V(x)\f$
+   * this becomes
    \f[ 
      W_{\overline{x}}(x)=\frac{m_0}{2a}\left((x-x_+)^2+(x-x_-)^2\right)+aV(x)
    \f]
+   * where \f$\overline{x}=\frac{x_++x_-}{2}\f$.
+   * This quantity is required for sampling of the fine lattice sites.
    *
-   * @param[in] xbar Value of \f$\overline{x}=\frac{1}{2}(x_++x_-)\f$
+   * @param[in] x_m Value of \f$x_-\f$
+   * @param[in] x_p Value of \f$x_+\f$
    */
-  double virtual inline getWminimum(const double xbar) const = 0;
+  double virtual inline getWcurvature(const double x_m,
+                                      const double x_p) const = 0;
+
+  /** @brief Find minimum of conditioned action \f$W_{x_-,x_+}(x)\f$
+   *
+   * Given \f$x_-\f$ and \f$x_+\f$, find the minimum \f$x_0\f$ 
+   * of the conditioned action \f$W_{\overline{x}}(x)\f$
+   *
+   * @param[in] x_m Value of \f$x_-\f$
+   * @param[in] x_p Value of \f$x_+\f$
+   */
+  double virtual inline getWminimum(const double x_m,
+                                    const double x_p) const = 0;
   
 protected:
   /** @brief Number of time slices */
