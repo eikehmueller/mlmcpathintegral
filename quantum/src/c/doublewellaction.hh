@@ -95,7 +95,8 @@ public:
    \f]
    * for \f$n=0,\dots,2\f$ where \f$\overline{x}=\frac{x_++x_-}{2}\f$.
    *
-   * @param[in] xbar Value of \f$\overline{x}=\frac{1}{2}(x_++x_-)\f$
+   * @param[in] x_m Value of \f$x_-\f$
+   * @param[in] x_p Value of \f$x_+\f$
    */
   double virtual inline getWminimum(const double x_m,
                                     const double x_p) const {

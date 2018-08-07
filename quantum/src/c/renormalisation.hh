@@ -30,7 +30,8 @@ public:
    * @param[in] T_final_ Final time \f$T\f$
    * @param[in] m0_ Mass \f$m_0\f$
    * @param[in] mu2_ Harmonic oscillator potential parameter \f$\mu^2\f$
-   * @param[in] Renormalisation to use (0: none, 1: perturbatibe, 2: exact)
+   * @param[in] renormalisation_ Type of renormalisation to use 
+   *              (0: none, 1: perturbative, 2: exact)
    */
   RenormalisedHOParameters(const unsigned int M_lat_,
                            const double T_final_,
