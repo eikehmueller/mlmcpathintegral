@@ -78,7 +78,7 @@ public:
    */
   double virtual inline getWcurvature(const double x_m,
                                       const double x_p) const {
-    return m0/a_lat*fabs(cos(0.5*(x_p-x_m)));
+    return 2.0*m0/a_lat*fabs(cos(0.5*(x_p-x_m)));
   }
 
   /** @brief Find minimum of conditioned action \f$W_{x_-,x_+}(x)\f$
