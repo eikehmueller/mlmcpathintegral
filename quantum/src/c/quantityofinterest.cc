@@ -23,5 +23,5 @@ const double QoISusceptibility::evaluate(const Path* x_path) {
     Q = mod_pi(dx);
     chi += Q*Q;
   }
-  return chi/x_path->T_final;
+  return four_pi2_inv*chi/x_path->T_final;
 }

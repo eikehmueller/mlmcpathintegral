@@ -70,7 +70,8 @@ public:
    * @param[in] M_lat_ Number of time slices \f$M\f$
    */
   QoISusceptibility(unsigned int M_lat_) : QoI(M_lat_),
-                                           pi(4.0*atan(1.0)) {}
+                                           pi(4.0*atan(1.0)),
+                                           four_pi2_inv(0.25/(pi*pi)){}
 
   /** @brief Evaluate on a path
    *
@@ -89,6 +90,8 @@ public:
 private:
   /** @brief Constant \f$\pi\f$ */
   const double pi;
+  /** @brief Constant \f$1/(4\pi^2)\f$ */
+  const double four_pi2_inv;
 };
 
 #endif // QUANTITYOFINTEREST_HH
