@@ -29,7 +29,16 @@ int main(int argc, char* argv[]) {
   std::cout << std::endl;
   Parameters param("parameters.in");
   param.show();
+#if defined(ACTION_HARMONIC_OSCILLATOR) || defined(ACTION_QUARTIC_OSCILLATOR) || defined(ACTION_DOUBLEWELL) 
   QoIXsquared qoi(param.M_lat);
+  std::cout << " QoI = X^2 " << std::endl;
+  std::cout << std::endl;
+#endif // ACTION_HARMONIC_OSCILLATOR || ACTION_QUARTIC_OSCILLATOR || ACTION_DOUBLEWELL 
+#ifdef ACTION_ROTOR
+  QoISusceptibility qoi(param.M_lat);
+  std::cout << " QoI = Susceptibility Q[X]^2/T " << std::endl;
+  std::cout << std::endl;
+#endif
   RenormalisedHOParameters coarse_param(param.M_lat,
                                         param.T_final,
                                         param.m0,
@@ -120,8 +129,8 @@ int main(int argc, char* argv[]) {
   std::pair<double,double> result;
   result = montecarlo_singlelevel.evaluate();
   double error = sqrt(result.second/(1.*param.n_samples));
-  std::cout << "   E[x^2] = " << result.first << " +/- " << error << std::endl;
-  std::cout << " Var[x^2] = " << result.second << std::endl;
+  std::cout << "   E[QoI] = " << result.first << " +/- " << error << std::endl;
+  std::cout << " Var[QoI] = " << result.second << std::endl;
   std::cout << std::endl;
   Sampler* coarse_sampler;
   if (param.hmc_sampling) {
@@ -145,7 +154,7 @@ int main(int argc, char* argv[]) {
                                          param.n_burnin,
                                          true);  
   result = montecarlo_twolevel.evaluate_difference();
-  std::cout << " difference <x^2> " << std::endl;
+  std::cout << " difference <QoI> " << std::endl;
   std::cout << " mean = " << result.first << " variance " << result.second << std::endl;
   std::cout << std::endl;
   std::cout << "=== Fine level sampler statistics === " << std::endl; 

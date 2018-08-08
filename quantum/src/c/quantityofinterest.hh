@@ -51,5 +51,44 @@ public:
   const double virtual evaluate(const Path* x_path);
 };
 
+/** @class QoISusceptibility
+ *
+ * @brief class for calculation the susceptibility for the QM rotor
+ *
+ * For a path \f$X\f$ the susceptibility is defined as
+ * \f$\chi_t = Q[X]^2/T \f$ where
+ * \f[
+ *   Q[X] = \frac{1}{2\pi} \sum_{j=0}^{M_{lat}-1} (X_j - X_{j-1}) \mod [-\pi,\pi]
+ * \f]
+ * and the time is \f$T=a_{lat}M_{lat}\f$.
+ */
+
+class QoISusceptibility : public QoI {
+public: 
+  /** @brief Create new instance 
+   *
+   * @param[in] M_lat_ Number of time slices \f$M\f$
+   */
+  QoISusceptibility(unsigned int M_lat_) : QoI(M_lat_),
+                                           pi(4.0*atan(1.0)) {}
+
+  /** @brief Evaluate on a path
+   *
+   * @param[in] x_path Path \f$X\f$ on which to evaluate the QoI
+   */
+  const double virtual evaluate(const Path* x_path);
+
+  /** @brief Calculate \f$ x mod [-pi,pi) \f$
+   *
+   * @param[in] x Value of \f$x\f$
+   */
+  double inline mod_pi(const double x) {
+    return x - 2.*pi*floor(0.5*(x+pi)/pi);
+  }
+  
+private:
+  /** @brief Constant \f$\pi\f$ */
+  const double pi;
+};
 
 #endif // QUANTITYOFINTEREST_HH
