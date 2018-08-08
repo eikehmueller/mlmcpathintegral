@@ -31,12 +31,14 @@ int main(int argc, char* argv[]) {
   param.show();
 #if defined(ACTION_HARMONIC_OSCILLATOR) || defined(ACTION_QUARTIC_OSCILLATOR) || defined(ACTION_DOUBLEWELL) 
   QoIXsquared qoi(param.M_lat);
-  std::cout << " QoI = X^2 " << std::endl;
+  std::cout << std::endl;
+  std::cout << "QoI = X^2 " << std::endl;
   std::cout << std::endl;
 #endif // ACTION_HARMONIC_OSCILLATOR || ACTION_QUARTIC_OSCILLATOR || ACTION_DOUBLEWELL 
 #ifdef ACTION_ROTOR
   QoISusceptibility qoi(param.M_lat);
-  std::cout << " QoI = Susceptibility Q[X]^2/T " << std::endl;
+  std::cout << std::endl;
+  std::cout << "QoI = Susceptibility Q[X]^2/T " << std::endl;
   std::cout << std::endl;
 #endif
   RenormalisedHOParameters coarse_param(param.M_lat,
