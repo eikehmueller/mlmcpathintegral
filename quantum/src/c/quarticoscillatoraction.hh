@@ -59,7 +59,17 @@ public:
   void virtual force(const Path* x_path,
                      Path* p_path) const;
 
-    /** @brief Second derivative \f$W''_{\overline{x}}(x)\f$ of conditioned action
+    /** @brief Initialise path 
+   *
+   * Set initial values of path to zero.
+   *
+   * @param[out] x_path Path \f$X\f$ to be set
+   */
+  void virtual initialise_path(Path* x_path) const {
+    std::fill(x_path->data,x_path->data+M_lat,0.0);
+  }
+
+  /** @brief Second derivative \f$W''_{\overline{x}}(x)\f$ of conditioned action
    *
    * For the harmonic oscillator potential the curvature of the modified
    * action (see Action::getWcurvature()) is 

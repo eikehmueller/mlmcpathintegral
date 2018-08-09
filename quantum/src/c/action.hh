@@ -54,7 +54,7 @@ public:
    * 
    * Calculate \f$S[X]\f$ for a specific path
    *
-   * @param x_path Path, has to be an array of length \f$M\f$
+   * @param[in] x_path Path, has to be an array of length \f$M\f$
    */
   const double virtual evaluate(const Path* x_path) const = 0;
 
@@ -63,13 +63,22 @@ public:
    * Calculate \f$P = \frac{\partial S[X]}{\partial X}\f$ for a specific
    * path and return the resulting force as a path.
    *
-   * @param x_path Path \f$X\f$ on which to evaluate the force
-   * @param p_path Resulting force \f$P\f$ at every point
+   * @param[in] x_path Path \f$X\f$ on which to evaluate the force
+   * @param[out] p_path Resulting force \f$P\f$ at every point
    *
    */
   void virtual force(const Path* x_path,
                      Path* p_path) const = 0;
 
+  /** @brief Initialise path 
+   *
+   * Set initial values of path, those values will be used to start the 
+   * sampling process
+   *
+   * @param[out] x_path Path \f$X\f$ to be set
+   */
+  void virtual initialise_path(Path* x_path) const = 0;
+  
   /** @brief Second derivative \f$W''_{x_-,x_+}(x)\f$ of conditioned
    * action at its minimum.
    *
@@ -87,7 +96,7 @@ public:
    * @param[in] x_p Value of \f$x_+\f$
    */
   double virtual inline getWcurvature(const double x_m,
-                                      const double x_p) const {};
+                                      const double x_p) const = 0;
 
   /** @brief Find minimum of conditioned action \f$W_{x_-,x_+}(x)\f$
    *
@@ -98,7 +107,7 @@ public:
    * @param[in] x_p Value of \f$x_+\f$
    */
   double virtual inline getWminimum(const double x_m,
-                                    const double x_p) const {};
+                                    const double x_p) const = 0;
   
 protected:
   /** @brief Number of time slices */

@@ -45,6 +45,7 @@ public:
     // Create temporary workspace
     x_path_cur = new Path(M_lat,T_final);
     p_path_cur = new Path(M_lat,T_final);
+    action.initialise_path(x_path_cur);
     // Burn in
     std::vector<Path*> x_path_tmp;
     x_path_tmp.push_back(new Path(M_lat,T_final));
