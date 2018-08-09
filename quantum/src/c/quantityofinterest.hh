@@ -1,5 +1,6 @@
 #ifndef QUANTITYOFINTEREST_HH
 #define QUANTITYOFINTEREST_HH QUANTITYOFINTEREST_HH
+#include <math.h>
 #include "path.hh"
 
 /** @file quantityofinterest.hh
