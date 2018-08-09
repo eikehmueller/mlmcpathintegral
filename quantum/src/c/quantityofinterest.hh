@@ -54,7 +54,7 @@ public:
 
 /** @class QoISusceptibility
  *
- * @brief class for calculation the susceptibility for the QM rotor
+ * @brief class for calculating the susceptibility for the QM rotor
  *
  * For a path \f$X\f$ the susceptibility is defined as
  * \f$\chi_t = Q[X]^2/T \f$ where
