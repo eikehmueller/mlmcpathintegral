@@ -5,6 +5,7 @@
 #include "action.hh"
 #include "rotoraction.hh"
 #include "expsin2distribution.hh"
+#include "auxilliary.hh"
 
 /** @file conditionedfineaction.hh
  * @brief Header file for conditioned fine action classes
@@ -132,8 +133,7 @@ public:
    *
    * @param[in] action_ Underlying action class
    */
-  RotorConditionedFineAction (const RotorAction& action_) : pi(4.0*atan(1.0)),
-                                                            action(action_) {
+  RotorConditionedFineAction (const RotorAction& action_) : action(action_) {
     engine.seed(11897197);
   }
 
@@ -155,18 +155,8 @@ public:
    */
   virtual double evaluate(const Path* x_path) const;
 
-private:
-  /** @brief Calculate \f$ x mod [-pi,pi) \f$
-   *
-   * @param[in] x Value of \f$x\f$
-   */
-  double inline mod_2pi(const double x) const {
-    return x - 2.*pi*floor(0.5*(x+pi)/pi);
-  }
 
 private:
-  /** @brief Constant \f$\pi\f$ */
-  const double pi;
   /** @brief Underlying action class */
   const RotorAction& action;
   /** @brief Random number engine */

@@ -1,5 +1,5 @@
 #include "rotoraction.hh"
-#include <iostream>
+
 /** @file rotoraction.cc
  * @brief Implementation of rotoraction.hh
  */
@@ -41,8 +41,7 @@ void RotorAction::force(const Path* x_path,
 /** Initialise path */
 void RotorAction::initialise_path(Path* x_path) const {
   std::mt19937_64 engine;
-  double pi = 4.0*atan(1.0);
-  std::uniform_real_distribution<double> uniform(-pi,pi);
+  std::uniform_real_distribution<double> uniform(-M_PI,M_PI);
   std::generate(x_path->data,x_path->data+M_lat,[&uniform,&engine]() {return uniform(engine);});
   x_path->save_to_disk("path_initial.dat");
 }

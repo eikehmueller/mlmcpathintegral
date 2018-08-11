@@ -1,6 +1,6 @@
 #ifndef ROTORACTION_HH
 #define ROTORACTION_HH ROTORACTION_HH
-#include <math.h>
+#include <cmath>
 #include <random>
 #include "path.hh"
 #include "action.hh"

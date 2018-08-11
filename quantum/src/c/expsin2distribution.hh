@@ -42,15 +42,14 @@ public:
    *                  constant distribution
    */
   ExpSin2Distribution(const double sigma_,
-                      const unsigned int nint_=16) : pi(4.0*atan(1.0)),
-                                                     sigma(sigma_),
+                      const unsigned int nint_=16) : sigma(sigma_),
                                                      nint(nint_),
-                                                     Znorm_inv(1./(2.0*pi*exp(-0.5*sigma)*gsl_sf_bessel_I0(0.5*sigma))),
+                                                     Znorm_inv(1./(2.0*M_PI*exp(-0.5*sigma)*gsl_sf_bessel_I0(0.5*sigma))),
                                                      distribution(0.0,1.0) {
     /* Calculate cumulative probability density for piecewise constant
      * distribution */
     // Width of intervales
-    double h = pi/(1.0*nint);
+    double h = M_PI/(1.0*nint);
     p_cdf.push_back(0.0);
     for (unsigned int i=0;i<=nint;++i) {
       double x_tmp = i*h;
@@ -103,8 +102,6 @@ public:
   double evaluate(const double x) const;
 
 private:
-  /** @brief constant pi */
-  const double pi;
   /** @brief Parameter \f$\sigma\f$ of distribution */
   const double sigma;
   /** @brief Number of intervals of piecewise constant distribution */
