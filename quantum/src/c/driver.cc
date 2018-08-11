@@ -149,7 +149,11 @@ int main(int argc, char* argv[]) {
     exit(-1);
 #endif // ACTION_HARMONIC_OSCILLATOR
   }
+#ifdef ACTION_ROTOR
+  RotorConditionedFineAction conditioned_fine_action(action);
+#else
   GaussianConditionedFineAction conditioned_fine_action(action);
+#endif // ACTION_ROTOR
   // Two level method
   MonteCarloTwoLevel montecarlo_twolevel(coarse_action,
                                          *coarse_sampler,
