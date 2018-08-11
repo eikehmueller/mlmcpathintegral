@@ -3,6 +3,8 @@
 #include <random>
 #include "path.hh"
 #include "action.hh"
+#include "rotoraction.hh"
+#include "expsin2distribution.hh"
 
 /** @file conditionedfineaction.hh
  * @brief Header file for conditioned fine action classes
@@ -19,7 +21,7 @@
  *   fill in all fine points \f$X_{2i+1}\f$ by sampling from a suitable
  *   conditioned probability distribution
  *   \f[
- *     p(X_{2i+1}|X_{2i},X_{2i+2}) = Z(X_{2i,2i+1}) \exp\left[-S^{cond}_(X_{2i+1;X_{2i},X_{2i+2}}) \right] \qquad\text{for all $i=0,\dots,M/2-1$}.
+ *     p(X_{2i+1}|X_{2i},X_{2i+2}) = Z(X_{2i,2i+1})^{-1} \exp\left[-S^{cond}_(X_{2i+1;X_{2i},X_{2i+2}}) \right] \qquad\text{for all $i=0,\dots,M/2-1$}.
  *   \f]
  *   Note that \f$Z(2i,2i+2)\f$ is a normalisation constant which guarantees
  *   that this is indeed a probability density.
@@ -27,8 +29,9 @@
  * - Given a path \f$X\f$ of length \f$M\f$ for which the fine points
  *   \f$X_{2i+1}\f$ with \f$i=0,\dots,M/2-1\f$ have been set (for example with 
  *   the above method), calculate the value of the conditioned action
+ *   (including the normalisation constant) as
  *   \f[
- *     \sum_{i=0}^{M/2-1} \log(Z(X_{2i},X_{2i+2})) - S^{cond}(X_{2i+1;X_{2i},X_{2i+2}})
+ *     \sum_{i=0}^{M/2-1} S^{cond}(X_{2i+1;X_{2i},X_{2i+2}} + \log(Z(X_{2i},X_{2i+2}) 
  *   \f]
  */
 
@@ -107,6 +110,69 @@ private:
   /** @brief Normal distribution for drawing from distribution */
   mutable Normal normal_dist;
 
+};
+
+/** @class RotorConditionedFineAction
+ *
+ * @brief Conditioned fine action for the QM rotor
+ *
+ * The conditioned action is given by
+ * \f[
+ *    S^{cond}(X;X_-,X_+) = 2W''(X_-,X_+)\sin^2\left(X-\overline{X}(X_-,X_+)\right)
+ * \f]
+ * where the curvature \f$W''(X_-,X_+)\f$ and mean \f$\overline{X}(X_-,X_+)\f$
+ * are given by the getWcurvature() and getWminimum() methods of underlying
+ * action class which is passed to the constructor.
+ */
+class RotorConditionedFineAction : public ConditionedFineAction {
+public:
+  /** @brief Constructor
+   * 
+   * Construct new instance
+   *
+   * @param[in] action_ Underlying action class
+   */
+  RotorConditionedFineAction (const RotorAction& action_) : pi(4.0*atan(1.0)),
+                                                            action(action_) {
+    engine.seed(11897197);
+  }
+
+  /** @brief Fill in fine points
+   * 
+   * Given a path \f$X\f$ for which the coarse points have been set, fill in
+   * the fine points by sampling from the conditioned action.
+   *
+   * @param[inout] x_path Path \f$X\f$ to fill
+   */
+  virtual void fill_fine_points(Path* x_path) const;
+
+  /** @brief Evaluate conditioned action at fine points
+   * 
+   * Given a path \f$X\f$ for which all points have been set, evaluate the
+   * conditioned action.
+   *
+   * @param[inout] x_path Path \f$X\f$ to fill
+   */
+  virtual double evaluate(const Path* x_path) const;
+
+private:
+  /** @brief Calculate \f$ x mod [-pi,pi) \f$
+   *
+   * @param[in] x Value of \f$x\f$
+   */
+  double inline mod_2pi(const double x) const {
+    return x - 2.*pi*floor(0.5*(x+pi)/pi);
+  }
+
+private:
+  /** @brief Constant \f$\pi\f$ */
+  const double pi;
+  /** @brief Underlying action class */
+  const RotorAction& action;
+  /** @brief Random number engine */
+  typedef std::mt19937_64 Engine;
+  /** @brief Type of Mersenne twister engine */
+  mutable Engine engine;
 };
 
 #endif // CONDITIONEDFINEACTION_HH

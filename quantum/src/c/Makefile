@@ -3,9 +3,9 @@
 # local_XXX.mk
 include local.mk
 
-CFLAGS_OPT=-O3 -std=c++11 -I$(EIGEN_DIR)
-CFLAGS_DEBUG=-g -Wall -O0 -std=c++11 -I$(EIGEN_DIR)
-LFLAGS=
+CFLAGS_OPT=-O3 -std=c++11 -I$(EIGEN_INCLUDE_DIR) -I$(GSL_INCLUDE_DIR)
+CFLAGS_DEBUG=-g -Wall -O0 -std=c++11 -I$(EIGEN_INCLUDE_DIR) -I$(GSL_INCLUDE_DIR)
+LFLAGS=-L$(GSL_LIB_DIR) -lgsl
 CXX=g++
 
 SOURCES=$(wildcard *.hh *.cc)
