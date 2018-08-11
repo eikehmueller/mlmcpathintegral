@@ -29,13 +29,13 @@ double GaussianConditionedFineAction::evaluate(const Path* x_path) const {
   double x_p = x_path->data[0];
   double dx = x_path->data[M_lat-1] - action.getWminimum(x_m,x_p);
   double curvature = action.getWcurvature(x_m,x_p);
-  double S = 0.5*curvature*dx*dx + 0.5*log(curvature);
+  double S = 0.5*curvature*dx*dx - 0.5*log(curvature);
   for (unsigned int j=0; j<M_lat/2-1; ++j) {
     x_m = x_path->data[2*j];
     x_p = x_path->data[2*j+2];
     double dx = x_path->data[2*j+1] - action.getWminimum(x_m,x_p);
     double curvature = action.getWcurvature(x_m,x_p);
-    S += 0.5*curvature*dx*dx + 0.5*log(curvature);
+    S += 0.5*curvature*dx*dx - 0.5*log(curvature);
   }
   return S;
 }
