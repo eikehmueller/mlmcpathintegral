@@ -3,24 +3,6 @@
  * @brief Implementation of twolevelmetropolissampler.hh
  */
 
-/** Evaluate conditioned modified action on a given fine path */
-const double TwoLevelMetropolisSampler::conditioned_free_action(const Path* x_path) {
-  unsigned int M_lat = fine_action.getM_lat();
-  double x_m = x_path->data[M_lat-2];
-  double x_p = x_path->data[0];
-  double dx = x_path->data[M_lat-1] - fine_action.getWminimum(x_m,x_p);
-  double curvature = fine_action.getWcurvature(x_m,x_p);
-  double S = 0.5*curvature*dx*dx + 0.5*log(curvature);
-  for (unsigned int j=0; j<M_lat/2-1; ++j) {
-    x_m = x_path->data[2*j];
-    x_p = x_path->data[2*j+2];
-    double dx = x_path->data[2*j+1] - fine_action.getWminimum(x_m,x_p);
-    double curvature = fine_action.getWcurvature(x_m,x_p);
-    S += 0.5*curvature*dx*dx+0.5*log(curvature);
-  }
-  return S;
-}
-
 /** Draw new sample pair */
 void TwoLevelMetropolisSampler::draw(std::vector<Path*> x_path) {
   unsigned int M_lat = fine_action.getM_lat();
@@ -29,14 +11,14 @@ void TwoLevelMetropolisSampler::draw(std::vector<Path*> x_path) {
   coarse_path.push_back(theta_coarse);
   coarse_sampler.draw(coarse_path);
   // Populate the fine level trial state
+  // Step 1: coarse level points
   for (unsigned int j=0; j<M_lat/2; ++j) {
     theta_prime->data[2*j] = theta_coarse->data[j];    
-    double x_m = theta_coarse->data[j];
-    double x_p = theta_coarse->data[(j+1)%(M_lat/2)];
-    double x0 = fine_action.getWminimum(x_m,x_p);
-    double sigma = 1./sqrt(fine_action.getWcurvature(x_m,x_p));
-    theta_prime->data[2*j+1] = x0 + normal_dist(engine)*sigma;
   }
+  // Step 2: fine level points from conditioned action
+  // DEBUG: use engine from this class to ensure bit-reproducibility
+  conditioned_fine_action.set_ext_engine(&engine);
+  conditioned_fine_action.fill_fine_points(theta_prime);
   /*
    * Calculate the difference in level-\ell actions,
    * required to calculate the ratio
@@ -60,8 +42,8 @@ void TwoLevelMetropolisSampler::draw(std::vector<Path*> x_path) {
    * q_{ML}^{\ell,F}(\theta_{\ell,F}^{n}|\theta_{\ell,C}^{n}) /
    * q_{ML}^{\ell,F}(\theta'_{\ell,F}|\theta'_{\ell,C})
    */
-  double deltaS_trial = conditioned_free_action(theta_fine) \
-    - conditioned_free_action(theta_prime);
+  double deltaS_trial = conditioned_fine_action.evaluate(theta_fine) \
+    - conditioned_fine_action.evaluate(theta_prime);
 
   double deltaS = deltaS_fine + deltaS_coarse + deltaS_trial;
   bool accept = false;

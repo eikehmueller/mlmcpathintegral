@@ -5,6 +5,7 @@
 #include <iostream>
 #include "sampler.hh"
 #include "action.hh"
+#include "conditionedfineaction.hh"
 #include "quantityofinterest.hh"
 #include "twolevelmetropolissampler.hh"
 
@@ -98,6 +99,7 @@ public:
    * @param[in] coarse_action_ Action on coarse level
    * @param[in] coarse_sampler_ Sampler on coarse level
    * @param[in] fine_action_ Action on fine level
+   * @param[in] conditioned_fine_action_ Conditioned fine action
    * @param[in] qoi_ Quantity of interest
    * @param[in] n_samples_ Number of samples to evaluate
    * @param[in] n_burnin_ Number of burnin samples (QoI not evaluated on those)
@@ -106,6 +108,7 @@ public:
   MonteCarloTwoLevel(Action& coarse_action_,
                      Sampler& coarse_sampler_,
                      Action& fine_action_,
+                     ConditionedFineAction& conditioned_fine_action_,
                      QoI& qoi_,
                      const unsigned int n_samples_,
                      const unsigned int n_burnin_,
@@ -114,10 +117,12 @@ public:
     coarse_sampler(coarse_sampler_),
     coarse_action(coarse_action_),
     fine_action(fine_action_),
+    conditioned_fine_action(conditioned_fine_action_),
     qoi(qoi_),
     twolevel_sampler(coarse_sampler_,
                      coarse_action_,
                      fine_action_,
+                     conditioned_fine_action_,
                      record_stats_) {}
 
   /** @brief Calculate mean and variance of difference
@@ -140,6 +145,8 @@ private:
   Action& coarse_action;
   /** @brief Action on fine level */
   Action& fine_action;
+  /** @brief Conditioned fine action */
+  ConditionedFineAction& conditioned_fine_action;
   /** @brief Quantity of interest */
   QoI& qoi;
   /** Two-level sampler */

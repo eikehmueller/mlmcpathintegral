@@ -4,6 +4,7 @@
 #include <random>
 #include "action.hh"
 #include "sampler.hh"
+#include "conditionedfineaction.hh"
 
 /** @file twolevelmetropolissampler.hh
  * @brief Header file for two level Metropolis sampler
@@ -47,16 +48,20 @@ public:
    * @param[in] coarse_sampler_ Sampler on coarse level \f$\ell-1\f$
    * @param[in] coarse_action_ Action on coarse level \f$\ell-1\f$
    * @param[in] fine_action_ Action on fine level \f$\ell\f$
+   * @param[in] conditioned_fine_action_ Conditioned fine action object for
+   *            filling in the fine points
    * @param[in] record_stats_ Record statistics?
    */
   TwoLevelMetropolisSampler(Sampler& coarse_sampler_,
                             const Action& coarse_action_,
                             const Action& fine_action_,
+                            const ConditionedFineAction& conditioned_fine_action_,
                             const bool record_stats_=false) :
     Base(record_stats_),
     coarse_sampler(coarse_sampler_),
     coarse_action(coarse_action_),
-    fine_action(fine_action_) {
+    fine_action(fine_action_),
+    conditioned_fine_action(conditioned_fine_action_) {
     assert(2*coarse_action.getM_lat()==fine_action.getM_lat());
     theta_coarse = new Path(coarse_action.getM_lat(),
                             coarse_action.getT_final());
@@ -86,25 +91,7 @@ public:
    * @param[out] x_path Vector of pointers to fine- and coarse- path
    */
   virtual void draw(std::vector<Path*> x_path);
-  
-private:
-  /** @brief Evaluate conditioned free action
-   *
-   * Let
-   * \f[
-     S_{free}[\theta] = \frac{m_0}{a}\sum_{j=0}^{M/2}(\theta_{2j}-\frac{\theta_{2j}+\theta_{2j+2}}{2})^2
-     \f]
-   * 
-   * This can be used to calculate the conditioned free probability as
-   * \f$\pi_{free}^{\ell}(\theta_F|\theta_C) = e^{-S_{free}[\theta]}\f$
-   *
-   * which is required in the accept-/reject-step
-   *
-   * @param[in] x_path Path \f$\theta\f$ on which to evaluate
-   * \f$\pi_{free}^{\ell}(\theta)\f$
-   */
-  const double conditioned_free_action(const Path* x_path);
-                            
+                              
 protected:
   /** @brief Sampler on coarse level */
   Sampler& coarse_sampler;
@@ -112,6 +99,8 @@ protected:
   const Action& coarse_action;
   /** @brief Action on fine level */
   const Action& fine_action;
+  /** @brief Conditioned fine action */
+  const ConditionedFineAction& conditioned_fine_action;
   /** @brief Temporary state vector on coarse level \f$\theta^n_{\ell-1}\f$ */
   mutable Path* theta_coarse;
   /** @brief Temporary state vector on fine level \f$\theta^n_{\ell}\f$ */
@@ -124,12 +113,8 @@ protected:
   typedef std::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */
   mutable Engine engine;
-  /** @brief Type of normal distribution */
-  typedef std::normal_distribution<double> Normal;
   /** @brief Type of uniform distribution */
   typedef std::uniform_real_distribution<double> Uniform;
-  /** @brief Normal distribution for drawing from conditioned free distribution */
-  mutable Normal normal_dist;
   /** @brief Uniform distribution in [0,1] for accept/reject step */
   mutable Uniform uniform_dist;
 };

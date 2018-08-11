@@ -10,6 +10,7 @@
 #include "parameters.hh"
 #include "renormalisation.hh"
 #include "twolevelmetropolissampler.hh"
+#include "conditionedfineaction.hh"
 #include "hmcsampler.hh"
 #include "config.h"
 
@@ -148,9 +149,12 @@ int main(int argc, char* argv[]) {
     exit(-1);
 #endif // ACTION_HARMONIC_OSCILLATOR
   }
+  GaussianConditionedFineAction conditioned_fine_action(action);
+  // Two level method
   MonteCarloTwoLevel montecarlo_twolevel(coarse_action,
                                          *coarse_sampler,
                                          action,
+                                         conditioned_fine_action,
                                          qoi,
                                          param.n_samples,
                                          param.n_burnin,
