@@ -130,7 +130,7 @@ protected:
   typedef std::uniform_real_distribution<double> Uniform;
   /** @brief Normal distribution for drawing from conditioned free distribution */
   mutable Normal normal_dist;
-  /** @brief Normal distribution in [0,1] for accept/reject step */
+  /** @brief Uniform distribution in [0,1] for accept/reject step */
   mutable Uniform uniform_dist;
 };
 #endif // TWOLEVELMETROPOLISSAMPLER_HH
