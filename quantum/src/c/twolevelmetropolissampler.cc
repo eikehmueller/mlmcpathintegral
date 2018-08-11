@@ -16,8 +16,6 @@ void TwoLevelMetropolisSampler::draw(std::vector<Path*> x_path) {
     theta_prime->data[2*j] = theta_coarse->data[j];    
   }
   // Step 2: fine level points from conditioned action
-  // DEBUG: use engine from this class to ensure bit-reproducibility
-  conditioned_fine_action.set_ext_engine(&engine);
   conditioned_fine_action.fill_fine_points(theta_prime);
   /*
    * Calculate the difference in level-\ell actions,

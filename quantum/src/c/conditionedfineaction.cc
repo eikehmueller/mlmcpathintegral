@@ -12,14 +12,14 @@ void GaussianConditionedFineAction::fill_fine_points(Path* x_path) const {
     double x_p = x_path->data[2*(j+1)];
     double x0 = action.getWminimum(x_m,x_p);
     double sigma = 1./sqrt(action.getWcurvature(x_m,x_p));
-    x_path->data[2*j+1] = x0 + normal_dist(*ext_engine)*sigma;
+    x_path->data[2*j+1] = x0 + normal_dist(engine)*sigma;
   }
   // Final point which requires wrap around
   double x_m = x_path->data[M_lat-2];
   double x_p = x_path->data[0];
   double x0 = action.getWminimum(x_m,x_p);
   double sigma = 1./sqrt(action.getWcurvature(x_m,x_p));
-  x_path->data[M_lat-1] = x0 + normal_dist(*ext_engine)*sigma;
+  x_path->data[M_lat-1] = x0 + normal_dist(engine)*sigma;
 }
 
 /* Evaluate conditioned action at fine points */

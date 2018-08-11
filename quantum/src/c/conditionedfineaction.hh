@@ -51,9 +51,6 @@ public:
    * @param[inout] x_path Path \f$X\f$ to fill
    */
   virtual double evaluate(const Path* x_path) const = 0;  
-
-  /** @brief Set external engine (debug only, to ensure bitreproducibility) */
-  virtual void set_ext_engine(std::mt19937_64* ext_engine_) const = 0;
 };
 
 /** @class GaussianConditionedFineAction
@@ -97,11 +94,6 @@ public:
    * @param[inout] x_path Path \f$X\f$ to fill
    */
   virtual double evaluate(const Path* x_path) const;
-
-  /** @brief Set external engine (debug only, to ensure bitreproducibility) */
-  virtual void set_ext_engine(std::mt19937_64* ext_engine_) const {
-    ext_engine = ext_engine_;
-  }
   
 private:
   /** @brief Underlying action class */
@@ -110,8 +102,6 @@ private:
   typedef std::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */
   mutable Engine engine;
-  /** External engine (for debugging) */
-  mutable Engine* ext_engine;
   /** @brief Type of normal distribution */
   typedef std::normal_distribution<double> Normal;
   /** @brief Normal distribution for drawing from distribution */
