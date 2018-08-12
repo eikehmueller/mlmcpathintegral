@@ -74,12 +74,16 @@ public:
    * For the harmonic oscillator potential the curvature of the modified
    * action (see Action::getWcurvature()) is 
    \f[
-   W''_{\overline{x}} = \frac{2m_0}{a}+am_0\mu^2 + 3a\lambda x^2
+   W''_{x_-,x_+} = \frac{2m_0}{a}+am_0\mu^2 + 3a\lambda x^2
    \f]
+   * where \f$x=\frac{x_-+x_+}{2}\f$.
    *
-   * @param[in] x Point at which to calculate the curvature
+   * @param[in] x_m Value of \f$x_-\f$
+   * @param[in] x_p Value of \f$x_+\f$
    */
-  double virtual inline getWcurvature(const double x) const {
+  double virtual inline getWcurvature(const double x_m,
+                                      const double x_p) const {
+    double x = 0.5*(x_m+x_p);
     return (2./a_lat + a_lat*mu2)*m0 + 3.*lambda*a_lat*x*x;
   }
 
@@ -90,17 +94,19 @@ public:
    \f[
       x_0\left(1+\frac{1}{2}a^2\mu^2\right) + \frac{\lambda a^2}{2m_0}  x_0^3 = \overline{x}
    \f]
-   * Here, we calculate an approximate value by setting
-   * \f$x_0^{(0)} = \overline{x}\f$ and then computing
-   * and iterating
+   * where \f$x=\frac{x_-+x_+}{2}\f$. Here, we calculate an approximate value
+   * by setting \f$x_0^{(0)} = \overline{x}\f$ and then iterating
    \f[
      x_0^{(n+1)} = \left(1+\frac{1}{2}a^2\mu^2\right)^{-1}\left(\overline{x} - \frac{\lambda a^2}{2m_0} \left(x_0^{(n)}\right)^3\right)
    \f]
    * for \f$n=0,\dots,2\f$
    *
-   * @param[in] xbar Value of \f$\overline{x}=\frac{1}{2}(x_++x_-)\f$
+   * @param[in] x_m Value of \f$x_-\f$
+   * @param[in] x_p Value of \f$x_+\f$
    */
-  double virtual inline getWminimum(const double xbar) const {
+  double virtual inline getWminimum(const double x_m,
+                                    const double x_p) const {
+    const double xbar = 0.5*(x_m+x_p);
     const double rho = 1./(1.+0.5*a_lat*a_lat*mu2);
     double x = xbar;
     for (int i=0;i<4;++i) {
