@@ -122,7 +122,7 @@ if (__name__ == '__main__'):
     plot_variance_decay(filenames,labels,'variance_decay_ho.pdf',2)
 
     # *** quartic oscillator ***
-    do_run = True
+    do_run = False
 
     T_final = 1.0
     m0 = 1.0
@@ -147,4 +147,4 @@ if (__name__ == '__main__'):
     labels.append('naive')
     if (do_run):
         multilevel._run_all(filename=filename,force=True)
-    plot_variance_decay(filenames,labels,'variance_decay_qo.pdf',1)
+    plot_variance_decay(filenames,labels,'variance_decay_qo.pdf',2)
