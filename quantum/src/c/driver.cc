@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
   std::cout << std::endl;
   Parameters param("parameters.in");
   param.show();
-#if defined(ACTION_HARMONIC_OSCILLATOR) || defined(ACTION_QUARTIC_OSCILLATOR) || defined(ACTION_DOUBLEWELL) 
+#if defined(ACTION_HARMONIC_OSCILLATOR) || defined(ACTION_QUARTIC_OSCILLATOR) || defined(ACTION_DOUBLE_WELL)
   QoIXsquared qoi(param.M_lat);
   std::cout << std::endl;
   std::cout << "QoI = X^2 " << std::endl;
