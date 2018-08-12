@@ -22,7 +22,7 @@
  *   fill in all fine points \f$X_{2i+1}\f$ by sampling from a suitable
  *   conditioned probability distribution
  *   \f[
- *     p(X_{2i+1}|X_{2i},X_{2i+2}) = Z(X_{2i,2i+1})^{-1} \exp\left[-S^{cond}_(X_{2i+1;X_{2i},X_{2i+2}}) \right] \qquad\text{for all $i=0,\dots,M/2-1$}.
+ *     p(X_{2i+1}|X_{2i},X_{2i+2}) = Z(X_{2i,2i+1})^{-1} \exp\left[-S^{cond}(X_{2i+1;X_{2i},X_{2i+2}}) \right] \qquad\text{for all $i=0,\dots,M/2-1$}.
  *   \f]
  *   Note that \f$Z(2i,2i+2)\f$ is a normalisation constant which guarantees
  *   that this is indeed a probability density.
@@ -32,7 +32,7 @@
  *   the above method), calculate the value of the conditioned action
  *   (including the normalisation constant) as
  *   \f[
- *     \sum_{i=0}^{M/2-1} S^{cond}(X_{2i+1;X_{2i},X_{2i+2}} + \log(Z(X_{2i},X_{2i+2}) 
+ *     \sum_{i=0}^{M/2-1} S^{cond}(X_{2i+1;X_{2i},X_{2i+2}}) + \log(Z(X_{2i},X_{2i+2}) 
  *   \f]
  */
 
