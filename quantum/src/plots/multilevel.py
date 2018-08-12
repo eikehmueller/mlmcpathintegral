@@ -86,7 +86,7 @@ class MultiLevel(object):
             if m:
                 mean = float(m.group(1))
                 diff_variance = float(m.group(2))
-            m = re.match('^ *Var\[x\^2\] *= *(.*) *$',line)
+            m = re.match('^ *Var\[QoI\] *= *(.*) *$',line)
             if m:
                 variance = float(m.group(1))
         if (not (action==self.action)):
