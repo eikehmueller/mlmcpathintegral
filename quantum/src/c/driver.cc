@@ -12,6 +12,7 @@
 #include "twolevelmetropolissampler.hh"
 #include "conditionedfineaction.hh"
 #include "hmcsampler.hh"
+#include "clustersampler.hh"
 #include "config.h"
 
 /** @file driver.cc
