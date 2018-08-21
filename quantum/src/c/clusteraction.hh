@@ -37,41 +37,27 @@ public:
                 const double m0_)
     : Action(M_lat_, T_final_, m0_) {}
 
-  /** @brief Energy of link \f$E_{\ell}\f$
+  /** @brief Change \f$S_{\ell}\f$ in energy used in bonding probabilities
+   *
+   * The probability to have a bond between sites \f$i\f$ and \f$i+1\f$
+   * is given by \f$1-e^{\min(0,-S_{\ell})}\f$
    *
    * @param[in] x_m Value of \f$x^{(\ell)}_- = x_i\f$
    * @param[in] x_p Value of \f$x^{(\ell)}_+ = x_{i+1}\f$
    */
-  virtual double link_E(const double x_m, const double x_p) const = 0;
+  virtual double S_ell(const double x_m, const double x_p) const = 0;
 
-  /** @brief Limit on energy of link \f$Q_{\ell}\f$
-   *
-   * This returns
-   * \f[
-   *   Q_\ell = \max_{h_-,h_+\in H} E(h_-x^{(\ell)}_-),h_+x^{(\ell)}_+)
-   * \f]
-   * where \f$H\f$ is the current subgroup. 
-   * 
-   * @param[in] x_m Value of \f$x^{(\ell)}_- = x_i\f$
-   * @param[in] x_p Value of \f$x^{(\ell)}_+ = x_{i+1}\f$
+  /** @brief Set angle for the next step of the cluster algorithm
    */
-  virtual double link_Q(const double x_m, const double x_p) const = 0;
+  virtual void new_angle() const = 0;
 
-  /** @brief Set subgroup \f$H\f$ for the next step of the cluster algorithm
-   */
-  virtual void new_subgroup() const = 0;
-
-  /** @brief Return element \f$h\in H\f$ of currently set subgroup 
-   */
-  virtual void new_subgroup_element() const = 0;
-
-  /** @brief Apply currently set subgroup \f$h\in H\f$ element to \f$x\f$
+  /** @brief Flip the current spin
    * 
    * Return \f$hx\f$
    *
    * @param[in] x value of site \f$x\f$
    */
-  virtual double apply_current_subgroup_element(const double x) const = 0;
+  virtual double flip(const double x) const = 0;
 };
 
 #endif // CLUSTERACTION_HH
