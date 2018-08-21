@@ -9,10 +9,6 @@
 void HMCSampler::draw(std::vector<Path*> x_path) {
   const unsigned int M_lat = action.getM_lat();
   const double T_final = action.getT_final();
-  // Trial state
-  Path* x_path_trial = new Path(M_lat,T_final);
-  // Momentum change from force term
-  Path* dp_path = new Path(M_lat,T_final);
   // Initial kinetic energy
   double T_kin_cur = 0.0;
   // Draw random momentum from normal distribution
@@ -82,7 +78,4 @@ void HMCSampler::draw(std::vector<Path*> x_path) {
             x_path_cur->data+M_lat,
             x_path[0]->data);
 
-  // Deallocate memory
-  delete x_path_trial;
-  delete dp_path;
 }

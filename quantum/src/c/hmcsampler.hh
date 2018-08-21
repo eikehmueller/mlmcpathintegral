@@ -43,8 +43,14 @@ public:
     const unsigned int M_lat = action.getM_lat();
     const double T_final = action.getT_final();
     // Create temporary workspace
+    // current position
     x_path_cur = new Path(M_lat,T_final);
+    // current (conjugate) momentum
     p_path_cur = new Path(M_lat,T_final);
+    // Trial path
+    x_path_trial = new Path(M_lat,T_final);
+    // Momentum change from force term
+    dp_path = new Path(M_lat,T_final);
     action.initialise_path(x_path_cur);
     // Burn in
     std::vector<Path*> x_path_tmp;
@@ -62,6 +68,8 @@ public:
   virtual ~HMCSampler() {
     delete x_path_cur;
     delete p_path_cur;
+    delete x_path_trial;
+    delete dp_path;
   }
 
   /** @brief Draw a sample 
@@ -83,10 +91,12 @@ protected:
   const unsigned int n_burnin;
   /** @brief Current state (path) */
   mutable Path* x_path_cur;
-  /** @brief Trial state (path) */
-  mutable Path* x_path_trial;
   /** @brief temporary for momenta */
   mutable Path* p_path_cur;
+  /** @brief Trial state (path) */
+  mutable Path* x_path_trial;
+  /** @brief temporary increment for momenta */
+  mutable Path* dp_path;
   /** @brief Random number engine */
   typedef std::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */
