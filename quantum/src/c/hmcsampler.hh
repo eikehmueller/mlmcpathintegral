@@ -58,6 +58,7 @@ public:
     for (unsigned int i=0;i<n_burnin;++i) {
       draw(x_path_tmp);
     }
+    delete [] x_path_tmp[0];
     engine.seed(8923759233);
   }
 
