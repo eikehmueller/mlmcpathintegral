@@ -34,7 +34,7 @@ public:
              const double T_hmc_,
              const double dt_hmc_,
              const unsigned int n_burnin_) :
-    Base(action_.getM_lat()),
+    Base(true),
     action(action_),
     T_hmc(T_hmc_),
     dt_hmc(dt_hmc_),
