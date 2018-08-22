@@ -54,11 +54,12 @@ public:
     action.initialise_path(x_path_cur);
     // Burn in
     std::vector<Path*> x_path_tmp;
-    x_path_tmp.push_back(new Path(M_lat,T_final));
+    Path* tmp = new Path(M_lat,T_final);
+    x_path_tmp.push_back(tmp);
     for (unsigned int i=0;i<n_burnin;++i) {
       draw(x_path_tmp);
     }
-    delete [] x_path_tmp[0];
+    delete tmp;
     engine.seed(8923759233);
   }
 
