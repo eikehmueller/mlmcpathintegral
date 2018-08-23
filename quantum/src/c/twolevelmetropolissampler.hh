@@ -63,34 +63,23 @@ public:
     fine_action(fine_action_),
     conditioned_fine_action(conditioned_fine_action_) {
     assert(2*coarse_action.getM_lat()==fine_action.getM_lat());
-    theta_coarse = new Path(coarse_action.getM_lat(),
-                            coarse_action.getT_final());
-    theta_fine = new Path(fine_action.getM_lat(),
-                          coarse_action.getT_final());
-    theta_fine_C = new Path(coarse_action.getM_lat(),
-                            coarse_action.getT_final());
-    theta_prime = new Path(fine_action.getM_lat(),
-                           coarse_action.getT_final());
+    theta_coarse = std::make_shared<Path>(coarse_action.getM_lat(),
+                                          coarse_action.getT_final());
+    theta_fine = std::make_shared<Path>(fine_action.getM_lat(),
+                                        coarse_action.getT_final());
+    theta_fine_C = std::make_shared<Path>(coarse_action.getM_lat(),
+                                          coarse_action.getT_final());
+    theta_prime = std::make_shared<Path>(fine_action.getM_lat(),
+                                         coarse_action.getT_final());
     engine.seed(89216491);
     reset_stats();
   }
-
-  /** @brief Destroy intance
-   * 
-   * Deallocate all temporary memory
-   */
-  virtual ~TwoLevelMetropolisSampler() {
-    delete theta_coarse;
-    delete theta_fine;
-    delete theta_fine_C;
-    delete theta_prime;
-  }  
 
   /** @brief draw new fine-/coarse-level path pair
    *
    * @param[out] x_path Vector of pointers to fine- and coarse- path
    */
-  virtual void draw(std::vector<Path*> x_path);
+  virtual void draw(std::vector<std::shared_ptr<Path>> x_path);
                               
 protected:
   /** @brief Sampler on coarse level */
@@ -102,13 +91,13 @@ protected:
   /** @brief Conditioned fine action */
   const ConditionedFineAction& conditioned_fine_action;
   /** @brief Temporary state vector on coarse level \f$\theta^n_{\ell-1}\f$ */
-  mutable Path* theta_coarse;
+  mutable std::shared_ptr<Path> theta_coarse;
   /** @brief Temporary state vector on fine level \f$\theta^n_{\ell}\f$ */
-  mutable Path* theta_fine;
+  mutable std::shared_ptr<Path> theta_fine;
   /** @brief Coarse part of state vector on fine level \f$\theta^n_{\ell,C}\f$ */
-  mutable Path* theta_fine_C;
+  mutable std::shared_ptr<Path> theta_fine_C;
   /** @brief Trial state vector on fine level \f$\theta'_{\ell}\f$ */
-  mutable Path* theta_prime;
+  mutable std::shared_ptr<Path> theta_prime;
   /** @brief Random number engine */
   typedef std::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */

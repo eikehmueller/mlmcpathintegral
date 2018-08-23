@@ -5,7 +5,7 @@
  */
 
 /** Evaluate action */
-const double RotorAction::evaluate(const Path* x_path) const {
+const double RotorAction::evaluate(const std::shared_ptr<Path> x_path) const {
   double x_diff = x_path->data[0]-x_path->data[M_lat-1];
   double S = 1.-cos(x_diff);
   for (unsigned int j=1;j<M_lat;++j) {
@@ -16,8 +16,8 @@ const double RotorAction::evaluate(const Path* x_path) const {
 }
 
 /** Calculate force */
-void RotorAction::force(const Path* x_path,
-                        Path* p_path) const {
+void RotorAction::force(const std::shared_ptr<Path> x_path,
+                        std::shared_ptr<Path> p_path) const {
   double tmp = m0/a_lat;
   // Left boundary
   double x_m = x_path->data[M_lat-1];
@@ -39,7 +39,7 @@ void RotorAction::force(const Path* x_path,
 }
 
 /** Initialise path */
-void RotorAction::initialise_path(Path* x_path) const {
+void RotorAction::initialise_path(std::shared_ptr<Path> x_path) const {
   std::mt19937_64 engine;
   std::uniform_real_distribution<double> uniform(-M_PI,M_PI);
   std::generate(x_path->data,x_path->data+M_lat,[&uniform,&engine]() {return uniform(engine);});

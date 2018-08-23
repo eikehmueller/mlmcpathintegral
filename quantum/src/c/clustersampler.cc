@@ -23,7 +23,7 @@ std::pair<bool,int> ClusterSampler::process_link(const int i,
 }
 
 /** Draw next sample */
-void ClusterSampler::draw(std::vector<Path*> x_path) {
+void ClusterSampler::draw(std::vector<std::shared_ptr<Path>> x_path) {
   const unsigned int M_lat = action.getM_lat();
   // Pick new subgroup
   action.new_angle();

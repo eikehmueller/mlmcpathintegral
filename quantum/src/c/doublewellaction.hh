@@ -44,7 +44,7 @@ public:
    *
    * @param[in] x_path path \f$X\f$, has to be am array of length \f$M\f$
    */
-  const double virtual evaluate(const Path* x_path) const;
+  const double virtual evaluate(const std::shared_ptr<Path> x_path) const;
 
   /** @brief Calculate force for HMC integrator for a specific path
    *
@@ -59,8 +59,8 @@ public:
    * @param x_path Path \f$X\f$ on which to evaluate the force
    * @param p_path Resulting force \f$P\f$ at every point
    */
-  void virtual force(const Path* x_path,
-                     Path* p_path) const;
+  void virtual force(const std::shared_ptr<Path> x_path,
+                     std::shared_ptr<Path> p_path) const;
 
   /** @brief Initialise path 
    *
@@ -68,7 +68,7 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ to be set
    */
-  void virtual initialise_path(Path* x_path) const {
+  void virtual initialise_path(std::shared_ptr<Path> x_path) const {
     std::fill(x_path->data,x_path->data+M_lat,0.0);
   }
 

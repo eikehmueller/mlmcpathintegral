@@ -25,7 +25,7 @@ public:
    *
    * @param[in] x_path Path \f$X\f$ on which to evaluate the QoI
    */
-  const double virtual evaluate(const Path* x_path) = 0;
+  const double virtual evaluate(const std::shared_ptr<Path> x_path) = 0;
   
 protected:
   /** @brief Number of time slices */
@@ -50,7 +50,7 @@ public:
    *
    * @param[in] x_path Path \f$X\f$ on which to evaluate the QoI
    */
-  const double virtual evaluate(const Path* x_path);
+  const double virtual evaluate(const std::shared_ptr<Path> x_path);
 };
 
 /** @class QoISusceptibility
@@ -78,7 +78,7 @@ public:
    *
    * @param[in] x_path Path \f$X\f$ on which to evaluate the QoI
    */
-  const double virtual evaluate(const Path* x_path);
+  const double virtual evaluate(const std::shared_ptr<Path> x_path);
   
 private:
   /** @brief Constant \f$1/(4\pi^2)\f$ */

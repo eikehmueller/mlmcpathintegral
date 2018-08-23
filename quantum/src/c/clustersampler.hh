@@ -38,11 +38,11 @@ public:
     const unsigned int M_lat = action.getM_lat();
     const double T_final = action.getT_final();
     // Create temporary workspace
-    x_path_cur = new Path(M_lat,T_final);
+    x_path_cur = std::make_shared<Path>(M_lat,T_final);
     action.initialise_path(x_path_cur);
     // Burn in
-    std::vector<Path*> x_path_tmp;
-    x_path_tmp.push_back(new Path(M_lat,T_final));
+    std::vector<std::shared_ptr<Path>> x_path_tmp;
+    x_path_tmp.push_back(std::make_shared<Path>(M_lat,T_final));
     for (unsigned int i=0;i<n_burnin;++i) {
       draw(x_path_tmp);
     }
@@ -52,9 +52,7 @@ public:
    *
    * Deallocate memory
    */
-  virtual ~ClusterSampler() {
-    delete x_path_cur;
-  }
+  virtual ~ClusterSampler() {}
 
   /** @brief Draw a sample 
    *
@@ -62,7 +60,7 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ drawn from distribution
    */
-  virtual void draw(std::vector<Path*> x_path);
+  virtual void draw(std::vector<std::shared_ptr<Path>> x_path);
 
 private:
   
@@ -85,7 +83,7 @@ protected:
   /** @brief Number of burn-in steps */
   const unsigned int n_burnin;
   /** @brief Current state (path) */
-  mutable Path* x_path_cur;
+  mutable std::shared_ptr<Path> x_path_cur;
   /** @brief Random number engine */
   typedef std::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */

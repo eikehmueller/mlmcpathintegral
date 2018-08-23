@@ -5,7 +5,7 @@
  */
 
 /* Evaluate QoI */
-const double QoIXsquared::evaluate(const Path* x_path) {
+const double QoIXsquared::evaluate(const std::shared_ptr<Path> x_path) {
   double X2=0.0;
   for (unsigned int i=0; i<x_path->M_lat; ++i) {
     double tmp = x_path->data[i];
@@ -15,7 +15,7 @@ const double QoIXsquared::evaluate(const Path* x_path) {
 }
 
 /* Evaluate QoI */
-const double QoISusceptibility::evaluate(const Path* x_path) {
+const double QoISusceptibility::evaluate(const std::shared_ptr<Path> x_path) {
   double dx = x_path->data[0]-x_path->data[x_path->M_lat-1];
   double Q = mod_2pi(dx);
   for (unsigned int i=1; i<x_path->M_lat; ++i) {

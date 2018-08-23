@@ -4,7 +4,7 @@
  */
 
 /** Evaluate action */
-const double DoubleWellAction::evaluate(const Path* x_path) const {
+const double DoubleWellAction::evaluate(const std::shared_ptr<Path> x_path) const {
   double ainv2 = 1./(a_lat*a_lat);
   double x_j = x_path->data[0];
   double x_j_squared = x_j*x_j;
@@ -20,8 +20,8 @@ const double DoubleWellAction::evaluate(const Path* x_path) const {
 }
 
 /** Calculate force */
-void DoubleWellAction::force(const Path* x_path,
-                             Path* p_path) const {
+void DoubleWellAction::force(const std::shared_ptr<Path> x_path,
+                             std::shared_ptr<Path> p_path) const {
   double tmp_1 = m0/a_lat;
   double tmp_2 = 2.+a_lat*a_lat*mu2;
   double tmp_3 = a_lat*lambda*inv_sigma2;

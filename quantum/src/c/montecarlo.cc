@@ -9,9 +9,9 @@
 
 /** Calculate Monte Carlo estimate with single level method */
 std::pair<double,double> MonteCarloSingleLevel::evaluate() {
-  std::vector<Path*> x_path(1);
-  x_path[0] = new Path(action.getM_lat(),
-                       action.getT_final());
+  std::vector<std::shared_ptr<Path>> x_path;
+  x_path.push_back(std::make_shared<Path>(action.getM_lat(),
+                                          action.getT_final()));
 
   // Burn-in phase
   for (unsigned int k=0;k<n_burnin;++k) {
@@ -44,11 +44,13 @@ std::pair<double,double> MonteCarloSingleLevel::evaluate() {
 
 /** Calculate mean and variance of difference in QoI */
 std::pair<double,double> MonteCarloTwoLevel::evaluate_difference() {
-  std::vector<Path*> x_path(2);
-  x_path[0] = new Path(fine_action.getM_lat(),
-                       fine_action.getT_final()); // fine path
-  x_path[1] = new Path(coarse_action.getM_lat(),
-                       fine_action.getT_final()); // coarse path
+  std::vector<std::shared_ptr<Path>> x_path;
+  // fine path
+  x_path.push_back(std::make_shared<Path>(fine_action.getM_lat(),
+                                          fine_action.getT_final()));
+  // coarse path
+  x_path.push_back(std::make_shared<Path>(coarse_action.getM_lat(),
+                                          fine_action.getT_final()));
 
   // Burn-in phase
   for (unsigned int k=0;k<n_burnin;++k) {

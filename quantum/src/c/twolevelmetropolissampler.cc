@@ -4,10 +4,10 @@
  */
 
 /** Draw new sample pair */
-void TwoLevelMetropolisSampler::draw(std::vector<Path*> x_path) {
+void TwoLevelMetropolisSampler::draw(std::vector<std::shared_ptr<Path>> x_path) {
   unsigned int M_lat = fine_action.getM_lat();
   // Draw new coarse level sample
-  std::vector<Path*> coarse_path;
+  std::vector<std::shared_ptr<Path>> coarse_path;
   coarse_path.push_back(theta_coarse);
   coarse_sampler.draw(coarse_path);
   // Populate the fine level trial state

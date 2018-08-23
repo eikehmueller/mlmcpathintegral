@@ -6,7 +6,7 @@
  */
 
 /** Draw next sample */
-void HMCSampler::draw(std::vector<Path*> x_path) {
+void HMCSampler::draw(std::vector<std::shared_ptr<Path>> x_path) {
   const unsigned int M_lat = action.getM_lat();
   const double T_final = action.getT_final();
   // Initial kinetic energy

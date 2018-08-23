@@ -4,7 +4,7 @@
  */
 
 /* Fill in fine points */
-void GaussianConditionedFineAction::fill_fine_points(Path* x_path) const {
+void GaussianConditionedFineAction::fill_fine_points(std::shared_ptr<Path> x_path) const {
   unsigned int M_lat = x_path->M_lat;
   // interior points
   for (unsigned int j=0; j<M_lat/2-1; ++j) {
@@ -23,7 +23,7 @@ void GaussianConditionedFineAction::fill_fine_points(Path* x_path) const {
 }
 
 /* Evaluate conditioned action at fine points */
-double GaussianConditionedFineAction::evaluate(const Path* x_path) const {
+double GaussianConditionedFineAction::evaluate(const std::shared_ptr<Path> x_path) const {
   unsigned int M_lat = action.getM_lat();
   double x_m = x_path->data[M_lat-2];
   double x_p = x_path->data[0];
@@ -41,7 +41,7 @@ double GaussianConditionedFineAction::evaluate(const Path* x_path) const {
 }
 
 /* Fill in fine points */
-void RotorConditionedFineAction::fill_fine_points(Path* x_path) const {
+void RotorConditionedFineAction::fill_fine_points(std::shared_ptr<Path> x_path) const {
   unsigned int M_lat = x_path->M_lat;
   // interior points
   for (unsigned int j=0; j<M_lat/2-1; ++j) {
@@ -62,7 +62,7 @@ void RotorConditionedFineAction::fill_fine_points(Path* x_path) const {
 }
 
 /* Evaluate conditioned action at fine points */
-double RotorConditionedFineAction::evaluate(const Path* x_path) const {
+double RotorConditionedFineAction::evaluate(const std::shared_ptr<Path> x_path) const {
   unsigned int M_lat = action.getM_lat();
   double x_m = x_path->data[M_lat-2];
   double x_p = x_path->data[0];

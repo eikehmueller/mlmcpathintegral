@@ -40,39 +40,32 @@ public:
     dt_hmc(dt_hmc_),
     n_burnin(n_burnin_)
   {
+    engine.seed(8923759233);
     const unsigned int M_lat = action.getM_lat();
     const double T_final = action.getT_final();
     // Create temporary workspace
     // current position
-    x_path_cur = new Path(M_lat,T_final);
+    x_path_cur = std::make_shared<Path>(M_lat,T_final);
     // current (conjugate) momentum
-    p_path_cur = new Path(M_lat,T_final);
+    p_path_cur = std::make_shared<Path>(M_lat,T_final);
     // Trial path
-    x_path_trial = new Path(M_lat,T_final);
+    x_path_trial = std::make_shared<Path>(M_lat,T_final);
     // Momentum change from force term
-    dp_path = new Path(M_lat,T_final);
+    dp_path = std::make_shared<Path>(M_lat,T_final);
     action.initialise_path(x_path_cur);
     // Burn in
-    std::vector<Path*> x_path_tmp;
-    Path* tmp = new Path(M_lat,T_final);
-    x_path_tmp.push_back(tmp);
+    std::vector<std::shared_ptr<Path>> x_path_tmp;
+    x_path_tmp.push_back(std::make_shared<Path>(M_lat,T_final));
     for (unsigned int i=0;i<n_burnin;++i) {
       draw(x_path_tmp);
     }
-    delete tmp;
-    engine.seed(8923759233);
   }
 
   /** @brief Destroy instance
    *
    * Deallocate memory
    */
-  virtual ~HMCSampler() {
-    delete x_path_cur;
-    delete p_path_cur;
-    delete x_path_trial;
-    delete dp_path;
-  }
+  virtual ~HMCSampler() {}
 
   /** @brief Draw a sample 
    *
@@ -80,7 +73,7 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ drawn from distribution
    */
-  virtual void draw(std::vector<Path*> x_path);
+  virtual void draw(std::vector<std::shared_ptr<Path>> x_path);
 
 protected:
   /** @brief Action to sample from */
@@ -92,13 +85,13 @@ protected:
   /** @brief Number of burn-in steps */
   const unsigned int n_burnin;
   /** @brief Current state (path) */
-  mutable Path* x_path_cur;
+  mutable std::shared_ptr<Path> x_path_cur;
   /** @brief temporary for momenta */
-  mutable Path* p_path_cur;
+  mutable std::shared_ptr<Path> p_path_cur;
   /** @brief Trial state (path) */
-  mutable Path* x_path_trial;
+  mutable std::shared_ptr<Path> x_path_trial;
   /** @brief temporary increment for momenta */
-  mutable Path* dp_path;
+  mutable std::shared_ptr<Path> dp_path;
   /** @brief Random number engine */
   typedef std::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */

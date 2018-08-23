@@ -39,23 +39,22 @@ public:
     assert(mu2>0.0);
     build_covariance();
     engine.seed(124129017);
-    y_tmp = new Path(M_lat_,T_final_);
+    y_tmp = std::make_shared<Path>(M_lat_,T_final_);
   }
 
   /** @brief Tidy up
    * 
    * Delete any temporary arrays
    */
-  ~HarmonicOscillatorAction() {
-    delete y_tmp;
-  }
+  ~HarmonicOscillatorAction() {}
+
   /** @brief Evaluate action for a specific path
    * 
    * Calculate \f$S[X]\f$ for a specific path
    *
    * @param[in] x_path path \f$X\f$, has to be am array of length \f$M\f$
    */
-  const double virtual evaluate(const Path* x_path) const;
+  const double virtual evaluate(const std::shared_ptr<Path> x_path) const;
 
   /** @brief Calculate force for HMC integrator for a specific path
    *
@@ -70,8 +69,8 @@ public:
    * @param x_path Path \f$X\f$ on which to evaluate the force
    * @param p_path Resulting force \f$P\f$ at every point
    */
-  void virtual force(const Path* x_path,
-                     Path* p_path) const;
+  void virtual force(const std::shared_ptr<Path> x_path,
+                     std::shared_ptr<Path> p_path) const;
 
   /** @brief Initialise path 
    *
@@ -79,7 +78,7 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ to be set
    */
-  void virtual initialise_path(Path* x_path) const {
+  void virtual initialise_path(std::shared_ptr<Path> x_path) const {
     std::fill(x_path->data,x_path->data+M_lat,0.0);
   }  
   
@@ -122,7 +121,7 @@ public:
    *
    * @param[out] x_path: path to populate
    */
-  virtual void draw(std::vector<Path*> x_path);
+  virtual void draw(std::vector<std::shared_ptr<Path>> x_path);
 
   /** @brief Exact expression for expectation value of \f$X^2\f$
    *
@@ -175,7 +174,7 @@ private:
   /** @brief Normal distribution */
   mutable Normal normal_dist;
   /** @brief temporary array used for direct sampling */
-  Path* y_tmp;
+  std::shared_ptr<Path> y_tmp;
   /** @brief Curvature of modified potential */
   const double Wcurvature;
   /** @brief Scaling factor for calculation of mimimum of modified potential */

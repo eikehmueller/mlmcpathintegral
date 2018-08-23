@@ -56,7 +56,7 @@ public:
    *
    * @param[in] x_path Path, has to be an array of length \f$M\f$
    */
-  const double virtual evaluate(const Path* x_path) const = 0;
+  const double virtual evaluate(const std::shared_ptr<Path> x_path) const = 0;
 
   /** @brief Calculate force for HMC integrator for a specific path
    *
@@ -67,8 +67,8 @@ public:
    * @param[out] p_path Resulting force \f$P\f$ at every point
    *
    */
-  void virtual force(const Path* x_path,
-                     Path* p_path) const = 0;
+  void virtual force(const std::shared_ptr<Path> x_path,
+                     std::shared_ptr<Path> p_path) const = 0;
 
   /** @brief Initialise path 
    *
@@ -77,7 +77,7 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ to be set
    */
-  void virtual initialise_path(Path* x_path) const = 0;
+  void virtual initialise_path(std::shared_ptr<Path> x_path) const = 0;
   
   /** @brief Second derivative \f$W''_{x_-,x_+}(x)\f$ of conditioned
    * action at its minimum.
