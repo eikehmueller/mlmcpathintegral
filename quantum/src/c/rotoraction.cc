@@ -40,8 +40,7 @@ void RotorAction::force(const std::shared_ptr<Path> x_path,
 
 /** Initialise path */
 void RotorAction::initialise_path(std::shared_ptr<Path> x_path) const {
-  std::mt19937_64 engine;
   std::uniform_real_distribution<double> uniform(-M_PI,M_PI);
-  std::generate(x_path->data,x_path->data+M_lat,[&uniform,&engine]() {return uniform(engine);});
+  std::generate(x_path->data,x_path->data+M_lat,[this,&uniform]() {return uniform(engine);});
   x_path->save_to_disk("path_initial.dat");
 }
