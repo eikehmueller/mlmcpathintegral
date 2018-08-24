@@ -32,7 +32,7 @@ public:
     action(action_),
     n_burnin(n_burnin_),
     uniform_dist(0.0,1.0),
-    uniform_int_dist(0,action_.getM_lat())
+    uniform_int_dist(0,action_.getM_lat()-1)
   {
     engine.seed(2141517);
     const unsigned int M_lat = action.getM_lat();
