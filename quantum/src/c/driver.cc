@@ -103,16 +103,16 @@ int main(int argc, char* argv[]) {
 #endif // ACTION_ROTOR
   std::cout << std::endl;
   
-  Sampler* sampler;
+  std::shared_ptr<Sampler> sampler;
   if (param.sampler == SamplerHMC) {
-    sampler = new HMCSampler(action,
-                             param.T_hmc,
-                             param.dt_hmc,
-                             param.n_burnin_sampler);
+    sampler = std::make_shared<HMCSampler>(action,
+                                           param.T_hmc,
+                                           param.dt_hmc,
+                                           param.n_burnin_sampler);
   } else if (param.sampler == SamplerCluster) {
 #ifdef ACTION_ROTOR
-    sampler = new ClusterSampler(action,
-                                 param.n_burnin_sampler);
+    sampler = std::make_shared<ClusterSampler>(action,
+                                               param.n_burnin_sampler);
 #else
     std::cout << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
 #endif
@@ -146,16 +146,16 @@ int main(int argc, char* argv[]) {
   std::cout << "   E[QoI] = " << result.first << " +/- " << error << std::endl;
   std::cout << " Var[QoI] = " << result.second << std::endl;
   std::cout << std::endl;
-  Sampler* coarse_sampler;
+  std::shared_ptr<Sampler> coarse_sampler;
   if (param.sampler == SamplerHMC) {
-    coarse_sampler = new HMCSampler(coarse_action,
-                                    param.T_hmc,
-                                    param.dt_hmc,
-                                    param.n_burnin_sampler);
+    coarse_sampler = std::make_shared<HMCSampler>(coarse_action,
+                                                  param.T_hmc,
+                                                  param.dt_hmc,
+                                                  param.n_burnin_sampler);
   } else if (param.sampler == SamplerCluster) {
 #ifdef ACTION_ROTOR
-    coarse_sampler = new ClusterSampler(coarse_action,
-                                        param.n_burnin_sampler);
+    coarse_sampler = std::make_shared<ClusterSampler>(coarse_action,
+                                                      param.n_burnin_sampler);
 #else
     std::cout << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
     exit(-1);
@@ -198,9 +198,4 @@ int main(int argc, char* argv[]) {
   std::cout << "=== Two level sampler statistics === " << std::endl; 
   montecarlo_twolevel.get_twolevelsampler().show_stats();
   std::cout << std::endl;
-  // Tidy up
-  if ( (param.sampler == SamplerHMC) or (param.sampler == SamplerCluster) ) {
-    delete sampler;
-    delete coarse_sampler;
-  }
 }
