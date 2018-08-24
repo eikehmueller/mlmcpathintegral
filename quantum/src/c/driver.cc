@@ -108,11 +108,11 @@ int main(int argc, char* argv[]) {
     sampler = new HMCSampler(action,
                              param.T_hmc,
                              param.dt_hmc,
-                             param.n_burnin_hmc);
+                             param.n_burnin_sampler);
   } else if (param.sampler == SamplerCluster) {
 #ifdef ACTION_ROTOR
     sampler = new ClusterSampler(action,
-                                 param.n_burnin_hmc);
+                                 param.n_burnin_sampler);
 #else
     std::cout << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
 #endif
@@ -151,11 +151,11 @@ int main(int argc, char* argv[]) {
     coarse_sampler = new HMCSampler(coarse_action,
                                     param.T_hmc,
                                     param.dt_hmc,
-                                    param.n_burnin_hmc);
+                                    param.n_burnin_sampler);
   } else if (param.sampler == SamplerCluster) {
 #ifdef ACTION_ROTOR
     coarse_sampler = new ClusterSampler(coarse_action,
-                                        param.n_burnin_hmc);
+                                        param.n_burnin_sampler);
 #else
     std::cout << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
     exit(-1);

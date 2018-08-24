@@ -27,7 +27,7 @@ void Parameters::readfile() {
     infile >> dummy >> sampler_int;
     infile >> dummy >> T_hmc;
     infile >> dummy >> dt_hmc;
-    infile >> dummy >> n_burnin_hmc;
+    infile >> dummy >> n_burnin_sampler;
     infile.close();
     switch (renormalisation_int) {
       case 0: renormalisation = RenormalisationNone; break;
@@ -80,5 +80,5 @@ void Parameters::show() {
   std::cout << " sampler          = " << sampler_label << std::endl;
   std::cout << " T_hmc            = " << T_hmc << std::endl;
   std::cout << " dt_hmc           = " << dt_hmc << std::endl;
-  std::cout << " n_burnin_hmc     = " << n_burnin_hmc << std::endl;
+  std::cout << " n_burnin_sampler = " << n_burnin_sampler << std::endl;
 }

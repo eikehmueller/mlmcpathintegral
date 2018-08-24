@@ -95,7 +95,7 @@ public:
   double T_hmc;
   /** @brief Time step size \f$\Delta t_{hmc}\f$ of HMC trajectories */
   double dt_hmc;
-  /** @brief HMC burnin samples */
-  unsigned int n_burnin_hmc;
+  /** @brief Sampler burnin samples */
+  unsigned int n_burnin_sampler;
 };
 #endif // PARAMETERS_HH
