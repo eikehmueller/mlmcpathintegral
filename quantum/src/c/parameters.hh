@@ -19,6 +19,17 @@ enum RenormalisationType {
   RenormalisationExact = 2
 };
 
+/** @brief Enum for sampler:
+ *  - 0: HMC
+ *  - 1: cluster algorithm (only some actions)
+ *  - 2: exact (only some actions)
+*/
+enum SampleType {
+  SamplerHMC = 0,
+  SamplerCluster = 1,
+  SamplerExact = 2
+};
+
 /** @class Parameters
  *
  * @brief Storage for parameters, which can be read from a file 
@@ -39,7 +50,7 @@ public:
      renormalisation VALUE
      n_burnin        VALUE
      n_samples       VALUE
-     hmc_sampling    VALUE
+     sampler         VALUE
      T_hmc           VALUE
      dt_hmc          VALUE
      n_burnin_hmc    VALUE
@@ -79,7 +90,7 @@ public:
   /** @brief Number of samples */
   unsigned int n_samples;
   /** @brief Use Hybrid Monte Carlo (HMC) sampling? */
-  bool hmc_sampling;
+  int sampler;
   /** @brief Length \f$T_{hmc}\f$ of HMC trajectories */
   double T_hmc;
   /** @brief Time step size \f$\Delta t_{hmc}\f$ of HMC trajectories */
