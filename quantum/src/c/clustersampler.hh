@@ -31,6 +31,7 @@ public:
     Base(action_.getM_lat()),
     action(action_),
     n_burnin(n_burnin_),
+    n_updates(10),
     uniform_dist(0.0,1.0),
     uniform_int_dist(0,action_.getM_lat()-1)
   {
@@ -82,6 +83,8 @@ protected:
   const ClusterAction& action;
   /** @brief Number of burn-in steps */
   const unsigned int n_burnin;
+  /** @brief Number of updates per step */
+  const unsigned int n_updates;
   /** @brief Current state (path) */
   mutable std::shared_ptr<Path> x_path_cur;
   /** @brief Random number engine */
