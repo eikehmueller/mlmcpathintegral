@@ -1,8 +1,9 @@
 #ifndef SAMPLER_HH
 #define SAMPLER_HH SAMPLER_HH
-#include "path.hh"
+#include <memory>
 #include <iostream>
 #include <vector>
+#include "path.hh"
 
 /** @file sampler.hh
  * @brief Header file for sampler base class

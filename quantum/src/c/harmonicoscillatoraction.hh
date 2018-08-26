@@ -3,6 +3,7 @@
 #include <cassert>
 #include <random>
 #include <vector>
+#include <memory>
 #include <Eigen/Dense>
 #include "path.hh"
 #include "sampler.hh"

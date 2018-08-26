@@ -1,5 +1,6 @@
 #ifndef QUANTITYOFINTEREST_HH
 #define QUANTITYOFINTEREST_HH QUANTITYOFINTEREST_HH
+#include <memory>
 #include <cmath>
 #include "path.hh"
 #include "auxilliary.hh"

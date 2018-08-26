@@ -1,5 +1,6 @@
 #ifndef ROTORACTION_HH
 #define ROTORACTION_HH ROTORACTION_HH
+#include <memory>
 #include <cmath>
 #include <random>
 #include <algorithm>

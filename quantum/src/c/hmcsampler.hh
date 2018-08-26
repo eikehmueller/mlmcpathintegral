@@ -1,9 +1,10 @@
 #ifndef HMCSAMPLER_HH
 #define HMCSAMPLER_HH HMCSAMPLER_HH
-#include "path.hh"
-#include "action.hh"
+#include <memory>
 #include <random>
 #include <vector>
+#include "path.hh"
+#include "action.hh"
 
 /** @file hmcsampler.hh
  * @brief Header file for Hybrid Monte Carlo sampler base class

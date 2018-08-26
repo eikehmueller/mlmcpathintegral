@@ -1,5 +1,6 @@
 #ifndef ACTION_HH
 #define ACTION_HH ACTION_HH
+#include <memory>
 #include <cassert>
 #include <random>
 #include <vector>

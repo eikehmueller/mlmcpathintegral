@@ -1,6 +1,7 @@
 #ifndef CONDITIONEDFINEACTION_HH
 #define CONDITIONEDFINEACTION_HH CONDITIONEDFINEACTION_HH
 #include <random>
+#include <memory>
 #include "path.hh"
 #include "action.hh"
 #include "rotoraction.hh"

@@ -1,5 +1,6 @@
 #ifndef QUARTICOSCILLATORACTION_HH
 #define QUARTICOSCILLATORACTION_HH QUARTICOSCILLATORACTION_HH
+#include <memory>
 #include <vector>
 #include "path.hh"
 #include "action.hh"

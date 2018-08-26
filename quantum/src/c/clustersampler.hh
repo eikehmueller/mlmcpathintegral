@@ -1,9 +1,10 @@
 #ifndef CLUSTERSAMPLER_HH
 #define CLUSTERSAMPLER_HH CLUSTERSAMPLER_HH
-#include "path.hh"
-#include "clusteraction.hh"
 #include <random>
 #include <vector>
+#include <memory>
+#include "path.hh"
+#include "clusteraction.hh"
 
 /** @file clustersampler.hh
  * @brief Header file for sampler based on cluster algorithm

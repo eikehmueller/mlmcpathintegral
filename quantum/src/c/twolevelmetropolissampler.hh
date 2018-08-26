@@ -1,6 +1,6 @@
 #ifndef TWOLEVELMETROPOLISSAMPLER_HH
 #define TWOLEVELMETROPOLISSAMPLER_HH TWOLEVELMETROPOLISSAMPLER_HH
-
+#include <memory>
 #include <random>
 #include "action.hh"
 #include "sampler.hh"
