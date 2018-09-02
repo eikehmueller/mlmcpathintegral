@@ -8,6 +8,7 @@
 #include "conditionedfineaction.hh"
 #include "quantityofinterest.hh"
 #include "twolevelmetropolissampler.hh"
+#include "statistics.hh"
 
 /** @file montecarlo.hh
  * @brief Header file for Monte Carlo classes
@@ -75,8 +76,10 @@ public:
    * 
    * Calculate the Quantity of interest by Monte Carlo sampling. Return
    * estimator for the mean and variance
+   *
+   * @param[inout] stats Object for recording statistics
    */
-  std::pair<double,double> evaluate();
+  void evaluate(Statistics& stats);
 private:
   /** @brief Action action to use */
   Action& action;
@@ -129,8 +132,14 @@ public:
    *
    * Calculate the mean and variance of the difference in the QoI 
    * evaluated at two subsequent levels.
+   *
+   * @param[inout] stats_fine Statistics for fine level
+   * @param[inout] stats_coarse Statistics for coarse level
+   * @param[inout] stats_diff Statistics for difference
    */
-  std::pair<double,double> evaluate_difference();
+  void evaluate_difference(Statistics& stats_fine,
+                           Statistics& stats_coarse,
+                           Statistics& stats_diff);
 
   /** @brief Return reference to two-level sampler 
    */

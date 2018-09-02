@@ -14,6 +14,7 @@
 #include "hmcsampler.hh"
 #include "clustersampler.hh"
 #include "config.h"
+#include "statistics.hh"
 
 /** @file driver.cc
  * @brief File with main program
@@ -140,12 +141,9 @@ int main(int argc, char* argv[]) {
   std::cout << " Continuum limit [a -> 0] <x^2> = " << exact_result_continuum << std::endl;
   std::cout << std::endl;
 #endif // ACTION_HARMONIC_OSCILLATOR
-  std::pair<double,double> result;
-  result = montecarlo_singlelevel.evaluate();
-  double error = sqrt(result.second/(1.*param.n_samples));
-  std::cout << "   E[QoI] = " << result.first << " +/- " << error << std::endl;
-  std::cout << " Var[QoI] = " << result.second << std::endl;
-  std::cout << std::endl;
+  Statistics stats("QoI",10);
+  montecarlo_singlelevel.evaluate(stats);
+  std::cout << stats << std::endl;
   std::shared_ptr<Sampler> coarse_sampler;
   if (param.sampler == SamplerHMC) {
     coarse_sampler = std::make_shared<HMCSampler>(coarse_action,
@@ -184,10 +182,16 @@ int main(int argc, char* argv[]) {
                                          qoi,
                                          param.n_samples,
                                          param.n_burnin,
-                                         true);  
-  result = montecarlo_twolevel.evaluate_difference();
-  std::cout << " difference <QoI> " << std::endl;
-  std::cout << " mean = " << result.first << " variance " << result.second << std::endl;
+                                         true);
+  Statistics stats_fine("QoI[fine]",10);
+  Statistics stats_coarse("QoI[coarse]",10);
+  Statistics stats_diff("delta QoI",10);
+  montecarlo_twolevel.evaluate_difference(stats_fine,
+                                          stats_coarse,
+                                          stats_diff);
+  std::cout << stats_fine << std::endl;
+  std::cout << stats_coarse << std::endl;
+  std::cout << stats_diff << std::endl;
   std::cout << std::endl;
   std::cout << "=== Fine level sampler statistics === " << std::endl; 
   sampler->show_stats();
