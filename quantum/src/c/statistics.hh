@@ -1,6 +1,10 @@
 #ifndef STATISTICS_HH
 #define STATISTICS_HH STATISTICS_HH
 
+/** @file statistics.hh
+ * @brief Header file for statistics class
+ */
+
 #include <deque>
 #include <vector>
 #include <cmath>
