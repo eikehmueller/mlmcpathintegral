@@ -5,13 +5,13 @@ Repository for the implementation of **multilevel MCMC path integral methods in 
  * Doublewell potential
  * Quantum mechanical rotor (see [2])
 
-The multilevel MCMC methods are described in [3]
+The multilevel MCMC methods are described in [3]. Further details can be found in the scientific documentation in the directory `quantum/doc`.
 
-[1]: [Creutz, M. and Freedman, B., 1981. A statistical approach to quantum mechanics. Annals of Physics, 132(2), pp.427-462.](https://www.sciencedirect.com/science/article/pii/0003491681900749)
+![Path integral](./quantum/doc/figures/path_integral.svg)
+*Fig. 1: Path integrals on a lattice*
 
-[2]: [Ammon, A., Genz, A., Hartung, T., Jansen, K., Leövey, H. and Volmer, J., 2016. On the efficient numerical solution of lattice systems with low-order couplings. Computer Physics Communications, 198, pp.71-81.](https://arxiv.org/abs/1503.05088)
-
-[3]: [Dodwell, T.J., Ketelsen, C., Scheichl, R. and Teckentrup, A.L., 2015. A hierarchical multilevel Markov chain Monte Carlo algorithm with applications to uncertainty quantification in subsurface flow. SIAM/ASA Journal on Uncertainty Quantification, 3(1), pp.1075-1108.](https://epubs.siam.org/doi/abs/10.1137/130915005)
+![Multilevel MCMC](./quantum/doc/figures/multilevel_schematic.svg)
+*Fig. 2: Grid hierarchy in multilevel methods*
 
 ### Directory layout ###
 The main directory is `quantum`, with the code contained in the subdirectory `quantum/src/c`. Scientific Documentation can be found in the subdirectory `quantum/doc`.
@@ -28,3 +28,11 @@ To run, type
 ```
 
 All parameters are read from the file `parameters.in`, so edit this accordingly. The order of parameters matters (and the labels are actually ignored). You might want to copy the file `parameters_template.in` to `parameters.in` to make a start.
+
+### References ###
+[1]: [Creutz, M. and Freedman, B., 1981. A statistical approach to quantum mechanics. Annals of Physics, 132(2), pp.427-462.](https://www.sciencedirect.com/science/article/pii/0003491681900749)
+
+[2]: [Ammon, A., Genz, A., Hartung, T., Jansen, K., Leövey, H. and Volmer, J., 2016. On the efficient numerical solution of lattice systems with low-order couplings. Computer Physics Communications, 198, pp.71-81.](https://arxiv.org/abs/1503.05088)
+
+[3]: [Dodwell, T.J., Ketelsen, C., Scheichl, R. and Teckentrup, A.L., 2015. A hierarchical multilevel Markov chain Monte Carlo algorithm with applications to uncertainty quantification in subsurface flow. SIAM/ASA Journal on Uncertainty Quantification, 3(1), pp.1075-1108.](https://epubs.siam.org/doi/abs/10.1137/130915005)
+
