@@ -119,7 +119,10 @@ int main(int argc, char* argv[]) {
 #endif
   } else if (param.sampler == SamplerExact) {
 #ifdef ACTION_HARMONIC_OSCILLATOR
-    sampler = &action;
+    sampler = std::make_shared<HarmonicOscillatorAction>(param.M_lat,
+                                                         param.T_final,
+                                                         param.m0,
+                                                         param.mu2);
 #else
     std::cout << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
     exit(-1);
@@ -160,7 +163,10 @@ int main(int argc, char* argv[]) {
 #endif // ACTION_ROTOR
   } else if (param.sampler == SamplerExact) {
 #ifdef ACTION_HARMONIC_OSCILLATOR
-    coarse_sampler = &coarse_action;
+    coarse_sampler = std::make_shared<HarmonicOscillatorAction>(param.M_lat/2,
+                                                                param.T_final,
+                                                                coarse_param.m0_coarse(),
+                                                                coarse_param.mu2_coarse());
 #else
     std::cout << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
     exit(-1);
