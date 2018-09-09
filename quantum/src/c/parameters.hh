@@ -49,7 +49,7 @@ enum NumConstraintFlag {
   NonPositive = 4  // x <=0
 };
 
-/** @class Paramater 
+/** @class Parameter 
  *
  *  @brief Base class for storing a parameter
  * 
