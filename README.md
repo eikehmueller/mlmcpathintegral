@@ -17,14 +17,21 @@ The multilevel MCMC methods are described in [3]. Further details can be found i
 The main directory is `quantum`, with the code contained in the subdirectory `quantum/src/c`. Scientific Documentation can be found in the subdirectory `quantum/doc`.
 The other directory `rare_events` contain some preliminary thoughts on using multilevel MCMC methods for the path-integral evaluation of rare events.
 
+
 ### Compilation ###
-Go to the code directory `quantum/src/c`
-Copy the machine-specific Makefile `local_MACHINE.mk` to `local.mk` and edit if necessary. Edit compile time options in `config.h`. `make all` will build the code, `make doc` will build the doxygen documentation in the subdirectory doc. 
+
+#### Prerequisites ####
+The code requires the following two packages:
+ * The [Eigen library](http://eigen.tuxfamily.org/index.php?title=Main_Page) for dense linear algebra
+ * The [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/)
+
+#### Building the code ####
+Go to the code directory `quantum/src/c`. Copy the machine-specific Makefile `local_MACHINE.mk` to `local.mk` and edit if necessary, in particular set the paths to the Eigen library and the GSL. Edit compile time options in `config.h`. `make all` will build the code, `make doc` will build the doxygen documentation in the subdirectory doc. 
 
 ### Running ##
 To run, type
 ```
-./driver.x parameters.in
+./driver.x
 ```
 
 All parameters are read from the file `parameters.in`, so edit this accordingly. The order of parameters matters (and the labels are actually ignored). You might want to copy the file `parameters_template.in` to `parameters.in` to make a start.
