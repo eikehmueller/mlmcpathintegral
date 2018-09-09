@@ -10,6 +10,7 @@
 #include <cmath>
 #include <iostream>
 #include <string>
+#include <iomanip>
 
 /** @class Statistics
  * @brief Class for recording statistics of an observable

@@ -1,13 +1,74 @@
-M_lat            8
-T_final          1.0
-m0               1.0
-mu2              1.0
-lambda           0.0
-sigma            1.0
-renormalisation  0
-n_burnin         1000
-n_samples        200000
-sampler          0
-T_hmc            10.0
-dt_hmc           0.01
-n_burnin_sampler 1000
+###########################################
+# General parameters
+###########################################
+general:
+  do_singlelevelmc = true # Run single level MC algorithm?
+  do_twolevelmc = true # Run two level MC algorithm?
+
+###########################################
+# Lattice parameters
+###########################################
+lattice:
+  M_lat = 16        # Number of lattice sites
+  T_final = 1.0     # Final time
+
+###########################################
+# Harmonic oscillator action parameters
+###########################################
+harmonicoscillator:
+  m0 = 1.0           # Unrenormalised mass
+  mu2 = 1.0          # Curvature of potential
+  renormalisation = 'none' # Renormalisation [none, perturbative, exact]
+
+###########################################
+# Double well action parameters
+###########################################
+doublewell:
+  m0 = 1.0           # Unrenormalised mass
+  mu2 = 1.0          # Curvature of potential
+  lambda = 1.0       # Parameter lambda
+  sigma = 1.0        # Parameter sigma
+
+###########################################
+# Quartic oscillator action parameters
+###########################################
+quarticoscillator:
+  m0 = 1.0           # Unrenormalised mass
+  mu2 = 1.0          # Curvature of potential
+  lambda = 1.0       # Parameter lambda
+
+###########################################
+# Rotor action parameters
+###########################################
+rotor:
+  m0 = 0.25          # Unrenormalised mass
+
+###########################################
+# Single level Monte Carlo parameters
+###########################################
+singlelevelmc:
+  n_burnin = 100     # Number of burnin samples
+  n_samples = 1000   # Number of samples
+  sampler = 'HMC'    # Sampler to use [HMC, cluster, exact]
+
+###########################################
+# Two level Monte Carlo parameters
+###########################################
+twolevelmc:
+  n_burnin = 100      # Number of burnin samples
+  n_samples = 1000    # Number of samples
+  coarsesampler = 'HMC' # Sampler to use [HMC, cluster, exact]
+
+###########################################
+# HMC sampler parameters
+###########################################
+hmc:
+  T = 10.0        # HMC integration time
+  dt = 0.01       # HMC time step
+  n_burnin = 100  # Number of burnin samples
+
+###########################################
+# Cluster sampler parameters
+###########################################
+clusteralgorithm:
+  n_burnin = 100  # Number of burnin samples

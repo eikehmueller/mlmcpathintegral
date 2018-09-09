@@ -2,6 +2,7 @@
 #define SAMPLER_HH SAMPLER_HH
 #include <memory>
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include "path.hh"
 

@@ -31,10 +31,10 @@ Go to the code directory `quantum/src/c`. Copy the machine-specific Makefile `lo
 ### Running ##
 To run, type
 ```
-./driver.x
+./driver.x PARAMETERFILE
 ```
 
-All parameters are read from the file `parameters.in`, so edit this accordingly. The order of parameters matters (and the labels are actually ignored). You might want to copy the file `parameters_template.in` to `parameters.in` to make a start.
+All parameters are read from the file `PARAMETERFILE` given as a command line option, so edit this accordingly. You might want to copy the file `parameters_template.in` to `parameters.in` to make a start.
 
 ### References ###
 [1]: [Creutz, M. and Freedman, B., 1981. A statistical approach to quantum mechanics. Annals of Physics, 132(2), pp.427-462.](https://www.sciencedirect.com/science/article/pii/0003491681900749)
