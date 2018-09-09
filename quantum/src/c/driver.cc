@@ -30,8 +30,15 @@ int main(int argc, char* argv[]) {
   std::cout << "!!   Path integral multilevel MCMC   !!" << std::endl;
   std::cout << "++===================================++" << std::endl;
   std::cout << std::endl;
-  std::string filename = "parameters.in";
-
+  if (argc != 2) {
+    std::cout << "Usage: " << argv[0] << " PARAMETERFILE" << std::endl;
+    std::cout << std::endl;
+    return 0;
+  }
+  std::string filename = argv[1];
+  std::cout << " Reading parameter from file \'" << filename << "\'" << std::endl;
+    std::cout << std::endl;
+  
   /* ====== Read parameters ====== */
   GeneralParameters param_general;
   if (param_general.readFile(filename)) return 1;
