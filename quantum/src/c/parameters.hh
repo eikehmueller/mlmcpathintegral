@@ -814,8 +814,10 @@ public:
   /** @brief Construct a new instance */
   ClusterParameters() :
     Parameters("clusteralgorithm"),
-    n_burnin_(100) {
+    n_burnin_(100),
+    n_updates_(10) {
     addKey("n_burnin",Integer);
+    addKey("n_updates",Integer);
   }
 
   /** @brief Read parameters from file
@@ -832,9 +834,13 @@ public:
   }
   /** @brief Return number of burnin samples */
   unsigned int n_burnin() const { return n_burnin_; }
+  /** @brief Return number of updates between steps */
+  unsigned int n_updates() const { return n_updates_; }
 private:
   /** @brief Number of burnin samples */
   unsigned int n_burnin_;
+  /** @brief Number of cluster updates between steps */
+  unsigned int n_updates_;
 };
 
 /** @brief Write parameters to stream */

@@ -26,13 +26,15 @@ public:
    *
    * @param[in] action_ Action to sample from
    * @param[in] n_burnin_ Number of burnin steps
+   * @param[in] n_updates_ Number of cluster updates between steps
    */
   ClusterSampler(const ClusterAction& action_,
-                 const unsigned int n_burnin_) :
+                 const unsigned int n_burnin_,
+                 const unsigned int n_updates_) :
     Base(action_.getM_lat()),
     action(action_),
     n_burnin(n_burnin_),
-    n_updates(10),
+    n_updates(n_updates_),
     uniform_dist(0.0,1.0),
     uniform_int_dist(0,action_.getM_lat()-1)
   {

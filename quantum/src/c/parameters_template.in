@@ -72,3 +72,6 @@ hmc:
 ###########################################
 clusteralgorithm:
   n_burnin = 100  # Number of burnin samples
+  n_updates = 10  # Number of cluster updates between steps
+
+#

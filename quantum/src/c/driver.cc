@@ -155,7 +155,8 @@ int main(int argc, char* argv[]) {
   } else if (param_singlelevelmc.sampler() == SamplerCluster) {
 #ifdef ACTION_ROTOR
     sampler = std::make_shared<ClusterSampler>(action,
-                                               param_cluster.n_burnin());
+                                               param_cluster.n_burnin(),
+                                               param_cluster.n_updates());
 #else
     std::cout << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
     exit(-1);
@@ -254,7 +255,8 @@ int main(int argc, char* argv[]) {
   } else if (param_twolevelmc.coarsesampler() == SamplerCluster) {
 #ifdef ACTION_ROTOR
     coarse_sampler = std::make_shared<ClusterSampler>(coarse_action,
-                                                      param_cluster.n_burnin());
+                                                      param_cluster.n_burnin(),
+                                                      param_cluster.n_updates());
 #else
     std::cout << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
     exit(-1);
