@@ -7,11 +7,47 @@
 #include "auxilliary.hh"
 #include "path.hh"
 #include "clusteraction.hh"
+#include "parameters.hh"
 
 /** @file rotoraction.hh
  * @brief Header file for quantum mechanical rotor action class
  */
 
+/** @class RotorParameters
+ *
+ * @brief Class for storing parameters of quantum rotor action
+ *
+ * This stores the mass \f$m_0\f$ of the quantum mechanical rotor.
+ */
+class RotorParameters : public Parameters {
+public:
+  /** @brief Construct a new instance */
+  RotorParameters() :
+    Parameters("rotor"),
+    m0_(1.0) {
+    addKey("m0",Double,Positive);
+  }
+
+  /** @brief Read parameters from file
+   *
+   * @param[in] filename Name of file to read
+   */
+  int readFile(const std::string filename) {
+
+    int readSuccess = Parameters::readFile(filename);
+    if (!readSuccess) {
+      m0_ = getContents("m0")->getDouble();
+    }
+    return readSuccess;
+  }
+
+  /** @brief Return unrenormalised mass \f$m_0\f$ */
+  double m0() const { return m0_; }
+
+private:
+  /** @brief Unrenormalised mass \f$m_0\f$ */
+  double m0_;
+};
 
 /** @class HarmonicOscillatorAction
  *

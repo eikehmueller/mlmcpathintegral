@@ -8,11 +8,69 @@
 #include "path.hh"
 #include "sampler.hh"
 #include "action.hh"
+#include "parameters.hh"
 
 /** @file harmonicoscillatoraction.hh
  * @brief Header file for harmonic oscillator action base class
  */
 
+/** @class HarmonicOscillatorParameters
+ *
+ * @brief Class for storing parameters of harmonic oscillator action
+ *
+ * This stores the mass \f$m_0\f$ and curvature \f$\mu_2\f$ of the 
+ * harmonic oscillator action with potential \f$V(x)=\frac{m_0}{2}\mu^2x^2\f$
+ */
+class HarmonicOscillatorParameters : public Parameters {
+public:
+  /** @brief Construct a new instance */
+  HarmonicOscillatorParameters() :
+    Parameters("harmonicoscillator"),
+    m0_(1.0),
+    mu2_(1.0),
+    renormalisation_(RenormalisationNone) {
+    addKey("m0",Double,Positive);
+    addKey("mu2",Double);
+    addKey("renormalisation",String);
+  }
+
+  /** @brief Read parameters from file
+   *
+   * @param[in] filename Name of file to read
+   */
+  int readFile(const std::string filename) {
+
+    int readSuccess = Parameters::readFile(filename);
+    if (!readSuccess) {
+      m0_ = getContents("m0")->getDouble();
+      mu2_ = getContents("mu2")->getDouble();
+      std::string renormalisation_str = getContents("renormalisation")->getString();
+      if (renormalisation_str == "none") {
+        renormalisation_ = RenormalisationNone;
+      } else if (renormalisation_str == "perturbative") {
+        renormalisation_ = RenormalisationPerturbative;
+      } else if (renormalisation_str == "exact") {
+        renormalisation_ = RenormalisationExact;
+      }
+    }
+    return readSuccess;
+  }
+
+  /** @brief Return unrenormalised mass \f$m_0\f$ */
+  double m0() const { return m0_; }
+  /** @brief Return parameter \f$\mu^2\f$ */
+  double mu2() const { return mu2_; }
+  /** @brief Return renormalisation */
+  RenormalisationType renormalisation() const { return renormalisation_; }
+
+private:
+  /** @brief Unrenormalised mass \f$m_0\f$ */
+  double m0_;
+  /** @brief Parameter \f$\mu^2\f$ */
+  double mu2_;
+  /** @brief Renormalisation */
+  RenormalisationType renormalisation_;
+};
 
 /** @class HarmonicOscillatorAction
  *

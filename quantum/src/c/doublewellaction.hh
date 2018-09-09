@@ -4,11 +4,70 @@
 #include <vector>
 #include "path.hh"
 #include "action.hh"
+#include "parameters.hh"
 
 /** @file doublewellaction.hh
  * @brief Header file for double well action class
  */
 
+/** @class DoubleWellParameters
+ *
+ * @brief Class for storing parameters of double well action
+ *
+ * This stores the mass \f$m_0\f$ and parameters \f$\mu_2\f$, \f$\lambda\f$
+ * and \f$\sigma\f$ of the double well action with potential
+ * \f$V(x)=\frac{m_0}{2}\mu^2x^2+\lambda\exp\left(-\frac{x^2}{2\sigma^2}\right)\f$
+ */
+class DoubleWellParameters : public Parameters {
+public:
+  /** @brief Construct a new instance */
+  DoubleWellParameters() :
+    Parameters("doublewell"),
+    m0_(1.0),
+    mu2_(1.0),
+    lambda_(1.0),
+    sigma_(1.0) {
+    addKey("m0",Double,Positive);
+    addKey("mu2",Double);
+    addKey("lambda",Double);
+    addKey("sigma",Double);
+  }
+
+  /** @brief Read parameters from file
+   *
+   * @param[in] filename Name of file to read
+   */
+  int readFile(const std::string filename) {
+
+    int readSuccess = Parameters::readFile(filename);
+    if (!readSuccess) {
+      m0_ = getContents("m0")->getDouble();
+      mu2_ = getContents("mu2")->getDouble();
+      lambda_ = getContents("lambda")->getDouble();
+      sigma_ = getContents("sigma")->getDouble();
+    }
+    return readSuccess;
+  }
+
+  /** @brief Return unrenormalised mass \f$m_0\f$ */
+  double m0() const { return m0_; }
+  /** @brief Return parameter \f$\mu^2\f$ */
+  double mu2() const { return mu2_; }
+  /** @brief Return parameter \f$\lambda\f$ */
+  double lambda() const { return lambda_; }
+  /** @brief Return parameter \f$\sigma\f$ */
+  double sigma() const { return sigma_; }
+
+private:
+  /** @brief Unrenormalised mass \f$m_0\f$ */
+  double m0_;
+  /** @brief Parameter \f$\mu^2\f$ */
+  double mu2_;
+  /** @brief Parameter \f$\lambda\f$ */
+  double lambda_;
+  /** @brief Parameter \f$\sigma\f$ */
+  double sigma_;
+};
 
 /** @class DoubleWellAction
  *

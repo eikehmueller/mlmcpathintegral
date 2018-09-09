@@ -4,11 +4,63 @@
 #include <vector>
 #include "path.hh"
 #include "action.hh"
+#include "parameters.hh"
 
 /** @file quarticoscillatoraction.hh
  * @brief Header file for quartic oscillator action class
  */
 
+/** @class QuarticOscillatorParameters
+ *
+ * @brief Class for storing parameters of quartic oscillator action
+ *
+ * This stores the mass \f$m_0\f$ and parameters \f$\mu_2\f$, \f$\lambda\f$
+ * of the double well action with potential
+ * \f$V(x)=\frac{m_0}{2}\mu^2x^2+\frac{\lambda}{4}x^4\f$.
+ */
+class QuarticOscillatorParameters : public Parameters {
+public:
+  /** @brief Construct a new instance */
+  QuarticOscillatorParameters() :
+    Parameters("quarticoscillator"),
+    m0_(1.0),
+    mu2_(1.0),
+    lambda_(1.0) {
+    addKey("m0",Double,Positive);
+    addKey("mu2",Double);
+    addKey("lambda",Double,NonNegative);
+  }
+
+  /** @brief Read parameters from file
+   *
+   * @param[in] filename Name of file to read
+   */
+  int readFile(const std::string filename) {
+
+    int readSuccess = Parameters::readFile(filename);
+    if (!readSuccess) {
+      m0_ = getContents("m0")->getDouble();
+      mu2_ = getContents("mu2")->getDouble();
+      lambda_ = getContents("lambda")->getDouble();
+    }
+    return readSuccess;
+  }
+
+  /** @brief Return unrenormalised mass \f$m_0\f$ */
+  double m0() const { return m0_; }
+  /** @brief Return parameter \f$\mu^2\f$ */
+  double mu2() const { return mu2_; }
+  /** @brief Return parameter \f$\lambda\f$ */
+  double lambda() const { return lambda_; }
+
+private:
+  /** @brief Unrenormalised mass \f$m_0\f$ */
+  double m0_;
+  /** @brief Parameter \f$\mu^2\f$ */
+  double mu2_;
+  /** @brief Parameter \f$\lambda\f$ */
+  double lambda_;
+};
 
 /** @class QuarticOscillatorAction
  *

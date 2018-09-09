@@ -9,10 +9,128 @@
 #include "quantityofinterest.hh"
 #include "twolevelmetropolissampler.hh"
 #include "statistics.hh"
+#include "parameters.hh"
 
 /** @file montecarlo.hh
  * @brief Header file for Monte Carlo classes
  */
+
+/** @class SingleLevelMCParameters
+ *
+ * @brief Class for storing parameters of single level Monte Carlo integrator.
+ */
+class SingleLevelMCParameters : public Parameters {
+public:
+  /** @brief Construct a new instance */
+  SingleLevelMCParameters() :
+    Parameters("singlelevelmc"),
+    n_burnin_(100),
+    n_samples_(100),
+    sampler_(SamplerHMC) {
+    addKey("n_burnin",Integer,Positive);
+    addKey("n_samples",Integer,Positive);
+    addKey("sampler",String);
+  }
+
+  /** @brief Read parameters from file
+   *
+   * @param[in] filename Name of file to read
+   */
+  int readFile(const std::string filename) {
+
+    int readSuccess = Parameters::readFile(filename);
+    if (!readSuccess) {
+      n_burnin_ = getContents("n_burnin")->getInt();
+      n_samples_ = getContents("n_samples")->getInt();
+      std::string sampler_str = getContents("sampler")->getString();
+      if (sampler_str == "HMC") {
+        sampler_ = SamplerHMC;
+      } else if (sampler_str == "cluster") {
+        sampler_ = SamplerCluster;
+      } else if (sampler_str == "exact") {
+        sampler_ = SamplerExact;
+      } else  {
+        std::cerr << " ERROR: Unknown sampler: " << sampler_str << std::endl;
+        std::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
+        exit(-1);
+      }
+    }
+    return readSuccess;
+  }
+
+  /** @brief Return number of burnin samples */
+  unsigned int n_burnin() const { return n_burnin_; }
+  /** @brief Return number of samples */
+  unsigned int n_samples() const { return n_samples_; }
+  /** @brief Return sampler type */
+  SamplerType sampler() const { return sampler_; }
+private:
+  /** @brief Number of burnin samples */
+  unsigned int n_burnin_;
+  /** @brief Number of samples */
+  unsigned int n_samples_;
+  /** @brief Sampler type */
+  SamplerType sampler_;
+};
+
+/** @class TwoLevelMCParameters
+ *
+ * @brief Class for storing parameters of two level Monte Carlo integrator.
+ */
+class TwoLevelMCParameters : public Parameters {
+public:
+  /** @brief Construct a new instance */
+  TwoLevelMCParameters() :
+    Parameters("twolevelmc"),
+    n_burnin_(100),
+    n_samples_(100),
+    coarsesampler_(SamplerHMC) {
+    addKey("n_burnin",Integer,Positive);
+    addKey("n_samples",Integer,Positive);
+    addKey("coarsesampler",String);
+  }
+
+  /** @brief Read parameters from file
+   *
+   * @param[in] filename Name of file to read
+   */
+  int readFile(const std::string filename) {
+
+    int readSuccess = Parameters::readFile(filename);
+    if (!readSuccess) {
+      n_burnin_ = getContents("n_burnin")->getInt();
+      n_samples_ = getContents("n_samples")->getInt();
+      std::string sampler_str = getContents("coarsesampler")->getString();
+      if (sampler_str == "HMC") {
+        coarsesampler_ = SamplerHMC;
+      } else if (sampler_str == "cluster") {
+        coarsesampler_ = SamplerCluster;
+      } else if (sampler_str == "exact") {
+        coarsesampler_ = SamplerExact;
+      } else  {
+        std::cerr << " ERROR: Unknown coarse sampler: " << sampler_str;
+        std::cerr << std::endl;
+        std::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
+        exit(-1);
+      }
+    }
+    return readSuccess;
+  }
+
+  /** @brief Return number of burnin samples */
+  unsigned int n_burnin() const { return n_burnin_; }
+  /** @brief Return number of samples */
+  unsigned int n_samples() const { return n_samples_; }
+  /** @brief Return sampler type */
+  SamplerType coarsesampler() const { return coarsesampler_; }
+private:
+  /** @brief Number of burnin samples */
+  unsigned int n_burnin_;
+  /** @brief Number of samples */
+  unsigned int n_samples_;
+  /** @brief Sampler type */
+  SamplerType coarsesampler_;
+};
 
 /** @class MonteCarlo
  * 

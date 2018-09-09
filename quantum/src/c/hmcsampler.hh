@@ -5,10 +5,57 @@
 #include <vector>
 #include "path.hh"
 #include "action.hh"
+#include "parameters.hh"
 
 /** @file hmcsampler.hh
  * @brief Header file for Hybrid Monte Carlo sampler base class
  */
+
+/** @class HMCParameters
+ *
+ * @brief Class for storing parameters of Hybrid MC sampler
+ */
+class HMCParameters : public Parameters {
+public:
+  /** @brief Construct a new instance */
+  HMCParameters() :
+    Parameters("hmc"),
+    T_(1.0),
+    dt_(0.1),
+    n_burnin_(100) {
+    addKey("T",Double,Positive);
+    addKey("dt",Double,Positive);
+    addKey("n_burnin",Integer,Positive);
+  }
+
+  /** @brief Read parameters from file
+   *
+   * @param[in] filename Name of file to read
+   */
+  int readFile(const std::string filename) {
+
+    int readSuccess = Parameters::readFile(filename);
+    if (!readSuccess) {
+      T_ = getContents("T")->getDouble();
+      dt_ = getContents("dt")->getDouble();
+      n_burnin_ = getContents("n_burnin")->getInt();
+    }
+    return readSuccess;
+  }
+  /** @brief Return length of integration interval \f$T\f$ */
+  double T() const { return T_; }
+  /** @brief Return integration timestep \f$dt\f$ */
+  double dt() const { return dt_; }
+  /** @brief Return number of burnin samples */
+  unsigned int n_burnin() const { return n_burnin_; }
+private:
+  /** @brief Integration time interval \f$T\f$ */
+  double T_;
+  /** @brief Integration time step \f$dt\f$ */
+  double dt_;
+  /** @brief Number of burnin samples */
+  unsigned int n_burnin_;
+};
 
 /** @class HMCSampler
  * @brief Hybrid Monte Carlo sampler

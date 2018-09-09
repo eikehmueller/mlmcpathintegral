@@ -5,10 +5,49 @@
 #include <memory>
 #include "path.hh"
 #include "clusteraction.hh"
+#include "parameters.hh"
 
 /** @file clustersampler.hh
  * @brief Header file for sampler based on cluster algorithm
  */
+
+/** @class ClusterParameters
+ *
+ * @brief Class for storing parameters of Cluster algorithm
+*/
+class ClusterParameters : public Parameters {
+public:
+  /** @brief Construct a new instance */
+  ClusterParameters() :
+    Parameters("clusteralgorithm"),
+    n_burnin_(100),
+    n_updates_(10) {
+    addKey("n_burnin",Integer,Positive);
+    addKey("n_updates",Integer,Positive);
+  }
+
+  /** @brief Read parameters from file
+   *
+   * @param[in] filename Name of file to read
+   */
+  int readFile(const std::string filename) {
+
+    int readSuccess = Parameters::readFile(filename);
+    if (!readSuccess) {
+      n_burnin_ = getContents("n_burnin")->getInt();
+    }
+    return readSuccess;
+  }
+  /** @brief Return number of burnin samples */
+  unsigned int n_burnin() const { return n_burnin_; }
+  /** @brief Return number of updates between steps */
+  unsigned int n_updates() const { return n_updates_; }
+private:
+  /** @brief Number of burnin samples */
+  unsigned int n_burnin_;
+  /** @brief Number of cluster updates between steps */
+  unsigned int n_updates_;
+};
 
 /** @class ClusterSampler
  * @brief Cluster algorithm sampler
