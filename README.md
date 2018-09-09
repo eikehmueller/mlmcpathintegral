@@ -1,6 +1,7 @@
 # Project overview 
 
 Repository for the implementation of **multilevel MCMC path integral methods in quantum physics**. So far, this is for one-dimensional quantum mechnanical systems. Monte Carlo methods for those systems are described in [1], and so far the following problems have been implemented:
+
  * Harmonic oscillator
  * Doublewell potential
  * Quantum mechanical rotor (see [2])
@@ -22,7 +23,8 @@ The other directory `rare_events` contain some preliminary thoughts on using mul
 
 #### Prerequisites ####
 The code requires the following two packages:
- * The [Eigen library](http://eigen.tuxfamily.org/index.php?title=Main_Page) for dense linear algebra
+
+* The [Eigen library](http://eigen.tuxfamily.org/index.php?title=Main_Page) for dense linear algebra
  * The [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/)
 
 #### Building the code ####
