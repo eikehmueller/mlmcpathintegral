@@ -105,32 +105,34 @@ int Parameters::readFile(const std::string filename) {
       if (parseSection) {
         if (keywords.count(key) > 0) {
           if (!found[key]) {
+            NumConstraintFlag num_constraint = num_constraints[key];
+            std::string label = section_ + ":" + key;
             // Integer
             if ( (!regexec(&regexKeyValueInt_,line,0,0,0)) &&
                  (keywords[key] == Integer) ) {
               for (auto it=split_value.begin();it!=split_value.end();++it) {
-                contents[key].push_back(new IntParameter("0"));
+                contents[key].push_back(new IntParameter(label,"0",num_constraint));
                 contents[key].back()->setValue(*it);
               }
               // Double
             } else if ( (!regexec(&regexKeyValueDouble_,line,0,0,0)) &&
                         (keywords[key] == Double) ) {
               for (auto it=split_value.begin();it!=split_value.end();++it) {
-                contents[key].push_back(new DoubleParameter("0.0"));
+                contents[key].push_back(new DoubleParameter(label,"0.0",num_constraint));
                 contents[key].back()->setValue(*it);
               }
               // Bool
             } else if ( (!regexec(&regexKeyValueBool_,line,0,0,0)) &&
                         (keywords[key] == Bool) ) {
               for (auto it=split_value.begin();it!=split_value.end();++it) {
-                contents[key].push_back(new BoolParameter("false"));
+                contents[key].push_back(new BoolParameter(label,"false"));
                 contents[key].back()->setValue(*it);
               }
               // String
             } else if ( (!regexec(&regexKeyValueString_,line,0,0,0)) &&
                         (keywords[key] == String) ) {
               for (auto it=split_value.begin();it!=split_value.end();++it) {
-                contents[key].push_back(new StringParameter("blank"));
+                contents[key].push_back(new StringParameter(label,"blank"));
                 contents[key].back()->setValue(*it);
               }
             } else {
@@ -187,8 +189,11 @@ int Parameters::readFile(const std::string filename) {
 }
 
 /* Register a key - value pair */
-void Parameters::addKey(const std::string key, const Datatype datatype) {
+void Parameters::addKey(const std::string key,
+                        const Datatype datatype,
+                        const NumConstraintFlag num_constraint) {
   keywords.insert(std::pair<std::string,Datatype>(key,datatype));
+  num_constraints[key] = num_constraint;
   std::vector<Parameter*> empty;
   contents[key] = empty;
 }

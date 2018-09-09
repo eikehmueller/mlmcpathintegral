@@ -60,10 +60,12 @@ class Parameter {
 public:
   /** @brief Construct a new instance
    *
+   * @param[in] label__ Label to be used for parameter
    * @param[in] valueString String containing value
    */
-  Parameter(const std::string valueString) :
-    valueString_(valueString) {}
+  Parameter(const std::string label__,
+            const std::string valueString) :
+    label_(label__), valueString_(valueString) {}
 
   /** @brief Return value as double (if possible), return error by default */
   virtual const double getDouble() const {
@@ -89,6 +91,9 @@ public:
     return false;
   };
 
+  /** @brief Return label */
+  std::string label() const { return label_; }
+
   /** @brief Set new value
    *
    * @param[in] valueString String containing new value
@@ -96,7 +101,11 @@ public:
   // set data
   virtual void setValue(const std::string valueString) {
   };
+protected:
+  /** @brief string with label */
+  const std::string label_;
 private:
+  /** @brief string with value */
   std::string valueString_;
 };
 
@@ -108,24 +117,16 @@ class DoubleParameter : public Parameter {
 public:
   /** @brief Construct a new instance
    *
+   * @param[in] label_ Label of parameter 
    * @param[in] valueString String containing value
+   * @param[in] num_constraint_ Constraint on numerical value
    */  
-  DoubleParameter(const std::string valueString,
-                  const NumConstraintFlag numconstraint=AnyValue) :
-    Parameter(valueString) {
+  DoubleParameter(const std::string label_,
+                  const std::string valueString,
+                  const NumConstraintFlag num_constraint_=AnyValue) :
+    Parameter(label_,valueString),
+    num_constraint(num_constraint_) {
     value=atof(valueString.c_str());
-    if ( (numconstraint == Positive) and (not (value > 0)) ) {
-      std::cerr << "ERROR: expected positive number" << std::endl;
-    }
-    if ( (numconstraint == NonNegative) and (not (value >= 0)) ) {
-      std::cerr << "ERROR: expected non-negative number" << std::endl;
-    }
-    if ( (numconstraint == Negative) and (not (value < 0)) ) {
-      std::cerr << "ERROR: expected negative number" << std::endl;
-    }
-    if ( (numconstraint == NonPositive) and (not (value <= 0)) ) {
-      std::cerr << "ERROR: expected non-positive number" << std::endl;
-    }
   }
   /** @brief Return value as double */
   virtual const double getDouble() const { return value; }
@@ -135,8 +136,30 @@ public:
    */
   virtual void setValue(const std::string valueString) {
     value=atof(valueString.c_str());
+    check_constraint();
   }
 private:
+  /** @brief Check constraints of current value */
+  void check_constraint() {
+    if ( (num_constraint == Positive) and (not (value > 0)) ) {
+      std::cerr << "ERROR: expected positive number for parameter " << label_ << std::endl;
+      exit(1);
+    }
+    if ( (num_constraint == NonNegative) and (not (value >= 0)) ) {
+      std::cerr << "ERROR: expected non-negative number for parameter " << label_ << std::endl;
+      exit(1);
+    }
+    if ( (num_constraint == Negative) and (not (value < 0)) ) {
+      std::cerr << "ERROR: expected negative number for parameter " << label_ << std::endl;
+      exit(1);
+    }
+    if ( (num_constraint == NonPositive) and (not (value <= 0)) ) {
+      std::cerr << "ERROR: expected non-positive number for parameter " << label_ << std::endl;
+      exit(1);
+    }
+  }
+  /** @brief Numerical constraint flag */
+  NumConstraintFlag num_constraint;
   /** @brief Value of parameter */
   double value;
 };
@@ -149,24 +172,15 @@ class IntParameter : public Parameter {
 public:
   /** @brief Construct a new instance
    *
+   * @param[in] label_ Label of parameter 
    * @param[in] valueString String containing value
+   * @param[in] num_constraint Numerical constraint flag
    */  
-  IntParameter(const std::string valueString,
-               const NumConstraintFlag numconstraint=AnyValue) :
-    Parameter(valueString) {
+  IntParameter(const std::string label_,
+               const std::string valueString,
+               const NumConstraintFlag num_constraint_=AnyValue) :
+    Parameter(label_,valueString), num_constraint(num_constraint_) {
     value=atoi(valueString.c_str());
-    if ( (numconstraint == Positive) and (not (value > 0)) ) {
-      std::cerr << "ERROR: expected positive number" << std::endl;
-    }
-    if ( (numconstraint == NonNegative) and (not (value >= 0)) ) {
-      std::cerr << "ERROR: expected non-negative number" << std::endl;
-    }
-    if ( (numconstraint == Negative) and (not (value < 0)) ) {
-      std::cerr << "ERROR: expected negative number" << std::endl;
-    }
-    if ( (numconstraint == NonPositive) and (not (value <= 0)) ) {
-      std::cerr << "ERROR: expected non-positive number" << std::endl;
-    }
   }
   /** @brief Return value as integer */
   virtual const int getInt() const { return value; }
@@ -176,8 +190,30 @@ public:
    */
   virtual void setValue(const std::string valueString) {
     value=atoi(valueString.c_str());
+    check_constraint();
   }
 private:
+  /** @brief Check constraints of current value */
+  void check_constraint() {
+    if ( (num_constraint == Positive) and (not (value > 0)) ) {
+      std::cerr << "ERROR: expected positive number for parameter " << label_ << std::endl;
+      exit(1);
+    }
+    if ( (num_constraint == NonNegative) and (not (value >= 0)) ) {
+      std::cerr << "ERROR: expected non-negative number for parameter " << label_ << std::endl;
+      exit(1);
+    }
+    if ( (num_constraint == Negative) and (not (value < 0)) ) {
+      std::cerr << "ERROR: expected negative number for parameter " << label_ << std::endl;
+      exit(1);
+    }
+    if ( (num_constraint == NonPositive) and (not (value <= 0)) ) {
+      std::cerr << "ERROR: expected non-positive number for parameter " << label_ << std::endl;
+      exit(1);
+    }
+  }
+  /** @brief Numerical constraint flag */
+  NumConstraintFlag num_constraint;
   /** @brief Value of parameter */
   int value;
 };
@@ -190,10 +226,12 @@ class StringParameter : public Parameter {
 public:
   /** @brief Construct a new instance
    *
+   * @param[in] label_ Label of parameter 
    * @param[in] valueString String containing value
    */  
-  StringParameter(const std::string valueString) :
-    Parameter(valueString) {
+  StringParameter(const std::string label_,
+                  const std::string valueString) :
+    Parameter(label_,valueString) {
     value = valueString.substr(1, valueString.size()-2);
   }
   /** @brief Return value as string */
@@ -218,10 +256,12 @@ class BoolParameter : public Parameter {
 public:
   /** @brief Construct a new instance
    *
+   * @param[in] label_ Label of parameter 
    * @param[in] valueString String containing value
    */  
-  BoolParameter(const std::string valueString) :
-    Parameter(valueString) {
+  BoolParameter(const std::string label,
+                const std::string valueString) :
+    Parameter(label,valueString) {
     value = ( ( valueString == "true" ) ||
               ( valueString == "True" ) ||
               ( valueString == "TRUE" ) ) ;
@@ -323,13 +363,18 @@ protected:
    * 
    * @param[in] key Name of key to be used
    * @param[in] datatype Datatype of value
+   * @param[in] num_constraint Numerical constraint flag
    */
-  void addKey(const std::string key, const Datatype datatype);
+  void addKey(const std::string key,
+              const Datatype datatype,
+              const NumConstraintFlag num_constraint=AnyValue);
   /** @brief hash for key - value pairs */
   std::map<std::string,std::vector<Parameter*> > contents;
 private:
   /** @brief hash for key - datatype pairs */
   std::map<std::string,Datatype> keywords;
+  /** @brief hash for numerical constraint flags */
+  std::map<std::string,NumConstraintFlag> num_constraints;
   /** @brief Name of section associated with this class */
   std::string section_;
   /** @brief Regular expression for a comment */
@@ -407,8 +452,8 @@ public:
     Parameters("lattice"),
     M_lat_(8),
     T_final_(1.0) {
-    addKey("M_lat",Integer);
-    addKey("T_final",Double);
+    addKey("M_lat",Integer,Positive);
+    addKey("T_final",Double,Positive);
   }
 
   /** @brief Read parameters from file
@@ -452,7 +497,7 @@ public:
     m0_(1.0),
     mu2_(1.0),
     renormalisation_(RenormalisationNone) {
-    addKey("m0",Double);
+    addKey("m0",Double,Positive);
     addKey("mu2",Double);
     addKey("renormalisation",String);
   }
@@ -512,7 +557,7 @@ public:
     mu2_(1.0),
     lambda_(1.0),
     sigma_(1.0) {
-    addKey("m0",Double);
+    addKey("m0",Double,Positive);
     addKey("mu2",Double);
     addKey("lambda",Double);
     addKey("sigma",Double);
@@ -570,9 +615,9 @@ public:
     m0_(1.0),
     mu2_(1.0),
     lambda_(1.0) {
-    addKey("m0",Double);
+    addKey("m0",Double,Positive);
     addKey("mu2",Double);
-    addKey("lambda",Double);
+    addKey("lambda",Double,NonNegative);
   }
 
   /** @brief Read parameters from file
@@ -618,7 +663,7 @@ public:
   RotorParameters() :
     Parameters("rotor"),
     m0_(1.0) {
-    addKey("m0",Double);
+    addKey("m0",Double,Positive);
   }
 
   /** @brief Read parameters from file
@@ -654,8 +699,8 @@ public:
     n_burnin_(100),
     n_samples_(100),
     sampler_(SamplerHMC) {
-    addKey("n_burnin",Integer);
-    addKey("n_samples",Integer);
+    addKey("n_burnin",Integer,Positive);
+    addKey("n_samples",Integer,Positive);
     addKey("sampler",String);
   }
 
@@ -712,8 +757,8 @@ public:
     n_burnin_(100),
     n_samples_(100),
     coarsesampler_(SamplerHMC) {
-    addKey("n_burnin",Integer);
-    addKey("n_samples",Integer);
+    addKey("n_burnin",Integer,Positive);
+    addKey("n_samples",Integer,Positive);
     addKey("coarsesampler",String);
   }
 
@@ -771,9 +816,9 @@ public:
     T_(1.0),
     dt_(0.1),
     n_burnin_(100) {
-    addKey("T",Double);
-    addKey("dt",Double);
-    addKey("n_burnin",Integer);
+    addKey("T",Double,Positive);
+    addKey("dt",Double,Positive);
+    addKey("n_burnin",Integer,Positive);
   }
 
   /** @brief Read parameters from file
@@ -816,8 +861,8 @@ public:
     Parameters("clusteralgorithm"),
     n_burnin_(100),
     n_updates_(10) {
-    addKey("n_burnin",Integer);
-    addKey("n_updates",Integer);
+    addKey("n_burnin",Integer,Positive);
+    addKey("n_updates",Integer,Positive);
   }
 
   /** @brief Read parameters from file
