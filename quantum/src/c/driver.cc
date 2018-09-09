@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <utility>
 #include <memory>
 #include "harmonicoscillatoraction.hh"
@@ -190,6 +191,7 @@ int main(int argc, char* argv[]) {
     double exact_result = action.Xsquared_exact();
     double exact_result_continuum = action.Xsquared_exact_continuum();
     std::cout << std::endl;
+    std::cout << std::setprecision(6) << std::fixed;
     std::cout << " Exact result             <x^2> = " << exact_result << std::endl;
     std::cout << " Continuum limit [a -> 0] <x^2> = " << exact_result_continuum << std::endl;
     std::cout << std::endl;
