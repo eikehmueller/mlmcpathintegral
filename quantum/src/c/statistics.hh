@@ -30,8 +30,8 @@
  *
  * - *Autocorrelation function*
  *   \f[
- *     C(k) &= \langle (Q_i-\overline{Q})(Q_{i-k}-\overline{Q}) \rangle\\
- *          &= \langle Q_i Q_{i-k} \rangle - \overline{Q}^2
+ *     C(k) = \langle (Q_i-\overline{Q})(Q_{i-k}-\overline{Q}) \rangle\\
+ *          = \langle Q_i Q_{i-k} \rangle - \overline{Q}^2
  *   \f]
  *
  * - *Integrated autocorrelation*
