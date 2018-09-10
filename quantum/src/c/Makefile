@@ -5,7 +5,8 @@ include local.mk
 
 CFLAGS_OPT=-O3 -std=c++11 -I$(EIGEN_INCLUDE_DIR) -I$(GSL_INCLUDE_DIR)
 CFLAGS_DEBUG=-g -Wall -O0 -std=c++11 -I$(EIGEN_INCLUDE_DIR) -I$(GSL_INCLUDE_DIR)
-LFLAGS=-L$(GSL_LIB_DIR) -lgsl
+LFLAGS=-L$(GSL_LIB_DIR) -static
+LLIBS=-lgsl -lgslcblas
 CXX=g++
 
 SOURCES=$(wildcard *.hh *.cc)
@@ -42,7 +43,7 @@ $(DEPDIR)/%.d: ;
 include $(wildcard $(patsubst %,$(DEPDIR)/%.d,$(basename $(SOURCES))))
 
 $(MAIN): $(OBJS) config.h
-	$(CXX) $(LFLAGS) -o $(MAIN) $(OBJS)
+	$(CXX) $(LFLAGS) -o $(MAIN) $(OBJS) $(LLIBS)
 
 doc: $(SOURCES) config.h
 	doxygen doxygen.cfg
