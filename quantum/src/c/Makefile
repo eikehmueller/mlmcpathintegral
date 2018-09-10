@@ -1,6 +1,14 @@
 # Include local, machine dependent Makefile.
 # Use this for machine-dependent settings by copying over one of the files
 # local_XXX.mk
+
+COM_COLOR   = \033[0;1m
+OBJ_COLOR   = \033[0;37m
+NO_COLOR    = \033[m
+
+COM_MESSAGE   = "Compiling"
+LINK_MESSAGE  = "Linking"
+
 include local.mk
 
 CFLAGS_OPT=-O3 -std=c++11 -I$(EIGEN_INCLUDE_DIR) -I$(GSL_INCLUDE_DIR)
@@ -30,12 +38,14 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
 POSTCOMPILE = @mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
 
 %.o: %.cc %.hh
-	$(CXX) $(DEPFLAGS) $(CFLAGS) -c -o $@ $<
-	$(POSTCOMPILE)
+	@printf "%b" "$(COM_COLOR)$(COM_MESSAGE) $(OBJ_COLOR)$(@)$(NO_COLOR)\n";
+	@$(CXX) $(DEPFLAGS) $(CFLAGS) -c -o $@ $<
+	@$(POSTCOMPILE)
 
 %.o: %.cc
-	$(CXX) $(DEPFLAGS) $(CFLAGS) -c -o $@ $<
-	$(POSTCOMPILE)
+	@printf "%b" "$(COM_COLOR)$(COM_MESSAGE) $(OBJ_COLOR)$(@)$(NO_COLOR)\n";
+	@$(CXX) $(DEPFLAGS) $(CFLAGS) -c -o $@ $<
+	@$(POSTCOMPILE)
 
 $(DEPDIR)/%.d: ;
 .PRECIOUS: $(DEPDIR)/%.d
@@ -43,7 +53,8 @@ $(DEPDIR)/%.d: ;
 include $(wildcard $(patsubst %,$(DEPDIR)/%.d,$(basename $(SOURCES))))
 
 $(MAIN): $(OBJS) config.h
-	$(CXX) $(LFLAGS) -o $(MAIN) $(OBJS) $(LLIBS)
+	@printf "%b" "$(COM_COLOR)$(LINK_MESSAGE) $(OBJ_COLOR)$(@)$(NO_COLOR)\n";
+	@$(CXX) $(LFLAGS) -o $(MAIN) $(OBJS) $(LLIBS)
 
 doc: $(SOURCES) config.h
 	doxygen doxygen.cfg
