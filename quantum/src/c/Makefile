@@ -13,8 +13,8 @@ include local.mk
 
 CFLAGS_OPT=-O3 -std=c++11 -I$(EIGEN_INCLUDE_DIR) -I$(GSL_INCLUDE_DIR)
 CFLAGS_DEBUG=-g -Wall -O0 -std=c++11 -I$(EIGEN_INCLUDE_DIR) -I$(GSL_INCLUDE_DIR)
-LFLAGS=-L$(GSL_LIB_DIR) -static
-LLIBS=-lgsl -lgslcblas
+LFLAGS=-L$(GSL_LIB_DIR) $(LOCAL_LFLAGS)
+LLIBS=-lgsl -lgslcblas 
 CXX=g++
 
 SOURCES=$(wildcard *.hh *.cc)
