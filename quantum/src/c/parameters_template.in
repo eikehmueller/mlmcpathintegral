@@ -4,6 +4,11 @@
 general:
   do_singlelevelmc = true # Run single level MC algorithm?
   do_twolevelmc = true # Run two level MC algorithm?
+  action = 'harmonicoscillator' # action to use. Allowed values are:
+                                # [harmonicoscillator,
+                                #  quarticoscillator,
+                                #  doublewell,
+                                #  rotor]
 
 ###########################################
 # Lattice parameters

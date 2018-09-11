@@ -16,6 +16,20 @@
  * storing them in appropriate classes.
  */
 
+/** @brief Enum for different actions
+ *  - 0: Harmonic Oscillator
+ *  - 1: Quartic Oscillator
+ *  - 2: Double Well
+ *  - 3: Quantum mechanical rotor
+*/
+enum ActionType {
+  ActionHarmonicOscillator = 0,
+  ActionQuarticOscillator = 1,
+  ActionDoubleWell = 2,
+  ActionRotor = 3
+};
+
+
 /** @brief Enum for renormalisations:
  *  - 0: No renormalisation
  *  - 1: Perturbative renormalisation
@@ -406,9 +420,11 @@ public:
   GeneralParameters() :
     Parameters("general"),
     do_singlelevelmc_(true),
-    do_twolevelmc_(true) {
+    do_twolevelmc_(true),
+    action_(ActionHarmonicOscillator) {
     addKey("do_singlelevelmc",Bool);
     addKey("do_twolevelmc",Bool);
+    addKey("action",String);
   }
 
   /** @brief Read parameters from file
@@ -421,6 +437,17 @@ public:
     if (!readSuccess) {
       do_singlelevelmc_ = getContents("do_singlelevelmc")->getBool();
       do_twolevelmc_ = getContents("do_twolevelmc")->getBool();
+      std::string action_str = getContents("action")->getString();
+      if (action_str=="harmonicoscillator") {
+        action_ = ActionHarmonicOscillator;
+      } else if (action_str=="quarticoscillator") {
+        action_ = ActionQuarticOscillator;
+      } else if (action_str=="doublewell") {
+        action_ = ActionDoubleWell;
+      } else if (action_str=="rotor") {
+        action_ = ActionRotor;
+      } else {
+      }
     }
     return readSuccess;
   }
@@ -429,12 +456,16 @@ public:
   bool do_singlelevelmc() const { return do_singlelevelmc_; }
   /** @brief Run two level MC algorithm? */
   bool do_twolevelmc() const { return do_twolevelmc_; }
+  /** @brief Return the action type */
+  ActionType action() const { return action_; }
 
 private:
   /** @brief Run single level MC algorithm? */
   bool do_singlelevelmc_;
   /** @brief Run two level MC algorithm? */
   bool do_twolevelmc_;
+  /** @brief Type of action */
+  ActionType action_;
 };
 
 

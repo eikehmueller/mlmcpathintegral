@@ -28,7 +28,7 @@ The code requires the following two packages:
  * The [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/)
 
 #### Building the code ####
-Go to the code directory `quantum/src/c`. Copy the machine-specific Makefile `local_MACHINE.mk` to `local.mk` and edit if necessary, in particular set the paths to the Eigen library and the GSL. Edit compile time options in `config.h`. `make all` will build the code, `make doc` will build the doxygen documentation in the subdirectory doc. 
+Go to the code directory `quantum/src/c`. Copy the machine-specific Makefile `local_MACHINE.mk` to `local.mk` and edit if necessary, in particular set the paths to the Eigen library and the GSL. Edit compile time options (if you want to save some paths to disk) in `config.h`. `make all` will build the code, `make doc` will build the doxygen documentation in the subdirectory doc. 
 
 ### Running ##
 To run, type
