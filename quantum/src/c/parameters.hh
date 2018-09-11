@@ -395,7 +395,7 @@ private:
   static const bool verbose=0;
 };
 
-/** @class GeneralParameter
+/** @class GeneralParameters
  *
  * @brief Class for storing general parameter
  * 
