@@ -67,22 +67,22 @@ public:
    * @param[in] n_burnin_ Number of burnin steps
    * @param[in] n_updates_ Number of cluster updates between steps
    */
-  ClusterSampler(const ClusterAction& action_,
+  ClusterSampler(const std::shared_ptr<ClusterAction> action_,
                  const unsigned int n_burnin_,
                  const unsigned int n_updates_) :
-    Base(action_.getM_lat()),
+    Base(action_->getM_lat()),
     action(action_),
     n_burnin(n_burnin_),
     n_updates(n_updates_),
     uniform_dist(0.0,1.0),
-    uniform_int_dist(0,action_.getM_lat()-1)
+    uniform_int_dist(0,action_->getM_lat()-1)
   {
     engine.seed(2141517);
-    const unsigned int M_lat = action.getM_lat();
-    const double T_final = action.getT_final();
+    const unsigned int M_lat = action->getM_lat();
+    const double T_final = action->getT_final();
     // Create temporary workspace
     x_path_cur = std::make_shared<Path>(M_lat,T_final);
-    action.initialise_path(x_path_cur);
+    action->initialise_path(x_path_cur);
     // Burn in
     std::vector<std::shared_ptr<Path>> x_path_tmp;
     x_path_tmp.push_back(std::make_shared<Path>(M_lat,T_final));
@@ -122,7 +122,7 @@ private:
   
 protected:
   /** @brief Action to sample from */
-  const ClusterAction& action;
+  const std::shared_ptr<ClusterAction> action;
   /** @brief Number of burn-in steps */
   const unsigned int n_burnin;
   /** @brief Number of updates per step */

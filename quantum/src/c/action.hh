@@ -5,6 +5,7 @@
 #include <random>
 #include <vector>
 #include <Eigen/Dense>
+#include <iostream>
 #include "path.hh"
 #include "sampler.hh"
 #include "renormalisation.hh"
@@ -57,6 +58,16 @@ public:
   /** @brief Return lattice spacing \f$a\f$ */
   double geta_lat() const { return a_lat;}
 
+  /** @brief Construct coarsened version of action
+   *
+   * This returns a coarsened version of the action on the next level
+   * of the multigrid hierarchy.
+   */
+  std::shared_ptr<Action> virtual coarse_action() {
+    std::cerr << "ERROR: cannot coarsen action" << std::endl;
+    exit(1);
+  };
+    
   /** @brief Evaluate action for a specific path
    * 
    * Calculate \f$S[X]\f$ for a specific path

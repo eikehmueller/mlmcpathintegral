@@ -94,6 +94,22 @@ public:
    * Delete any temporary arrays
    */
   ~RotorAction() {}
+
+  /** @brief Construct coarsened version of action
+   *
+   * This returns a coarsened version of the action on the next level
+   * of the multigrid hierarchy.
+   */
+  std::shared_ptr<Action> virtual coarse_action() {
+    if (M_lat%2) {
+      std::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
+      exit(1);
+    }
+    return std::make_shared<RotorAction>(M_lat/2,
+                                         T_final,
+                                         renormalisation,
+                                         m0);
+  };
   
   /** @brief Evaluate action for a specific path
    * 

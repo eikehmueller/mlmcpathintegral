@@ -78,7 +78,7 @@ public:
    *
    * @param[in] action_ Underlying action class
    */
-  GaussianConditionedFineAction (const Action& action_) : action(action_) {
+  GaussianConditionedFineAction (const std::shared_ptr<Action> action_) : action(action_) {
     engine.seed(11897197);
   }
 
@@ -102,7 +102,7 @@ public:
   
 private:
   /** @brief Underlying action class */
-  const Action& action;
+  const std::shared_ptr<Action> action;
   /** @brief Random number engine */
   typedef std::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */
@@ -134,7 +134,7 @@ public:
    *
    * @param[in] action_ Underlying action class
    */
-  RotorConditionedFineAction (const RotorAction& action_) : action(action_) {
+  RotorConditionedFineAction (const std::shared_ptr<RotorAction> action_) : action(action_) {
     engine.seed(11897197);
   }
 
@@ -159,7 +159,7 @@ public:
 
 private:
   /** @brief Underlying action class */
-  const RotorAction& action;
+  const std::shared_ptr<RotorAction> action;
   /** @brief Random number engine */
   typedef std::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */

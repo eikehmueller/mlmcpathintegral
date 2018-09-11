@@ -89,14 +89,15 @@ int main(int argc, char* argv[]) {
   std::cout << param_twolevelmc << std::endl;
   
   /* ====== Select quantity of interest ====== */
+  std::shared_ptr<QoI> qoi;
 #if defined(ACTION_HARMONIC_OSCILLATOR) || defined(ACTION_QUARTIC_OSCILLATOR) || defined(ACTION_DOUBLE_WELL)
-  QoIXsquared qoi(param_lattice.M_lat());
+  qoi=std::make_shared<QoIXsquared>(param_lattice.M_lat());
   std::cout << std::endl;
   std::cout << "QoI = X^2 " << std::endl;
   std::cout << std::endl;
 #endif // ACTION_HARMONIC_OSCILLATOR || ACTION_QUARTIC_OSCILLATOR || ACTION_DOUBLEWELL 
 #ifdef ACTION_ROTOR
-  QoISusceptibility qoi(param_lattice.M_lat());
+  qoi=std::make_shared<QoISusceptibility>(param_lattice.M_lat());
   std::cout << std::endl;
   std::cout << "QoI = Susceptibility Q[X]^2/T " << std::endl;
   std::cout << std::endl;
@@ -106,43 +107,47 @@ int main(int argc, char* argv[]) {
   /* *** HARMONIC OSCILLATOR *** */
 #ifdef ACTION_HARMONIC_OSCILLATOR
   std::cout << "Action = harmonic oscillator" << std::endl;
-  HarmonicOscillatorAction action(param_lattice.M_lat(),
-                                  param_lattice.T_final(),
-                                  param_ho.renormalisation(),
-                                  param_ho.m0(),
-                                  param_ho.mu2());
+  std::shared_ptr<Action> action =
+    std::make_shared<HarmonicOscillatorAction>(param_lattice.M_lat(),
+                                               param_lattice.T_final(),
+                                               param_ho.renormalisation(),
+                                               param_ho.m0(),
+                                               param_ho.mu2());
 #endif // ACTION_HARMONIC_OSCILLATOR
   
   /* *** QUARTIC OSCILLATOR *** */
 #ifdef ACTION_QUARTIC_OSCILLATOR
   std::cout << "Action = quartic oscillator" << std::endl;
-  QuarticOscillatorAction action(param_lattice.M_lat(),
-                                 param_lattice.T_final(),
-                                 RenormalisationNone,
-                                 param_qo.m0(),
-                                 param_qo.mu2(),
-                                 param_qo.lambda());
+  std::shared_ptr<Action> action =
+    std::make_shared<QuarticOscillatorAction>(param_lattice.M_lat(),
+                                              param_lattice.T_final(),
+                                              RenormalisationNone,
+                                              param_qo.m0(),
+                                              param_qo.mu2(),
+                                              param_qo.lambda());
 #endif // ACTION_QUARTIC_OSCILLATOR
   
   /* *** DOUBLE WELL *** */
 #ifdef ACTION_DOUBLE_WELL
   std::cout << "Action = double well" << std::endl;
-  DoubleWellAction action(param_lattice.M_lat(),
-                          param_lattice.T_final(),
-                          RenormalisationNone,
-                          param_dw.m0(),
-                          param_dw.mu2(),
-                          param_dw.lambda(),
-                          param_dw.sigma());
+  std::shared_ptr<Action> action = 
+    std::make_shared<DoubleWellAction>(param_lattice.M_lat(),
+                                       param_lattice.T_final(),
+                                       RenormalisationNone,
+                                       param_dw.m0(),
+                                       param_dw.mu2(),
+                                       param_dw.lambda(),
+                                       param_dw.sigma());
 #endif // ACTION_DOUBLE_WELL
 
   /* *** ROTOR *** */
 #ifdef ACTION_ROTOR
   std::cout << "Action = rotor" << std::endl;
-  RotorAction action(param_lattice.M_lat(),
-                     param_lattice.T_final(),
-                     RenormalisationNone,
-                     param_rotor.m0());
+  std::shared_ptr<Action> action = 
+    std::make_shared<RotorAction>(param_lattice.M_lat(),
+                                  param_lattice.T_final(),
+                                  RenormalisationNone,
+                                  param_rotor.m0());
 #endif // ACTION_ROTOR
   std::cout << std::endl;
 
@@ -158,7 +163,7 @@ int main(int argc, char* argv[]) {
                                            param_hmc.n_burnin());
   } else if (param_singlelevelmc.sampler() == SamplerCluster) {
 #ifdef ACTION_ROTOR
-    sampler = std::make_shared<ClusterSampler>(action,
+    sampler = std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(action),
                                                param_cluster.n_burnin(),
                                                param_cluster.n_updates());
 #else
@@ -167,11 +172,7 @@ int main(int argc, char* argv[]) {
 #endif
   } else if (param_singlelevelmc.sampler() == SamplerExact) {
 #ifdef ACTION_HARMONIC_OSCILLATOR
-    sampler = std::make_shared<HarmonicOscillatorAction>(param_lattice.M_lat(),
-                                                         param_lattice.T_final(),
-                                                         param_ho.renormalisation(),
-                                                         param_ho.m0(),
-                                                         param_ho.mu2());
+    sampler = std::dynamic_pointer_cast<Sampler>(action);
 #else
     std::cout << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
     exit(-1);
@@ -188,15 +189,17 @@ int main(int argc, char* argv[]) {
 
     /* ====== Construct single level MC ====== */
     MonteCarloSingleLevel montecarlo_singlelevel(action,
-                                                 *sampler,
+                                                 sampler,
                                                  qoi,
                                                  param_singlelevelmc.n_samples(),
                                                  param_singlelevelmc.n_burnin());
 
     /* ====== Print out exact result for harmonic oscillator */
 #ifdef ACTION_HARMONIC_OSCILLATOR
-    double exact_result = action.Xsquared_exact();
-    double exact_result_continuum = action.Xsquared_exact_continuum();
+    std::shared_ptr<HarmonicOscillatorAction> ho_action =
+      std::dynamic_pointer_cast<HarmonicOscillatorAction>(action);
+    double exact_result = ho_action->Xsquared_exact();
+    double exact_result_continuum = ho_action->Xsquared_exact_continuum();
     std::cout << std::endl;
     std::cout << std::setprecision(6) << std::fixed;
     std::cout << " Exact result             <x^2> = " << exact_result << std::endl;
@@ -212,48 +215,8 @@ int main(int argc, char* argv[]) {
    * Two level method                         *
    * **************************************** */
   /* ====== Select coarse action ====== */
-  /* *** HARMONIC OSCILLATOR *** */
-#ifdef ACTION_HARMONIC_OSCILLATOR
-  RenormalisedHOParameters coarse_param(param_lattice.M_lat(),
-                                        param_lattice.T_final(),
-                                        param_ho.m0(),
-                                        param_ho.mu2(),
-                                        param_ho.renormalisation());
-  HarmonicOscillatorAction coarse_action(param_lattice.M_lat()/2,
-                                         param_lattice.T_final(),
-                                         param_ho.renormalisation(),
-                                         coarse_param.m0_coarse(),
-                                         coarse_param.mu2_coarse());
-#endif // ACTION_HARMONIC_OSCILLATOR
-
-  /* *** QUARTIC OSCILLATOR *** */
-#ifdef ACTION_QUARTIC_OSCILLATOR
-  QuarticOscillatorAction coarse_action(param_lattice.M_lat()/2,
-                                        param_lattice.T_final(),
-                                        RenormalisationNone,
-                                        param_qo.m0(),
-                                        param_qo.mu2(),
-                                        param_qo.lambda());
-#endif // ACTION_QUARTIC_OSCILLATOR
-  
-  /* *** DOUBLE WELL *** */
-#ifdef ACTION_DOUBLE_WELL
-  DoubleWellAction coarse_action(param_lattice.M_lat()/2,
-                                 param_lattice.T_final(),
-                                 RenormalisationNone,
-                                 param_dw.m0(),
-                                 param_dw.mu2(),
-                                 param_dw.lambda(),
-                                 param_dw.sigma());
-#endif // ACTION_DOUBLE_WELL
-
-  /* *** ROTOR *** */
-#ifdef ACTION_ROTOR
-  RotorAction coarse_action(param_lattice.M_lat()/2,
-                            param_lattice.T_final(),
-                            RenormalisationNone,
-                            param_rotor.m0());
-#endif // ACTION_ROTOR
+  std::shared_ptr<Action> coarse_action;
+  coarse_action = action->coarse_action();
   
   std::shared_ptr<Sampler> coarse_sampler;
   if (param_twolevelmc.coarsesampler() == SamplerHMC) {
@@ -263,7 +226,7 @@ int main(int argc, char* argv[]) {
                                                   param_hmc.n_burnin());
   } else if (param_twolevelmc.coarsesampler() == SamplerCluster) {
 #ifdef ACTION_ROTOR
-    coarse_sampler = std::make_shared<ClusterSampler>(coarse_action,
+    coarse_sampler = std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(coarse_action),
                                                       param_cluster.n_burnin(),
                                                       param_cluster.n_updates());
 #else
@@ -272,11 +235,7 @@ int main(int argc, char* argv[]) {
 #endif // ACTION_ROTOR
   } else if (param_twolevelmc.coarsesampler() == SamplerExact) {
 #ifdef ACTION_HARMONIC_OSCILLATOR
-    coarse_sampler = std::make_shared<HarmonicOscillatorAction>(param_lattice.M_lat()/2,
-                                                                param_lattice.T_final(),
-                                                                param_ho.renormalisation(),
-                                                                coarse_param.m0_coarse(),
-                                                                coarse_param.mu2_coarse());
+    coarse_sampler = std::dynamic_pointer_cast<Sampler>(coarse_action);
     
 #else
     std::cout << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
@@ -287,10 +246,14 @@ int main(int argc, char* argv[]) {
     exit(-1);
   }
 
+  std::shared_ptr<ConditionedFineAction> conditioned_fine_action;
 #ifdef ACTION_ROTOR
-  RotorConditionedFineAction conditioned_fine_action(action);
+  conditioned_fine_action =
+    std::make_shared<RotorConditionedFineAction>(std::dynamic_pointer_cast<RotorAction>(action));
 #else
-  GaussianConditionedFineAction conditioned_fine_action(action);
+  conditioned_fine_action =
+    std::make_shared<GaussianConditionedFineAction>(action);
+                                                                            
 #endif // ACTION_ROTOR
   if (param_general.do_twolevelmc()) {
     std::cout << "+--------------------------------+" << std::endl;
@@ -298,7 +261,7 @@ int main(int argc, char* argv[]) {
     std::cout << "+--------------------------------+" << std::endl;
     std::cout << std::endl;
     MonteCarloTwoLevel montecarlo_twolevel(coarse_action,
-                                           *coarse_sampler,
+                                           coarse_sampler,
                                            action,
                                            conditioned_fine_action,
                                            qoi,

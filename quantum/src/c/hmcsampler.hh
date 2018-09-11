@@ -78,7 +78,7 @@ public:
    * @param[in] dt_hmc_ Step size \f$\Delta t_{HMC}\f$ of HMC trajectories 
    * @param[in] n_burnin_ Number of burnin steps
    */
-  HMCSampler(const Action& action_,
+  HMCSampler(const std::shared_ptr<Action> action_,
              const double T_hmc_,
              const double dt_hmc_,
              const unsigned int n_burnin_) :
@@ -89,8 +89,8 @@ public:
     n_burnin(n_burnin_)
   {
     engine.seed(8923759233);
-    const unsigned int M_lat = action.getM_lat();
-    const double T_final = action.getT_final();
+    const unsigned int M_lat = action->getM_lat();
+    const double T_final = action->getT_final();
     // Create temporary workspace
     // current position
     x_path_cur = std::make_shared<Path>(M_lat,T_final);
@@ -100,7 +100,7 @@ public:
     x_path_trial = std::make_shared<Path>(M_lat,T_final);
     // Momentum change from force term
     dp_path = std::make_shared<Path>(M_lat,T_final);
-    action.initialise_path(x_path_cur);
+    action->initialise_path(x_path_cur);
     // Burn in
     std::vector<std::shared_ptr<Path>> x_path_tmp;
     x_path_tmp.push_back(std::make_shared<Path>(M_lat,T_final));
@@ -125,7 +125,7 @@ public:
 
 protected:
   /** @brief Action to sample from */
-  const Action& action;
+  const std::shared_ptr<Action> action;
   /** @brief Length of deterministic trajectories */
   const double T_hmc;
   /** @brief Time step size of determininistic trajectories */

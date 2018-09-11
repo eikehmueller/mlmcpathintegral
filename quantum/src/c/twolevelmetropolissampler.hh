@@ -52,25 +52,25 @@ public:
    *            filling in the fine points
    * @param[in] record_stats_ Record statistics?
    */
-  TwoLevelMetropolisSampler(Sampler& coarse_sampler_,
-                            const Action& coarse_action_,
-                            const Action& fine_action_,
-                            const ConditionedFineAction& conditioned_fine_action_,
+  TwoLevelMetropolisSampler(std::shared_ptr<Sampler> coarse_sampler_,
+                            const std::shared_ptr<Action> coarse_action_,
+                            const std::shared_ptr<Action> fine_action_,
+                            const std::shared_ptr<ConditionedFineAction> conditioned_fine_action_,
                             const bool record_stats_=false) :
     Base(record_stats_),
     coarse_sampler(coarse_sampler_),
     coarse_action(coarse_action_),
     fine_action(fine_action_),
     conditioned_fine_action(conditioned_fine_action_) {
-    assert(2*coarse_action.getM_lat()==fine_action.getM_lat());
-    theta_coarse = std::make_shared<Path>(coarse_action.getM_lat(),
-                                          coarse_action.getT_final());
-    theta_fine = std::make_shared<Path>(fine_action.getM_lat(),
-                                        coarse_action.getT_final());
-    theta_fine_C = std::make_shared<Path>(coarse_action.getM_lat(),
-                                          coarse_action.getT_final());
-    theta_prime = std::make_shared<Path>(fine_action.getM_lat(),
-                                         coarse_action.getT_final());
+    assert(2*coarse_action->getM_lat()==fine_action->getM_lat());
+    theta_coarse = std::make_shared<Path>(coarse_action->getM_lat(),
+                                          coarse_action->getT_final());
+    theta_fine = std::make_shared<Path>(fine_action->getM_lat(),
+                                        coarse_action->getT_final());
+    theta_fine_C = std::make_shared<Path>(coarse_action->getM_lat(),
+                                          coarse_action->getT_final());
+    theta_prime = std::make_shared<Path>(fine_action->getM_lat(),
+                                         coarse_action->getT_final());
     engine.seed(89216491);
     reset_stats();
   }
@@ -83,13 +83,13 @@ public:
                               
 protected:
   /** @brief Sampler on coarse level */
-  Sampler& coarse_sampler;
+  std::shared_ptr<Sampler> coarse_sampler;
   /** @brief Action on coarse level */
-  const Action& coarse_action;
+  const std::shared_ptr<Action> coarse_action;
   /** @brief Action on fine level */
-  const Action& fine_action;
+  const std::shared_ptr<Action> fine_action;
   /** @brief Conditioned fine action */
-  const ConditionedFineAction& conditioned_fine_action;
+  const std::shared_ptr<ConditionedFineAction> conditioned_fine_action;
   /** @brief Temporary state vector on coarse level \f$\theta^n_{\ell-1}\f$ */
   mutable std::shared_ptr<Path> theta_coarse;
   /** @brief Temporary state vector on fine level \f$\theta^n_{\ell}\f$ */

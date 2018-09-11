@@ -178,9 +178,9 @@ public:
    * @param[in] n_burnin_ Number of burnin samples (QoI not evaluated on those)
    * @param[in] record_stats_ Record statistics of sampler
    */
-  MonteCarloSingleLevel(Action& action_,
-                        Sampler& sampler_,
-                        QoI& qoi_,
+  MonteCarloSingleLevel(std::shared_ptr<Action> action_,
+                        std::shared_ptr<Sampler> sampler_,
+                        std::shared_ptr<QoI> qoi_,
                         const unsigned int n_samples_,
                         const unsigned int n_burnin_,
                         const bool record_stats_=false) :
@@ -200,11 +200,11 @@ public:
   void evaluate(Statistics& stats);
 private:
   /** @brief Action action to use */
-  Action& action;
+  std::shared_ptr<Action> action;
   /** @brief Sampler class for creating samples */
-  Sampler& sampler;
+  std::shared_ptr<Sampler> sampler;
   /** @brief Quantity of interest */
-  QoI& qoi;
+  std::shared_ptr<QoI> qoi;
 };
 
 /** @class MonteCarloTwoLevel
@@ -226,11 +226,11 @@ public:
    * @param[in] n_burnin_ Number of burnin samples (QoI not evaluated on those)
    * @param[in] record_stats_ Record statistics of sampler
    */
-  MonteCarloTwoLevel(Action& coarse_action_,
-                     Sampler& coarse_sampler_,
-                     Action& fine_action_,
-                     ConditionedFineAction& conditioned_fine_action_,
-                     QoI& qoi_,
+  MonteCarloTwoLevel(std::shared_ptr<Action> coarse_action_,
+                     std::shared_ptr<Sampler> coarse_sampler_,
+                     std::shared_ptr<Action> fine_action_,
+                     std::shared_ptr<ConditionedFineAction> conditioned_fine_action_,
+                     std::shared_ptr<QoI> qoi_,
                      const unsigned int n_samples_,
                      const unsigned int n_burnin_,
                      const bool record_stats_=false) :
@@ -267,15 +267,15 @@ public:
     
 private:
   /** @brief Sampler on coarse level */
-  Sampler& coarse_sampler;
+  std::shared_ptr<Sampler> coarse_sampler;
   /** @brief Action on coarse level */
-  Action& coarse_action;
+  std::shared_ptr<Action> coarse_action;
   /** @brief Action on fine level */
-  Action& fine_action;
+  std::shared_ptr<Action> fine_action;
   /** @brief Conditioned fine action */
-  ConditionedFineAction& conditioned_fine_action;
+  std::shared_ptr<ConditionedFineAction> conditioned_fine_action;
   /** @brief Quantity of interest */
-  QoI& qoi;
+  std::shared_ptr<QoI> qoi;
   /** Two-level sampler */
   TwoLevelMetropolisSampler twolevel_sampler;
 };

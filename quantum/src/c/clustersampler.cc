@@ -10,27 +10,27 @@ std::pair<bool,int> ClusterSampler::process_link(const int i,
   // Neighbouring site
   int i_neighbour = (i+direction)%x_path_cur->M_lat;
   // Check if neighbouring site is bonded
-  double Sell = action.S_ell(x_path_cur->data[i],
+  double Sell = action->S_ell(x_path_cur->data[i],
                              x_path_cur->data[i_neighbour]);
   // Connection probability
   double p_connect = 1.-exp(fmin(0,-Sell));
   // Flip neighbouring site if it is bonded
   bool bonded = (uniform_dist(engine)<p_connect);
   if (bonded) {
-    x_path_cur->data[i_neighbour] = action.flip(x_path_cur->data[i_neighbour]);
+    x_path_cur->data[i_neighbour] = action->flip(x_path_cur->data[i_neighbour]);
   }
   return std::make_pair(bonded,i_neighbour);
 }
 
 /** Draw next sample */
 void ClusterSampler::draw(std::vector<std::shared_ptr<Path>> x_path) {
-  const unsigned int M_lat = action.getM_lat();
+  const unsigned int M_lat = action->getM_lat();
   for (int i=0;i<n_updates;i++) {
     // Pick new subgroup
-    action.new_angle();
+    action->new_angle();
     // Pick a random site and flip it
     int i0 = uniform_int_dist(engine);
-    x_path_cur->data[i0] = action.flip(x_path_cur->data[i0]);
+    x_path_cur->data[i0] = action->flip(x_path_cur->data[i0]);
     // Process cluster forward
     int i_p=i0;
     int i_last_p;

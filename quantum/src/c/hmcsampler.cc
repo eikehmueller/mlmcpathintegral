@@ -7,8 +7,8 @@
 
 /** Draw next sample */
 void HMCSampler::draw(std::vector<std::shared_ptr<Path>> x_path) {
-  const unsigned int M_lat = action.getM_lat();
-  const double T_final = action.getT_final();
+  const unsigned int M_lat = action->getM_lat();
+  const double T_final = action->getT_final();
   // Initial kinetic energy
   double T_kin_cur = 0.0;
   // Draw random momentum from normal distribution
@@ -34,7 +34,7 @@ void HMCSampler::draw(std::vector<std::shared_ptr<Path>> x_path) {
       dt_x = 0.0;
     }
     // Calculate force
-    action.force(x_path_trial,dp_path);
+    action->force(x_path_trial,dp_path);
     for(unsigned int j=0;j<M_lat;++j) {
       // Momentum update P -> P - 0.5*dt_{hmc}*dS(X)/dX
       p_path_cur->data[j] -= dt_p*dp_path->data[j];
@@ -51,7 +51,7 @@ void HMCSampler::draw(std::vector<std::shared_ptr<Path>> x_path) {
   // STEP 2: Accept-reject step
   bool accept = false;
   // Change in action S(X)
-  double deltaS = action.evaluate(x_path_trial) - action.evaluate(x_path_cur);
+  double deltaS = action->evaluate(x_path_trial) - action->evaluate(x_path_cur);
   // Change in kinetic energy T(P)
   double deltaT = T_kin_trial - T_kin_cur;
   // Change in H(X,P) = T(P) + S(X)

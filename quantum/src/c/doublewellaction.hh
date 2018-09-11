@@ -97,9 +97,30 @@ public:
                    const double lambda_,
                    const double sigma_)
     : Action(M_lat_,T_final_,renormalisation_,m0_), mu2(mu2_), lambda(lambda_),
+      sigma(sigma_),
       inv_sigma2(1./(sigma_*sigma_)) {
   }
 
+  /** @brief Construct coarsened version of action
+   *
+   * This returns a coarsened version of the action on the next level
+   * of the multigrid hierarchy.
+   */
+  std::shared_ptr<Action> virtual coarse_action() {
+    if (M_lat%2) {
+      std::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
+      exit(1);
+    }
+    return std::make_shared<DoubleWellAction>(M_lat/2,
+                                              T_final,
+                                              renormalisation,
+                                              m0,
+                                              mu2,
+                                              lambda,
+                                              sigma);
+  }
+
+  
   /** @brief Evaluate action for a specific path
    * 
    * Calculate \f$S[X]\f$ for a specific path
@@ -186,6 +207,8 @@ private:
   const double mu2;
   /** @brief Coefficient of quartic term in potential */
   const double lambda;
+  /** @brief Parameter sigma in potential */
+  const double sigma;
   /** @brief Inverse squared width of exponential term in potential */
   const double inv_sigma2;
 };

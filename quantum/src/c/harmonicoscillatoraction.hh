@@ -109,6 +109,25 @@ public:
    */
   ~HarmonicOscillatorAction() {}
 
+  /** @brief Construct coarsened version of action
+   *
+   * This returns a coarsened version of the action on the next level
+   * of the multigrid hierarchy.
+   */
+  std::shared_ptr<Action> virtual coarse_action() {
+    if (M_lat%2) {
+      std::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
+      exit(1);
+    }
+    RenormalisedHOParameters c_param(M_lat,T_final,m0,mu2,renormalisation);
+    return std::make_shared<HarmonicOscillatorAction>(M_lat/2,
+                                                      T_final,
+                                                      renormalisation,
+                                                      c_param.m0_coarse(),
+                                                      c_param.mu2_coarse());
+  };
+
+
   /** @brief Evaluate action for a specific path
    * 
    * Calculate \f$S[X]\f$ for a specific path
