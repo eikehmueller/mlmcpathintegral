@@ -77,12 +77,15 @@ public:
    * 
    * @param[in] M_lat_ Number of time slices \f$M\f$
    * @param[in] T_final_ Final time \f$T\f$
+   * @param[in] renormalisation_ Type of renormalisation
    * @param[in] m0_ Moment of inertia (angular mass) \f$I\f$
    */
   RotorAction(const unsigned int M_lat_,
               const double T_final_,
-              const double m0_) : ClusterAction(M_lat_,T_final_,m0_),
-                                  uniform_dist(-M_PI,M_PI) {
+              const RenormalisationType renormalisation_,
+              const double m0_)
+    : ClusterAction(M_lat_,T_final_,renormalisation_,m0_),
+      uniform_dist(-M_PI,M_PI) {
     engine.seed(21172817);
   }
 

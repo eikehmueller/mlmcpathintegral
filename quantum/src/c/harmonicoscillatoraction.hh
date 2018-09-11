@@ -85,17 +85,19 @@ public:
    * 
    * @param[in] M_lat_ Number of time slices \f$M\f$
    * @param[in] T_final_ Final time \f$T\f$
+   * @param[in] renormalisation_ Type of renormalisation
    * @param[in] m0_ Mass of particle \f$m_0\f$
    * @param[in] mu2_ Frequency \f$\mu^2\f$
    */
   HarmonicOscillatorAction(const unsigned int M_lat_,
                            const double T_final_,
+                           const RenormalisationType renormalisation_,
                            const double m0_,
                            const double mu2_)
-    : Action(M_lat_,T_final_,m0_), Sampler(false), mu2(mu2_),
+    : Action(M_lat_,T_final_,renormalisation_,m0_),
+      Sampler(false), mu2(mu2_),
       Wcurvature((2./a_lat + a_lat*mu2)*m0),
       Wminimum_scaling(0.5/(1.+0.5*a_lat*a_lat*mu2)) {
-    assert(mu2>0.0);
     build_covariance();
     engine.seed(124129017);
     y_tmp = std::make_shared<Path>(M_lat_,T_final_);

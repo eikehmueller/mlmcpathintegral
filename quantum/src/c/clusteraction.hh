@@ -29,13 +29,15 @@ public:
    * Create new instance of class.
    * 
    * @param[in] M_lat_ Number of time slices \f$M\f$
+   * @param[in] renormalisation_ Renormalisation type
    * @param[in] T_final_ Final time \f$T\f$
    * @param[in] m0_ Mass of particle \f$m_0\f$
    */
   ClusterAction(const unsigned int M_lat_,
                 const double T_final_,
+                const RenormalisationType renormalisation_,
                 const double m0_)
-    : Action(M_lat_, T_final_, m0_) {}
+    : Action(M_lat_, T_final_, renormalisation_, m0_) {}
 
   /** @brief Change \f$S_{\ell}\f$ in energy used in bonding probabilities
    *

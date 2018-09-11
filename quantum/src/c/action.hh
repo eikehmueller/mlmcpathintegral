@@ -7,6 +7,7 @@
 #include <Eigen/Dense>
 #include "path.hh"
 #include "sampler.hh"
+#include "renormalisation.hh"
 
 /** @file action.hh
  * @brief Header file for action base class
@@ -29,12 +30,17 @@ public:
    * 
    * @param[in] M_lat_ Number of time slices \f$M\f$
    * @param[in] T_final_ Final time \f$T\f$
+   * @param[in] renormalisation_ Type of renormalisation
+  
    * @param[in] m0_ Mass of particle \f$m_0\f$
    */
   Action(const unsigned int M_lat_,
          const double T_final_,
+         const RenormalisationType renormalisation_,
          const double m0_)
-    : M_lat(M_lat_), T_final(T_final_), m0(m0_), a_lat(T_final_/M_lat_) {
+    : M_lat(M_lat_), T_final(T_final_),
+      renormalisation(renormalisation_),
+      m0(m0_), a_lat(T_final_/M_lat_) {
     assert(m0>0.0);
     assert(T_final>0.0);
   }
@@ -115,6 +121,8 @@ protected:
   const unsigned int M_lat;
   /** @brief Final time */
   const double T_final;
+  /** @brief Renormalisation */
+  const RenormalisationType renormalisation;
   /** @brief Particle mass */
   const double m0;
   /** @brief lattice spacing */

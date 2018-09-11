@@ -76,16 +76,19 @@ public:
    * 
    * @param[in] M_lat_ Number of time slices \f$M\f$
    * @param[in] T_final_ Final time \f$T\f$
+   * @param[in] renormalisation_ Type of renormalisation
    * @param[in] m0_ Mass of particle \f$m_0\f$
    * @param[in] mu2_ Frequency \f$\mu^2\f$
    * @param[in] lambda_ Coefficient of quartic term, \f$\lambda\f$
    */
   QuarticOscillatorAction(const unsigned int M_lat_,
                           const double T_final_,
+                          const RenormalisationType renormalisation_,
                           const double m0_,
                           const double mu2_,
                           const double lambda_)
-    : Action(M_lat_,T_final_,m0_), mu2(mu2_), lambda(lambda_) {
+    : Action(M_lat_,T_final_,renormalisation_,m0_),
+      mu2(mu2_), lambda(lambda_) {
   }
 
   /** @brief Evaluate action for a specific path

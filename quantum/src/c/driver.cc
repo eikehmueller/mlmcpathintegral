@@ -108,6 +108,7 @@ int main(int argc, char* argv[]) {
   std::cout << "Action = harmonic oscillator" << std::endl;
   HarmonicOscillatorAction action(param_lattice.M_lat(),
                                   param_lattice.T_final(),
+                                  param_ho.renormalisation(),
                                   param_ho.m0(),
                                   param_ho.mu2());
 #endif // ACTION_HARMONIC_OSCILLATOR
@@ -117,6 +118,7 @@ int main(int argc, char* argv[]) {
   std::cout << "Action = quartic oscillator" << std::endl;
   QuarticOscillatorAction action(param_lattice.M_lat(),
                                  param_lattice.T_final(),
+                                 RenormalisationNone,
                                  param_qo.m0(),
                                  param_qo.mu2(),
                                  param_qo.lambda());
@@ -127,6 +129,7 @@ int main(int argc, char* argv[]) {
   std::cout << "Action = double well" << std::endl;
   DoubleWellAction action(param_lattice.M_lat(),
                           param_lattice.T_final(),
+                          RenormalisationNone,
                           param_dw.m0(),
                           param_dw.mu2(),
                           param_dw.lambda(),
@@ -138,6 +141,7 @@ int main(int argc, char* argv[]) {
   std::cout << "Action = rotor" << std::endl;
   RotorAction action(param_lattice.M_lat(),
                      param_lattice.T_final(),
+                     RenormalisationNone,
                      param_rotor.m0());
 #endif // ACTION_ROTOR
   std::cout << std::endl;
@@ -165,6 +169,7 @@ int main(int argc, char* argv[]) {
 #ifdef ACTION_HARMONIC_OSCILLATOR
     sampler = std::make_shared<HarmonicOscillatorAction>(param_lattice.M_lat(),
                                                          param_lattice.T_final(),
+                                                         param_ho.renormalisation(),
                                                          param_ho.m0(),
                                                          param_ho.mu2());
 #else
@@ -216,6 +221,7 @@ int main(int argc, char* argv[]) {
                                         param_ho.renormalisation());
   HarmonicOscillatorAction coarse_action(param_lattice.M_lat()/2,
                                          param_lattice.T_final(),
+                                         param_ho.renormalisation(),
                                          coarse_param.m0_coarse(),
                                          coarse_param.mu2_coarse());
 #endif // ACTION_HARMONIC_OSCILLATOR
@@ -224,6 +230,7 @@ int main(int argc, char* argv[]) {
 #ifdef ACTION_QUARTIC_OSCILLATOR
   QuarticOscillatorAction coarse_action(param_lattice.M_lat()/2,
                                         param_lattice.T_final(),
+                                        RenormalisationNone,
                                         param_qo.m0(),
                                         param_qo.mu2(),
                                         param_qo.lambda());
@@ -233,6 +240,7 @@ int main(int argc, char* argv[]) {
 #ifdef ACTION_DOUBLE_WELL
   DoubleWellAction coarse_action(param_lattice.M_lat()/2,
                                  param_lattice.T_final(),
+                                 RenormalisationNone,
                                  param_dw.m0(),
                                  param_dw.mu2(),
                                  param_dw.lambda(),
@@ -243,6 +251,7 @@ int main(int argc, char* argv[]) {
 #ifdef ACTION_ROTOR
   RotorAction coarse_action(param_lattice.M_lat()/2,
                             param_lattice.T_final(),
+                            RenormalisationNone,
                             param_rotor.m0());
 #endif // ACTION_ROTOR
   
@@ -265,8 +274,10 @@ int main(int argc, char* argv[]) {
 #ifdef ACTION_HARMONIC_OSCILLATOR
     coarse_sampler = std::make_shared<HarmonicOscillatorAction>(param_lattice.M_lat()/2,
                                                                 param_lattice.T_final(),
+                                                                param_ho.renormalisation(),
                                                                 coarse_param.m0_coarse(),
                                                                 coarse_param.mu2_coarse());
+    
 #else
     std::cout << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
     exit(-1);
