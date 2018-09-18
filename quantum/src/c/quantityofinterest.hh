@@ -18,9 +18,8 @@ class QoI {
 public: 
   /** @brief Create new instance 
    *
-   * @param[in] M_lat_ Number of time slices \f$M\f$
    */
-  QoI(unsigned int M_lat_) : M_lat(M_lat_) {}
+  QoI() {}
 
   /** @brief Evaluate on a path
    *
@@ -28,9 +27,6 @@ public:
    */
   const double virtual evaluate(const std::shared_ptr<Path> x_path) = 0;
   
-protected:
-  /** @brief Number of time slices */
-  const unsigned int M_lat;
 };
 
 /** @class QoIXsquared
@@ -45,7 +41,7 @@ public:
    *
    * @param[in] M_lat_ Number of time slices \f$M\f$
    */
-  QoIXsquared(unsigned int M_lat_) : QoI(M_lat_) {}
+  QoIXsquared() {}
 
   /** @brief Evaluate on a path
    *
@@ -72,8 +68,7 @@ public:
    *
    * @param[in] M_lat_ Number of time slices \f$M\f$
    */
-  QoISusceptibility(unsigned int M_lat_) : QoI(M_lat_),
-                                           four_pi2_inv(0.25/(M_PI*M_PI)){}
+  QoISusceptibility() : four_pi2_inv(0.25/(M_PI*M_PI)) {}
 
   /** @brief Evaluate on a path
    *

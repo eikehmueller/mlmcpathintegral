@@ -98,11 +98,11 @@ int main(int argc, char* argv[]) {
   if ( (param_general.action() == ActionHarmonicOscillator) or
        (param_general.action() == ActionQuarticOscillator) or
        (param_general.action() == ActionDoubleWell) ) {
-    qoi=std::make_shared<QoIXsquared>(param_lattice.M_lat());
+    qoi=std::make_shared<QoIXsquared>();
     std::cout << "QoI = X^2 " << std::endl;
   }
   if ( (param_general.action() == ActionRotor) ) {
-    qoi=std::make_shared<QoISusceptibility>(param_lattice.M_lat());
+    qoi=std::make_shared<QoISusceptibility>();
     std::cout << "QoI = Susceptibility Q[X]^2/T " << std::endl;
   }
   std::cout << std::endl;
