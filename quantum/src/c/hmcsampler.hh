@@ -6,6 +6,7 @@
 #include "path.hh"
 #include "action.hh"
 #include "parameters.hh"
+#include "sampler.hh"
 
 /** @file hmcsampler.hh
  * @brief Header file for Hybrid Monte Carlo sampler base class
@@ -80,6 +81,7 @@ public:
              const double T_hmc_,
              const double dt_hmc_,
              const unsigned int n_burnin_) :
+    Sampler(),
     action(action_),
     T_hmc(T_hmc_),
     dt_hmc(dt_hmc_),

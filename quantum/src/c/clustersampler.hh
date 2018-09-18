@@ -6,6 +6,7 @@
 #include "path.hh"
 #include "clusteraction.hh"
 #include "parameters.hh"
+#include "sampler.hh"
 
 /** @file clustersampler.hh
  * @brief Header file for sampler based on cluster algorithm
@@ -68,6 +69,7 @@ public:
   ClusterSampler(const std::shared_ptr<ClusterAction> action_,
                  const unsigned int n_burnin_,
                  const unsigned int n_updates_) :
+    Sampler(),
     action(action_),
     n_burnin(n_burnin_),
     n_updates(n_updates_),

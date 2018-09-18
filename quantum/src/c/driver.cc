@@ -12,6 +12,7 @@
 #include "renormalisation.hh"
 #include "twolevelmetropolissampler.hh"
 #include "conditionedfineaction.hh"
+#include "mcmcstep.hh"
 #include "hmcsampler.hh"
 #include "clustersampler.hh"
 #include "config.h"

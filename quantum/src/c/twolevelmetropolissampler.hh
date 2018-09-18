@@ -3,7 +3,7 @@
 #include <memory>
 #include <random>
 #include "action.hh"
-#include "sampler.hh"
+#include "mcmcstep.hh"
 #include "conditionedfineaction.hh"
 
 /** @file twolevelmetropolissampler.hh
@@ -39,10 +39,8 @@
  *
  * This guarantees that the fine level samples have the correct distribution.
  */
-class TwoLevelMetropolisSampler : public Sampler {
+class TwoLevelMetropolisSampler : public MCMCStep {
 public:
-  /** @brief Base type */
-  typedef Sampler Base;
   /** @brief Create a new instance
    *
    * @param[in] coarse_sampler_ Sampler on coarse level \f$\ell-1\f$
@@ -55,6 +53,7 @@ public:
                             const std::shared_ptr<Action> coarse_action_,
                             const std::shared_ptr<Action> fine_action_,
                             const std::shared_ptr<ConditionedFineAction> conditioned_fine_action_) :
+    MCMCStep(),
     coarse_sampler(coarse_sampler_),
     coarse_action(coarse_action_),
     fine_action(fine_action_),
