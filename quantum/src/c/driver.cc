@@ -9,6 +9,7 @@
 #include "quantityofinterest.hh"
 #include "montecarlosinglelevel.hh"
 #include "montecarlotwolevel.hh"
+#include "montecarlomultilevel.hh"
 #include "parameters.hh"
 #include "renormalisation.hh"
 #include "twolevelmetropolisstep.hh"
@@ -91,7 +92,11 @@ int main(int argc, char* argv[]) {
   TwoLevelMCParameters param_twolevelmc;
   if (param_twolevelmc.readFile(filename)) return 1;
   std::cout << param_twolevelmc << std::endl;
-  
+
+  MultiLevelMCParameters param_multilevelmc;
+  if (param_multilevelmc.readFile(filename)) return 1;
+  std::cout << param_multilevelmc << std::endl;
+
   /* ====== Select quantity of interest ====== */
   std::shared_ptr<QoI> qoi;
   std::cout << std::endl;
@@ -191,10 +196,10 @@ int main(int argc, char* argv[]) {
     std::cout << std::endl;
 
   }
+
   /* **************************************** * 
    * Two level method                         *
    * **************************************** */
-  
   if (param_general.do_twolevelmc()) {
     std::cout << "+--------------------------------+" << std::endl;
     std::cout << "! Two level MC                   !" << std::endl;
@@ -223,5 +228,23 @@ int main(int argc, char* argv[]) {
     std::cout << "=== Two level sampler statistics === " << std::endl; 
     montecarlo_twolevel.get_twolevelstep()->show_stats();
     std::cout << std::endl;
+  }
+  
+  /* **************************************** * 
+   * Multilevel method                         *
+   * **************************************** */
+  if (param_general.do_multilevelmc()) {
+    std::cout << "+--------------------------------+" << std::endl;
+    std::cout << "! Multilevel MC                  !" << std::endl;
+    std::cout << "+--------------------------------+" << std::endl;
+    std::cout << std::endl;
+    
+    MonteCarloMultiLevel montecarlo_multilevel(action,
+                                               qoi,
+                                               param_general,
+                                               param_hmc,
+                                               param_cluster,
+                                               param_multilevelmc);
+    montecarlo_multilevel.evaluate();
   }
 }

@@ -421,9 +421,11 @@ public:
     Parameters("general"),
     do_singlelevelmc_(true),
     do_twolevelmc_(true),
+    do_multilevelmc_(true),
     action_(ActionHarmonicOscillator) {
     addKey("do_singlelevelmc",Bool);
     addKey("do_twolevelmc",Bool);
+    addKey("do_multilevelmc",Bool);
     addKey("action",String);
   }
 
@@ -437,6 +439,7 @@ public:
     if (!readSuccess) {
       do_singlelevelmc_ = getContents("do_singlelevelmc")->getBool();
       do_twolevelmc_ = getContents("do_twolevelmc")->getBool();
+      do_multilevelmc_ = getContents("do_multilevelmc")->getBool();
       std::string action_str = getContents("action")->getString();
       if (action_str=="harmonicoscillator") {
         action_ = ActionHarmonicOscillator;
@@ -456,6 +459,8 @@ public:
   bool do_singlelevelmc() const { return do_singlelevelmc_; }
   /** @brief Run two level MC algorithm? */
   bool do_twolevelmc() const { return do_twolevelmc_; }
+  /** @brief Run multilevel MC algorithm? */
+  bool do_multilevelmc() const { return do_multilevelmc_; }
   /** @brief Return the action type */
   ActionType action() const { return action_; }
 
@@ -464,6 +469,8 @@ private:
   bool do_singlelevelmc_;
   /** @brief Run two level MC algorithm? */
   bool do_twolevelmc_;
+  /** @brief Run multilevel MC algorithm? */
+  bool do_multilevelmc_;
   /** @brief Type of action */
   ActionType action_;
 };

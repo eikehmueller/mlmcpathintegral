@@ -133,6 +133,9 @@ public:
     }
     return 1.0+2.0*tau_int_tmp/(S_k[0]-avg*avg);
   }
+
+  /** @brief Return the number of samples */
+  unsigned int samples() const { return n_samples; }
   
 private:
   /** @brief Label for identifying object */
