@@ -10,7 +10,7 @@
 #include "montecarlo.hh"
 #include "parameters.hh"
 #include "renormalisation.hh"
-#include "twolevelmetropolissampler.hh"
+#include "twolevelmetropolisstep.hh"
 #include "conditionedfineaction.hh"
 #include "mcmcstep.hh"
 #include "hmcsampler.hh"
@@ -273,7 +273,7 @@ int main(int argc, char* argv[]) {
     coarse_sampler->show_stats();
     std::cout << std::endl;
     std::cout << "=== Two level sampler statistics === " << std::endl; 
-    montecarlo_twolevel.get_twolevelsampler().show_stats();
+    montecarlo_twolevel.get_twolevelstep().show_stats();
     std::cout << std::endl;
   }
 }

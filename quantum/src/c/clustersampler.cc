@@ -23,7 +23,7 @@ std::pair<bool,int> ClusterSampler::process_link(const int i,
 }
 
 /** Draw next sample */
-void ClusterSampler::draw(std::vector<std::shared_ptr<Path>> x_path) {
+void ClusterSampler::draw(std::shared_ptr<Path> x_path) {
   const unsigned int M_lat = action->getM_lat();
   for (int i=0;i<n_updates;i++) {
     // Pick new subgroup
@@ -54,5 +54,5 @@ void ClusterSampler::draw(std::vector<std::shared_ptr<Path>> x_path) {
   // Copy to output vector
   std::copy(x_path_cur->data,
             x_path_cur->data+M_lat,
-            x_path[0]->data);
+            x_path->data);
 }

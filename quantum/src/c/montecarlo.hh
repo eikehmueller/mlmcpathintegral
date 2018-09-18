@@ -7,7 +7,7 @@
 #include "action.hh"
 #include "conditionedfineaction.hh"
 #include "quantityofinterest.hh"
-#include "twolevelmetropolissampler.hh"
+#include "twolevelmetropolisstep.hh"
 #include "statistics.hh"
 #include "parameters.hh"
 
@@ -231,10 +231,9 @@ public:
     fine_action(fine_action_),
     conditioned_fine_action(conditioned_fine_action_),
     qoi(qoi_),
-    twolevel_sampler(coarse_sampler_,
-                     coarse_action_,
-                     fine_action_,
-                     conditioned_fine_action_) {}
+    twolevel_step(coarse_action_,
+                  fine_action_,
+                  conditioned_fine_action_) {}
 
   /** @brief Calculate mean and variance of difference
    *
@@ -251,8 +250,8 @@ public:
 
   /** @brief Return reference to two-level sampler 
    */
-  TwoLevelMetropolisSampler& get_twolevelsampler() {
-    return twolevel_sampler;
+  TwoLevelMetropolisStep& get_twolevelstep() {
+    return twolevel_step;
   }
     
 private:
@@ -267,7 +266,7 @@ private:
   /** @brief Quantity of interest */
   std::shared_ptr<QoI> qoi;
   /** Two-level sampler */
-  TwoLevelMetropolisSampler twolevel_sampler;
+  TwoLevelMetropolisStep twolevel_step;
 };
 
 #endif // MONTECARLO_HH

@@ -32,7 +32,7 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ drawn from distribution
    */
-  virtual void draw(std::vector<std::shared_ptr<Path>> x_path) = 0;
+  virtual void draw(std::shared_ptr<Path> x_path) = 0;
    
 };
 

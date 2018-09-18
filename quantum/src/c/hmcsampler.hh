@@ -101,8 +101,8 @@ public:
     dp_path = std::make_shared<Path>(M_lat,T_final);
     action->initialise_path(x_path_cur);
     // Burn in
-    std::vector<std::shared_ptr<Path>> x_path_tmp;
-    x_path_tmp.push_back(std::make_shared<Path>(M_lat,T_final));
+    std::shared_ptr<Path> x_path_tmp =
+      std::make_shared<Path>(M_lat,T_final);
     for (unsigned int i=0;i<n_burnin;++i) {
       draw(x_path_tmp);
     }
@@ -120,7 +120,7 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ drawn from distribution
    */
-  virtual void draw(std::vector<std::shared_ptr<Path>> x_path);
+  virtual void draw(std::shared_ptr<Path> x_path);
 
 protected:
   /** @brief Action to sample from */

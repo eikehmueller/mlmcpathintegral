@@ -1,18 +1,18 @@
-#ifndef TWOLEVELMETROPOLISSAMPLER_HH
-#define TWOLEVELMETROPOLISSAMPLER_HH TWOLEVELMETROPOLISSAMPLER_HH
+#ifndef TWOLEVELMETROPOLISSTEP_HH
+#define TWOLEVELMETROPOLISSTEP_HH TWOLEVELMETROPOLISSTEP_HH
 #include <memory>
 #include <random>
 #include "action.hh"
 #include "mcmcstep.hh"
 #include "conditionedfineaction.hh"
 
-/** @file twolevelmetropolissampler.hh
- * @brief Header file for two level Metropolis sampler
+/** @file twolevelmetropolisstep.hh
+ * @brief Header file for two level Metropolis step
  */
 
-/** @class TwoLevelMetropolisSampler 
+/** @class TwoLevelMetropolisStep
  *
- * @brief Two level sampler
+ * @brief Two level Metropolis step
  *
  * Given a way of creating coarse samples \f$\theta_{\ell-1}\f$ from a 
  * sampler on level \f$\ell-1\f$, create fine samples \f$\theta_{\ell}\f$
@@ -39,28 +39,23 @@
  *
  * This guarantees that the fine level samples have the correct distribution.
  */
-class TwoLevelMetropolisSampler : public MCMCStep {
+class TwoLevelMetropolisStep : public MCMCStep {
 public:
   /** @brief Create a new instance
    *
-   * @param[in] coarse_sampler_ Sampler on coarse level \f$\ell-1\f$
    * @param[in] coarse_action_ Action on coarse level \f$\ell-1\f$
    * @param[in] fine_action_ Action on fine level \f$\ell\f$
    * @param[in] conditioned_fine_action_ Conditioned fine action object for
    *            filling in the fine points
    */
-  TwoLevelMetropolisSampler(std::shared_ptr<Sampler> coarse_sampler_,
-                            const std::shared_ptr<Action> coarse_action_,
-                            const std::shared_ptr<Action> fine_action_,
-                            const std::shared_ptr<ConditionedFineAction> conditioned_fine_action_) :
+  TwoLevelMetropolisStep(const std::shared_ptr<Action> coarse_action_,
+                         const std::shared_ptr<Action> fine_action_,
+                         const std::shared_ptr<ConditionedFineAction> conditioned_fine_action_) :
     MCMCStep(),
-    coarse_sampler(coarse_sampler_),
     coarse_action(coarse_action_),
     fine_action(fine_action_),
     conditioned_fine_action(conditioned_fine_action_) {
     assert(2*coarse_action->getM_lat()==fine_action->getM_lat());
-    theta_coarse = std::make_shared<Path>(coarse_action->getM_lat(),
-                                          coarse_action->getT_final());
     theta_fine = std::make_shared<Path>(fine_action->getM_lat(),
                                         coarse_action->getT_final());
     theta_fine_C = std::make_shared<Path>(coarse_action->getM_lat(),
@@ -71,23 +66,21 @@ public:
     reset_stats();
   }
 
-  /** @brief draw new fine-/coarse-level path pair
+  /** @brief draw new fine path given a coarse path
    *
-   * @param[out] x_path Vector of pointers to fine- and coarse- path
+   * @param[out] x_coarse_path Coarse path
+   * @param[out] x_path Resulting fine path
    */
-  virtual void draw(std::vector<std::shared_ptr<Path>> x_path);
+  virtual void draw(const std::shared_ptr<Path> x_coarse_path,
+                    std::shared_ptr<Path> x_path);
                               
 protected:
-  /** @brief Sampler on coarse level */
-  std::shared_ptr<Sampler> coarse_sampler;
   /** @brief Action on coarse level */
   const std::shared_ptr<Action> coarse_action;
   /** @brief Action on fine level */
   const std::shared_ptr<Action> fine_action;
   /** @brief Conditioned fine action */
   const std::shared_ptr<ConditionedFineAction> conditioned_fine_action;
-  /** @brief Temporary state vector on coarse level \f$\theta^n_{\ell-1}\f$ */
-  mutable std::shared_ptr<Path> theta_coarse;
   /** @brief Temporary state vector on fine level \f$\theta^n_{\ell}\f$ */
   mutable std::shared_ptr<Path> theta_fine;
   /** @brief Coarse part of state vector on fine level \f$\theta^n_{\ell,C}\f$ */
@@ -103,4 +96,4 @@ protected:
   /** @brief Uniform distribution in [0,1] for accept/reject step */
   mutable Uniform uniform_dist;
 };
-#endif // TWOLEVELMETROPOLISSAMPLER_HH
+#endif // TWOLEVELMETROPOLISSTEP_HH

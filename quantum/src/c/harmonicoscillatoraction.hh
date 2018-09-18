@@ -202,7 +202,7 @@ public:
    *
    * @param[out] x_path: path to populate
    */
-  virtual void draw(std::vector<std::shared_ptr<Path>> x_path);
+  virtual void draw(std::shared_ptr<Path> x_path);
 
   /** @brief Exact expression for expectation value of \f$X^2\f$
    *
