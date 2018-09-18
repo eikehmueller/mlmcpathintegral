@@ -19,9 +19,8 @@ class Sampler {
 public:
   /** @brief Create new instance
    *
-   * @param[in] record_stats_ Record statistics? 
    */
-  Sampler(const bool record_stats_) : record_stats(record_stats_) {
+  Sampler() {
     reset_stats();
   }
 
@@ -57,8 +56,6 @@ public:
   
 protected:
   /** @brief Collect statistics on acceptance probability and autocorrelation */
-  const bool record_stats;
-  /** @brief Number of accepted samples */
   mutable unsigned int n_accepted_samples;
   /** @brief Number of total samples */  
   mutable unsigned int n_total_samples;

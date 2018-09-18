@@ -69,8 +69,6 @@ private:
  */
 class HMCSampler : public Sampler {
 public:
-  /** @brief Base class */
-  typedef Sampler Base;
   /** @brief Create new instance
    *
    * @param[in] action_ Action to sample from
@@ -82,7 +80,6 @@ public:
              const double T_hmc_,
              const double dt_hmc_,
              const unsigned int n_burnin_) :
-    Base(true),
     action(action_),
     T_hmc(T_hmc_),
     dt_hmc(dt_hmc_),

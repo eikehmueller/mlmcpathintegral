@@ -59,8 +59,6 @@ private:
  */
 class ClusterSampler : public Sampler {
 public:
-  /** @brief Base class */
-  typedef Sampler Base;
   /** @brief Create new instance
    *
    * @param[in] action_ Action to sample from
@@ -70,7 +68,6 @@ public:
   ClusterSampler(const std::shared_ptr<ClusterAction> action_,
                  const unsigned int n_burnin_,
                  const unsigned int n_updates_) :
-    Base(action_->getM_lat()),
     action(action_),
     n_burnin(n_burnin_),
     n_updates(n_updates_),

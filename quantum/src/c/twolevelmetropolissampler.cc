@@ -56,10 +56,8 @@ void TwoLevelMetropolisSampler::draw(std::vector<std::shared_ptr<Path>> x_path) 
               theta_prime->data+M_lat,
               theta_fine->data);
   }
-  if (record_stats) {
-    n_total_samples++;
-    n_accepted_samples += (int) accept;
-  }
+  n_total_samples++;
+  n_accepted_samples += (int) accept;
   // Copy back to path
   std::copy(theta_fine->data,
             theta_fine->data+M_lat,

@@ -48,10 +48,8 @@ void ClusterSampler::draw(std::vector<std::shared_ptr<Path>> x_path) {
       bonded = processed_link.first;
       i_m = processed_link.second;
     } while ( (i_m != i_last_p) and bonded );
-    if (record_stats) {
-      n_total_samples++;
-      n_accepted_samples++;
-    }
+    n_total_samples++;
+    n_accepted_samples++;
   }
   // Copy to output vector
   std::copy(x_path_cur->data,

@@ -254,8 +254,7 @@ int main(int argc, char* argv[]) {
                                            conditioned_fine_action,
                                            qoi,
                                            param_twolevelmc.n_samples(),
-                                           param_twolevelmc.n_burnin(),
-                                           true);
+                                           param_twolevelmc.n_burnin());
     Statistics stats_fine("QoI[fine]",10);
     Statistics stats_coarse("QoI[coarse]",10);
     Statistics stats_diff("delta QoI",10);

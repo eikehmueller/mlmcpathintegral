@@ -143,21 +143,16 @@ public:
    *
    * @param[in] n_samples_ Number of samples
    * @param[in] n_burnin_ Number of burn-in steps
-   * @param[in] record_stats_ Record statistics of sampler
    */
   MonteCarlo(const unsigned int n_samples_,
-             const unsigned int n_burnin_,
-             const bool record_stats_=false) :
+             const unsigned int n_burnin_) :
     n_samples(n_samples_), 
-    n_burnin(n_burnin_),
-    record_stats(record_stats_) {}
+    n_burnin(n_burnin_) {}
 protected:
   /** @brief Number of samples */
   const unsigned int n_samples;
   /** @brief Number of burn-in steps */
   const unsigned int n_burnin;
-  /** @brief Record statistics */
-  const bool record_stats;
 };
 
 /** @class MonteCarloSingleLevel
@@ -176,15 +171,13 @@ public:
    * @param[in] qoi_ Quantity of interest to evaluate on samples
    * @param[in] n_samples_ Number of samples to evaluate
    * @param[in] n_burnin_ Number of burnin samples (QoI not evaluated on those)
-   * @param[in] record_stats_ Record statistics of sampler
    */
   MonteCarloSingleLevel(std::shared_ptr<Action> action_,
                         std::shared_ptr<Sampler> sampler_,
                         std::shared_ptr<QoI> qoi_,
                         const unsigned int n_samples_,
-                        const unsigned int n_burnin_,
-                        const bool record_stats_=false) :
-    MonteCarlo(n_samples_,n_burnin_,record_stats_), 
+                        const unsigned int n_burnin_) :
+    MonteCarlo(n_samples_,n_burnin_), 
     action(action_), 
     sampler(sampler_), 
     qoi(qoi_)
@@ -224,7 +217,6 @@ public:
    * @param[in] qoi_ Quantity of interest
    * @param[in] n_samples_ Number of samples to evaluate
    * @param[in] n_burnin_ Number of burnin samples (QoI not evaluated on those)
-   * @param[in] record_stats_ Record statistics of sampler
    */
   MonteCarloTwoLevel(std::shared_ptr<Action> coarse_action_,
                      std::shared_ptr<Sampler> coarse_sampler_,
@@ -232,9 +224,8 @@ public:
                      std::shared_ptr<ConditionedFineAction> conditioned_fine_action_,
                      std::shared_ptr<QoI> qoi_,
                      const unsigned int n_samples_,
-                     const unsigned int n_burnin_,
-                     const bool record_stats_=false) :
-    MonteCarlo(n_samples_,n_burnin_,record_stats_),
+                     const unsigned int n_burnin_) :
+    MonteCarlo(n_samples_,n_burnin_),
     coarse_sampler(coarse_sampler_),
     coarse_action(coarse_action_),
     fine_action(fine_action_),
@@ -243,8 +234,7 @@ public:
     twolevel_sampler(coarse_sampler_,
                      coarse_action_,
                      fine_action_,
-                     conditioned_fine_action_,
-                     record_stats_) {}
+                     conditioned_fine_action_) {}
 
   /** @brief Calculate mean and variance of difference
    *

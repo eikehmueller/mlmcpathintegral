@@ -50,14 +50,11 @@ public:
    * @param[in] fine_action_ Action on fine level \f$\ell\f$
    * @param[in] conditioned_fine_action_ Conditioned fine action object for
    *            filling in the fine points
-   * @param[in] record_stats_ Record statistics?
    */
   TwoLevelMetropolisSampler(std::shared_ptr<Sampler> coarse_sampler_,
                             const std::shared_ptr<Action> coarse_action_,
                             const std::shared_ptr<Action> fine_action_,
-                            const std::shared_ptr<ConditionedFineAction> conditioned_fine_action_,
-                            const bool record_stats_=false) :
-    Base(record_stats_),
+                            const std::shared_ptr<ConditionedFineAction> conditioned_fine_action_) :
     coarse_sampler(coarse_sampler_),
     coarse_action(coarse_action_),
     fine_action(fine_action_),
