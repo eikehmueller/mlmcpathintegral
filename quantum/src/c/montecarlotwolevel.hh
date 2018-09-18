@@ -10,6 +10,8 @@
 #include "twolevelmetropolisstep.hh"
 #include "statistics.hh"
 #include "parameters.hh"
+#include "hmcsampler.hh"
+#include "clustersampler.hh"
 #include "montecarlo.hh"
 
 /** @file montecarlotwolevel.hh
@@ -85,31 +87,20 @@ class MonteCarloTwoLevel : public MonteCarlo {
 public:
   /** \brief Create new instance 
    *
-   * @param[in] coarse_action_ Action on coarse level
-   * @param[in] coarse_sampler_ Sampler on coarse level
    * @param[in] fine_action_ Action on fine level
-   * @param[in] conditioned_fine_action_ Conditioned fine action
    * @param[in] qoi_ Quantity of interest
-   * @param[in] n_samples_ Number of samples to evaluate
-   * @param[in] n_burnin_ Number of burnin samples (QoI not evaluated on those)
+   * @param[in] param_general General parameters
+   * @param[in] param_hmc HMC sampler parameters
+   * @param[in] param_cluster Cluster sampler parameters
+   * @param[in] param_twolevelmc Two level sampler parameters
    */
-  MonteCarloTwoLevel(std::shared_ptr<Action> coarse_action_,
-                     std::shared_ptr<Sampler> coarse_sampler_,
-                     std::shared_ptr<Action> fine_action_,
-                     std::shared_ptr<ConditionedFineAction> conditioned_fine_action_,
+  MonteCarloTwoLevel(std::shared_ptr<Action> fine_action_,
                      std::shared_ptr<QoI> qoi_,
-                     const unsigned int n_samples_,
-                     const unsigned int n_burnin_) :
-    MonteCarlo(n_samples_,n_burnin_),
-    coarse_sampler(coarse_sampler_),
-    coarse_action(coarse_action_),
-    fine_action(fine_action_),
-    conditioned_fine_action(conditioned_fine_action_),
-    qoi(qoi_),
-    twolevel_step(coarse_action_,
-                  fine_action_,
-                  conditioned_fine_action_) {}
-
+                     const GeneralParameters param_general,
+                     const HMCParameters param_hmc,
+                     const ClusterParameters param_cluster,
+                     const TwoLevelMCParameters param_twolevelmc);
+  
   /** @brief Calculate mean and variance of difference
    *
    * Calculate the mean and variance of the difference in the QoI 
@@ -123,9 +114,12 @@ public:
                            Statistics& stats_coarse,
                            Statistics& stats_diff);
 
+  /** @brief Return coarse sampler */
+  std::shared_ptr<Sampler> get_coarsesampler() { return coarse_sampler; }
+  
   /** @brief Return reference to two-level sampler 
    */
-  TwoLevelMetropolisStep& get_twolevelstep() {
+  std::shared_ptr<TwoLevelMetropolisStep> get_twolevelstep() {
     return twolevel_step;
   }
     
@@ -141,7 +135,7 @@ private:
   /** @brief Quantity of interest */
   std::shared_ptr<QoI> qoi;
   /** Two-level sampler */
-  TwoLevelMetropolisStep twolevel_step;
+  std::shared_ptr<TwoLevelMetropolisStep> twolevel_step;
 };
 
 #endif // MONTECARLOTWOLEVEL_HH

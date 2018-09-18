@@ -8,6 +8,9 @@
 #include "quantityofinterest.hh"
 #include "statistics.hh"
 #include "parameters.hh"
+#include "parameters.hh"
+#include "hmcsampler.hh"
+#include "clustersampler.hh"
 #include "montecarlo.hh"
 
 /** @file montecarlosinglelevel.hh
@@ -84,22 +87,19 @@ public:
   /** @brief Create new instance
    *
    * @param[in] action_ Action to use
-   * @param[in] sampler_ Sampler to draw from
    * @param[in] qoi_ Quantity of interest to evaluate on samples
-   * @param[in] n_samples_ Number of samples to evaluate
-   * @param[in] n_burnin_ Number of burnin samples (QoI not evaluated on those)
+   * @param[in] param_general General parameters
+   * @param[in] param_hmc HMC sampler parameters
+   * @param[in] param_cluster Cluster sampler parameters
+   * @param[in] param_singlelevelmc Single level sampler parameters
    */
   MonteCarloSingleLevel(std::shared_ptr<Action> action_,
-                        std::shared_ptr<Sampler> sampler_,
                         std::shared_ptr<QoI> qoi_,
-                        const unsigned int n_samples_,
-                        const unsigned int n_burnin_) :
-    MonteCarlo(n_samples_,n_burnin_), 
-    action(action_), 
-    sampler(sampler_), 
-    qoi(qoi_)
-  {}
-
+                        const GeneralParameters param_general,
+                        const HMCParameters param_hmc,
+                        const ClusterParameters param_cluster,
+                        const SingleLevelMCParameters param_singlelevelmc);
+  
   /** @brief Calculate QoI
    * 
    * Calculate the Quantity of interest by Monte Carlo sampling. Return
@@ -108,6 +108,11 @@ public:
    * @param[inout] stats Object for recording statistics
    */
   void evaluate(Statistics& stats);
+
+  /** @brief Return sampler */
+  std::shared_ptr<Sampler> get_sampler() { return sampler; }
+  
+
 private:
   /** @brief Action action to use */
   std::shared_ptr<Action> action;
