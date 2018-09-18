@@ -6,6 +6,7 @@
 #include "path.hh"
 #include "clusteraction.hh"
 #include "parameters.hh"
+#include "sampler.hh"
 
 /** @file clustersampler.hh
  * @brief Header file for sampler based on cluster algorithm
@@ -59,8 +60,6 @@ private:
  */
 class ClusterSampler : public Sampler {
 public:
-  /** @brief Base class */
-  typedef Sampler Base;
   /** @brief Create new instance
    *
    * @param[in] action_ Action to sample from
@@ -70,7 +69,7 @@ public:
   ClusterSampler(const std::shared_ptr<ClusterAction> action_,
                  const unsigned int n_burnin_,
                  const unsigned int n_updates_) :
-    Base(action_->getM_lat()),
+    Sampler(),
     action(action_),
     n_burnin(n_burnin_),
     n_updates(n_updates_),
@@ -84,8 +83,7 @@ public:
     x_path_cur = std::make_shared<Path>(M_lat,T_final);
     action->initialise_path(x_path_cur);
     // Burn in
-    std::vector<std::shared_ptr<Path>> x_path_tmp;
-    x_path_tmp.push_back(std::make_shared<Path>(M_lat,T_final));
+    std::shared_ptr<Path> x_path_tmp = std::make_shared<Path>(M_lat,T_final);
     for (unsigned int i=0;i<n_burnin;++i) {
       draw(x_path_tmp);
     }
@@ -103,7 +101,7 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ drawn from distribution
    */
-  virtual void draw(std::vector<std::shared_ptr<Path>> x_path);
+  virtual void draw(std::shared_ptr<Path> x_path);
 
 private:
   

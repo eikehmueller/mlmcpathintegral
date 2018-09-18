@@ -6,7 +6,7 @@
  */
 
 /** Draw next sample */
-void HMCSampler::draw(std::vector<std::shared_ptr<Path>> x_path) {
+void HMCSampler::draw(std::shared_ptr<Path> x_path) {
   const unsigned int M_lat = action->getM_lat();
   const double T_final = action->getT_final();
   // Initial kinetic energy
@@ -68,14 +68,12 @@ void HMCSampler::draw(std::vector<std::shared_ptr<Path>> x_path) {
               x_path_trial->data+M_lat,
               x_path_cur->data);
   }
-  if (record_stats) {
-    n_total_samples++;
-    n_accepted_samples += (int) accept;
-  }
+  n_total_samples++;
+  n_accepted_samples += (int) accept;
   
   // Copy to output vector
   std::copy(x_path_cur->data,
             x_path_cur->data+M_lat,
-            x_path[0]->data);
+            x_path->data);
 
 }

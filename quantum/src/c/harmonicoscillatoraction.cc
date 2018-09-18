@@ -52,8 +52,8 @@ void HarmonicOscillatorAction::build_covariance() {
 }
 
 /** Draw sample from distribution */
-void HarmonicOscillatorAction::draw(std::vector<std::shared_ptr<Path>> x_path) {
-  Eigen::Map<Vector> x(x_path[0]->data,M_lat);
+void HarmonicOscillatorAction::draw(std::shared_ptr<Path> x_path) {
+  Eigen::Map<Vector> x(x_path->data,M_lat);
   for (unsigned int i=0; i<M_lat;++i) {
     y_tmp->data[i] = normal_dist(engine);
   }  

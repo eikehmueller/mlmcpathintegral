@@ -95,7 +95,8 @@ public:
                            const double m0_,
                            const double mu2_)
     : Action(M_lat_,T_final_,renormalisation_,m0_),
-      Sampler(false), mu2(mu2_),
+      Sampler(),
+      mu2(mu2_),
       Wcurvature((2./a_lat + a_lat*mu2)*m0),
       Wminimum_scaling(0.5/(1.+0.5*a_lat*a_lat*mu2)) {
     build_covariance();
@@ -201,7 +202,7 @@ public:
    *
    * @param[out] x_path: path to populate
    */
-  virtual void draw(std::vector<std::shared_ptr<Path>> x_path);
+  virtual void draw(std::shared_ptr<Path> x_path);
 
   /** @brief Exact expression for expectation value of \f$X^2\f$
    *

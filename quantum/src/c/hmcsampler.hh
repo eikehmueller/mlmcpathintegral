@@ -6,6 +6,7 @@
 #include "path.hh"
 #include "action.hh"
 #include "parameters.hh"
+#include "sampler.hh"
 
 /** @file hmcsampler.hh
  * @brief Header file for Hybrid Monte Carlo sampler base class
@@ -69,8 +70,6 @@ private:
  */
 class HMCSampler : public Sampler {
 public:
-  /** @brief Base class */
-  typedef Sampler Base;
   /** @brief Create new instance
    *
    * @param[in] action_ Action to sample from
@@ -82,7 +81,7 @@ public:
              const double T_hmc_,
              const double dt_hmc_,
              const unsigned int n_burnin_) :
-    Base(true),
+    Sampler(),
     action(action_),
     T_hmc(T_hmc_),
     dt_hmc(dt_hmc_),
@@ -102,8 +101,8 @@ public:
     dp_path = std::make_shared<Path>(M_lat,T_final);
     action->initialise_path(x_path_cur);
     // Burn in
-    std::vector<std::shared_ptr<Path>> x_path_tmp;
-    x_path_tmp.push_back(std::make_shared<Path>(M_lat,T_final));
+    std::shared_ptr<Path> x_path_tmp =
+      std::make_shared<Path>(M_lat,T_final);
     for (unsigned int i=0;i<n_burnin;++i) {
       draw(x_path_tmp);
     }
@@ -121,7 +120,7 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ drawn from distribution
    */
-  virtual void draw(std::vector<std::shared_ptr<Path>> x_path);
+  virtual void draw(std::shared_ptr<Path> x_path);
 
 protected:
   /** @brief Action to sample from */

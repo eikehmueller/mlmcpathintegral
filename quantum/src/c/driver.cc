@@ -7,11 +7,14 @@
 #include "doublewellaction.hh"
 #include "rotoraction.hh"
 #include "quantityofinterest.hh"
-#include "montecarlo.hh"
+#include "montecarlosinglelevel.hh"
+#include "montecarlotwolevel.hh"
+#include "montecarlomultilevel.hh"
 #include "parameters.hh"
 #include "renormalisation.hh"
-#include "twolevelmetropolissampler.hh"
+#include "twolevelmetropolisstep.hh"
 #include "conditionedfineaction.hh"
+#include "mcmcstep.hh"
 #include "hmcsampler.hh"
 #include "clustersampler.hh"
 #include "config.h"
@@ -89,18 +92,22 @@ int main(int argc, char* argv[]) {
   TwoLevelMCParameters param_twolevelmc;
   if (param_twolevelmc.readFile(filename)) return 1;
   std::cout << param_twolevelmc << std::endl;
-  
+
+  MultiLevelMCParameters param_multilevelmc;
+  if (param_multilevelmc.readFile(filename)) return 1;
+  std::cout << param_multilevelmc << std::endl;
+
   /* ====== Select quantity of interest ====== */
   std::shared_ptr<QoI> qoi;
   std::cout << std::endl;
   if ( (param_general.action() == ActionHarmonicOscillator) or
        (param_general.action() == ActionQuarticOscillator) or
        (param_general.action() == ActionDoubleWell) ) {
-    qoi=std::make_shared<QoIXsquared>(param_lattice.M_lat());
+    qoi=std::make_shared<QoIXsquared>();
     std::cout << "QoI = X^2 " << std::endl;
   }
   if ( (param_general.action() == ActionRotor) ) {
-    qoi=std::make_shared<QoISusceptibility>(param_lattice.M_lat());
+    qoi=std::make_shared<QoISusceptibility>();
     std::cout << "QoI = Susceptibility Q[X]^2/T " << std::endl;
   }
   std::cout << std::endl;
@@ -153,28 +160,7 @@ int main(int argc, char* argv[]) {
   /* **************************************** * 
    * Single level method                      *
    * **************************************** */  
-  /* ====== Select sampler for single level method ====== */
-  std::shared_ptr<Sampler> sampler;
-  if (param_singlelevelmc.sampler() == SamplerHMC) {
-    sampler = std::make_shared<HMCSampler>(action,
-                                           param_hmc.T(),
-                                           param_hmc.dt(),
-                                           param_hmc.n_burnin());
-  } else if (param_singlelevelmc.sampler() == SamplerCluster) {
-    if (param_general.action() != ActionRotor) {
-      std::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
-      exit(-1);
-    }
-    sampler = std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(action),
-                                               param_cluster.n_burnin(),
-                                               param_cluster.n_updates());
-  } else if (param_singlelevelmc.sampler() == SamplerExact) {
-    if (param_general.action() != ActionHarmonicOscillator) {
-      std::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
-      exit(-1);
-    }
-    sampler = std::dynamic_pointer_cast<Sampler>(action);
-  }
+
   if (param_general.do_singlelevelmc()) {
     std::cout << "+--------------------------------+" << std::endl;
     std::cout << "! Single level MC                !" << std::endl;
@@ -183,10 +169,11 @@ int main(int argc, char* argv[]) {
 
     /* ====== Construct single level MC ====== */
     MonteCarloSingleLevel montecarlo_singlelevel(action,
-                                                 sampler,
                                                  qoi,
-                                                 param_singlelevelmc.n_samples(),
-                                                 param_singlelevelmc.n_burnin());
+                                                 param_general,
+                                                 param_hmc,
+                                                 param_cluster,
+                                                 param_singlelevelmc);
 
     /* ====== Print out exact result for harmonic oscillator */
     if (param_general.action() == ActionHarmonicOscillator) {
@@ -204,58 +191,27 @@ int main(int argc, char* argv[]) {
     Statistics stats("QoI",10);
     montecarlo_singlelevel.evaluate(stats);
     std::cout << stats << std::endl;
+    std::cout << "=== Sampler statistics === " << std::endl; 
+    montecarlo_singlelevel.get_sampler()->show_stats();
+    std::cout << std::endl;
+
   }
+
   /* **************************************** * 
    * Two level method                         *
    * **************************************** */
-  /* ====== Select coarse action ====== */
-  std::shared_ptr<Action> coarse_action;
-  coarse_action = action->coarse_action();
-  
-  std::shared_ptr<Sampler> coarse_sampler;
-  if (param_twolevelmc.coarsesampler() == SamplerHMC) {
-    coarse_sampler = std::make_shared<HMCSampler>(coarse_action,
-                                                  param_hmc.T(),
-                                                  param_hmc.dt(),
-                                                  param_hmc.n_burnin());
-  } else if (param_twolevelmc.coarsesampler() == SamplerCluster) {
-    if (param_general.action() != ActionRotor) {
-      std::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
-      exit(-1);
-    }
-    coarse_sampler = std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(coarse_action),
-                                                      param_cluster.n_burnin(),
-                                                      param_cluster.n_updates());
-  } else if (param_twolevelmc.coarsesampler() == SamplerExact) {
-    if (param_general.action() != ActionHarmonicOscillator) {
-      std::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
-      exit(-1);
-    }
-    coarse_sampler = std::dynamic_pointer_cast<Sampler>(coarse_action);
-  }
-
-  std::shared_ptr<ConditionedFineAction> conditioned_fine_action;
-  if (param_general.action() == ActionRotor) {
-    conditioned_fine_action =
-      std::make_shared<RotorConditionedFineAction>(std::dynamic_pointer_cast<RotorAction>(action));
-  } else {
-    conditioned_fine_action =
-      std::make_shared<GaussianConditionedFineAction>(action);
-  }
-  
   if (param_general.do_twolevelmc()) {
     std::cout << "+--------------------------------+" << std::endl;
     std::cout << "! Two level MC                   !" << std::endl;
     std::cout << "+--------------------------------+" << std::endl;
     std::cout << std::endl;
-    MonteCarloTwoLevel montecarlo_twolevel(coarse_action,
-                                           coarse_sampler,
-                                           action,
-                                           conditioned_fine_action,
+    
+    MonteCarloTwoLevel montecarlo_twolevel(action,
                                            qoi,
-                                           param_twolevelmc.n_samples(),
-                                           param_twolevelmc.n_burnin(),
-                                           true);
+                                           param_general,
+                                           param_hmc,
+                                           param_cluster,
+                                           param_twolevelmc);
     Statistics stats_fine("QoI[fine]",10);
     Statistics stats_coarse("QoI[coarse]",10);
     Statistics stats_diff("delta QoI",10);
@@ -266,14 +222,29 @@ int main(int argc, char* argv[]) {
     std::cout << stats_coarse << std::endl;
     std::cout << stats_diff << std::endl;
     std::cout << std::endl;
-    std::cout << "=== Fine level sampler statistics === " << std::endl; 
-    sampler->show_stats();
-    std::cout << std::endl;
     std::cout << "=== Coarse level sampler statistics === " << std::endl; 
-    coarse_sampler->show_stats();
+    montecarlo_twolevel.get_coarsesampler()->show_stats();
     std::cout << std::endl;
     std::cout << "=== Two level sampler statistics === " << std::endl; 
-    montecarlo_twolevel.get_twolevelsampler().show_stats();
+    montecarlo_twolevel.get_twolevelstep()->show_stats();
     std::cout << std::endl;
+  }
+  
+  /* **************************************** * 
+   * Multilevel method                         *
+   * **************************************** */
+  if (param_general.do_multilevelmc()) {
+    std::cout << "+--------------------------------+" << std::endl;
+    std::cout << "! Multilevel MC                  !" << std::endl;
+    std::cout << "+--------------------------------+" << std::endl;
+    std::cout << std::endl;
+    
+    MonteCarloMultiLevel montecarlo_multilevel(action,
+                                               qoi,
+                                               param_general,
+                                               param_hmc,
+                                               param_cluster,
+                                               param_multilevelmc);
+    montecarlo_multilevel.evaluate();
   }
 }
