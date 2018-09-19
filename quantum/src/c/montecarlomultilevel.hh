@@ -1,6 +1,7 @@
 #ifndef MONTECARLOMULTILEVEL_HH
 #define MONTECARLOMULTILEVEL_HH MONTECARLOMULTILEVEL_HH
 #include <utility>
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <sstream>
