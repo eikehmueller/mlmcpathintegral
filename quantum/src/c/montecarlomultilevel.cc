@@ -7,6 +7,7 @@
 MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
                                            std::shared_ptr<QoI> qoi_,
                                            const GeneralParameters param_general,
+                                           const StatisticsParameters param_stats,
                                            const HMCParameters param_hmc,
                                            const ClusterParameters param_cluster,
                                            const MultiLevelMCParameters param_multilevelmc) :
@@ -14,7 +15,10 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
   fine_action(fine_action_),
   qoi(qoi_),
   n_level(param_multilevelmc.n_level()),
-  epsilon(param_multilevelmc.epsilon()) {
+  epsilon(param_multilevelmc.epsilon()),
+  n_autocorr_window(param_stats.n_autocorr_window()),
+  n_min_samples_corr(param_stats.n_min_samples_corr()),
+  n_min_samples_qoi(param_stats.n_min_samples_qoi()) {
   // Check that Number of lattice points permits number of levels
   unsigned int M_lat = fine_action->getM_lat();
   if ( (M_lat>>n_level)<<n_level == M_lat) {
@@ -75,14 +79,13 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
     coarse_sampler = std::dynamic_pointer_cast<Sampler>(coarse_action);
   }
   // Construct statistics on all levels
-  int k_max = 20; // Record autocorrelations over a window of 20 steps
   for (int level=0;level<n_level;++level) {
     std::stringstream stats_corr_label;
     stats_corr_label << "corr[" << level << "]";
-    stats_corr.push_back(std::make_shared<Statistics>(stats_corr_label.str(),k_max));
-    std::stringstream stats_Y_label;
-    stats_Y_label << "Y[" << level << "]";
-    stats_Y.push_back(std::make_shared<Statistics>(stats_Y_label.str(),k_max));
+    stats_corr.push_back(std::make_shared<Statistics>(stats_corr_label.str(),n_autocorr_window));
+    std::stringstream stats_qoi_label;
+    stats_qoi_label << "Y[" << level << "]";
+    stats_qoi.push_back(std::make_shared<Statistics>(stats_qoi_label.str(),n_autocorr_window));
   }
 }    
 
@@ -95,13 +98,9 @@ void MonteCarloMultiLevel::evaluate() {
   // Vector with target samples on each level. Record at least 100 samples.
   for (int level=0;level<n_level;++level) {
     stats_corr[level]->reset();
-    stats_Y[level]->reset();
+    stats_qoi[level]->reset();
   }
   double two_epsilon_inv2 = 2./(epsilon*epsilon);
-  // Minimal number of samples to measure autocorrelation time
-  unsigned int n_min_samples_autocorr = 100;
-  // Minimal number of samples to measure QoI
-  unsigned int n_min_samples_qoi = 100; 
   // Array which records whether we collected sufficient (uncorrelated)
   // samples on a particular level
   std::vector<bool> sufficient_stats_corr(n_level,false);
@@ -139,12 +138,12 @@ void MonteCarloMultiLevel::evaluate() {
      * that the measured autocorrelation time has been measured to 
      * sufficient accuracy.
      */
-    if ( (stats_corr[level]->samples() > n_min_samples_autocorr) and
+    if ( (stats_corr[level]->samples() > n_min_samples_corr) and
          (t[level] > stats_corr[level]->tau_int()) ) {
-      stats_Y[level]->record_sample(qoi_Y);
+      stats_qoi[level]->record_sample(qoi_Y);
       // Calculate variance and predict new number of target samples
-      V_ell[level] = stats_Y[level]->variance();
-      int n_samples = stats_Y[level]->samples();
+      V_ell[level] = stats_qoi[level]->variance();
+      int n_samples = stats_qoi[level]->samples();
       if (n_samples > n_min_samples_qoi) {
         int n_target = ceil(two_epsilon_inv2*sqrt(V_ell[level]*h_ell)*sum_V_ell_over_h_ell);
         sufficient_stats_corr[level] = (n_samples > n_target);
@@ -180,7 +179,7 @@ void MonteCarloMultiLevel::evaluate() {
 void MonteCarloMultiLevel::show_statistics() {
   for (int level=0;level<n_level;++level) {
     std::cout << *stats_corr[level];
-    std::cout << *stats_Y[level];
+    std::cout << *stats_qoi[level];
     std::cout << "------------------------------------" << std::endl;
     std::cout << std::endl;
   }  

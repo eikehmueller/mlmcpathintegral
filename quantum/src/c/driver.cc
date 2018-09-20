@@ -46,6 +46,7 @@ int main(int argc, char* argv[]) {
   /* ====== Read parameters ====== */
   GeneralParameters param_general;
   LatticeParameters param_lattice;
+  StatisticsParameters param_stats;
   HarmonicOscillatorParameters param_ho;
   QuarticOscillatorParameters param_qo;
   DoubleWellParameters param_dw;
@@ -54,6 +55,8 @@ int main(int argc, char* argv[]) {
   std::cout << param_general << std::endl;
   if (param_lattice.readFile(filename)) return 1;
   std::cout << param_lattice << std::endl;
+  if (param_stats.readFile(filename)) return 1;
+  std::cout << param_stats << std::endl;
   switch (param_general.action()) {
   case (ActionHarmonicOscillator): {
     if (param_ho.readFile(filename)) return 1;
@@ -171,6 +174,7 @@ int main(int argc, char* argv[]) {
     MonteCarloSingleLevel montecarlo_singlelevel(action,
                                                  qoi,
                                                  param_general,
+                                                 param_stats,
                                                  param_hmc,
                                                  param_cluster,
                                                  param_singlelevelmc);
@@ -242,6 +246,7 @@ int main(int argc, char* argv[]) {
     MonteCarloMultiLevel montecarlo_multilevel(action,
                                                qoi,
                                                param_general,
+                                               param_stats,
                                                param_hmc,
                                                param_cluster,
                                                param_multilevelmc);

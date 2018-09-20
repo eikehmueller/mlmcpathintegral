@@ -8,12 +8,16 @@
 MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
                                              std::shared_ptr<QoI> qoi_,
                                              const GeneralParameters param_general,
+                                             const StatisticsParameters param_stats,
                                              const HMCParameters param_hmc,
                                              const ClusterParameters param_cluster,
                                              const SingleLevelMCParameters param_singlelevelmc) :
   MonteCarlo(param_singlelevelmc.n_burnin()),
   action(action_), 
-  qoi(qoi_) {
+  qoi(qoi_),
+  n_autocorr_window(param_stats.n_autocorr_window()),
+  n_min_samples_corr(param_stats.n_min_samples_corr()),
+  n_min_samples_qoi(param_stats.n_min_samples_qoi()) {
   if (param_singlelevelmc.sampler() == SamplerHMC) {
     sampler = std::make_shared<HMCSampler>(action,
                                            param_hmc.T(),
@@ -34,9 +38,8 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
     }
     sampler = std::dynamic_pointer_cast<Sampler>(action);
   }
-  int k_max = 20;
-  stats_corr = std::make_shared<Statistics>("corr",k_max);
-  stats_Q = std::make_shared<Statistics>("Q",k_max);
+  stats_corr = std::make_shared<Statistics>("corr",n_autocorr_window);
+  stats_Q = std::make_shared<Statistics>("Q",n_autocorr_window);
   }
 
 /** Calculate Monte Carlo estimate with single level method */
@@ -46,8 +49,6 @@ void MonteCarloSingleLevel::evaluate() {
                            action->getT_final());
   // Window over which autocorrelation is measured
   double epsilon=1.E-2;
-  unsigned int n_min_samples_autocorr = 10;
-  unsigned int n_min_samples_qoi = 10;
 
   for (int i=i;i<n_burnin;++i)
     sampler->draw(x_path);
@@ -73,7 +74,7 @@ void MonteCarloSingleLevel::evaluate() {
     double qoi_Q = qoi->evaluate(x_path);
     stats_corr->record_sample(qoi_Q);
     if ( (t > stats_corr->tau_int()) and
-         (stats_corr->samples() > n_min_samples_autocorr) ) {
+         (stats_corr->samples() > n_min_samples_corr) ) {
       t = 0;
       stats_Q->record_sample(qoi_Q);
       int n_samples = stats_Q->samples();

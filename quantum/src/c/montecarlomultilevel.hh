@@ -100,6 +100,7 @@ public:
   MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
                        std::shared_ptr<QoI> qoi_,
                        const GeneralParameters param_general,
+                       const StatisticsParameters param_stats,
                        const HMCParameters param_hmc,
                        const ClusterParameters param_cluster,
                        const MultiLevelMCParameters param_multilevelmc);
@@ -132,7 +133,13 @@ private:
   /** @brief vector with statistics of (correlated) Q_fine */
   std::vector<std::shared_ptr<Statistics> > stats_corr;
   /** @brief vector with statistics of uncorrelated Y's*/
-  std::vector<std::shared_ptr<Statistics> > stats_Y;
+  std::vector<std::shared_ptr<Statistics> > stats_qoi;
+  /** @brief Size of autocorrelation window */
+  unsigned int n_autocorr_window;
+  /** @brief Minimal number of samples for correlated quantities */
+  unsigned int n_min_samples_corr;
+  /** @brief Minimal number of samples for qoi */
+  unsigned int n_min_samples_qoi;
 };
 
 #endif // MONTECARLOMULTILEVEL_HH

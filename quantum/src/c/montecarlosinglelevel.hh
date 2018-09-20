@@ -96,6 +96,7 @@ public:
   MonteCarloSingleLevel(std::shared_ptr<Action> action_,
                         std::shared_ptr<QoI> qoi_,
                         const GeneralParameters param_general,
+                        const StatisticsParameters param_stats,
                         const HMCParameters param_hmc,
                         const ClusterParameters param_cluster,
                         const SingleLevelMCParameters param_singlelevelmc);
@@ -127,6 +128,12 @@ private:
   std::shared_ptr<Statistics> stats_corr;
   /** @brief Statistics for measuring QoI */
   std::shared_ptr<Statistics> stats_Q;
+  /** @brief Size of autocorrelation window */
+  unsigned int n_autocorr_window;
+  /** @brief Minimal number of samples for correlated quantities */
+  unsigned int n_min_samples_corr;
+  /** @brief Minimal number of samples for qoi */
+  unsigned int n_min_samples_qoi;
 };
 
 #endif // MONTECARLOSINGLELEVEL_HH
