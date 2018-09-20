@@ -124,6 +124,8 @@ public:
   }
     
 private:
+  /** @brief Number of samples */
+  const unsigned int n_samples;
   /** @brief Sampler on coarse level */
   std::shared_ptr<Sampler> coarse_sampler;
   /** @brief Action on coarse level */

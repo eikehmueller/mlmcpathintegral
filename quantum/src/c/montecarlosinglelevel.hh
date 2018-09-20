@@ -27,10 +27,10 @@ public:
   SingleLevelMCParameters() :
     Parameters("singlelevelmc"),
     n_burnin_(100),
-    n_samples_(100),
+    epsilon_(1.0),
     sampler_(SamplerHMC) {
     addKey("n_burnin",Integer,Positive);
-    addKey("n_samples",Integer,Positive);
+    addKey("epsilon",Double,Positive);
     addKey("sampler",String);
   }
 
@@ -43,7 +43,7 @@ public:
     int readSuccess = Parameters::readFile(filename);
     if (!readSuccess) {
       n_burnin_ = getContents("n_burnin")->getInt();
-      n_samples_ = getContents("n_samples")->getInt();
+      epsilon_ = getContents("epsilon")->getDouble();
       std::string sampler_str = getContents("sampler")->getString();
       if (sampler_str == "HMC") {
         sampler_ = SamplerHMC;
@@ -62,15 +62,15 @@ public:
 
   /** @brief Return number of burnin samples */
   unsigned int n_burnin() const { return n_burnin_; }
-  /** @brief Return number of samples */
-  unsigned int n_samples() const { return n_samples_; }
+  /** @brief Return tolerance epsilon */
+  double epsilon() const { return epsilon_; }
   /** @brief Return sampler type */
   SamplerType sampler() const { return sampler_; }
 private:
   /** @brief Number of burnin samples */
   unsigned int n_burnin_;
-  /** @brief Number of samples */
-  unsigned int n_samples_;
+  /** @brief tolerance epsilon */
+  double epsilon_;
   /** @brief Sampler type */
   SamplerType sampler_;
 };
@@ -107,7 +107,7 @@ public:
    *
    * @param[inout] stats Object for recording statistics
    */
-  void evaluate(Statistics& stats);
+  void evaluate(Statistics& stats_Y);
 
   /** @brief Return sampler */
   std::shared_ptr<Sampler> get_sampler() { return sampler; }

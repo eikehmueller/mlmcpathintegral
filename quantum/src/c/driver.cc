@@ -188,9 +188,9 @@ int main(int argc, char* argv[]) {
       std::cout << std::endl;
     }
   
-    Statistics stats("QoI",10);
-    montecarlo_singlelevel.evaluate(stats);
-    std::cout << stats << std::endl;
+    Statistics stats_Y("QoI",10);
+    montecarlo_singlelevel.evaluate(stats_Y);
+    std::cout << stats_Y << std::endl;
     std::cout << "=== Sampler statistics === " << std::endl; 
     montecarlo_singlelevel.get_sampler()->show_stats();
     std::cout << std::endl;

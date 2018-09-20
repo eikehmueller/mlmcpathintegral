@@ -13,8 +13,8 @@ MonteCarloTwoLevel::MonteCarloTwoLevel(std::shared_ptr<Action> fine_action_,
                                        const HMCParameters param_hmc,
                                        const ClusterParameters param_cluster,
                                        const TwoLevelMCParameters param_twolevelmc) :
-  MonteCarlo(param_twolevelmc.n_samples(),
-             param_twolevelmc.n_burnin()),
+  MonteCarlo(param_twolevelmc.n_burnin()),
+  n_samples(param_twolevelmc.n_samples()),
   fine_action(fine_action_),
   qoi(qoi_) {
   coarse_action = fine_action->coarse_action();

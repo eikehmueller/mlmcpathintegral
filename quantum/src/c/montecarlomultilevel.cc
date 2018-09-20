@@ -10,7 +10,7 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
                                            const HMCParameters param_hmc,
                                            const ClusterParameters param_cluster,
                                            const MultiLevelMCParameters param_multilevelmc) :
-  MonteCarlo(1,1),
+  MonteCarlo(1),
   fine_action(fine_action_),
   qoi(qoi_),
   n_level(param_multilevelmc.n_level()),
@@ -99,9 +99,9 @@ void MonteCarloMultiLevel::evaluate() {
   }
   double two_epsilon_inv2 = 2./(epsilon*epsilon);
   // Minimal number of samples to measure autocorrelation time
-  int n_min_samples_autocorr = 100;
+  unsigned int n_min_samples_autocorr = 100;
   // Minimal number of samples to measure QoI
-  int n_min_samples_qoi = 100; 
+  unsigned int n_min_samples_qoi = 100; 
   // Array which records whether we collected sufficient (uncorrelated)
   // samples on a particular level
   std::vector<bool> sufficient_stats(n_level,false);
