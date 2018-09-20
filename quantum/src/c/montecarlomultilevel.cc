@@ -77,9 +77,9 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
   // Construct statistics on all levels
   int k_max = 20; // Record autocorrelations over a window of 20 steps
   for (int level=0;level<n_level;++level) {
-    std::stringstream stats_label;
-    stats_label << "Q[" << level << "]";
-    stats.push_back(std::make_shared<Statistics>(stats_label.str(),k_max));
+    std::stringstream stats_corr_label;
+    stats_corr_label << "corr[" << level << "]";
+    stats_corr.push_back(std::make_shared<Statistics>(stats_corr_label.str(),k_max));
     std::stringstream stats_Y_label;
     stats_Y_label << "Y[" << level << "]";
     stats_Y.push_back(std::make_shared<Statistics>(stats_Y_label.str(),k_max));
@@ -94,7 +94,7 @@ void MonteCarloMultiLevel::evaluate() {
   std::vector<int> t(n_level,0);
   // Vector with target samples on each level. Record at least 100 samples.
   for (int level=0;level<n_level;++level) {
-    stats[level]->reset();
+    stats_corr[level]->reset();
     stats_Y[level]->reset();
   }
   double two_epsilon_inv2 = 2./(epsilon*epsilon);
@@ -104,7 +104,7 @@ void MonteCarloMultiLevel::evaluate() {
   unsigned int n_min_samples_qoi = 100; 
   // Array which records whether we collected sufficient (uncorrelated)
   // samples on a particular level
-  std::vector<bool> sufficient_stats(n_level,false);
+  std::vector<bool> sufficient_stats_corr(n_level,false);
   int level = n_level-1; // Current level
   double sum_V_ell_over_h_ell; // sum_{ell=0}^{L-1} V_{ell}/h_{ell}
   std::vector<double> V_ell(n_level,0.0); // Variance on a particular level
@@ -131,7 +131,7 @@ void MonteCarloMultiLevel::evaluate() {
       double qoi_coarse = qoi->evaluate(x_path[level+1]);      
       qoi_Y = qoi_fine-qoi_coarse;
     }
-    stats[level]->record_sample(qoi_fine);
+    stats_corr[level]->record_sample(qoi_fine);
     t[level] += 1;
     /* If the current path is sufficiently well decorrelated, use it to
      * calculate the estimator and down to the next-finer level.
@@ -139,15 +139,15 @@ void MonteCarloMultiLevel::evaluate() {
      * that the measured autocorrelation time has been measured to 
      * sufficient accuracy.
      */
-    if ( (stats[level]->samples() > n_min_samples_autocorr) and
-         (t[level] > stats[level]->tau_int()) ) {
+    if ( (stats_corr[level]->samples() > n_min_samples_autocorr) and
+         (t[level] > stats_corr[level]->tau_int()) ) {
       stats_Y[level]->record_sample(qoi_Y);
       // Calculate variance and predict new number of target samples
       V_ell[level] = stats_Y[level]->variance();
       int n_samples = stats_Y[level]->samples();
       if (n_samples > n_min_samples_qoi) {
         int n_target = ceil(two_epsilon_inv2*sqrt(V_ell[level]*h_ell)*sum_V_ell_over_h_ell);
-        sufficient_stats[level] = (n_samples > n_target);
+        sufficient_stats_corr[level] = (n_samples > n_target);
       }
       if (level > 0) {
         // If we haven't reached the finest level, pass down to next level
@@ -161,8 +161,8 @@ void MonteCarloMultiLevel::evaluate() {
           double h_ell = action[i]->geta_lat();
           sum_V_ell_over_h_ell += V_ell[i]/h_ell;
         }
-        if (std::all_of(sufficient_stats.begin(),
-                        sufficient_stats.end(),
+        if (std::all_of(sufficient_stats_corr.begin(),
+                        sufficient_stats_corr.end(),
                         [](bool v) { return v; })) {
           break;
         }
@@ -174,8 +174,12 @@ void MonteCarloMultiLevel::evaluate() {
     // Abort if we have collected sufficient statistics, this can
     // only be judged on the coarsest level
   } while (true);
+}
+
+/* Show statistics */
+void MonteCarloMultiLevel::show_statistics() {
   for (int level=0;level<n_level;++level) {
-    std::cout << *stats[level];
+    std::cout << *stats_corr[level];
     std::cout << *stats_Y[level];
     std::cout << "------------------------------------" << std::endl;
     std::cout << std::endl;

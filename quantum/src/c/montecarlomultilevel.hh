@@ -106,6 +106,9 @@ public:
 
   /** @brief Run multilevel method */
   void evaluate();
+
+  /** @brief Print out statistics */
+  void show_statistics();
   
 private:
   /** @brief Sampler on coarsest level */
@@ -127,7 +130,7 @@ private:
   /** @brief Coarse on a particular level */
   std::vector<std::shared_ptr<Path> > x_coarse_path;
   /** @brief vector with statistics of (correlated) Q_fine */
-  std::vector<std::shared_ptr<Statistics> > stats;
+  std::vector<std::shared_ptr<Statistics> > stats_corr;
   /** @brief vector with statistics of uncorrelated Y's*/
   std::vector<std::shared_ptr<Statistics> > stats_Y;
 };

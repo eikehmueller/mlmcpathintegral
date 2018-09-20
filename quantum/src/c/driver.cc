@@ -188,9 +188,9 @@ int main(int argc, char* argv[]) {
       std::cout << std::endl;
     }
   
-    Statistics stats_Y("QoI",10);
-    montecarlo_singlelevel.evaluate(stats_Y);
-    std::cout << stats_Y << std::endl;
+    montecarlo_singlelevel.evaluate();
+    std::cout << std::endl;
+    montecarlo_singlelevel.show_statistics();
     std::cout << "=== Sampler statistics === " << std::endl; 
     montecarlo_singlelevel.get_sampler()->show_stats();
     std::cout << std::endl;
@@ -246,5 +246,6 @@ int main(int argc, char* argv[]) {
                                                param_cluster,
                                                param_multilevelmc);
     montecarlo_multilevel.evaluate();
+    montecarlo_multilevel.show_statistics();
   }
 }

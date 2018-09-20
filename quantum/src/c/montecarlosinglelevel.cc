@@ -34,18 +34,18 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
     }
     sampler = std::dynamic_pointer_cast<Sampler>(action);
   }
+  int k_max = 20;
+  stats_corr = std::make_shared<Statistics>("corr",k_max);
+  stats_Q = std::make_shared<Statistics>("Q",k_max);
   }
 
 /** Calculate Monte Carlo estimate with single level method */
-void MonteCarloSingleLevel::evaluate(Statistics& stats_Y) {
+void MonteCarloSingleLevel::evaluate() {
   std::shared_ptr<Path> x_path =
     std::make_shared<Path>(action->getM_lat(),
                            action->getT_final());
   // Window over which autocorrelation is measured
   double epsilon=1.E-2;
-  int k_max=20;
-  // Statistics for measuring autocorrelations
-  Statistics stats("Q",k_max);
   unsigned int n_min_samples_autocorr = 10;
   unsigned int n_min_samples_qoi = 10;
 
@@ -53,8 +53,8 @@ void MonteCarloSingleLevel::evaluate(Statistics& stats_Y) {
     sampler->draw(x_path);
   
   double two_epsilon_inv2 = 2./(epsilon*epsilon);
-  stats.reset();
-  stats_Y.reset();
+  stats_corr->reset();
+  stats_Q->reset();
   int t=0;
   bool sufficient_stats = false;
   while (not sufficient_stats) {
@@ -70,18 +70,25 @@ void MonteCarloSingleLevel::evaluate(Statistics& stats_Y) {
     }
 #endif
     // Quantity of interest
-    double qoi_Y = qoi->evaluate(x_path);
-    stats.record_sample(qoi_Y);
-    if ( (t > stats.tau_int()) and
-         (stats.samples() > n_min_samples_autocorr) ) {
+    double qoi_Q = qoi->evaluate(x_path);
+    stats_corr->record_sample(qoi_Q);
+    if ( (t > stats_corr->tau_int()) and
+         (stats_corr->samples() > n_min_samples_autocorr) ) {
       t = 0;
-      stats_Y.record_sample(qoi_Y);
-      int n_samples = stats_Y.samples();
+      stats_Q->record_sample(qoi_Q);
+      int n_samples = stats_Q->samples();
       if (n_samples > n_min_samples_qoi) {
-        int n_target = ceil(two_epsilon_inv2*stats_Y.variance());
+        int n_target = ceil(two_epsilon_inv2*stats_Q->variance());
         sufficient_stats = (n_samples > n_target);
       }
     }
     t++;
   }
+}
+
+/* Print out statistics */
+void MonteCarloSingleLevel::show_statistics() {
+  std::cout << *stats_corr;
+  std::cout << *stats_Q;
+  std::cout << std::endl;
 }

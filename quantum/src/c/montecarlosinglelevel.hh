@@ -107,7 +107,10 @@ public:
    *
    * @param[inout] stats Object for recording statistics
    */
-  void evaluate(Statistics& stats_Y);
+  void evaluate();
+
+  /** @brief Show statistics */
+  void show_statistics();
 
   /** @brief Return sampler */
   std::shared_ptr<Sampler> get_sampler() { return sampler; }
@@ -120,6 +123,10 @@ private:
   std::shared_ptr<Sampler> sampler;
   /** @brief Quantity of interest */
   std::shared_ptr<QoI> qoi;
+  /** @brief Statistics for measuring autocorrelations */
+  std::shared_ptr<Statistics> stats_corr;
+  /** @brief Statistics for measuring QoI */
+  std::shared_ptr<Statistics> stats_Q;
 };
 
 #endif // MONTECARLOSINGLELEVEL_HH
