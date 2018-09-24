@@ -83,6 +83,7 @@ multilevelmc:
   n_level = 3      # Number of levels
   epsilon = 1.0    # Tolerance epsilon
   coarsesampler = 'HMC' # Sampler to use [HMC, cluster, exact]
+  show_detailed_stats = false  # Print out detailed statistics?
 
 ###########################################
 # HMC sampler parameters

@@ -33,10 +33,12 @@ public:
     Parameters("multilevelmc"),
     n_level_(2),
     epsilon_(1.0),
-    coarsesampler_(SamplerHMC) {
+    coarsesampler_(SamplerHMC),
+    show_detailed_stats_(false) {
     addKey("n_level",Integer,Positive);
     addKey("epsilon",Double,Positive);
     addKey("coarsesampler",String);
+    addKey("show_detailed_stats",Bool);
   }
 
   /** @brief Read parameters from file
@@ -49,6 +51,7 @@ public:
     if (!readSuccess) {
       n_level_ = getContents("n_level")->getInt();
       epsilon_ = getContents("epsilon")->getDouble();
+      show_detailed_stats_ = getContents("show_detailed_stats")->getBool();
       std::string sampler_str = getContents("coarsesampler")->getString();
       if (sampler_str == "HMC") {
         coarsesampler_ = SamplerHMC;
@@ -72,6 +75,8 @@ public:
   double epsilon() const { return epsilon_; }
   /** @brief Return sampler type */
   SamplerType coarsesampler() const { return coarsesampler_; }
+  /** @brief Show detailed statistics? */
+  bool show_detailed_stats() const { return show_detailed_stats_; }
 private:
   /** @brief Number of levels */
   unsigned int n_level_;
@@ -79,6 +84,8 @@ private:
   double epsilon_;
   /** @brief Sampler type */
   SamplerType coarsesampler_;
+  /** @brief Show detailed statistics? */
+  bool show_detailed_stats_;
 };
 
 /** @class MonteCarloMultiLevel
@@ -109,6 +116,9 @@ public:
   /** @brief Run multilevel method */
   void evaluate();
 
+  /** @brief Print out detailed statistics on all levels */
+  void show_detailed_statistics();
+  
   /** @brief Print out statistics */
   void show_statistics();
   

@@ -180,7 +180,7 @@ void MonteCarloMultiLevel::evaluate() {
 }
 
 /* Show detailed statistics on all levels */
-void MonteCarloMultiLevel::show_statistics() {
+void MonteCarloMultiLevel::show_detailed_statistics() {
   std::cout << "=== Statistics of correlated quantities ===" << std::endl;
   for (int level=0;level<n_level;++level) {
     std::cout << "level = " << level << std::endl;
@@ -194,6 +194,10 @@ void MonteCarloMultiLevel::show_statistics() {
     std::cout << "------------------------------------" << std::endl;
   }
   std::cout << std::endl;
+}
+
+/* Show summary statistics and timing */
+void MonteCarloMultiLevel::show_statistics() {
   double qoi_value = 0.0;
   double qoi_error = 0.0;
   for (int level=0;level<n_level;++level) {
@@ -201,7 +205,7 @@ void MonteCarloMultiLevel::show_statistics() {
     qoi_error += stats_qoi[level]->error();
   }
   std::cout << std::setprecision(6) << std::fixed;
-  std::cout << "=== Combined QoI ===" << std::endl;
+  std::cout << std::endl;
   std::cout << " Q: Avg +/- Err = " << qoi_value << " +/- " << qoi_error << std::endl;
   std::cout << std::endl;
   std::cout << timer << std::endl;

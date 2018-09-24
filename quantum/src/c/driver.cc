@@ -252,5 +252,8 @@ int main(int argc, char* argv[]) {
                                                param_multilevelmc);
     montecarlo_multilevel.evaluate();
     montecarlo_multilevel.show_statistics();
+    if (param_multilevelmc.show_detailed_stats()) {
+      montecarlo_multilevel.show_detailed_statistics();
+    }
   }
 }
