@@ -36,6 +36,7 @@ public:
     int readSuccess = Parameters::readFile(filename);
     if (!readSuccess) {
       n_burnin_ = getContents("n_burnin")->getInt();
+      n_updates_ = getContents("n_updates")->getInt();
     }
     return readSuccess;
   }
