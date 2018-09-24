@@ -17,7 +17,8 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
   qoi(qoi_),
   n_autocorr_window(param_stats.n_autocorr_window()),
   n_min_samples_corr(param_stats.n_min_samples_corr()),
-  n_min_samples_qoi(param_stats.n_min_samples_qoi()) {
+  n_min_samples_qoi(param_stats.n_min_samples_qoi()),
+  epsilon(param_singlelevelmc.epsilon()) {
   if (param_singlelevelmc.sampler() == SamplerHMC) {
     sampler = std::make_shared<HMCSampler>(action,
                                            param_hmc.T(),
@@ -47,9 +48,6 @@ void MonteCarloSingleLevel::evaluate() {
   std::shared_ptr<Path> x_path =
     std::make_shared<Path>(action->getM_lat(),
                            action->getT_final());
-  // Window over which autocorrelation is measured
-  double epsilon=1.E-2;
-
   for (int i=i;i<n_burnin;++i)
     sampler->draw(x_path);
   

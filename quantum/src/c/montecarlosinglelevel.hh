@@ -134,6 +134,8 @@ private:
   unsigned int n_min_samples_corr;
   /** @brief Minimal number of samples for qoi */
   unsigned int n_min_samples_qoi;
+  /** @brief Tolerance epsilon */
+  const double epsilon;
 };
 
 #endif // MONTECARLOSINGLELEVEL_HH
