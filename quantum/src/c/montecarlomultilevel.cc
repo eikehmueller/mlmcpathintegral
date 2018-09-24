@@ -18,7 +18,8 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
   epsilon(param_multilevelmc.epsilon()),
   n_autocorr_window(param_stats.n_autocorr_window()),
   n_min_samples_corr(param_stats.n_min_samples_corr()),
-  n_min_samples_qoi(param_stats.n_min_samples_qoi()) {
+  n_min_samples_qoi(param_stats.n_min_samples_qoi()),
+  timer("MultilevelMC") {
   // Check that Number of lattice points permits number of levels
   unsigned int M_lat = fine_action->getM_lat();
   if ( (M_lat>>n_level)<<n_level == M_lat) {
@@ -107,6 +108,8 @@ void MonteCarloMultiLevel::evaluate() {
   int level = n_level-1; // Current level
   double sum_V_ell_over_h_ell; // sum_{ell=0}^{L-1} V_{ell}/h_{ell}
   std::vector<double> V_ell(n_level,0.0); // Variance on a particular level
+  timer.reset();
+  timer.start();
   do {
     double h_ell = action[level]->geta_lat(); // Lattice spacing on cur. level
     double qoi_fine; // The QoI for the fine level samples
@@ -173,14 +176,34 @@ void MonteCarloMultiLevel::evaluate() {
     // Abort if we have collected sufficient statistics, this can
     // only be judged on the coarsest level
   } while (true);
+  timer.stop();
 }
 
-/* Show statistics */
+/* Show detailed statistics on all levels */
 void MonteCarloMultiLevel::show_statistics() {
+  std::cout << "=== Statistics of correlated quantities ===" << std::endl;
   for (int level=0;level<n_level;++level) {
+    std::cout << "level = " << level << std::endl;
     std::cout << *stats_corr[level];
+    std::cout << "------------------------------------" << std::endl;
+  }
+  std::cout << std::endl;
+  std::cout << "=== Statistics of QoI ===" << std::endl;
+  for (int level=0;level<n_level;++level) {
     std::cout << *stats_qoi[level];
     std::cout << "------------------------------------" << std::endl;
-    std::cout << std::endl;
-  }  
+  }
+  std::cout << std::endl;
+  double qoi_value = 0.0;
+  double qoi_error = 0.0;
+  for (int level=0;level<n_level;++level) {
+    qoi_value += stats_qoi[level]->average();
+    qoi_error += stats_qoi[level]->error();
+  }
+  std::cout << std::setprecision(6) << std::fixed;
+  std::cout << "=== Combined QoI ===" << std::endl;
+  std::cout << " Q: Avg +/- Err = " << qoi_value << " +/- " << qoi_error << std::endl;
+  std::cout << std::endl;
+  std::cout << timer << std::endl;
+  std::cout << std::endl;
 }

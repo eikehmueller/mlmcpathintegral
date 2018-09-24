@@ -18,7 +18,8 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
   n_autocorr_window(param_stats.n_autocorr_window()),
   n_min_samples_corr(param_stats.n_min_samples_corr()),
   n_min_samples_qoi(param_stats.n_min_samples_qoi()),
-  epsilon(param_singlelevelmc.epsilon()) {
+  epsilon(param_singlelevelmc.epsilon()),
+  timer("SinglevelMC") {
   if (param_singlelevelmc.sampler() == SamplerHMC) {
     sampler = std::make_shared<HMCSampler>(action,
                                            param_hmc.T(),
@@ -56,6 +57,8 @@ void MonteCarloSingleLevel::evaluate() {
   stats_Q->reset();
   int t=0;
   bool sufficient_stats = false;
+  timer.reset();
+  timer.start();
   while (not sufficient_stats) {
     sampler->draw(x_path);
     /* Save (some) paths to disk? Edit file config.h */
@@ -83,11 +86,14 @@ void MonteCarloSingleLevel::evaluate() {
     }
     t++;
   }
+  timer.stop();
 }
 
 /* Print out statistics */
 void MonteCarloSingleLevel::show_statistics() {
   std::cout << *stats_corr;
   std::cout << *stats_Q;
+  std::cout << std::endl;
+  std::cout << timer << std::endl;
   std::cout << std::endl;
 }

@@ -3,6 +3,7 @@
 #include <utility>
 #include <cmath>
 #include <iostream>
+#include "timer.hh"
 #include "sampler.hh"
 #include "action.hh"
 #include "quantityofinterest.hh"
@@ -136,6 +137,8 @@ private:
   unsigned int n_min_samples_qoi;
   /** @brief Tolerance epsilon */
   const double epsilon;
+  /** @brief time */
+  Timer timer;
 };
 
 #endif // MONTECARLOSINGLELEVEL_HH

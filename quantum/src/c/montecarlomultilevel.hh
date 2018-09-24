@@ -5,6 +5,7 @@
 #include <cmath>
 #include <iostream>
 #include <sstream>
+#include "timer.hh"
 #include "path.hh"
 #include "sampler.hh"
 #include "action.hh"
@@ -140,6 +141,8 @@ private:
   unsigned int n_min_samples_corr;
   /** @brief Minimal number of samples for qoi */
   unsigned int n_min_samples_qoi;
+  /** @brief Timer class */
+  Timer timer;
 };
 
 #endif // MONTECARLOMULTILEVEL_HH
