@@ -32,10 +32,12 @@ public:
   MultiLevelMCParameters() :
     Parameters("multilevelmc"),
     n_level_(2),
+    n_burnin_(100),
     epsilon_(1.0),
     coarsesampler_(SamplerHMC),
     show_detailed_stats_(false) {
     addKey("n_level",Integer,Positive);
+    addKey("n_burnin",Integer,Positive);
     addKey("epsilon",Double,Positive);
     addKey("coarsesampler",String);
     addKey("show_detailed_stats",Bool);
@@ -50,6 +52,7 @@ public:
     int readSuccess = Parameters::readFile(filename);
     if (!readSuccess) {
       n_level_ = getContents("n_level")->getInt();
+      n_burnin_ = getContents("n_burnin")->getInt();
       epsilon_ = getContents("epsilon")->getDouble();
       show_detailed_stats_ = getContents("show_detailed_stats")->getBool();
       std::string sampler_str = getContents("coarsesampler")->getString();
@@ -71,6 +74,8 @@ public:
 
   /** @brief Return number of levels */
   unsigned int n_level() const { return n_level_; }
+  /** @brief Return number burnin samples */
+  unsigned int n_burnin() const { return n_burnin_; }
   /** @brief Return tolerance epsilon */
   double epsilon() const { return epsilon_; }
   /** @brief Return sampler type */
@@ -80,6 +85,8 @@ public:
 private:
   /** @brief Number of levels */
   unsigned int n_level_;
+  /** @brief Number of burnin samples */
+  unsigned int n_burnin_;
   /** @brief tolerance epsilon */
   double epsilon_;
   /** @brief Sampler type */

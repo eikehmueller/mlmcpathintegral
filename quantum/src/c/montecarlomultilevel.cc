@@ -11,7 +11,7 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
                                            const HMCParameters param_hmc,
                                            const ClusterParameters param_cluster,
                                            const MultiLevelMCParameters param_multilevelmc) :
-  MonteCarlo(1),
+  MonteCarlo(param_multilevelmc.n_burnin()),
   fine_action(fine_action_),
   qoi(qoi_),
   n_level(param_multilevelmc.n_level()),
@@ -106,10 +106,79 @@ void MonteCarloMultiLevel::evaluate() {
   // samples on a particular level
   std::vector<bool> sufficient_stats_corr(n_level,false);
   int level = n_level-1; // Current level
+
+  // Burnin phase
+  do {
+    double qoi_fine; // The QoI for the fine level samples
+    // The QoI which is recorded on this level. This is Q_{L-1} on the
+    // coarsest level and Y_{ell} = Q_{ell+1}-Q_{ell} on all othe levels
+    double qoi_Y; 
+    if (level == (n_level-1)) {
+      /* Sample directly on coarsest level */
+      coarse_sampler->draw(x_path[level]);
+      qoi_fine = qoi->evaluate(x_path[level]);
+      qoi_Y = qoi_fine;
+    } else {
+      /* 
+       * On all other levels, sample by using the two level MCMC process
+       * We know that the coarse level samples are decorrelation, since the
+       * algorithm only ever proceeds to the next finer level if this is the
+       * case.
+       */
+      twolevel_step[level]->draw(x_path[level+1],x_path[level]);
+      qoi_fine = qoi->evaluate(x_path[level]);
+      double qoi_coarse = qoi->evaluate(x_path[level+1]);      
+      qoi_Y = qoi_fine-qoi_coarse;
+    }
+    stats_corr[level]->record_sample(qoi_fine);
+    t[level] += 1;
+    /* If the current path is sufficiently well decorrelated, use it to
+     * calculate the estimator and down to the next-finer level.
+     * Requiring the number of samples to be larger than n_min_samples ensures
+     * that the measured autocorrelation time has been measured to 
+     * sufficient accuracy.
+     */
+    if ( (stats_corr[level]->samples() > n_min_samples_corr) and
+         (t[level] > stats_corr[level]->tau_int()) ) {
+      stats_qoi[level]->record_sample(qoi_Y);
+      // Calculate variance and predict new number of target samples
+      int n_samples = stats_qoi[level]->samples();
+      if (n_samples > n_min_samples_qoi) {
+        sufficient_stats_corr[level] = (n_samples > n_burnin);
+      }
+      if (level > 0) {
+        // If we haven't reached the finest level, pass down to next level
+        t[level] = 0;
+        level--;
+      } else {
+        level = n_level-1;
+        // Calculate the sum \sum_{ell=0}^{L-1} V_ell/h_ell 
+        if (std::all_of(sufficient_stats_corr.begin(),
+                        sufficient_stats_corr.end(),
+                        [](bool v) { return v; })) {
+          break;
+        }
+      }      
+    } else {
+      // Cycle back to coarsest level
+      level = n_level-1;
+    } 
+  } while (true);
+
+  std::cout << "Burnin completed" << std::endl;
+  
+  // Reset everything before actual run
+  for (int level=0;level<n_level;++level) {
+    stats_corr[level]->reset();
+    stats_qoi[level]->reset();
+    sufficient_stats_corr[level] = false;
+    t[level] = 0;
+  }
   double sum_V_ell_over_h_ell; // sum_{ell=0}^{L-1} V_{ell}/h_{ell}
   std::vector<double> V_ell(n_level,0.0); // Variance on a particular level
   timer.reset();
   timer.start();
+  level = n_level-1;
   do {
     double h_ell = action[level]->geta_lat(); // Lattice spacing on cur. level
     double qoi_fine; // The QoI for the fine level samples
