@@ -104,7 +104,7 @@ void MonteCarloMultiLevel::evaluate() {
   double two_epsilon_inv2 = 2./(epsilon*epsilon);
   // Array which records whether we collected sufficient (uncorrelated)
   // samples on a particular level
-  std::vector<bool> sufficient_stats_corr(n_level,false);
+  std::vector<bool> sufficient_stats(n_level,false);
   int level = n_level-1; // Current level
 
   // Burnin phase
@@ -144,7 +144,7 @@ void MonteCarloMultiLevel::evaluate() {
       // Calculate variance and predict new number of target samples
       int n_samples = stats_qoi[level]->samples();
       if (n_samples > n_min_samples_qoi) {
-        sufficient_stats_corr[level] = (n_samples > n_burnin);
+        sufficient_stats[level] = (n_samples > n_burnin);
       }
       if (level > 0) {
         // If we haven't reached the finest level, pass down to next level
@@ -153,8 +153,8 @@ void MonteCarloMultiLevel::evaluate() {
       } else {
         level = n_level-1;
         // Calculate the sum \sum_{ell=0}^{L-1} V_ell/h_ell 
-        if (std::all_of(sufficient_stats_corr.begin(),
-                        sufficient_stats_corr.end(),
+        if (std::all_of(sufficient_stats.begin(),
+                        sufficient_stats.end(),
                         [](bool v) { return v; })) {
           break;
         }
@@ -171,7 +171,7 @@ void MonteCarloMultiLevel::evaluate() {
   for (int level=0;level<n_level;++level) {
     stats_corr[level]->reset();
     stats_qoi[level]->reset();
-    sufficient_stats_corr[level] = false;
+    sufficient_stats[level] = false;
     t[level] = 0;
   }
   double sum_V_ell_over_h_ell; // sum_{ell=0}^{L-1} V_{ell}/h_{ell}
@@ -218,7 +218,7 @@ void MonteCarloMultiLevel::evaluate() {
       int n_samples = stats_qoi[level]->samples();
       if (n_samples > n_min_samples_qoi) {
         int n_target = ceil(two_epsilon_inv2*sqrt(V_ell[level]*h_ell)*sum_V_ell_over_h_ell);
-        sufficient_stats_corr[level] = (n_samples > n_target);
+        sufficient_stats[level] = (n_samples > n_target);
       }
       if (level > 0) {
         // If we haven't reached the finest level, pass down to next level
@@ -232,8 +232,8 @@ void MonteCarloMultiLevel::evaluate() {
           double h_ell = action[i]->geta_lat();
           sum_V_ell_over_h_ell += V_ell[i]/h_ell;
         }
-        if (std::all_of(sufficient_stats_corr.begin(),
-                        sufficient_stats_corr.end(),
+        if (std::all_of(sufficient_stats.begin(),
+                        sufficient_stats.end(),
                         [](bool v) { return v; })) {
           break;
         }
