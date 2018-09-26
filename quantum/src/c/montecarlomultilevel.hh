@@ -150,6 +150,8 @@ private:
   std::vector<std::shared_ptr<Path> > x_coarse_path;
   /** @brief vector with statistics of (correlated) Q_fine */
   std::vector<std::shared_ptr<Statistics> > stats_corr;
+  /** @brief vector with statistics of correlated Y's*/
+  std::vector<std::shared_ptr<Statistics> > stats_qoi_corr;
   /** @brief vector with statistics of uncorrelated Y's*/
   std::vector<std::shared_ptr<Statistics> > stats_qoi;
   /** @brief Size of autocorrelation window */

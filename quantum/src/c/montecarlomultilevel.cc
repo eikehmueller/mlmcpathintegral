@@ -82,11 +82,14 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
   // Construct statistics on all levels
   for (int level=0;level<n_level;++level) {
     std::stringstream stats_corr_label;
-    stats_corr_label << "corr[" << level << "]";
+    stats_corr_label << "Q_{fine,corr}[" << level << "]";
     stats_corr.push_back(std::make_shared<Statistics>(stats_corr_label.str(),n_autocorr_window));
     std::stringstream stats_qoi_label;
     stats_qoi_label << "Y[" << level << "]";
     stats_qoi.push_back(std::make_shared<Statistics>(stats_qoi_label.str(),n_autocorr_window));
+    std::stringstream stats_qoi_corr_label;
+    stats_qoi_corr_label << "Y_{corr}[" << level << "]";
+    stats_qoi_corr.push_back(std::make_shared<Statistics>(stats_qoi_corr_label.str(),n_autocorr_window));
   }
 }    
 
@@ -94,12 +97,17 @@ void MonteCarloMultiLevel::evaluate() {
   /* Vector recording time since taking last sample from fine level chain
    * on a particular level. The samples are decorrelated of this time is
    * larger than the autocorrelation time of the fine level process.
-   */
-  std::vector<int> t(n_level,0);
+   */  
+  std::vector<int> t_qoi(n_level,0);
+  std::vector<int> t_fine(n_level,0);
+  std::vector<int> n_target(n_level,n_min_samples_qoi);
+  // Shift for comparing to integrated autocorrelation
+  int delta_tau_int=1;
   // Vector with target samples on each level. Record at least 100 samples.
   for (int level=0;level<n_level;++level) {
     stats_corr[level]->reset();
     stats_qoi[level]->reset();
+    stats_qoi_corr[level]->reset();
   }
   double two_epsilon_inv2 = 2./(epsilon*epsilon);
   // Array which records whether we collected sufficient (uncorrelated)
@@ -131,24 +139,30 @@ void MonteCarloMultiLevel::evaluate() {
       qoi_Y = qoi_fine-qoi_coarse;
     }
     stats_corr[level]->record_sample(qoi_fine);
-    t[level] += 1;
-    /* If the current path is sufficiently well decorrelated, use it to
+    stats_qoi_corr[level]->record_sample(qoi_Y);
+    t_fine[level]++;
+    t_qoi[level]++;
+      /* If the current path is sufficiently well decorrelated, use it to
      * calculate the estimator and down to the next-finer level.
      * Requiring the number of samples to be larger than n_min_samples ensures
      * that the measured autocorrelation time has been measured to 
      * sufficient accuracy.
      */
-    if ( (stats_corr[level]->samples() > n_min_samples_corr) and
-         (t[level] > stats_corr[level]->tau_int()) ) {
+    if ( (stats_qoi_corr[level]->samples() > n_min_samples_corr) and
+         (t_qoi[level] > stats_qoi_corr[level]->tau_int()+delta_tau_int) ) {
       stats_qoi[level]->record_sample(qoi_Y);
       // Calculate variance and predict new number of target samples
       int n_samples = stats_qoi[level]->samples();
       if (n_samples > n_min_samples_qoi) {
         sufficient_stats[level] = (n_samples > n_burnin);
       }
+      t_qoi[level]=0;
+    }
+    if ( (stats_corr[level]->samples() > n_min_samples_corr) and
+         (t_fine[level] > stats_corr[level]->tau_int()+delta_tau_int) ) {
       if (level > 0) {
         // If we haven't reached the finest level, pass down to next level
-        t[level] = 0;
+        t_fine[level] = 0;
         level--;
       } else {
         level = n_level-1;
@@ -163,16 +177,19 @@ void MonteCarloMultiLevel::evaluate() {
       // Cycle back to coarsest level
       level = n_level-1;
     } 
-  } while (true);
-
+  } while(true);
+  
   std::cout << "Burnin completed" << std::endl;
   
   // Reset everything before actual run
   for (int level=0;level<n_level;++level) {
     stats_corr[level]->reset();
     stats_qoi[level]->reset();
+    stats_qoi_corr[level]->reset();
+    n_target[level] = n_min_samples_qoi;
     sufficient_stats[level] = false;
-    t[level] = 0;
+    t_fine[level] = 0;
+    t_qoi[level] = 0;
   }
   double sum_V_ell_over_h_ell; // sum_{ell=0}^{L-1} V_{ell}/h_{ell}
   std::vector<double> V_ell(n_level,0.0); // Variance on a particular level
@@ -203,26 +220,26 @@ void MonteCarloMultiLevel::evaluate() {
       qoi_Y = qoi_fine-qoi_coarse;
     }
     stats_corr[level]->record_sample(qoi_fine);
-    t[level] += 1;
-    /* If the current path is sufficiently well decorrelated, use it to
-     * calculate the estimator and down to the next-finer level.
-     * Requiring the number of samples to be larger than n_min_samples ensures
-     * that the measured autocorrelation time has been measured to 
-     * sufficient accuracy.
-     */
-    if ( (stats_corr[level]->samples() > n_min_samples_corr) and
-         (t[level] > stats_corr[level]->tau_int()) ) {
+    stats_qoi_corr[level]->record_sample(qoi_Y);
+    t_fine[level]++;
+    t_qoi[level]++;
+    if ( (stats_qoi_corr[level]->samples() > n_min_samples_corr) and
+         (t_qoi[level] > stats_qoi_corr[level]->tau_int()+delta_tau_int) ) {
       stats_qoi[level]->record_sample(qoi_Y);
-      // Calculate variance and predict new number of target samples
-      V_ell[level] = stats_qoi[level]->variance();
       int n_samples = stats_qoi[level]->samples();
-      if (n_samples > n_min_samples_qoi) {
-        int n_target = ceil(two_epsilon_inv2*sqrt(V_ell[level]*h_ell)*sum_V_ell_over_h_ell);
-        sufficient_stats[level] = (n_samples > n_target);
+      if (n_samples > n_target[level]) {
+        // Calculate variance and predict new number of target samples
+        V_ell[level] = stats_qoi[level]->variance();
+        n_target[level] = ceil(two_epsilon_inv2*sqrt(V_ell[level]*h_ell)*sum_V_ell_over_h_ell);
+        sufficient_stats[level] = (n_samples > n_target[level]);
       }
+      t_qoi[level] = 0;
+    }
+    if ( (stats_corr[level]->samples() > n_min_samples_corr) and
+         (t_fine[level] > stats_corr[level]->tau_int()+delta_tau_int) ) {
       if (level > 0) {
         // If we haven't reached the finest level, pass down to next level
-        t[level] = 0;
+        t_fine[level] = 0;
         level--;
       } else {
         level = n_level-1;
@@ -247,13 +264,14 @@ void MonteCarloMultiLevel::evaluate() {
   } while (true);
   timer.stop();
 }
-
+  
 /* Show detailed statistics on all levels */
 void MonteCarloMultiLevel::show_detailed_statistics() {
   std::cout << "=== Statistics of correlated quantities ===" << std::endl;
   for (int level=0;level<n_level;++level) {
     std::cout << "level = " << level << std::endl;
     std::cout << *stats_corr[level];
+    std::cout << *stats_qoi_corr[level];
     std::cout << "------------------------------------" << std::endl;
   }
   std::cout << std::endl;
