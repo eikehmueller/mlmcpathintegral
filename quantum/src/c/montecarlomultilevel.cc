@@ -247,7 +247,7 @@ void MonteCarloMultiLevel::evaluate() {
         sum_V_ell_over_h_ell = 0.0;
         for (int i=0;i<n_level;++i) {
           double h_ell = action[i]->geta_lat();
-          sum_V_ell_over_h_ell += V_ell[i]/h_ell;
+          sum_V_ell_over_h_ell += sqrt(V_ell[i]/h_ell);
         }
         if (std::all_of(sufficient_stats.begin(),
                         sufficient_stats.end(),
