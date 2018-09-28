@@ -103,7 +103,7 @@ private:
  */
 class MonteCarloMultiLevel : public MonteCarlo {
 public:
-  /** \brief Create new instance 
+  /** @brief Create new instance 
    *
    * @param[in] fine_action_ Action on fine level
    * @param[in] qoi_ Quantity of interest
@@ -128,6 +128,23 @@ public:
   
   /** @brief Print out statistics */
   void show_statistics();
+
+private:
+  /** @brief Calculate effective cost \f$C_{\ell}^{eff}\f$ on a level
+   * 
+   * Calculate
+   * \f[
+   *   C^{eff}_{\ell} = \lceil \tau^{int}_{\ell} \rceil \sum_{k=\ell}^{L-1} T_k C_{k}
+   * \f]
+   * where \f$C_{k}=\alpha M_{k}\f$ is the cost on level \f$k\f$ and
+   * \f$T_k = t_k T_{k-1} = \prod_{k'=\ell+1}^{k}t_{k'}\f$, \f$T_{\ell}=1\f$.
+   * \f$t_k\f$ is the spacing between independent samples on level \f$k\f$.
+   * 
+   * @param[in] ell Level \f$\ell\f$
+   */
+  int cost_eff(const int ell) const;
+  
+
   
 private:
   /** @brief Sampler on coarsest level */
@@ -146,14 +163,14 @@ private:
   const double epsilon;
   /** @brief Path on a particular level */
   std::vector<std::shared_ptr<Path> > x_path;
-  /** @brief Coarse on a particular level */
-  std::vector<std::shared_ptr<Path> > x_coarse_path;
-  /** @brief vector with statistics of (correlated) Q_fine */
-  std::vector<std::shared_ptr<Statistics> > stats_corr;
-  /** @brief vector with statistics of correlated Y's*/
-  std::vector<std::shared_ptr<Statistics> > stats_qoi_corr;
+  /** @brief Path which is used as coarse path by subsequent level */
+  std::vector<std::shared_ptr<Path> > x_sampler_path;
+  /** @brief vector with statistics of sampler paths */
+  std::vector<std::shared_ptr<Statistics> > stats_sampler;
   /** @brief vector with statistics of uncorrelated Y's*/
   std::vector<std::shared_ptr<Statistics> > stats_qoi;
+  /** @brief number of skipped samples between independent samples on all levels */
+  std::vector<int> t_indep;
   /** @brief Size of autocorrelation window */
   unsigned int n_autocorr_window;
   /** @brief Minimal number of samples for correlated quantities */
