@@ -170,7 +170,7 @@ private:
   /** @brief vector with statistics of uncorrelated Y's*/
   std::vector<std::shared_ptr<Statistics> > stats_qoi;
   /** @brief number of skipped samples between independent samples on all levels */
-  std::vector<int> t_indep;
+  std::vector<double> t_indep;
   /** @brief Size of autocorrelation window */
   unsigned int n_autocorr_window;
   /** @brief Minimal number of samples for correlated quantities */

@@ -95,7 +95,6 @@ void MonteCarloMultiLevel::evaluate() {
    * larger than the autocorrelation time of the fine level process.
    */
   std::vector<int> t_sampler(n_level,0);
-  std::vector<int> n_target(n_level,n_min_samples_qoi);
   std::vector<int> n_indep(n_level,0);
   // Shift for comparing to integrated autocorrelation
   int delta_tau_int=1;
@@ -105,9 +104,6 @@ void MonteCarloMultiLevel::evaluate() {
     stats_qoi[level]->reset();
   }
   double two_epsilon_inv2 = 2./(epsilon*epsilon);
-  // Array which records whether we collected sufficient (uncorrelated)
-  // samples on a particular level
-  std::vector<bool> sufficient_stats(n_level,false);
   int level = n_level-1; // Current level
   // Samples on a given level
   std::vector<int> n_samples_burnin(n_level,0);
@@ -158,8 +154,6 @@ void MonteCarloMultiLevel::evaluate() {
   for (int level=0;level<n_level;++level) {
     stats_sampler[level]->reset();
     stats_qoi[level]->reset();
-    n_target[level] = n_min_samples_qoi;
-    sufficient_stats[level] = false;
     t_sampler[level] = 0;
     t_indep[level] = 0;
     n_indep[level] = 0;
@@ -171,10 +165,11 @@ void MonteCarloMultiLevel::evaluate() {
     // The QoI which is recorded on this level. This is Q_{L-1} on the
     // coarsest level and Y_{ell} = Q_{ell+1}-Q_{ell} on all othe levels
     double qoi_Y;
+    // The QoI of the independent sampler, Q_{ell}
     double qoi_sampler;
     if (level == (n_level-1)) {
       /* Sample directly on coarsest level */
-      coarse_sampler->draw(x_path[level]); // Path used for sampling
+      coarse_sampler->draw(x_path[level]); // Path used for measuring QoI
       coarse_sampler->draw(x_sampler_path[level]); // Path used on next level
       qoi_sampler = qoi->evaluate(x_sampler_path[level]);
       qoi_Y = qoi->evaluate(x_path[level]);
@@ -199,18 +194,9 @@ void MonteCarloMultiLevel::evaluate() {
     stats_sampler[level]->record_sample(qoi_sampler);
     t_sampler[level]++;
     stats_qoi[level]->record_sample(qoi_Y);
-    int n_samples = stats_qoi[level]->samples();
-    if (n_samples > n_target[level]) {
-      // Calculate variance and predict new number of target samples
-      double V_ell = stats_qoi[level]->variance();
-      double tau_int = stats_qoi[level]->tau_int();
-      double C_ell_eff = cost_eff(level);
-      n_target[level] = ceil(two_epsilon_inv2*sum_s_ell2_C_ell_eff*sqrt(V_ell/C_ell_eff)*tau_int);                
-      sufficient_stats[level] = (n_samples > n_target[level]);
-    }
     if (level > 0) {
       if ( (stats_sampler[level]->samples() > n_min_samples_corr) and
-           (t_sampler[level] > stats_sampler[level]->tau_int()+delta_tau_int) ) {
+           (t_sampler[level] > 2*stats_sampler[level]->tau_int()+delta_tau_int) ) {
         t_indep[level] = (n_indep[level]*t_indep[level]+t_sampler[level])/(1.0+n_indep[level]);
         n_indep[level]++;
         t_sampler[level] = 0;
@@ -219,18 +205,24 @@ void MonteCarloMultiLevel::evaluate() {
         level = n_level-1;
       }
     } else {
-      level = n_level-1;
       sum_s_ell2_C_ell_eff = 0;
-      for (int ell=0;ell<n_level-1;++ell) {
+      for (int ell=0;ell<n_level;++ell) {
         double V_ell = stats_sampler[ell]->variance();
         double C_ell_eff = cost_eff(ell);
         sum_s_ell2_C_ell_eff += sqrt(V_ell*C_ell_eff);
       }
-      if (std::all_of(sufficient_stats.begin(),
-                      sufficient_stats.end(),
-                      [](bool v) { return v; })) {
-        break;
+      bool sufficient_stats = true;
+      for (int ell=0;ell<n_level;++ell) {
+        int n_samples = stats_qoi[ell]->samples();
+        // Calculate variance and predict new number of target samples
+        double V_ell = stats_qoi[ell]->variance();
+        double tau_int = stats_qoi[ell]->tau_int();
+        double C_ell_eff = cost_eff(ell);
+        int n_target = ceil(two_epsilon_inv2*sum_s_ell2_C_ell_eff*sqrt(V_ell/C_ell_eff)*tau_int);
+        sufficient_stats = sufficient_stats and (n_samples > std::max(int(n_min_samples_qoi),n_target));
       }
+      if (sufficient_stats) break;
+      level = n_level-1;
     }
     // Abort if we have collected sufficient statistics, this can
     // only be judged on the coarsest level
@@ -243,14 +235,14 @@ int MonteCarloMultiLevel::cost_eff(const int ell) const {
   int M_lat = fine_action->getM_lat();
   // Cost is proportional to number of lattice points
   int C_k = M_lat >> ell;
-  int cost = 0;
+  int cost = C_k;
   int T_k = 1;
-  for (int k=ell+1;k<n_level-1;++k) {
+  for (int k=ell+1;k<n_level;++k) {
     cost += T_k*C_k;
-    T_k *= t_indep[k];
+    T_k *= ceil(t_indep[k]);
     C_k /= 2;
   }
-  return cost*ceil(stats_sampler[ell]->tau_int());
+  return cost*ceil(stats_qoi[ell]->tau_int());
 }
   
 /* Show detailed statistics on all levels */
