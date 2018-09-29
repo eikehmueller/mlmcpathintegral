@@ -109,66 +109,50 @@ void MonteCarloMultiLevel::evaluate() {
   // samples on a particular level
   std::vector<bool> sufficient_stats(n_level,false);
   int level = n_level-1; // Current level
-
+  // Samples on a given level
+  std::vector<int> n_samples_burnin(n_level,0);
   // Burnin phase
   do {
     // The QoI for the coarse path sampler on the current level
     double qoi_sampler;
-    // The QoI which is recorded on this level. This is Q_{L-1} on the
-    // coarsest level and Y_{ell} = Q_{ell+1}-Q_{ell} on all othe levels
-    double qoi_Y; 
     if (level == (n_level-1)) {
-      /* Sample directly on coarsest level */
       coarse_sampler->draw(x_path[level]);
       coarse_sampler->draw(x_sampler_path[level]);
       qoi_sampler = qoi->evaluate(x_sampler_path[level]);
-      qoi_Y = qoi->evaluate(x_path[level]);
     } else {
-      /* 
-       * On all other levels, sample by using the two level MCMC process
-       * We know that the coarse level samples are decorrelated, since the
-       * algorithm only ever proceeds to the next finer level if this is the
-       * case.
-       */
       twolevel_step[level]->draw(x_sampler_path[level+1],x_path[level]);
       if (level > 0) {
         twolevel_step[level]->draw(x_sampler_path[level+1],
                                    x_sampler_path[level]);
       }
       qoi_sampler = qoi->evaluate(x_sampler_path[level]);
-      double qoi_fine = qoi->evaluate(x_path[level]);
-      double qoi_coarse = qoi->evaluate(x_sampler_path[level+1]); 
-      qoi_Y = qoi_fine-qoi_coarse;
     }
     t_sampler[level]++;
     stats_sampler[level]->record_sample(qoi_sampler);
-    stats_qoi[level]->record_sample(qoi_Y);
-    // Calculate variance and predict new number of target samples
-    int n_samples = stats_qoi[level]->samples();
-    if (n_samples > n_min_samples_qoi) {
-      sufficient_stats[level] = (n_samples > n_burnin);
-    }
+    n_samples_burnin[level]++;
     if (level > 0) {
-      if ( (stats_sampler[level]->samples() > n_min_samples_corr) and
-           (t_sampler[level] > stats_sampler[level]->tau_int()+delta_tau_int) ) {
+      if ( (stats_sampler[level]->samples()>n_min_samples_corr) and
+           (t_sampler[level]>stats_sampler[level]->tau_int()+delta_tau_int) ) {
         t_sampler[level] = 0;
         // If we haven't reached the finest level, pass down to next level
         level--;
       } else {
-        // Cycle back to coarsest level
+        // Cycle back to coarsest level to pull down further samples
         level = n_level-1;
       } 
     } else {
-      level = n_level-1;
-      if (std::all_of(sufficient_stats.begin(),
-                      sufficient_stats.end(),
-                      [](bool v) { return v; })) {
+      // Check that we've collected sufficient samples
+      if (std::all_of(n_samples_burnin.begin(),
+                      n_samples_burnin.end(),
+                      [=](int v) { return v > n_burnin; })) {
         break;
       }
+      level = n_level-1;
     }      
   } while(true);
   
   std::cout << "Burnin completed" << std::endl;
+
   double sum_s_ell2_C_ell_eff = 1E9;
   // Reset everything before actual run
   for (int level=0;level<n_level;++level) {
