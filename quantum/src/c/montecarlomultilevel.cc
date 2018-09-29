@@ -144,7 +144,7 @@ void MonteCarloMultiLevel::evaluate() {
       // Check that we've collected sufficient samples
       if (std::all_of(n_samples_burnin.begin(),
                       n_samples_burnin.end(),
-                      [=](int v) { return v > n_burnin; })) {
+                      [=](int n_samples) { return n_samples > n_burnin; })) {
         break;
       }
       level = n_level-1;
