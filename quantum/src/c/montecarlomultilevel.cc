@@ -238,9 +238,9 @@ int MonteCarloMultiLevel::cost_eff(const int ell) const {
   int cost = C_k;
   int T_k = 1;
   for (int k=ell+1;k<n_level;++k) {
-    cost += T_k*C_k;
     T_k *= ceil(t_indep[k]);
     C_k /= 2;
+    cost += T_k*C_k;
   }
   return cost*ceil(stats_qoi[ell]->tau_int());
 }
