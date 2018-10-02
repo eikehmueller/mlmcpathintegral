@@ -247,16 +247,19 @@ int MonteCarloMultiLevel::cost_eff(const int ell) const {
   
 /* Show detailed statistics on all levels */
 void MonteCarloMultiLevel::show_detailed_statistics() {
-  std::cout << "=== Statistics of correlated quantities ===" << std::endl;
+  std::cout << "=== Statistics of coarse level samplers ===" << std::endl;
   for (int level=1;level<n_level;++level) {
     std::cout << "level = " << level << std::endl;
     std::cout << *stats_sampler[level];
+    std::cout << " spacing between samples " << t_indep[level] << std::endl;
     std::cout << "------------------------------------" << std::endl;
   }
   std::cout << std::endl;
   std::cout << "=== Statistics of QoI ===" << std::endl;
   for (int level=0;level<n_level;++level) {
+    std::cout << "level = " << level << std::endl;
     std::cout << *stats_qoi[level];
+    std::cout << " cost " << cost_eff(level) << std::endl;
     std::cout << "------------------------------------" << std::endl;
   }
   std::cout << std::endl;
