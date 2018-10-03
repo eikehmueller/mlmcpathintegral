@@ -96,8 +96,6 @@ void MonteCarloMultiLevel::evaluate() {
    */
   std::vector<int> t_sampler(n_level,0);
   std::vector<int> n_indep(n_level,0);
-  // Shift for comparing to integrated autocorrelation
-  int delta_tau_int=1;
   // Vector with target samples on each level. Record at least 100 samples.
   for (int level=0;level<n_level;++level) {
     stats_sampler[level]->reset();
@@ -128,7 +126,7 @@ void MonteCarloMultiLevel::evaluate() {
     n_samples_burnin[level]++;
     if (level > 0) {
       if ( (stats_sampler[level]->samples()>n_min_samples_corr) and
-           (t_sampler[level]>stats_sampler[level]->tau_int()+delta_tau_int) ) {
+           (t_sampler[level]>=ceil(stats_sampler[level]->tau_int())) ) {
         t_sampler[level] = 0;
         // If we haven't reached the finest level, pass down to next level
         level--;
@@ -196,7 +194,7 @@ void MonteCarloMultiLevel::evaluate() {
     stats_qoi[level]->record_sample(qoi_Y);
     if (level > 0) {
       if ( (stats_sampler[level]->samples() > n_min_samples_corr) and
-           (t_sampler[level] > 2*stats_sampler[level]->tau_int()+delta_tau_int) ) {
+           (t_sampler[level] >= ceil(stats_sampler[level]->tau_int())) ) {
         t_indep[level] = (n_indep[level]*t_indep[level]+t_sampler[level])/(1.0+n_indep[level]);
         n_indep[level]++;
         t_sampler[level] = 0;
