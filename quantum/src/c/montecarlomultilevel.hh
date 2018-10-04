@@ -169,6 +169,8 @@ private:
   std::vector<std::shared_ptr<Statistics> > stats_sampler;
   /** @brief vector with statistics of uncorrelated Y's*/
   std::vector<std::shared_ptr<Statistics> > stats_qoi;
+  /** @brief target number of samples on each level */
+  std::vector<int> n_target;
   /** @brief number of skipped samples between independent samples on all levels */
   std::vector<double> t_indep;
   /** @brief Size of autocorrelation window */

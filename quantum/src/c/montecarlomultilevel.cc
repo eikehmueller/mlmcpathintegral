@@ -19,6 +19,7 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
   n_autocorr_window(param_stats.n_autocorr_window()),
   n_min_samples_corr(param_stats.n_min_samples_corr()),
   n_min_samples_qoi(param_stats.n_min_samples_qoi()),
+  n_target(param_multilevelmc.n_level(),0),
   t_indep(param_multilevelmc.n_level(),0),
   timer("MultilevelMC") {
   // Check that Number of lattice points permits number of levels
@@ -159,6 +160,7 @@ void MonteCarloMultiLevel::evaluate() {
   timer.reset();
   timer.start();
   level = n_level-1;
+  std::vector<bool> sufficient_stats(n_level,false);
   do {
     // The QoI which is recorded on this level. This is Q_{L-1} on the
     // coarsest level and Y_{ell} = Q_{ell+1}-Q_{ell} on all othe levels
@@ -192,34 +194,52 @@ void MonteCarloMultiLevel::evaluate() {
     stats_sampler[level]->record_sample(qoi_sampler);
     t_sampler[level]++;
     stats_qoi[level]->record_sample(qoi_Y);
+    bool recompute_targets = false;
     if (level > 0) {
       if ( (stats_sampler[level]->samples() > n_min_samples_corr) and
            (t_sampler[level] >= ceil(stats_sampler[level]->tau_int())) ) {
         t_indep[level] = (n_indep[level]*t_indep[level]+t_sampler[level])/(1.0+n_indep[level]);
         n_indep[level]++;
         t_sampler[level] = 0;
-        level--;
+        // Check whether we actually need further samples on the finer levels
+        bool sufficient_stats_finer_levels = true;
+        for (int ell=0;ell<level;++ell) {
+          sufficient_stats_finer_levels = sufficient_stats_finer_levels and sufficient_stats[ell];
+        }
+        if (not sufficient_stats_finer_levels) {
+          level--;
+        } else {
+          level = n_level-1;
+          recompute_targets = true;
+        }
       } else {
         level = n_level-1;
+        recompute_targets = true;
       }
     } else {
+      recompute_targets = true;
+    }
+    if (recompute_targets) {
       sum_s_ell2_C_ell_eff = 0;
       for (int ell=0;ell<n_level;++ell) {
         double V_ell = stats_qoi[ell]->variance();
         double C_ell_eff = cost_eff(ell);
         sum_s_ell2_C_ell_eff += sqrt(V_ell*C_ell_eff);
       }
-      bool sufficient_stats = true;
       for (int ell=0;ell<n_level;++ell) {
         int n_samples = stats_qoi[ell]->samples();
         // Calculate variance and predict new number of target samples
         double V_ell = stats_qoi[ell]->variance();
         double tau_int = stats_qoi[ell]->tau_int();
         double C_ell_eff = cost_eff(ell);
-        int n_target = ceil(two_epsilon_inv2*sum_s_ell2_C_ell_eff*sqrt(V_ell/C_ell_eff)*tau_int);
-        sufficient_stats = sufficient_stats and (n_samples > std::max(int(n_min_samples_qoi),n_target));
+        n_target[ell] = ceil(two_epsilon_inv2*sum_s_ell2_C_ell_eff*sqrt(V_ell/C_ell_eff)*tau_int);
+        sufficient_stats[ell] = (n_samples > std::max(int(n_min_samples_qoi),n_target[ell]));
       }
-      if (sufficient_stats) break;
+      if (std::all_of(sufficient_stats.begin(),
+                      sufficient_stats.end(),
+                      [](bool v){return v;})) {
+          break;
+      }
       level = n_level-1;
     }
     // Abort if we have collected sufficient statistics, this can
@@ -258,6 +278,7 @@ void MonteCarloMultiLevel::show_detailed_statistics() {
   for (int level=0;level<n_level;++level) {
     std::cout << "level = " << level << std::endl;
     std::cout << *stats_qoi[level];
+    std::cout << " target number of samples = " << n_target[level] << std::endl;
     std::cout << " cost " << cost_eff(level) << std::endl;
     std::cout << "------------------------------------" << std::endl;
   }
