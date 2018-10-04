@@ -205,7 +205,7 @@ void MonteCarloMultiLevel::evaluate() {
     } else {
       sum_s_ell2_C_ell_eff = 0;
       for (int ell=0;ell<n_level;++ell) {
-        double V_ell = stats_sampler[ell]->variance();
+        double V_ell = stats_qoi[ell]->variance();
         double C_ell_eff = cost_eff(ell);
         sum_s_ell2_C_ell_eff += sqrt(V_ell*C_ell_eff);
       }
