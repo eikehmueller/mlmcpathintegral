@@ -291,8 +291,10 @@ void MonteCarloMultiLevel::show_statistics() {
   double qoi_error = 0.0;
   for (int level=0;level<n_level;++level) {
     qoi_value += stats_qoi[level]->average();
-    qoi_error += stats_qoi[level]->error();
+    double error = stats_qoi[level]->error();
+    qoi_error += error*error;
   }
+  qoi_error = sqrt(qoi_error);
   std::cout << std::setprecision(6) << std::fixed;
   std::cout << std::endl;
   std::cout << " Q: Avg +/- Err = " << qoi_value << " +/- " << qoi_error << std::endl;
