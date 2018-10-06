@@ -57,6 +57,7 @@ void MonteCarloSingleLevel::evaluate() {
   stats_Q->reset();
   int t=0;
   bool sufficient_stats = false;
+  int n_target = n_min_samples_qoi;
   timer.reset();
   timer.start();
   while (not sufficient_stats) {
@@ -79,8 +80,8 @@ void MonteCarloSingleLevel::evaluate() {
       t = 0;
       stats_Q->record_sample(qoi_Q);
       int n_samples = stats_Q->samples();
-      if (n_samples > n_min_samples_qoi) {
-        int n_target = ceil(two_epsilon_inv2*stats_Q->variance());
+      if (n_samples > n_target) {
+        n_target = ceil(stats_Q->tau_int()*two_epsilon_inv2*stats_Q->variance());
         sufficient_stats = (n_samples > n_target);
       }
     }
