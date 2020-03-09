@@ -3,6 +3,7 @@
 #include <utility>
 #include <cmath>
 #include <iostream>
+#include "config.h"
 #include "timer.hh"
 #include "sampler.hh"
 #include "action.hh"

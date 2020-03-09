@@ -60,6 +60,7 @@ void MonteCarloSingleLevel::evaluate() {
   int n_target = n_min_samples_qoi;
   timer.reset();
   timer.start();
+  int k=0;
   while (not sufficient_stats) {
     sampler->draw(x_path);
     /* Save (some) paths to disk? Edit file config.h */
@@ -72,6 +73,7 @@ void MonteCarloSingleLevel::evaluate() {
       x_path->save_to_disk(filename.str());
     }
 #endif
+    k++;
     // Quantity of interest
     double qoi_Q = qoi->evaluate(x_path);
     stats_corr->record_sample(qoi_Q);
