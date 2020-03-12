@@ -1,4 +1,5 @@
 \documentclass[11pt]{article}
+\usepackage{graphicx}
 \usepackage{amssymb,amsmath}
 \usepackage[margin=2cm]{geometry}
 \usepackage[colorlinks,bookmarksopen,bookmarksnumbered,citecolor=red,urlcolor=red]{hyperref}
@@ -101,26 +102,62 @@ The Lagrangian of a free particle of mass $M_0$ constrained to a circle of radiu
 \end{aligned}
 \label{eqn:Lagrangian_classical}
 \end{equation}
-Here we used the parametrisation $(x(t),y(t))=R(\cos(\phi(t)),\sin(\phi(t)))$ and the angular $L$ is defined as $L=I\dot{\phi}$. In the chosen units the time dependent Schr\"{o}dinger equation corresponding to the classical Lagrangian in Eq. \eqref{eqn:Lagrangian_classical} is obtained by using the angular momentum operator $\hat{L}=-i\partial_\phi$
+Here we used the parametrisation $(x(t),y(t))=R(\cos(\phi(t)),\sin(\phi(t)))$ and the angular $L$ is defined as $L=I\dot{\phi}$. In the chosen units the time dependent Schr\"{o}dinger equation corresponding to the classical Lagrangian in Eq. \eqref{eqn:Lagrangian_classical} is obtained by replacing the angular momentum by an operator $\hat{L}$. However, as derived in \cite{Tanimura1994}, the Hilbert space $H$ is the sum of separate spaces $H_\theta$, each with a different vacuum angle $\theta\in[-\pi,\pi)$, in other words
+  \begin{equation}
+    H=\bigoplus_{\theta\in[-\pi,\pi)} H_\theta.
+  \end{equation}
+  The angular momentum operator is different on each of those spaces, in $H_\theta$ it becomes $\hat{L}=-i\partial_\phi-\frac{\theta}{2\pi}i$ and the corresponding Schr\"{o}dinger equation is
 \begin{equation}
-  -i\frac{\partial{\Psi(\phi,t)}}{\partial t} = -\frac{1}{2I} \frac{\partial^2\Psi(\phi,t)}{\partial \phi^2}\label{eqn:Schroedinger}
+  -i\frac{\partial{\Psi(\phi,t)}}{\partial t} = H(\theta)\Psi(\phi,t)=-\frac{1}{2I} \left(\frac{\partial}{\partial \phi}-\frac{\theta}{2\pi}i\right)^2\Psi(\phi,t).\label{eqn:Schroedinger}
 \end{equation}
-The fundamental solution to Eq. \eqref{eqn:Schroedinger} is the wave function
+Note that $\theta$ looks a lot like an external current. Making the ansatz
 \begin{equation}
-  \Psi_{n}(\theta_n;\phi,t) = \frac{1}{\sqrt{2\pi}} \exp\left[-i(E_n t-n\phi+\theta_n)\right]
-  \qquad\text{with $E_n=\frac{n^2}{2I}$, $n\in\mathbb{Z}$ and $\theta_n\in [-\pi,\pi)$}.\label{eqn:fundamental_solution}
+  \Psi(\phi,t) = \frac{1}{2\pi}\exp\left[-i(E_m(\theta)t-m\phi)\right]
 \end{equation}
-Note that the wave function is parametrised by the the integer index $n$ and a vacuum angle $\theta_n$. As for the discretised case we assume that the time interval $[0,T]$ is finite, with periodic boundary conditions in time. Now let $Q\in\mathbb{Z}$ be the number of revolutions the quantised particle does in the time interval. To calculate $Q$, note that if the particle has angular velocity $\omega$ with $L=I\omega$, then we have
+energy eigenvalues are
 \begin{equation}
-Q = \frac{\text{angle covered in time $T$}}{2\pi} = \frac{\omega T}{2\pi} = \frac{T}{2\pi I}L.
+  E_m(\theta) = \frac{1}{2I}\left(m-\frac{\theta}{2\pi}\right)^2.
 \end{equation}
-The corresponding operator $\hat{Q}$ is defined as 
+The partition function at finite temperature $T$ is
 \begin{equation}
-\hat{Q} = \frac{T}{2\pi I}\hat{L} = -i\frac{T}{2\pi I}\partial_\phi.
+  Z(\theta) = \operatorname{Tr}\;\exp\left[-TH(\theta)\right]
+  = \sum_{m\in\mathbb{Z}} \exp\left[-\frac{T}{2I}\left(m-\frac{\theta}{2\pi}\right)^2\right].
 \end{equation}
-Note that as $[\hat{Q},\hat{L}]=0$ and the eigenvalues of $\hat{L}$ are the indices $n$ that label the wave functions $\Psi_n(\theta_n;\phi,t)$ defined in Eq. \eqref{eqn:fundamental_solution}, the eigenstates of $\hat{Q}$ are a linear combination of $\Psi_n(\theta_n;\phi,t)$ for fixed $n$:
+Since $Z(\theta+2\pi)=Z(\theta)$, it can be Fourier-expanded as
 \begin{equation}
-  \Psi_Q(\phi,t) = \int_{-\pi}^{\pi} a_Q(\theta_n)\Psi_n(\theta_n;\phi,t)\;d\theta_n\qquad\text{with $Q=\frac{nT}{2\pi I}$}
+  Z(\theta)=\sum_{Q\in\mathbb{Z}} Z_Q e^{i\theta Q}.
+\end{equation}
+$Z_Q$ can be obtained by Fourier-transforming $Z(\theta)$
+\begin{equation}
+  Z_Q = \frac{1}{2\pi}\int_{-\pi}^{\pi} Z(\theta')e^{-i\theta'Q}d\theta'
+  = \sqrt{\frac{2\pi^2}{T}}\exp\left[-\frac{2\pi^2I}{T}Q^2\right]
+\end{equation}
+The topological susceptibility is given by
+\begin{equation}
+  \begin{aligned}
+    \chi_t &= -\frac{1}{T}\frac{\partial^2\log[Z(\theta)]}{\partial\theta^2}\Big\vert_{\theta=0}\\
+    &= -\frac{1}{T}\frac{Z(\theta)(\partial^2_\theta Z(\theta))-(\partial_\theta Z(\theta))^2}{Z(\theta)^2}\Big\vert_{\theta=0}\\
+    &= -\frac{1}{T}\frac{\partial^2_\theta Z(\theta)}{Z(\theta)}\Big\vert_{\theta=0}
+    = \frac{1}{T}\frac{\sum_{Q\in\mathbb{Z}} Q^2 Z_Q}{\sum_{Q\in\mathbb{Z}}Z_Q}\\
+    &= \frac{1}{T}\frac{\sum_{Q\in\mathbb{Z}} Q^2 \exp\left[-\frac{2\pi^2I}{T}Q^2\right]}{\sum_{Q\in\mathbb{Z}}\exp\left[-\frac{2\pi^2I}{T}Q^2\right]}\\
+    &= \frac{1}{4\pi^2 I} S(z)\qquad\text{with $z:=\frac{4\pi^2 I}{T}$}
+      \end{aligned}
+\end{equation}
+Where the function $S(z)$ is defined as
+\begin{equation}
+  S(z) = z \frac{\sum_{Q\in\mathbb{Z}}Q^2 \exp\left[-\frac{1}{2}zQ^2\right]}{\sum_{Q\in\mathbb{Z}}\exp\left[-\frac{1}{2}zQ^2\right]}\label{eqn:Sz}
+\end{equation}
+and visualised in Fig. \ref{fig:Splot}.
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=0.5\linewidth]{S.pdf}
+    \caption{Function $S(z)$ defined in Eq. \eqref{eqn:Sz}}
+    \label{fig:Splot}
+  \end{center}
+\end{figure}
+The infinite volume limit $T\rightarrow\infty$ corresponds to $z\rightarrow 0$, and for $z\ll 1$ the sums in Eq. \eqref{eqn:Sz} can be approximated by integrals (using $q=\sqrt{z}Q$) to obtain
+\begin{equation}
+  S(z) \approx \frac{\int_{-\infty}^\infty q^2 \exp\left[-\frac{1}{2}q^2\right]}{\int_{-\infty}^\infty \exp\left[-\frac{1}{2}q^2\right]}=1.
 \end{equation}
 \bibliographystyle{unsrt}
 \bibliography{rotor}
