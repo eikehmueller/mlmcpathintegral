@@ -1,11 +1,13 @@
 \documentclass[11pt]{article}
 \usepackage{amssymb,amsmath}
-\usepackage[cm]{fullpage}
+\usepackage[margin=2cm]{geometry}
+\usepackage[colorlinks,bookmarksopen,bookmarksnumbered,citecolor=red,urlcolor=red]{hyperref}
 \renewcommand{\vec}[1]{\boldsymbol{#1}}
 \title{Quantum mechanical rotor}
 \begin{document}
 \maketitle
-\section*{Problem}
+Throughout this document we use Hartree atomic units\footnote{\url{https://en.wikipedia.org/wiki/Hartree_atomic_units}} in which $\hbar=1$, distances are measured in units of $a_0=\frac{4\pi\epsilon_0\hbar^2}{m_e e^2}$, energies in units of $E_h=\frac{\hbar^2}{m_ea_0^2}$ and times in units of $\hbar/E_h$.
+\section{Problem}
 We consider the discretised action in \cite{Ammon2016} (see also \cite{Bietenholz1997})
 \begin{equation}
 S[\phi] = \frac{I}{a}\sum_{i=0}^{d-1} \left(
@@ -23,7 +25,7 @@ Eq. \eqref{eqn:action_discrete} is a discretisation of the continuum action
 S_{\text{cont}}(\phi) = \frac{I}{2}\int_{0}^{T} \left(\frac{d\phi}{dt}\right)^2\;dt\qquad\text{with $T=a\cdot d$}
 \end{equation*}
 which naturally constrains the angle to $[-\pi,\pi)$.
-\section*{Fine-level sampling}
+\section{Fine-level sampling}
 To generate the conditioned fine level sample at the odd sites, we need to sample from a distribution with the probability density
 \begin{equation*}
 p(\phi|\phi_+,\phi_-) = \mathcal{Z}^{-1}\exp\left[-\frac{I}{a}f(\phi;\phi_+,\phi_-)\right]
@@ -90,6 +92,36 @@ Since $\sin^2(\psi/2)$ is a montonously increasing function of $\psi$, we have t
   \item Accept this sample with the probability $p_\sigma(\hat{\psi})/q_\sigma(\hat{\psi})$. Otherwise, continue with Step 1 (and repeat until a sample is accepted).
 \end{enumerate}
 The points $\psi_i$ should probably be chosen such that they are clustered closer together where the slope of $\sin^2(\psi/2)$ is large. This will ensure that the ratio $p_\sigma(\psi)/q_\sigma(\psi)$ is not too far from one, i.e. we accept as many points as possible.
+\section{Continuum limit}
+The Lagrangian of a free particle of mass $M_0$ constrained to a circle of radius $R$ is given by
+\begin{equation}
+\begin{aligned}
+  \mathcal{L} &= \frac{M_0}{2}\left(\dot{x}^2+\dot{y}^2\right)\qquad\text{with $x^2+y^2=R^2$}\\
+&= \frac{I}{2}\dot{\phi}^2=\frac{1}{2I} L^2 \qquad{\text{where $I:=R^2M_0$}}.
+\end{aligned}
+\label{eqn:Lagrangian_classical}
+\end{equation}
+Here we used the parametrisation $(x(t),y(t))=R(\cos(\phi(t)),\sin(\phi(t)))$ and the angular $L$ is defined as $L=I\dot{\phi}$. In the chosen units the time dependent Schr\"{o}dinger equation corresponding to the classical Lagrangian in Eq. \eqref{eqn:Lagrangian_classical} is obtained by using the angular momentum operator $\hat{L}=-i\partial_\phi$
+\begin{equation}
+  -i\frac{\partial{\Psi(\phi,t)}}{\partial t} = -\frac{1}{2I} \frac{\partial^2\Psi(\phi,t)}{\partial \phi^2}\label{eqn:Schroedinger}
+\end{equation}
+The fundamental solution to Eq. \eqref{eqn:Schroedinger} is the wave function
+\begin{equation}
+  \Psi_{n}(\theta_n;\phi,t) = \frac{1}{\sqrt{2\pi}} \exp\left[-i(E_n t-n\phi+\theta_n)\right]
+  \qquad\text{with $E_n=\frac{n^2}{2I}$, $n\in\mathbb{Z}$ and $\theta_n\in [-\pi,\pi)$}.\label{eqn:fundamental_solution}
+\end{equation}
+Note that the wave function is parametrised by the the integer index $n$ and a vacuum angle $\theta_n$. As for the discretised case we assume that the time interval $[0,T]$ is finite, with periodic boundary conditions in time. Now let $Q\in\mathbb{Z}$ be the number of revolutions the quantised particle does in the time interval. To calculate $Q$, note that if the particle has angular velocity $\omega$ with $L=I\omega$, then we have
+\begin{equation}
+Q = \frac{\text{angle covered in time $T$}}{2\pi} = \frac{\omega T}{2\pi} = \frac{T}{2\pi I}L.
+\end{equation}
+The corresponding operator $\hat{Q}$ is defined as 
+\begin{equation}
+\hat{Q} = \frac{T}{2\pi I}\hat{L} = -i\frac{T}{2\pi I}\partial_\phi.
+\end{equation}
+Note that as $[\hat{Q},\hat{L}]=0$ and the eigenvalues of $\hat{L}$ are the indices $n$ that label the wave functions $\Psi_n(\theta_n;\phi,t)$ defined in Eq. \eqref{eqn:fundamental_solution}, the eigenstates of $\hat{Q}$ are a linear combination of $\Psi_n(\theta_n;\phi,t)$ for fixed $n$:
+\begin{equation}
+  \Psi_Q(\phi,t) = \int_{-\pi}^{\pi} a_Q(\theta_n)\Psi_n(\theta_n;\phi,t)\;d\theta_n\qquad\text{with $Q=\frac{nT}{2\pi I}$}
+\end{equation}
 \bibliographystyle{unsrt}
 \bibliography{rotor}
 \end{document}
