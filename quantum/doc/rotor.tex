@@ -127,7 +127,7 @@ Since $Z(\theta+2\pi)=Z(\theta)$, it can be Fourier-expanded as
 \begin{equation}
   Z(\theta)=\sum_{Q\in\mathbb{Z}} Z_Q e^{i\theta Q}.
 \end{equation}
-$Z_Q$ can be obtained by Fourier-transforming $Z(\theta)$
+$Z_Q$ can be obtained by Fourier-transforming $Z(\theta)$ (see \cite{Bietenholz1997})
 \begin{equation}
   Z_Q = \frac{1}{2\pi}\int_{-\pi}^{\pi} Z(\theta')e^{-i\theta'Q}d\theta'
   = \sqrt{\frac{2\pi^2}{T}}\exp\left[-\frac{2\pi^2I}{T}Q^2\right]
@@ -157,7 +157,7 @@ and visualised in Fig. \ref{fig:Splot}.
 \end{figure}
 The infinite volume limit $T\rightarrow\infty$ corresponds to $z\rightarrow 0$, and for $z\ll 1$ the sums in Eq. \eqref{eqn:Sz} can be approximated by integrals (using $q=\sqrt{z}Q$) to obtain
 \begin{equation}
-  S(z) \approx \frac{\int_{-\infty}^\infty q^2 \exp\left[-\frac{1}{2}q^2\right]}{\int_{-\infty}^\infty \exp\left[-\frac{1}{2}q^2\right]}=1.
+  S(z) \approx \frac{\int_{-\infty}^\infty q^2 \exp\left[-\frac{1}{2}q^2\right]\;dq}{\int_{-\infty}^\infty \exp\left[-\frac{1}{2}q^2\right]\;dq}=1.
 \end{equation}
 \bibliographystyle{unsrt}
 \bibliography{rotor}
