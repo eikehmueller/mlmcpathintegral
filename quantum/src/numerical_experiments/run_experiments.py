@@ -95,6 +95,12 @@ class SingleLevelExperiment(Experiment):
                  color='blue',
                  linestyle='--',
                  label='fit $'+('%6.3f' % np.exp(c0))+'a^{'+('%6.3f' % c1)+'}$')
+        for j in range(len(df['alat'])):
+            plt.annotate('   '+str(np.array(df['Mlat'])[j]),
+                         (np.array(df['alat'])[j],
+                          np.array(df['bias'])[j]),
+                         va='top',ha='left')
+
         plt.legend(loc='lower right')
         plt.savefig('bias.pdf',bbox_inches='tight')
 
@@ -155,6 +161,12 @@ class TwoLevelExperiment(Experiment):
                  label='fit $'+('%6.3f' % np.exp(c0))+'a^{'+('%6.3f' % c1)+'}$')
         c0 = np.polyfit(np.array(np.log(df['alat']))[-3:-1],
                         np.array(np.log(df['var_chit']))[-3:-1],deg=0)
+        for j in range(len(df['alat'])):
+            plt.annotate('   '+str(np.array(df['Mlat'])[j]),
+                         (np.array(df['alat'])[j],
+                          np.array(df['var_dchit'])[j]),
+                         va='top',ha='left')
+
         plt.plot(df['alat'],0*df['alat']+np.exp(c0),
                  linewidth=2,
                  color='red',
