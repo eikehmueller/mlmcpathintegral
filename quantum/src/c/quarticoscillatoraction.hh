@@ -14,9 +14,9 @@
  *
  * @brief Class for storing parameters of quartic oscillator action
  *
- * This stores the mass \f$m_0\f$ and parameters \f$\mu_2\f$, \f$\lambda\f$
- * of the double well action with potential
- * \f$V(x)=\frac{m_0}{2}\mu^2x^2+\frac{\lambda}{4}x^4\f$.
+ * This stores the mass \f$m_0\f$ and parameters \f$\mu_2\f$, \f$\lambda\f$,
+ * \f$x_0\f$ of the double well action with potential
+ * \f$V(x)=\frac{m_0}{2}\mu^2x^2+\frac{\lambda}{4}(x-x_0)^4\f$.
  */
 class QuarticOscillatorParameters : public Parameters {
 public:
@@ -25,10 +25,12 @@ public:
     Parameters("quarticoscillator"),
     m0_(1.0),
     mu2_(1.0),
-    lambda_(1.0) {
+    lambda_(1.0),
+    x0_(0.0) {
     addKey("m0",Double,Positive);
     addKey("mu2",Double);
     addKey("lambda",Double,NonNegative);
+    addKey("x0",Double);
   }
 
   /** @brief Read parameters from file
@@ -42,6 +44,7 @@ public:
       m0_ = getContents("m0")->getDouble();
       mu2_ = getContents("mu2")->getDouble();
       lambda_ = getContents("lambda")->getDouble();
+      x0_ = getContents("x0")->getDouble();
     }
     return readSuccess;
   }
@@ -52,6 +55,8 @@ public:
   double mu2() const { return mu2_; }
   /** @brief Return parameter \f$\lambda\f$ */
   double lambda() const { return lambda_; }
+  /** @brief Return parameter \f$x_0\f$ */
+  double x0() const { return x0_; }
 
 private:
   /** @brief Unrenormalised mass \f$m_0\f$ */
@@ -60,6 +65,8 @@ private:
   double mu2_;
   /** @brief Parameter \f$\lambda\f$ */
   double lambda_;
+  /** @brief Parameter \f$x_0\f$ */
+  double x0_;
 };
 
 /** @class QuarticOscillatorAction
@@ -67,7 +74,7 @@ private:
  * @brief Action class for quartic oscillator 
  *
  * Action class for potential
- * \f$V(x)=\frac{m_0}{2}\mu^2x^2+\frac{\lambda}{4}x^4\f$
+ * \f$V(x)=\frac{m_0}{2}\mu^2x^2+\frac{\lambda}{4}(x-x_0)^4\f$
  */
 class QuarticOscillatorAction : public Action {
 public:
@@ -80,15 +87,17 @@ public:
    * @param[in] m0_ Mass of particle \f$m_0\f$
    * @param[in] mu2_ Frequency \f$\mu^2\f$
    * @param[in] lambda_ Coefficient of quartic term, \f$\lambda\f$
+   * @param[in] x0_ Shift quartic term, \f$x_0\f$
    */
   QuarticOscillatorAction(const unsigned int M_lat_,
                           const double T_final_,
                           const RenormalisationType renormalisation_,
                           const double m0_,
                           const double mu2_,
-                          const double lambda_)
+                          const double lambda_,
+                          const double x0_)
     : Action(M_lat_,T_final_,renormalisation_,m0_),
-      mu2(mu2_), lambda(lambda_) {
+      mu2(mu2_), lambda(lambda_), x0(x0_) {
   }
 
   /** @brief Construct coarsened version of action
@@ -106,7 +115,8 @@ public:
                                                      renormalisation,
                                                      m0,
                                                      mu2,
-                                                     lambda);
+                                                     lambda,
+                                                     x0);
   }
   
   /** @brief Evaluate action for a specific path
@@ -124,7 +134,7 @@ public:
    *
    * Note that for this action we have
      \f[
-         P_j = \frac{m_0}{a}\left(2X_j-X_{j-1}-X_{j+1}\right) + am_0\mu^2 X_j + a\lambda X_j^3
+         P_j = \frac{m_0}{a}\left(2X_j-X_{j-1}-X_{j+1}\right) + am_0\mu^2 X_j + a\lambda (X_j-x_0)^3
      \f]
    *
    * @param x_path Path \f$X\f$ on which to evaluate the force
@@ -158,7 +168,7 @@ public:
   double virtual inline getWcurvature(const double x_m,
                                       const double x_p) const {
     double x = 0.5*(x_m+x_p);
-    return (2./a_lat + a_lat*mu2)*m0 + 3.*lambda*a_lat*x*x;
+    return (2./a_lat + a_lat*mu2)*m0 + 3.*lambda*a_lat*(x-x0)*(x-x0);
   }
 
   /** @brief Find minimum of conditioned action \f$W_{\overline{x}}(x)\f$
@@ -184,7 +194,8 @@ public:
     const double rho = 1./(1.+0.5*a_lat*a_lat*mu2);
     double x = xbar;
     for (int i=0;i<4;++i) {
-      x = rho*(xbar - 0.5*a_lat*a_lat*lambda/m0*x*x*x);
+      double x_shifted = x-x0;
+      x = rho*(xbar - 0.5*a_lat*a_lat*lambda/m0*x_shifted*x_shifted*x_shifted);
     }
     return x;
   }
@@ -194,6 +205,8 @@ private:
   const double mu2;
   /** @brief Coefficient of quartic term in potential */
   const double lambda;
+  /** @brief Shift of quartic term in potential */
+  const double x0;
 };
 
 #endif // QUARTICOSCILLATORACTION_HH

@@ -134,7 +134,8 @@ int main(int argc, char* argv[]) {
                                                 RenormalisationNone,
                                                 param_qo.m0(),
                                                 param_qo.mu2(),
-                                                param_qo.lambda());    
+                                                param_qo.lambda(),
+                                                param_qo.x0());
     break;
   }
   case (ActionDoubleWell): {
