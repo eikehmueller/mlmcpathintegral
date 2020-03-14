@@ -4,6 +4,8 @@ import time
 import re
 import pandas
 import numpy as np
+import matplotlib as mpl
+mpl.use('Agg')
 from matplotlib import pyplot as plt
 
 executable = '../c/driver.x'
