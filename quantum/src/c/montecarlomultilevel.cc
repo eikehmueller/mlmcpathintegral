@@ -254,12 +254,12 @@ int MonteCarloMultiLevel::cost_eff(const int ell) const {
   // Cost on current level
   int cost = (M_lat >> ell);
   // Add cost on coarser levels
-  int T_k = ceil(t_indep[n_level-1]);
-  int C_k = M_lat >> (n_level-1);
-  for (int k=n_level-1;k>ell;--k) {
-    cost += T_k*C_k;
+  int T_k = 1;
+  int C_k = M_lat >> ell;
+  for (int k=ell+1;k<n_level;++k) {
     T_k *= ceil(t_indep[k]);
-    C_k *= 2;
+    C_k /= 2;
+    cost += T_k*C_k;
   }
   return cost*ceil(stats_qoi[ell]->tau_int());
 }
