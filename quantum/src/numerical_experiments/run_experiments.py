@@ -16,9 +16,12 @@ class Experiment():
         self.m0 = 0.25
         self.Mlatlist = Mlatlist
         self.outputdir = './runs_bias/'
-        self.templatefilename = 'parameters_template_bias.tpl'
+        self.templatefilename = None
         self.paramdict = {'TFINAL':self.Tfinal,
                           'M0':self.m0}
+        self.varying_paramdict = {'MLAT':{}}
+        for Mlat in Mlatlist:
+            self.varying_paramdict['MLAT'][Mlat] = Mlat
 
 
     def execute(self,force=False):
@@ -27,7 +30,8 @@ class Experiment():
         print()
         for Mlat in self.Mlatlist:
             print ('Running Mlat = '+('%6d' % Mlat))
-            self.paramdict['MLAT'] = Mlat
+            for key in self.varying_paramdict.keys():
+                self.paramdict[key] = self.varying_paramdict[key][Mlat]
             runner = Runner(self.templatefilename,
                             self.outputdir,
                             executable,
@@ -55,7 +59,10 @@ class Experiment():
         return time.strftime('%a, %d %b %Y %H:%M:%S +0000',time.gmtime())
 
 
-class SingleLevelExperiment(Experiment):
+class BiasExperiment(Experiment):
+    '''
+    Measure bias as a function of the lattice spacing
+    '''
     def __init__(self,Tfinal,m0,Mlatlist,epsilon):
         super().__init__(Tfinal,m0,Mlatlist)
         self.epsilon=epsilon
@@ -115,7 +122,11 @@ class SingleLevelExperiment(Experiment):
                     dchit = float(m.group(2))
         return chit, dchit
 
-class TwoLevelExperiment(Experiment):
+class VarianceExperiment(Experiment):
+    ''' 
+    Measure variance decay, i.e. variance of difference estimator
+    as a function of the lattice spacing.
+    '''
     def __init__(self,Tfinal,m0,Mlatlist,nsamples):
         super().__init__(Tfinal,m0,Mlatlist)
         self.nsamples=nsamples
@@ -199,6 +210,149 @@ class TwoLevelExperiment(Experiment):
 
         return var_chit, var_dchit, tau_int
 
+class SingleLevelCostExperiment(Experiment):
+    ''' 
+    Measure runtime of single level method for different lattice spacings
+    '''
+    def __init__(self,Tfinal,m0,Mlatlist,B0):
+        super().__init__(Tfinal,m0,Mlatlist)
+        self.B0=B0
+        self.outputdir = './runs_singlelevel/'
+        self.templatefilename = 'parameters_template_singlelevel.tpl'
+        self.varying_paramdict['EPSILON'] = {}
+        for Mlat in Mlatlist:
+            self.varying_paramdict['EPSILON'][Mlat] = self.epsilon(Mlat)
+
+    def epsilon(self,Mlat):
+        alat = self.Tfinal/Mlat
+        return self.B0*alat
+
+    def analyse(self):
+        raw_data = []
+        for Mlat in self.Mlatlist:
+            outputfilename = 'output_Mlat_'+str(Mlat)+'.txt'
+            epsilon = self.epsilon(Mlat)
+            t_elapsed = self.extract_output(self.outputdir+'/'+outputfilename)
+            raw_data.append([Mlat,epsilon,t_elapsed])
+        df = pandas.DataFrame(raw_data,columns = ['Mlat','epsilon','t_elapsed'])
+        df['alat'] = 1./df['Mlat']*self.Tfinal
+        print (df)
+        plt.clf()
+        ax = plt.gca()
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.set_xlim(np.sqrt(0.5)*np.array(df['epsilon'])[-1],
+                    np.sqrt(2.0)*np.array(df['epsilon'])[0])
+        plt.plot(df['epsilon'],df['t_elapsed'],
+                 linewidth=2,
+                 color='blue',
+                 marker='s',
+                 markerfacecolor='blue',
+                 markeredgewidth=2,
+                 markeredgecolor='blue',
+                 label=r'single level')
+        epsilon_ref_1 = 1.E-3
+        epsilon_ref_2 = 3.E-3
+        C_ref = 10.
+        plt.plot([epsilon_ref_1,epsilon_ref_2],[C_ref,C_ref*(epsilon_ref_2/epsilon_ref_1)**(-3)],
+                 linewidth=2,
+                 color='blue',
+                 linestyle='--',
+                 label=r'$\propto \epsilon^{-3}$')
+        for j in range(len(df['alat'])):
+            plt.annotate('   '+str(np.array(df['Mlat'])[j]),
+                         (np.array(df['epsilon'])[j],
+                          np.array(df['t_elapsed'])[j]),
+                         va='bottom',ha='left')
+
+        ax.set_xlabel(r'tolerance $\epsilon$')
+        ax.set_ylabel('elapsed time [s]')
+
+        plt.legend(loc='upper right')
+        plt.savefig('time_singlelevel.pdf',bbox_inches='tight')
+
+    def extract_output(self,filename):
+        with open(filename) as f:
+            for line in f.readlines():
+                m = re.match(' *\[timer SinglevelMC\] *: *(.*) *s',line)
+                if m:
+                    t_elapsed = float(m.group(1))
+        return t_elapsed
+
+class MultiLevelCostExperiment(Experiment):
+    ''' 
+    Measure runtime of multilevel method for different lattice spacings
+    '''
+    def __init__(self,Tfinal,m0,Mlatlist,B0):
+        super().__init__(Tfinal,m0,Mlatlist)
+        self.B0=B0
+        self.outputdir = './runs_multilevel/'
+        self.templatefilename = 'parameters_template_multilevel.tpl'
+        self.varying_paramdict['EPSILON'] = {}
+        self.varying_paramdict['NLEVEL'] = {}
+        for Mlat in Mlatlist:
+            self.varying_paramdict['EPSILON'][Mlat] = self.epsilon(Mlat)
+            self.varying_paramdict['NLEVEL'][Mlat] = self.nlevel(Mlat)
+
+    def epsilon(self,Mlat):
+        alat = self.Tfinal/Mlat
+        return self.B0*alat
+
+    def nlevel(self,Mlat):        
+        return (Mlat.bit_length()-1)-6
+
+    def analyse(self):
+        raw_data = []
+        for Mlat in self.Mlatlist:
+            outputfilename = 'output_Mlat_'+str(Mlat)+'.txt'
+            epsilon = self.epsilon(Mlat)
+            t_elapsed = self.extract_output(self.outputdir+'/'+outputfilename)
+            raw_data.append([Mlat,epsilon,t_elapsed])
+        df = pandas.DataFrame(raw_data,columns = ['Mlat','epsilon','t_elapsed'])
+        df['alat'] = 1./df['Mlat']*self.Tfinal
+        print (df)
+        plt.clf()
+        ax = plt.gca()
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.set_xlim(np.sqrt(0.5)*np.array(df['epsilon'])[-1],
+                    np.sqrt(2.0)*np.array(df['epsilon'])[0])
+        plt.plot(df['epsilon'],df['t_elapsed'],
+                 linewidth=2,
+                 color='blue',
+                 marker='s',
+                 markerfacecolor='blue',
+                 markeredgewidth=2,
+                 markeredgecolor='blue',
+                 label=r'single level')
+        epsilon_ref_1 = 2.E-3
+        epsilon_ref_2 = 6.E-3
+        C_ref = 10.
+        plt.plot([epsilon_ref_1,epsilon_ref_2],[C_ref,C_ref*(epsilon_ref_2/epsilon_ref_1)**(-3)],
+                 linewidth=2,
+                 color='blue',
+                 linestyle='--',
+                 label=r'$\propto \epsilon^{-3}$')
+        for j in range(len(df['alat'])):
+            plt.annotate('   '+str(np.array(df['Mlat'])[j]),
+                         (np.array(df['epsilon'])[j],
+                          np.array(df['t_elapsed'])[j]),
+                         va='bottom',ha='left')
+
+        ax.set_xlabel(r'tolerance $\epsilon$')
+        ax.set_ylabel('elapsed time [s]')
+
+        plt.legend(loc='upper right')
+        plt.savefig('time_multlevel.pdf',bbox_inches='tight')
+
+    def extract_output(self,filename):
+        with open(filename) as f:
+            for line in f.readlines():
+                m = re.match(' *\[timer MultilevelMC\] *: *(.*) *s',line)
+                if m:
+                    t_elapsed = float(m.group(1))
+        return t_elapsed
+
     
 if (__name__ == '__main__'):
 
@@ -210,6 +364,12 @@ if (__name__ == '__main__'):
     parser.add_argument('--variance', action='store_true',
                         default=False,
                         help='generate variance data by running two-level experiment')
+    parser.add_argument('--singlelevel', action='store_true',
+                        default=False,
+                        help='generate single level runtime data')
+    parser.add_argument('--multilevel', action='store_true',
+                        default=False,
+                        help='generate multi level runtime data')
 
     Tfinal = 4.0
     m0 = 0.25
@@ -217,11 +377,12 @@ if (__name__ == '__main__'):
     print ('Tfinal = ',Tfinal)
     print ('m0 = ',m0)
     args = parser.parse_args()
+    
     # Run single-level experiment to calculate bias
     if args.bias:
         epsilon = 1.E-4
         print ('epsilon = ',epsilon)
-        experiment = SingleLevelExperiment(Tfinal,m0,Mlatlist,epsilon)
+        experiment = BiasExperiment(Tfinal,m0,Mlatlist,epsilon)
         experiment.execute()
         experiment.analyse()
 
@@ -229,6 +390,24 @@ if (__name__ == '__main__'):
     if args.variance:
         nsamples = 100000
         print ('nsamples = ',nsamples)
-        experiment = TwoLevelExperiment(Tfinal,m0,Mlatlist,nsamples)
+        experiment = VarianceExperiment(Tfinal,m0,Mlatlist,nsamples)
+        experiment.execute()
+        experiment.analyse()
+
+    # Run single level cost experiment
+    if args.singlelevel:
+        B0 = 0.5
+        Mlatlist = (32,64,128,256,512,1024,2048)
+        print ('B0 = ',B0)
+        experiment = SingleLevelCostExperiment(Tfinal,m0,Mlatlist,B0)
+        experiment.execute()
+        experiment.analyse()
+
+    # Run single level cost experiment
+    if args.multilevel:
+        B0 = 0.5
+        Mlatlist = (128,256,512,1024)
+        print ('B0 = ',B0)
+        experiment = MultiLevelCostExperiment(Tfinal,m0,Mlatlist,B0)
         experiment.execute()
         experiment.analyse()
