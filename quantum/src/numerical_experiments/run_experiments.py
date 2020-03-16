@@ -15,8 +15,8 @@ class Experiment():
         self.Tfinal = Tfinal
         self.m0 = 0.25
         self.Mlatlist = Mlatlist
-        self.outputdir = './runs_singlelevel/'
-        self.templatefilename = 'parameters_template_singlelevel.tpl'
+        self.outputdir = './runs_bias/'
+        self.templatefilename = 'parameters_template_bias.tpl'
         self.paramdict = {'TFINAL':self.Tfinal,
                           'M0':self.m0}
 
@@ -59,8 +59,8 @@ class SingleLevelExperiment(Experiment):
     def __init__(self,Tfinal,m0,Mlatlist,epsilon):
         super().__init__(Tfinal,m0,Mlatlist)
         self.epsilon=epsilon
-        self.outputdir = './runs_singlelevel/'
-        self.templatefilename = 'parameters_template_singlelevel.tpl'
+        self.outputdir = './runs_bias/'
+        self.templatefilename = 'parameters_template_bias.tpl'
         self.paramdict['epsilon'] = epsilon
 
     def analyse(self):
@@ -119,8 +119,8 @@ class TwoLevelExperiment(Experiment):
     def __init__(self,Tfinal,m0,Mlatlist,nsamples):
         super().__init__(Tfinal,m0,Mlatlist)
         self.nsamples=nsamples
-        self.outputdir = './runs_twolevel/'
-        self.templatefilename = 'parameters_template_twolevel.tpl'
+        self.outputdir = './runs_variance/'
+        self.templatefilename = 'parameters_template_variance.tpl'
         self.paramdict['NSAMPLES'] = nsamples
 
     def analyse(self):
