@@ -135,7 +135,7 @@ $Z_Q$ can be obtained by Fourier-transforming $Z(\theta)$ (see \cite{Bietenholz1
 The topological susceptibility is given by
 \begin{equation}
   \begin{aligned}
-    \chi_t &= -\frac{1}{T}\frac{\partial^2\log[Z(\theta)]}{\partial\theta^2}\Big\vert_{\theta=0}\\
+    \mathbb{E}[\chi_t] &= -\frac{1}{T}\frac{\partial^2\log[Z(\theta)]}{\partial\theta^2}\Big\vert_{\theta=0}\\
     &= -\frac{1}{T}\frac{Z(\theta)(\partial^2_\theta Z(\theta))-(\partial_\theta Z(\theta))^2}{Z(\theta)^2}\Big\vert_{\theta=0}\\
     &= -\frac{1}{T}\frac{\partial^2_\theta Z(\theta)}{Z(\theta)}\Big\vert_{\theta=0}
     = \frac{1}{T}\frac{\sum_{Q\in\mathbb{Z}} Q^2 Z_Q}{\sum_{Q\in\mathbb{Z}}Z_Q}\\
@@ -143,22 +143,31 @@ The topological susceptibility is given by
     &= \frac{1}{4\pi^2 I} S(z)\qquad\text{with $z:=\frac{4\pi^2 I}{T}$}
       \end{aligned}
 \end{equation}
-Where the function $S(z)$ is defined as
+Where the function $S(z)=S_1(z)$ is defined by
 \begin{equation}
-  S(z) = z \frac{\sum_{Q\in\mathbb{Z}}Q^2 \exp\left[-\frac{1}{2}zQ^2\right]}{\sum_{Q\in\mathbb{Z}}\exp\left[-\frac{1}{2}zQ^2\right]}\label{eqn:Sz}
+  S_n(z) = z^n \frac{\sum_{Q^{2n}\in\mathbb{Z}}Q^2 \exp\left[-\frac{1}{2}zQ^2\right]}{\sum_{Q\in\mathbb{Z}}\exp\left[-\frac{1}{2}zQ^2\right]}\label{eqn:Sz}
 \end{equation}
-and visualised in Fig. \ref{fig:Splot}.
+The variance of $\chi_t$ is given by
+\begin{equation}
+  \begin{aligned}
+    \operatorname{Var}[\chi_t] &= \mathbb{E}\left[(\chi_t-\mathbb{E}[\chi_t])^2\right]=\mathbb{E}[\chi_t^2]-\mathbb{E}[\chi_t]^2\\
+    &= \frac{1}{T^2}\frac{\sum_{Q\in\mathbb{Z}}Q^4\exp\left[-\frac{2\pi^2I}{T}Q^2\right]}{\sum_{Q\in\mathbb{Z}}\exp[-\frac{2\pi^2I}{T}Q^2]}-\mathbb{E}[\chi_t]^2\\
+    &= \frac{1}{8\pi^4 I^2} R(z) \qquad\text{with $R(z):=\frac{S_2(z)-S_1(z)^2}{2}$.}
+  \end{aligned}
+\end{equation}
+The functions $S(z)$ and $\tilde{S}(z)$ are visualised in Fig. \ref{fig:Splot}.
 \begin{figure}
   \begin{center}
-    \includegraphics[width=0.5\linewidth]{S.pdf}
-    \caption{Function $S(z)$ defined in Eq. \eqref{eqn:Sz}}
+    \includegraphics[width=0.5\linewidth]{SandR.pdf}
+    \caption{Functions $S(z)$ and $R(z)$}
     \label{fig:Splot}
   \end{center}
 \end{figure}
 The infinite volume limit $T\rightarrow\infty$ corresponds to $z\rightarrow 0$, and for $z\ll 1$ the sums in Eq. \eqref{eqn:Sz} can be approximated by integrals (using $q=\sqrt{z}Q$) to obtain
 \begin{equation}
-  S(z) \approx \frac{\int_{-\infty}^\infty q^2 \exp\left[-\frac{1}{2}q^2\right]\;dq}{\int_{-\infty}^\infty \exp\left[-\frac{1}{2}q^2\right]\;dq}=1.
+  S_n(z) \approx \frac{\int_{-\infty}^\infty q^{2n} \exp\left[-\frac{1}{2}q^2\right]\;dq}{\int_{-\infty}^\infty \exp\left[-\frac{1}{2}q^2\right]\;dq}=(2n-1)!
 \end{equation}
+in particular $S(z)=S_1(z)\rightarrow 1$, $S_2(z)\rightarrow 3$ and $R(z)\rightarrow 1$.
 \bibliographystyle{unsrt}
 \bibliography{rotor}
 \end{document}
