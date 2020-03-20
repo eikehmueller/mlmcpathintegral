@@ -397,7 +397,7 @@ if (__name__ == '__main__'):
     # Run single level cost experiment
     if args.singlelevel:
         B0 = 0.5
-        Mlatlist = (32,64,128,256,512,1024,2048)
+        Mlatlist = (32,64,128,256,512,1024,2048,4096)
         print ('B0 = ',B0)
         experiment = SingleLevelCostExperiment(Tfinal,m0,Mlatlist,B0)
         experiment.execute()
@@ -406,7 +406,7 @@ if (__name__ == '__main__'):
     # Run single level cost experiment
     if args.multilevel:
         B0 = 0.5
-        Mlatlist = (128,256,512,1024)
+        Mlatlist = (128,256,512,1024,2048,4096)
         print ('B0 = ',B0)
         experiment = MultiLevelCostExperiment(Tfinal,m0,Mlatlist,B0)
         experiment.execute()
