@@ -119,11 +119,11 @@ private:
  * Calculate the renormalised coarse grid mass (= moment of inertia) 
  *
  \f[
-  m_0^{(c)} = \left(1-\frac{a}{2m_0}\right)m_0
+  m_0^{(c)} = \left(1+\frac{a}{16m_0}\right)m_0
  \f]
  * which is an approximation (valid for \f$a\ll 2I\f$) of
  \f[
-  m_0^{(c)} = \left(2\frac{I_1(2I/a)}{I_0(2I/a)}-1\right)m_0
+  m_0^{(c)} = \frac{I_1(2I/a)}{I_0(2I/a)}m_0
  \f]
  * where \f$I_k\f$ is the \f$k\f$-th modified Bessel function.
  */
@@ -152,7 +152,7 @@ public:
       m0coarse = m0;
       break;
     case RenormalisationPerturbative:
-      m0coarse = (1.-0.5*a_lat/m0)*m0;
+      m0coarse = (1.+a_lat/(16.*m0))*m0;
       break;
     case RenormalisationExact:
       std::cerr << "ERROR: exact renormalisation not implemented for rotor action " << std::endl;
