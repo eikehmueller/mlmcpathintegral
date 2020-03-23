@@ -59,7 +59,8 @@ quarticoscillator:
 ###########################################
 rotor:
   m0 = 0.25          # Unrenormalised mass
-
+  renormalisation = 'none' # Renormalisation [none, perturbative]
+  
 ###########################################
 # Single level Monte Carlo parameters
 ###########################################
