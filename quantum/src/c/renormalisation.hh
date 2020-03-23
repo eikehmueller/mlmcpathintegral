@@ -6,7 +6,38 @@
  */
 
 /** @class RenormalisedParameters 
- * @brief Renormalised coarse grid parameters
+ * @brief Base class for renormalised parameters
+ * 
+ */
+
+class RenormalisedParameters {
+public:
+  /** @brief Create new instance
+   *
+   * @param[in] M_lat_ Number of time slices
+   * @param[in] T_final_ Final time \f$T\f$
+   * @param[in] renormalisation_ Type of renormalisation to use 
+   *              (0: none, 1: perturbative, 2: exact)
+   */
+  RenormalisedParameters(const unsigned int M_lat_,
+                         const double T_final_,
+                         const RenormalisationType renormalisation_) :
+    T_final(T_final_), M_lat(M_lat_),
+    a_lat(T_final_/M_lat_), renormalisation(renormalisation_) {}
+  
+protected:
+  /** @brief Number of time slices */
+  const unsigned int M_lat;
+  /** @brief Final time */
+  const double T_final;
+  /** @brief Lattice spacing */
+  const double a_lat;
+  /** @brief Type of renormalisation */
+  const RenormalisationType renormalisation;
+};
+
+/** @class RenormalisedHOParameters 
+ * @brief Renormalised coarse grid parameters for the harmonic oscillator
  * 
  * Calculate the renormalised coarse grid mass and harmonic oscillator
  * potential parameter \f$\mu^2\f$
@@ -22,7 +53,7 @@
  * Instead of those exact formulae, the perturbative expansion in \f$\mu\f$
  * can also be used.
  */
-class RenormalisedHOParameters {
+class RenormalisedHOParameters : public RenormalisedParameters {
 public:
   /** @brief Create new instance
    *
@@ -38,8 +69,9 @@ public:
                            const double m0_,
                            const double mu2_,
                            const RenormalisationType renormalisation_) :
-    m0(m0_), mu2(mu2_), T_final(T_final_), M_lat(M_lat_),
-    a_lat(T_final_/M_lat_), renormalisation(renormalisation_) {}
+    RenormalisedParameters(M_lat_, T_final_, renormalisation_),
+    m0(m0_), mu2(mu2_) {}
+
   /** @brief Renormalised coarse level mass \f$m_0^{(c)}\f$*/
   double m0_coarse() {
     double m0coarse;
@@ -75,18 +107,64 @@ public:
   }
   
 private:
-  /** @brief Number of time slices */
-  const unsigned int M_lat;
-  /** @brief Final time */
-  const double T_final;
   /** @brief Mass \f$m_0\f$ */
   const double m0;
   /** @brief Harmonic oscillator potential parameter \f$\mu^2\f$*/
   const double mu2;
-  /** @brief Lattice spacing */
-  const double a_lat;
-  /** @brief Type of renormalisation */
-  const RenormalisationType renormalisation;
+};
+
+/** @class RenormalisedRotorParameters 
+ * @brief Renormalised coarse grid parameters for the topological rotor
+ * 
+ * Calculate the renormalised coarse grid mass (= moment of inertia) 
+ *
+ \f[
+  m_0^{(c)} = \left(1-\frac{a}{2m_0}\right)m_0
+ \f]
+ * which is an approximation (valid for \f$a\ll 2I\f$) of
+ \f[
+  m_0^{(c)} = \left(2\frac{I_1(2I/a)}{I_0(2I/a)}-1\right)m_0
+ \f]
+ * where \f$I_k\f$ is the \f$k\f$-th modified Bessel function.
+ */
+class RenormalisedRotorParameters : public RenormalisedParameters {
+public:
+  /** @brief Create new instance
+   *
+   * @param[in] M_lat_ Number of time slices
+   * @param[in] T_final_ Final time \f$T\f$
+   * @param[in] m0_ Mass (i.e. moment of inertia) \f$m_0\f$
+   * @param[in] renormalisation_ Type of renormalisation to use 
+   *              (0: none, 1: perturbative, 2: exact [not implemented])
+   */
+  RenormalisedRotorParameters(const unsigned int M_lat_,
+                              const double T_final_,
+                              const double m0_,
+                              const RenormalisationType renormalisation_) :
+    RenormalisedParameters(M_lat_, T_final_, renormalisation_),
+    m0(m0_) {}
+  
+  /** @brief Renormalised coarse level mass \f$m_0^{(c)}\f$*/
+  double m0_coarse() {
+    double m0coarse;
+    switch (renormalisation) {
+    case RenormalisationNone:
+      m0coarse = m0;
+      break;
+    case RenormalisationPerturbative:
+      m0coarse = (1.-0.5*a_lat/m0)*m0;
+      break;
+    case RenormalisationExact:
+      std::cerr << "ERROR: exact renormalisation not implemented for rotor action " << std::endl;
+      exit(1);
+      break;
+    }
+    return m0coarse;
+  }
+  
+private:
+  /** @brief Mass (moment of inertia) \f$m_0\f$ */
+  const double m0;
 };
 
 #endif // RENORMALISATION_HH

@@ -25,8 +25,10 @@ public:
   /** @brief Construct a new instance */
   RotorParameters() :
     Parameters("rotor"),
-    m0_(1.0) {
+    m0_(1.0),
+    renormalisation_(RenormalisationNone) {
     addKey("m0",Double,Positive);
+    addKey("renormalisation",String);
   }
 
   /** @brief Read parameters from file
@@ -40,17 +42,29 @@ public:
       m0_ = getContents("m0")->getDouble();
     }
     return readSuccess;
+    std::string renormalisation_str = getContents("renormalisation")->getString();
+    if (renormalisation_str == "none") {
+      renormalisation_ = RenormalisationNone;
+    } else if (renormalisation_str == "perturbative") {
+      renormalisation_ = RenormalisationPerturbative;
+    } else if (renormalisation_str == "exact") {
+      renormalisation_ = RenormalisationExact;
+    }
   }
 
   /** @brief Return unrenormalised mass \f$m_0\f$ */
   double m0() const { return m0_; }
+  /** @brief Return renormalisation */
+  RenormalisationType renormalisation() const { return renormalisation_; }
 
 private:
   /** @brief Unrenormalised mass \f$m_0\f$ */
   double m0_;
+  /** @brief Renormalisation */
+  RenormalisationType renormalisation_;
 };
 
-/** @class HarmonicOscillatorAction
+/** @class RotorAction
  *
  * @brief Action class for the quantum mechanical rotor descibed in
  *        <a href="https://arxiv.org/abs/1503.05088">arXiv/1503.05088</a>  
@@ -106,10 +120,11 @@ public:
       std::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
       exit(1);
     }
+    RenormalisedRotorParameters c_param(M_lat,T_final,m0,renormalisation);
     return std::make_shared<RotorAction>(M_lat/2,
                                          T_final,
                                          renormalisation,
-                                         m0);
+                                         c_param.m0_coarse());
   };
   
   /** @brief Evaluate action for a specific path
