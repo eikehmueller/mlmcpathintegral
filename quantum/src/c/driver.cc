@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
     action = 
       std::make_shared<RotorAction>(param_lattice.M_lat(),
                                     param_lattice.T_final(),
-                                    RenormalisationNone,
+                                    param_rotor.renormalisation(),
                                     param_rotor.m0());
 
     break;

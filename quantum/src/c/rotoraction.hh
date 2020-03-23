@@ -40,16 +40,17 @@ public:
     int readSuccess = Parameters::readFile(filename);
     if (!readSuccess) {
       m0_ = getContents("m0")->getDouble();
+      std::string renormalisation_str = getContents("renormalisation")->getString();
+      std::cout << "renormalisation_str " << renormalisation_str << std::endl;
+      if (renormalisation_str == "none") {
+        renormalisation_ = RenormalisationNone;
+      } else if (renormalisation_str == "perturbative") {
+        renormalisation_ = RenormalisationPerturbative;
+      } else if (renormalisation_str == "exact") {
+        renormalisation_ = RenormalisationExact;
+      }
     }
     return readSuccess;
-    std::string renormalisation_str = getContents("renormalisation")->getString();
-    if (renormalisation_str == "none") {
-      renormalisation_ = RenormalisationNone;
-    } else if (renormalisation_str == "perturbative") {
-      renormalisation_ = RenormalisationPerturbative;
-    } else if (renormalisation_str == "exact") {
-      renormalisation_ = RenormalisationExact;
-    }
   }
 
   /** @brief Return unrenormalised mass \f$m_0\f$ */
