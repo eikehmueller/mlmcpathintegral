@@ -1,5 +1,6 @@
 #ifndef RENORMALISATION_HH
 #define RENORMALISATION_HH RENORMALISATION_HH
+#include <math.h>
 #include "parameters.hh"
 /** @file renormalisation.hh
  * @brief Methods for calculation renormalised parameters
@@ -119,13 +120,9 @@ private:
  * Calculate the renormalised coarse grid mass (= moment of inertia) 
  *
  \f[
-  m_0^{(c)} = \left(1+\frac{a}{16m_0}\right)m_0
+  m_0^{(c)} = \left(1+\delta_I(T/m_0)\frac{a}{m_0}\right)m_0
  \f]
- * which is an approximation (valid for \f$a\ll 2I\f$) of
- \f[
-  m_0^{(c)} = \frac{I_1(2I/a)}{I_0(2I/a)}m_0
- \f]
- * where \f$I_k\f$ is the \f$k\f$-th modified Bessel function.
+ * \f$\delta_I(T/m_0)\f$ depends on the ratio \f$T/m_0\f$. 
  */
 class RenormalisedRotorParameters : public RenormalisedParameters {
 public:
@@ -152,7 +149,7 @@ public:
       m0coarse = m0;
       break;
     case RenormalisationPerturbative:
-      m0coarse = (1.+a_lat/(16.*m0))*m0;
+      m0coarse = (1.+deltaI(T_final/m0)*a_lat/m0)*m0;
       break;
     case RenormalisationExact:
       std::cerr << "ERROR: exact renormalisation not implemented for rotor action " << std::endl;
@@ -161,6 +158,24 @@ public:
     }
     return m0coarse;
   }
+
+  /** @brief Function \f$\delta (\xi)\f$
+   *
+   * @param[in] xi Argument \f$\xi\f$of the function
+   */
+  double deltaI(const double xi);
+
+  /** @brief Function \f$\hat{\Sigma}_p(\xi)\f$
+   *
+   * The function \f$\hat{\Sigma}_p\f$ is defined as
+   \f[
+   \hat{\Sigma}_p(\xi) = \frac{\sum_{m\in\mathbb{Z}}m^p \exp\left[-\frac{1}{2}\xi m^2\right]}{\sum_{m\in\mathbb{Z}}\exp\left[-\frac{1}{2}\xi m^2\right]}
+   \f]
+   *
+   * @param[in] xi Argument \f$\xi\f$of the function
+   * @param[in] p Power \f$p\f$ of \f$m\f$ in series
+   */
+  double Sigma_hat(const double xi, const unsigned int p);
   
 private:
   /** @brief Mass (moment of inertia) \f$m_0\f$ */
