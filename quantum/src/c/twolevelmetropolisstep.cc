@@ -34,8 +34,8 @@ void TwoLevelMetropolisStep::draw(const std::shared_ptr<Path> x_coarse_path,
   /*
    * Calculate the difference in free level-\ell actions,
    * required to calculate the ratio                                       
-   * q_{ML}^{\ell,F}(\theta_{\ell,F}^{n}|\theta_{\ell,C}^{n}) /
-   * q_{ML}^{\ell,F}(\theta'_{\ell,F}|\theta'_{\ell,C})
+   * q_{ML}^{\ell,F}(\theta_{\ell,F}^{n}|\theta'_{\ell,C}) /
+   * q_{ML}^{\ell,F}(\theta'_{\ell,F}|\theta_{\ell,C}^{n})
    */
   double deltaS_trial = conditioned_fine_action->evaluate(theta_fine) \
     - conditioned_fine_action->evaluate(theta_prime);
