@@ -5,7 +5,7 @@
  */
 
 double  RenormalisedRotorParameters::deltaI(const double xi) {
-  double a = 1.-17./8.*xi*Sigma_hat(xi,2)+1./2.*xi*Sigma_hat(xi,4);
+  double a = 1.-(2.+1./8.*xi)*xi*Sigma_hat(xi,2)+1./2.*xi*Sigma_hat(xi,4);
   double b = 1.-xi*Sigma_hat(xi,2)*(2.+xi*Sigma_hat(xi,2))+xi*xi*Sigma_hat(xi,4);
   return 0.5*a/b;
 }
