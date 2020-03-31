@@ -62,7 +62,17 @@ class Experiment():
             sum_1 += 2*m**p*np.exp(-0.5*xi*m**2)
             sum_2 += 2*np.exp(-0.5*xi*m**2)
         return sum_1/sum_2
-            
+
+    def bias_slope(self):
+        xi = self.Tfinal/self.m0
+        S_hat2 = self.Sigma_hat(xi,2)
+        S_hat4 = self.Sigma_hat(xi,4)
+        return 1./(4.*np.pi**2*self.m0**2)*(0.5-xi*S_hat2+0.25*xi**2*(S_hat4-S_hat2**2))
+
+    def epsilon(self,Mlat):
+        alat = self.Tfinal/Mlat
+        return np.sqrt(2.)*self.bias_slope()*alat
+    
     def show_clock(self):
         return time.strftime('%a, %d %b %Y %H:%M:%S +0000',time.gmtime())
 
@@ -134,12 +144,6 @@ class BiasExperiment(Experiment):
                     chit = float(m.group(1))
                     dchit = float(m.group(2))
         return chit, dchit
-
-    def bias_slope(self):
-        xi = self.Tfinal/self.m0
-        S_hat2 = self.Sigma_hat(xi,2)
-        S_hat4 = self.Sigma_hat(xi,4)
-        return 1./(4.*np.pi**2*self.m0**2)*(0.5-xi*S_hat2+0.25*xi**2*(S_hat4-S_hat2**2))
     
 class VarianceExperiment(Experiment):
     ''' 
@@ -233,18 +237,13 @@ class SingleLevelCostExperiment(Experiment):
     ''' 
     Measure runtime of single level method for different lattice spacings
     '''
-    def __init__(self,Tfinal,m0,Mlatlist,B0):
+    def __init__(self,Tfinal,m0,Mlatlist):
         super().__init__(Tfinal,m0,Mlatlist)
-        self.B0=B0
         self.outputdir = './runs_singlelevel/'
         self.templatefilename = 'parameters_template_singlelevel.tpl'
         self.varying_paramdict['EPSILON'] = {}
         for Mlat in Mlatlist:
             self.varying_paramdict['EPSILON'][Mlat] = self.epsilon(Mlat)
-
-    def epsilon(self,Mlat):
-        alat = self.Tfinal/Mlat
-        return self.B0*alat
 
     def analyse(self):
         raw_data = []
@@ -302,9 +301,8 @@ class MultiLevelCostExperiment(Experiment):
     ''' 
     Measure runtime of multilevel method for different lattice spacings
     '''
-    def __init__(self,Tfinal,m0,Mlatlist,B0):
+    def __init__(self,Tfinal,m0,Mlatlist):
         super().__init__(Tfinal,m0,Mlatlist)
-        self.B0=B0
         self.outputdir = './runs_multilevel/'
         self.templatefilename = 'parameters_template_multilevel.tpl'
         self.varying_paramdict['EPSILON'] = {}
@@ -312,10 +310,6 @@ class MultiLevelCostExperiment(Experiment):
         for Mlat in Mlatlist:
             self.varying_paramdict['EPSILON'][Mlat] = self.epsilon(Mlat)
             self.varying_paramdict['NLEVEL'][Mlat] = self.nlevel(Mlat)
-
-    def epsilon(self,Mlat):
-        alat = self.Tfinal/Mlat
-        return self.B0*alat
 
     def nlevel(self,Mlat):        
         return (Mlat.bit_length()-1)-6
@@ -415,18 +409,14 @@ if (__name__ == '__main__'):
 
     # Run single level cost experiment
     if args.singlelevel:
-        B0 = 0.5
         Mlatlist = (32,64,128,256,512,1024,2048,4096)
-        print ('B0 = ',B0)
         experiment = SingleLevelCostExperiment(Tfinal,m0,Mlatlist,B0)
         experiment.execute()
         experiment.analyse()
 
     # Run single level cost experiment
     if args.multilevel:
-        B0 = 0.5
         Mlatlist = (128,256,512,1024,2048,4096)
-        print ('B0 = ',B0)
         experiment = MultiLevelCostExperiment(Tfinal,m0,Mlatlist,B0)
         experiment.execute()
         experiment.analyse()
