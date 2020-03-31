@@ -54,7 +54,15 @@ class Experiment():
             S_num += 2.*Q**2*np.exp(-0.5*z*Q**2)
             S_denom += 2.*np.exp(-0.5*z*Q**2)
         return 1./(4.*np.pi**2*m0)*z*S_num/S_denom
-    
+
+    def Sigma_hat(self,xi,p):
+        sum_1 = 0.0
+        sum_2 = 1.0
+        for m in range(1,10):
+            sum_1 += 2*m**p*np.exp(-0.5*xi*m**2)
+            sum_2 += 2*np.exp(-0.5*xi*m**2)
+        return sum_1/sum_2
+            
     def show_clock(self):
         return time.strftime('%a, %d %b %Y %H:%M:%S +0000',time.gmtime())
 
@@ -104,6 +112,11 @@ class BiasExperiment(Experiment):
                  color='blue',
                  linestyle='--',
                  label='fit $'+('%6.3f' % np.exp(c0))+'a^{'+('%6.3f' % c1)+'}$')
+        plt.plot(df['alat'],self.bias_slope()*df['alat'],
+                 linewidth=2,
+                 color='red',
+                 linestyle='-',
+                 label='theory $'+('%6.3f' % self.bias_slope())+'a $')
         for j in range(len(df['alat'])):
             plt.annotate('   '+str(np.array(df['Mlat'])[j]),
                          (np.array(df['alat'])[j],
@@ -122,6 +135,12 @@ class BiasExperiment(Experiment):
                     dchit = float(m.group(2))
         return chit, dchit
 
+    def bias_slope(self):
+        xi = self.Tfinal/self.m0
+        S_hat2 = self.Sigma_hat(xi,2)
+        S_hat4 = self.Sigma_hat(xi,4)
+        return 1./(4.*np.pi**2*self.m0**2)*(0.5-xi*S_hat2+0.25*xi**2*(S_hat4-S_hat2**2))
+    
 class VarianceExperiment(Experiment):
     ''' 
     Measure variance decay, i.e. variance of difference estimator
@@ -324,7 +343,7 @@ class MultiLevelCostExperiment(Experiment):
                  markerfacecolor='blue',
                  markeredgewidth=2,
                  markeredgecolor='blue',
-                 label=r'single level')
+                 label=r'multi level')
         epsilon_ref_1 = 2.E-3
         epsilon_ref_2 = 6.E-3
         C_ref = 10.
@@ -343,7 +362,7 @@ class MultiLevelCostExperiment(Experiment):
         ax.set_ylabel('elapsed time [s]')
 
         plt.legend(loc='upper right')
-        plt.savefig('time_multlevel.pdf',bbox_inches='tight')
+        plt.savefig('time_multilevel.pdf',bbox_inches='tight')
 
     def extract_output(self,filename):
         with open(filename) as f:
