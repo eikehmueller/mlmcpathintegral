@@ -222,6 +222,20 @@ public:
     return mod_2pi(M_PI+2.*xbar-x);
   }
 
+  /** @brief Exact topological susceptibility
+   *
+   * Return exact value (up to corrections of \f$O((a/I)^2\f$) for finite
+   * values of \f$a\f$
+   */
+  double chit_exact_perturbative() const;
+
+  /** @brief Exact topological susceptibility in the continuum limit
+   *
+   * Return exact value of \f$\chi_t\f$ in the continuum limit
+   * \f$a\rightarrow0\f$.
+   */
+  double chit_exact_continuum() const;
+  
 protected:
   /** @brief reflection angle for current subgroup \f$H_{\overline{x}}\f$ */
   mutable double xbar;

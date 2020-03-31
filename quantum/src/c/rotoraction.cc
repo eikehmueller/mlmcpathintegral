@@ -46,3 +46,18 @@ void RotorAction::initialise_path(std::shared_ptr<Path> x_path) const {
   x_path->save_to_disk("path_initial.dat");
 #endif // SAVE_PATHS
 }
+
+/** Exact chi_t for finite a */
+double RotorAction::chit_exact_perturbative() const {
+  double xi = T_final/m0;
+  double z = a_lat/m0;
+  double S_hat2 = Sigma_hat(xi,2);
+  double S_hat4 = Sigma_hat(xi,4);
+  return 1./(4.*M_PI*M_PI*m0)*(1.-xi*S_hat2+(0.5-xi*S_hat2+0.25*xi*xi*(S_hat4-S_hat2*S_hat2))*z);
+}
+
+/** Exact chi_t in continuum limit */
+double RotorAction::chit_exact_continuum() const {
+  double xi = T_final/m0;
+  return 1./(4.*M_PI*M_PI*m0)*(1.-xi*Sigma_hat(xi,2));
+}

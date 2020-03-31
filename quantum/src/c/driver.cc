@@ -161,6 +161,32 @@ int main(int argc, char* argv[]) {
   }
   }
 
+  if (param_general.do_singlelevelmc() or param_general.do_multilevelmc()) {
+    /* ====== Print out exact result for harmonic oscillator */
+    if (param_general.action() == ActionHarmonicOscillator) {
+      std::shared_ptr<HarmonicOscillatorAction> ho_action =
+        std::dynamic_pointer_cast<HarmonicOscillatorAction>(action);
+      double exact_result = ho_action->Xsquared_exact();
+      double exact_result_continuum = ho_action->Xsquared_exact_continuum();
+      std::cout << std::endl;
+      std::cout << std::setprecision(6) << std::fixed;
+      std::cout << " Exact result             <x^2> = " << exact_result << std::endl;
+      std::cout << " Continuum limit [a -> 0] <x^2> = " << exact_result_continuum << std::endl;
+      std::cout << std::endl;
+    }
+    if (param_general.action() == ActionRotor) {
+      std::shared_ptr<RotorAction> rotor_action =
+        std::dynamic_pointer_cast<RotorAction>(action);
+      double exact_result_continuum = rotor_action->chit_exact_continuum();
+      double exact_result_perturbative = rotor_action->chit_exact_perturbative();
+      std::cout << std::endl;
+      std::cout << std::setprecision(6) << std::fixed;
+      std::cout << " Exact result             <chi_t> = " << exact_result_perturbative << " + O((a/I)^2), a/I = " << action->geta_lat()/action->getm0() << std::endl;
+      std::cout << " Continuum limit [a -> 0] <chi_t> = " << exact_result_continuum << std::endl;
+      std::cout << std::endl;
+    }
+  }
+  
   /* **************************************** * 
    * Single level method                      *
    * **************************************** */  
@@ -179,19 +205,6 @@ int main(int argc, char* argv[]) {
                                                  param_hmc,
                                                  param_cluster,
                                                  param_singlelevelmc);
-
-    /* ====== Print out exact result for harmonic oscillator */
-    if (param_general.action() == ActionHarmonicOscillator) {
-      std::shared_ptr<HarmonicOscillatorAction> ho_action =
-        std::dynamic_pointer_cast<HarmonicOscillatorAction>(action);
-      double exact_result = ho_action->Xsquared_exact();
-      double exact_result_continuum = ho_action->Xsquared_exact_continuum();
-      std::cout << std::endl;
-      std::cout << std::setprecision(6) << std::fixed;
-      std::cout << " Exact result             <x^2> = " << exact_result << std::endl;
-      std::cout << " Continuum limit [a -> 0] <x^2> = " << exact_result_continuum << std::endl;
-      std::cout << std::endl;
-    }
   
     montecarlo_singlelevel.evaluate();
     std::cout << std::endl;
