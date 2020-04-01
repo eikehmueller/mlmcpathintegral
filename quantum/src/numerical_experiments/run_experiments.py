@@ -1,7 +1,9 @@
 from runner import *
 import argparse
 import time
+import math
 import re
+import glob
 import pandas
 import numpy as np
 import matplotlib as mpl
@@ -63,12 +65,27 @@ class Experiment():
             sum_2 += 2*np.exp(-0.5*xi*m**2)
         return sum_1/sum_2
 
+    def S(self,z,n):
+        sum_1 = 0.0
+        sum_2 = 1.0
+        Qmax = 100
+        for Q in range(1,Qmax):
+            sum_1 += 2*Q**(2*n)*np.exp(-0.5*z*Q**2)
+            sum_2 += 2*np.exp(-0.5*z*Q**2)
+        return z**n*sum_1/sum_2
+
     def bias_slope(self):
         xi = self.Tfinal/self.m0
         S_hat2 = self.Sigma_hat(xi,2)
         S_hat4 = self.Sigma_hat(xi,4)
         return 1./(4.*np.pi**2*self.m0**2)*(0.5-xi*S_hat2+0.25*xi**2*(S_hat4-S_hat2**2))
 
+    def variance(self,Mlat):
+        alat = self.Tfinal/Mlat
+        z = 4.*np.pi**2*self.m0/self.Tfinal
+        R = 0.5*(self.S(z,2)-self.S(z,1)**2)
+        return 1./(8.*np.pi**4*self.m0**2)*R
+    
     def epsilon(self,Mlat):
         alat = self.Tfinal/Mlat
         return np.sqrt(2.)*self.bias_slope()*alat
@@ -241,10 +258,25 @@ class SingleLevelCostExperiment(Experiment):
         super().__init__(Tfinal,m0,Mlatlist)
         self.outputdir = './runs_singlelevel/'
         self.templatefilename = 'parameters_template_singlelevel.tpl'
+        self.tau_int={16:1.1,
+                      32:5.4,
+                      64:105.5,
+                      128:2222.1}
+        fix_nsamples = True
         self.varying_paramdict['EPSILON'] = {}
+        self.varying_paramdict['NSAMPLES'] = {}
         for Mlat in Mlatlist:
             self.varying_paramdict['EPSILON'][Mlat] = self.epsilon(Mlat)
+            if fix_nsamples:
+                n_samples = self.nsamples(Mlat)
+            else:
+                n_samples = 0
+            self.varying_paramdict['NSAMPLES'][Mlat] = n_samples            
 
+    def nsamples(self,Mlat):
+        a_lat = self.Tfinal/Mlat
+        return int(math.ceil(self.variance(Mlat)*self.tau_int[Mlat]/(self.bias_slope()*a_lat)**2))
+            
     def analyse(self):
         raw_data = []
         for Mlat in self.Mlatlist:
@@ -308,11 +340,11 @@ class MultiLevelCostExperiment(Experiment):
         self.varying_paramdict['EPSILON'] = {}
         self.varying_paramdict['NLEVEL'] = {}
         for Mlat in Mlatlist:
-            self.varying_paramdict['EPSILON'][Mlat] = self.epsilon(Mlat)
+            self.varying_paramdict['EPSILON'][Mlat] = 0.1*self.epsilon(Mlat)
             self.varying_paramdict['NLEVEL'][Mlat] = self.nlevel(Mlat)
 
     def nlevel(self,Mlat):        
-        return (Mlat.bit_length()-1)-6
+        return (Mlat.bit_length()-1)-2
 
     def analyse(self):
         raw_data = []
@@ -363,12 +395,103 @@ class MultiLevelCostExperiment(Experiment):
             for line in f.readlines():
                 m = re.match(' *\[timer MultilevelMC\] *: *(.*) *s',line)
                 if m:
-                    t_elapsed = float(m.group(1))
+                    t_elapsed = 0.01*float(m.group(1))
         return t_elapsed
 
     
-if (__name__ == '__main__'):
+class RuntimePlotter(object):
+    '''
+Plot runtime of single- and multilevel method
+'''
+    def __init__(self,Tfinal,m0):
+        self.outputdir = {'multilevel':'./runs_multilevel/',
+                          'singlelevel':'./runs_singlelevel/'}
 
+    def plot(self):
+        df = {}
+        for methodname in ('singlelevel', 'multilevel'):
+            df[methodname] = self.readfiles(methodname)
+        plt.clf()
+        ax = plt.gca()
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.set_xlim(np.sqrt(0.5)*np.array(df['multilevel']['epsilon'])[-1],
+                    np.sqrt(2.0)*np.array(df['multilevel']['epsilon'])[0])
+        color = {'singlelevel':'red',
+                 'multilevel':'blue'}
+        marker = {'singlelevel':'s',
+                 'multilevel':'o'}
+        for methodname in ('singlelevel', 'multilevel'):
+            plt.plot(df[methodname]['epsilon'],df[methodname]['t_elapsed'],
+                     linewidth=2,
+                     color=color[methodname],
+                     marker=marker[methodname],
+                     markerfacecolor=color[methodname],
+                     markeredgewidth=2,
+                     markeredgecolor=color[methodname],
+                     label=methodname)
+        Epsilon = np.arange(1.E-2,1.E-1,1.E-3)
+        f = lambda eps: eps**(-2)*np.log(eps)**3
+        C_ref = 1.
+        plt.plot(Epsilon,C_ref*f(Epsilon)/f(Epsilon[0]),
+                 linewidth=2,
+                 color='black',
+                 linestyle='--',
+                 label=r'$\propto \epsilon^{-2}|\log(\epsilon)|^3$')
+        for methodname in ('singlelevel','multilevel'):
+            for j in range(len(df[methodname]['Mlat'])):
+                plt.annotate('   '+str(np.array(df[methodname]['Mlat'])[j]),
+                             (np.array(df[methodname]['epsilon'])[j],
+                              np.array(df[methodname]['t_elapsed'])[j]),
+                             va='bottom',ha='left',color=color[methodname])
+
+        ax.set_xlabel(r'tolerance $\epsilon$')
+        ax.set_ylabel('elapsed time [s]')
+
+        plt.legend(loc='upper right')
+        plt.savefig('time_both.pdf',bbox_inches='tight')
+
+
+        
+    def readfiles(self,methodtype):
+        files = glob.glob(self.outputdir[methodtype]+'/output*.txt')
+        Mlatlist = []
+        for outfile in files:
+            m = re.match('.*\_([0-9]+)\.txt',outfile)
+            if m:
+                Mlatlist.append(int(m.group(1)))
+        raw_data = []
+        for Mlat in sorted(Mlatlist):
+            outputfilename = 'output_Mlat_'+str(Mlat)+'.txt'
+            t_elapsed, epsilon = self.extract_output(self.outputdir[methodtype]+'/'+outputfilename,
+                                            methodtype)
+            raw_data.append([Mlat,epsilon, t_elapsed])
+        df = pandas.DataFrame(raw_data,columns = ['Mlat','epsilon','t_elapsed'])
+        return df
+
+                
+            
+    def extract_output(self,filename,methodtype):
+        with open(filename) as f:
+            for line in f.readlines():
+                if (methodtype=='singlelevel'):
+                    m = re.match(' *epsilon *= *(.+) *',line)
+                    if m:
+                        epsilon = float(m.group(1))
+                    m = re.match(' *\[timer SinglevelMC\] *: *(.*) *s',line)
+                    if m:
+                        t_elapsed = float(m.group(1))
+                else:
+                    m = re.match(' *epsilon *= *(.+) *',line)
+                    if m:
+                        epsilon = 10.*float(m.group(1))
+                    m = re.match(' *\[timer MultilevelMC\] *: *(.*) *s',line)
+                    if m:
+                        t_elapsed = 0.01*float(m.group(1))
+        return t_elapsed, epsilon
+    
+if (__name__ == '__main__'):
+        
     parser = argparse.ArgumentParser(description='Numerical experiments.')
     parser.add_argument('--bias', action='store_true',
                         default=False,
@@ -409,14 +532,18 @@ if (__name__ == '__main__'):
 
     # Run single level cost experiment
     if args.singlelevel:
-        Mlatlist = (32,64,128,256,512,1024,2048,4096)
-        experiment = SingleLevelCostExperiment(Tfinal,m0,Mlatlist,B0)
+        Mlatlist = (16,32,64,128)
+        experiment = SingleLevelCostExperiment(Tfinal,m0,Mlatlist)
         experiment.execute()
         experiment.analyse()
 
     # Run single level cost experiment
     if args.multilevel:
-        Mlatlist = (128,256,512,1024,2048,4096)
-        experiment = MultiLevelCostExperiment(Tfinal,m0,Mlatlist,B0)
+        #Mlatlist = (128,256,512,1024,2048,4096)
+        Mlatlist = (16,32,64,128)
+        experiment = MultiLevelCostExperiment(Tfinal,m0,Mlatlist)
         experiment.execute()
         experiment.analyse()
+
+    runtime_plotter = RuntimePlotter(Tfinal,m0)
+    runtime_plotter.plot()

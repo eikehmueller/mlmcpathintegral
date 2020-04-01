@@ -59,7 +59,8 @@ quarticoscillator:
 ###########################################
 rotor:
   m0 = %(M0)f          # Unrenormalised mass
-
+  renormalisation = 'perturbative' # Renormalisation [none, perturbative, exact]
+  
 ###########################################
 # Single level Monte Carlo parameters
 ###########################################

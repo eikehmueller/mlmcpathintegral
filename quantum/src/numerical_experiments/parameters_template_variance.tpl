@@ -59,12 +59,14 @@ quarticoscillator:
 ###########################################
 rotor:
   m0 = %(M0)f          # Unrenormalised mass
+  renormalisation = 'perturbative' # Renormalisation [none, perturbative, exact]      
 
 ###########################################
 # Single level Monte Carlo parameters
 ###########################################
 singlelevelmc:
   n_burnin = 1000     # Number of burnin samples
+  n_samples = 0
   epsilon = 1.E-3
   sampler = 'cluster'    # Sampler to use [HMC, cluster, exact]
 

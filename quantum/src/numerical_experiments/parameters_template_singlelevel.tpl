@@ -22,7 +22,7 @@ lattice:
 # Statistics parameters
 ###########################################
 statistics:
-  n_autocorr_window = 20   # Size of window over which to measure
+  n_autocorr_window = 10   # Size of window over which to measure
                            # autocorrelations
   n_min_samples_corr = 1000 # Minimal number of samples for correlated
                            # estimators
@@ -59,14 +59,16 @@ quarticoscillator:
 ###########################################
 rotor:
   m0 = %(M0)f          # Unrenormalised mass
+  renormalisation = 'none'
 
 ###########################################
 # Single level Monte Carlo parameters
 ###########################################
 singlelevelmc:
   n_burnin = 1000     # Number of burnin samples
+  n_samples = %(NSAMPLES)d # Number of samples
   epsilon = %(EPSILON)f
-  sampler = 'cluster'    # Sampler to use [HMC, cluster, exact]
+  sampler = 'HMC'    # Sampler to use [HMC, cluster, exact]
 
 ###########################################
 # Two level Monte Carlo parameters
@@ -82,7 +84,7 @@ twolevelmc:
 multilevelmc:
   n_level = 3      # Number of levels
   n_burnin = 100      # Number of burnin samples
-  epsilon = 0.000137
+  epsilon = %(EPSILON)f       
   coarsesampler = 'exact' # Sampler to use [HMC, cluster, exact]
   show_detailed_stats = true
 
