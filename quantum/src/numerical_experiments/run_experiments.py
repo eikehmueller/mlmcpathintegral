@@ -506,7 +506,11 @@ if (__name__ == '__main__'):
     parser.add_argument('--multilevel', action='store_true',
                         default=False,
                         help='generate multi level runtime data')
+    parser.add_argument('--plotruntimes', action='store_true',
+                        default=False,
+                        help='generate plot of both single- and multi-level runtimes')
 
+    
     Tfinal = 4.0
     m0 = 0.25
     Mlatlist = (32,64,128,256,512,1024)
@@ -545,5 +549,6 @@ if (__name__ == '__main__'):
         experiment.execute()
         experiment.analyse()
 
-    runtime_plotter = RuntimePlotter(Tfinal,m0)
-    runtime_plotter.plot()
+    if args.plotruntimes:
+        runtime_plotter = RuntimePlotter(Tfinal,m0)
+        runtime_plotter.plot()
