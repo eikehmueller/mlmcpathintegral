@@ -430,14 +430,24 @@ Plot runtime of single- and multilevel method
                      markeredgewidth=2,
                      markeredgecolor=color[methodname],
                      label=methodname)
+        epsilon = np.array(df['singlelevel']['epsilon'])[1:]
+        t_elapsed = np.array(df['singlelevel']['t_elapsed'])[1:]
+        c1,c0 = np.polyfit(np.log(epsilon),
+                           np.log(t_elapsed),
+                           deg=1)
+        plt.plot(epsilon,0.6*np.exp(c0)*epsilon**c1,
+                 color=color['singlelevel'],
+                 linewidth=2,
+                 linestyle='--',
+                 label='fit $'+'\propto \epsilon^{'+('%6.3f' % c1)+'}$')
         Epsilon = np.arange(1.E-2,1.E-1,1.E-3)
         f = lambda eps: eps**(-2)*np.log(eps)**3
-        C_ref = 1.
+        C_ref = 2.
         plt.plot(Epsilon,C_ref*f(Epsilon)/f(Epsilon[0]),
                  linewidth=2,
                  color='black',
-                 linestyle='--',
-                 label=r'$\propto \epsilon^{-2}|\log(\epsilon)|^3$')
+                 linestyle=':',
+                 label=r'multilevel theory $\propto \epsilon^{-2}|\log(\epsilon)|^3$')
         for methodname in ('singlelevel','multilevel'):
             for j in range(len(df[methodname]['Mlat'])):
                 plt.annotate('   '+str(np.array(df[methodname]['Mlat'])[j]),
