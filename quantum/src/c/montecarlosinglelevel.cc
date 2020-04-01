@@ -18,6 +18,7 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
   n_autocorr_window(param_stats.n_autocorr_window()),
   n_min_samples_corr(param_stats.n_min_samples_corr()),
   n_min_samples_qoi(param_stats.n_min_samples_qoi()),
+  n_samples(param_singlelevelmc.n_samples()),
   epsilon(param_singlelevelmc.epsilon()),
   timer("SinglevelMC") {
   if (param_singlelevelmc.sampler() == SamplerHMC) {
@@ -81,13 +82,18 @@ void MonteCarloSingleLevel::evaluate() {
          (stats_corr->samples() > n_min_samples_corr) ) {
       t = 0;
       stats_Q->record_sample(qoi_Q);
-      int n_samples = stats_Q->samples();
-      if (n_samples > n_target) {
+      int n_samples_act = stats_Q->samples();
+      if (n_samples_act > n_target) {
         n_target = ceil(stats_Q->tau_int()*two_epsilon_inv2*stats_Q->variance());
-        sufficient_stats = (n_samples > n_target);
+        sufficient_stats = (n_samples_act > n_target);
       }
     }
     t++;
+    // If the target number of samples is given explicitly, generate exactly
+    // the number of requested samples
+    if (n_samples > 0) {
+      sufficient_stats = (k >= n_samples);
+    }
   }
   timer.stop();
 }

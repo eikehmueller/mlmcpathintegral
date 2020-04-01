@@ -32,6 +32,7 @@ public:
     epsilon_(1.0),
     sampler_(SamplerHMC) {
     addKey("n_burnin",Integer,Positive);
+    addKey("n_samples",Integer,NonNegative);
     addKey("epsilon",Double,Positive);
     addKey("sampler",String);
   }
@@ -45,6 +46,7 @@ public:
     int readSuccess = Parameters::readFile(filename);
     if (!readSuccess) {
       n_burnin_ = getContents("n_burnin")->getInt();
+      n_samples_ = getContents("n_samples")->getInt();
       epsilon_ = getContents("epsilon")->getDouble();
       std::string sampler_str = getContents("sampler")->getString();
       if (sampler_str == "HMC") {
@@ -64,6 +66,8 @@ public:
 
   /** @brief Return number of burnin samples */
   unsigned int n_burnin() const { return n_burnin_; }
+  /** @brief Return number of samples */
+  unsigned int n_samples() const { return n_samples_; }
   /** @brief Return tolerance epsilon */
   double epsilon() const { return epsilon_; }
   /** @brief Return sampler type */
@@ -71,6 +75,8 @@ public:
 private:
   /** @brief Number of burnin samples */
   unsigned int n_burnin_;
+  /** @brief Number of samples */
+  unsigned int n_samples_;
   /** @brief tolerance epsilon */
   double epsilon_;
   /** @brief Sampler type */
@@ -136,6 +142,8 @@ private:
   unsigned int n_min_samples_corr;
   /** @brief Minimal number of samples for qoi */
   unsigned int n_min_samples_qoi;
+  /** @brief Exact number of samples to use (ignored if zero) */
+  unsigned int n_samples;
   /** @brief Tolerance epsilon */
   const double epsilon;
   /** @brief time */
