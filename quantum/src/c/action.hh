@@ -58,6 +58,9 @@ public:
   /** @brief Return lattice spacing \f$a\f$ */
   double geta_lat() const { return a_lat;}
 
+  /** @brief Cost of one action evaluation */
+  virtual unsigned int evaluation_cost() const { return M_lat; }
+
   /** @brief Construct coarsened version of action
    *
    * This returns a coarsened version of the action on the next level

@@ -142,7 +142,7 @@ private:
    * 
    * @param[in] ell Level \f$\ell\f$
    */
-  int cost_eff(const int ell) const;
+  unsigned int cost_eff(const int ell) const;
   
 
   

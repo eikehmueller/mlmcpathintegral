@@ -255,17 +255,14 @@ void MonteCarloMultiLevel::evaluate() {
 }
 
 /* Calculate effective cost on a particular level ell */
-int MonteCarloMultiLevel::cost_eff(const int ell) const {
-  int M_lat = fine_action->getM_lat();
+unsigned int MonteCarloMultiLevel::cost_eff(const int ell) const {
   // Cost on current level
-  int cost = (M_lat >> ell);
+  int cost = action[ell]->evaluation_cost();
   // Add cost on coarser levels
   int T_k = 1;
-  int C_k = M_lat >> ell;
   for (int k=ell+1;k<n_level;++k) {
     T_k *= ceil(t_indep[k]);
-    C_k /= 2;
-    cost += T_k*C_k;
+    cost += T_k*action[k]->evaluation_cost();
   }
   return cost*ceil(stats_qoi[ell]->tau_int());
 }
