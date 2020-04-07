@@ -17,7 +17,7 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
   n_level(param_multilevelmc.n_level()),
   epsilon(param_multilevelmc.epsilon()),
   n_autocorr_window(param_stats.n_autocorr_window()),
-  n_min_samples_corr(param_stats.n_min_samples_corr()),
+  n_min_samples_sampler(param_multilevelmc.n_min_samples_sampler()),
   n_min_samples_qoi(param_stats.n_min_samples_qoi()),
   n_target(param_multilevelmc.n_level(),0),
   t_indep(param_multilevelmc.n_level(),0.0),
@@ -191,7 +191,7 @@ void MonteCarloMultiLevel::draw_independent_sample(const int ell,
     double qoi_sampler = qoi->evaluate(x_sampler_path[level]);
     stats_sampler[level]->record_sample(qoi_sampler);
     t_sampler[level]++;
-    if ( (stats_sampler[level]->samples() > n_min_samples_corr) and
+    if ( (stats_sampler[level]->samples() > n_min_samples_sampler) and
          (t_sampler[level] >= ceil(stats_sampler[level]->tau_int())) ) {
       // t_sampler[level] is the number of x_sampler_path samples
       // generated on this level since the last independent sample was used

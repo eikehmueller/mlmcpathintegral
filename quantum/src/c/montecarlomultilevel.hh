@@ -33,11 +33,13 @@ public:
     Parameters("multilevelmc"),
     n_level_(2),
     n_burnin_(100),
+    n_min_samples_sampler_(100),
     epsilon_(1.0),
     coarsesampler_(SamplerHMC),
     show_detailed_stats_(false) {
     addKey("n_level",Integer,Positive);
     addKey("n_burnin",Integer,Positive);
+    addKey("n_min_samples_sampler",Integer,Positive);
     addKey("epsilon",Double,Positive);
     addKey("coarsesampler",String);
     addKey("show_detailed_stats",Bool);
@@ -53,6 +55,7 @@ public:
     if (!readSuccess) {
       n_level_ = getContents("n_level")->getInt();
       n_burnin_ = getContents("n_burnin")->getInt();
+      n_min_samples_sampler_ = getContents("n_min_samples_sampler")->getInt();
       epsilon_ = getContents("epsilon")->getDouble();
       show_detailed_stats_ = getContents("show_detailed_stats")->getBool();
       std::string sampler_str = getContents("coarsesampler")->getString();
@@ -76,6 +79,8 @@ public:
   unsigned int n_level() const { return n_level_; }
   /** @brief Return number burnin samples */
   unsigned int n_burnin() const { return n_burnin_; }
+  /** @brief Return number of minimum sampler samples */
+  unsigned int n_min_samples_sampler() const { return n_min_samples_sampler_; }
   /** @brief Return tolerance epsilon */
   double epsilon() const { return epsilon_; }
   /** @brief Return sampler type */
@@ -87,6 +92,8 @@ private:
   unsigned int n_level_;
   /** @brief Number of burnin samples */
   unsigned int n_burnin_;
+  /** @brief Minimal number of sampler samples */
+  unsigned int n_min_samples_sampler_;
   /** @brief tolerance epsilon */
   double epsilon_;
   /** @brief Sampler type */
@@ -195,8 +202,8 @@ private:
   std::vector<int> t_sampler;
   /** @brief Size of autocorrelation window */
   unsigned int n_autocorr_window;
-  /** @brief Minimal number of samples for correlated quantities */
-  unsigned int n_min_samples_corr;
+  /** @brief Minimal number of samples for sampler */
+  unsigned int n_min_samples_sampler;
   /** @brief Minimal number of samples for qoi */
   unsigned int n_min_samples_qoi;
   /** @brief Timer class */
