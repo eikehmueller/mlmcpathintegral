@@ -23,10 +23,8 @@ public:
   StatisticsParameters() :
     Parameters("statistics"),
     n_autocorr_window_(20),
-    n_min_samples_corr_(100),
     n_min_samples_qoi_(100) {
     addKey("n_autocorr_window",Integer,Positive);
-    addKey("n_min_samples_corr",Integer,Positive);
     addKey("n_min_samples_qoi",Integer,Positive);
   }
 
@@ -39,7 +37,6 @@ public:
     int readSuccess = Parameters::readFile(filename);
     if (!readSuccess) {
       n_autocorr_window_ = getContents("n_autocorr_window")->getInt();
-      n_min_samples_corr_ = getContents("n_min_samples_corr")->getInt();
       n_min_samples_qoi_ = getContents("n_min_samples_qoi")->getInt();
     }
     return readSuccess;
@@ -47,15 +44,11 @@ public:
 
   /** @brief Return size of autocorrelation window */
   unsigned int n_autocorr_window() const { return n_autocorr_window_; }
-  /** @brief Return minimal number of samples for correlated quantities */
-  unsigned int n_min_samples_corr() const { return n_min_samples_corr_; }
   /** @brief Return minimal number of samples for QoI */
   unsigned int n_min_samples_qoi() const { return n_min_samples_qoi_; }
 private:
   /** @brief Size of autocorrelation window */
   unsigned int n_autocorr_window_;
-  /** @brief Minimal number of samples for correlated quantities */
-  unsigned int n_min_samples_corr_;
   /** @brief Minimal number of samples for qoi */
   unsigned int n_min_samples_qoi_;
 };

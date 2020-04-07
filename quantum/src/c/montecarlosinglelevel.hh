@@ -132,8 +132,6 @@ private:
   std::shared_ptr<Sampler> sampler;
   /** @brief Quantity of interest */
   std::shared_ptr<QoI> qoi;
-  /** @brief Statistics for measuring autocorrelations */
-  std::shared_ptr<Statistics> stats_corr;
   /** @brief Statistics for measuring QoI */
   std::shared_ptr<Statistics> stats_Q;
   /** @brief Size of autocorrelation window */
