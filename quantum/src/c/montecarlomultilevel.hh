@@ -130,6 +130,20 @@ public:
   void show_statistics();
 
 private:
+
+  /** Draw independent sample on particular level 
+   * 
+   * Generate a new independent sample \f$\Theta_\ell\f$ on level \f$\ell\f$
+   * using Algorithm 3 written down in
+   * Dodwell, Ketelsen, Scheichl, Teckentrup (2015) SIAM J. of Uncert. Quant.
+   *
+   * @param[in] ell level ell
+   * @param[inout] x_path generated path \f$\Theta_\ell\f$ 
+   */
+  void draw_independent_sample(const int ell,
+                               std::shared_ptr<Path> x_path);
+
+
   /** @brief Calculate effective cost \f$C_{\ell}^{eff}\f$ on a level
    * 
    * Calculate
@@ -163,6 +177,8 @@ private:
   const double epsilon;
   /** @brief Path on a particular level */
   std::vector<std::shared_ptr<Path> > x_path;
+  /** @brief Coarse path on a particular level */
+  std::vector<std::shared_ptr<Path> > x_coarse_path;
   /** @brief Path which is used as coarse path by subsequent level */
   std::vector<std::shared_ptr<Path> > x_sampler_path;
   /** @brief vector with statistics of sampler paths */
@@ -173,6 +189,10 @@ private:
   std::vector<int> n_target;
   /** @brief number of skipped samples between independent samples on all levels */
   std::vector<double> t_indep;
+  /** @brief number of independent samples on all levels */
+  std::vector<int> n_indep;
+  /** @brief number of samples generated since last independent sample */
+  std::vector<int> t_sampler;
   /** @brief Size of autocorrelation window */
   unsigned int n_autocorr_window;
   /** @brief Minimal number of samples for correlated quantities */

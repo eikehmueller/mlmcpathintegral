@@ -20,7 +20,9 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
   n_min_samples_corr(param_stats.n_min_samples_corr()),
   n_min_samples_qoi(param_stats.n_min_samples_qoi()),
   n_target(param_multilevelmc.n_level(),0),
-  t_indep(param_multilevelmc.n_level(),0),
+  t_indep(param_multilevelmc.n_level(),0.0),
+  n_indep(param_multilevelmc.n_level(),0),
+  t_sampler(param_multilevelmc.n_level(),0),
   timer("MultilevelMC") {
   // Check that Number of lattice points permits number of levels
   unsigned int M_lat = fine_action->getM_lat();
@@ -55,6 +57,7 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
   for (int ell=0;ell<n_level;++ell) {
     unsigned int M_lat = action[ell]->getM_lat();    
     x_path.push_back(std::make_shared<Path>(M_lat,T_final));
+    x_coarse_path.push_back(std::make_shared<Path>(M_lat,T_final));
     x_sampler_path.push_back(std::make_shared<Path>(M_lat,T_final));
   }
   // Construct sampler on coarsest level
@@ -95,84 +98,85 @@ void MonteCarloMultiLevel::evaluate() {
    * on a particular level. The samples are decorrelated of this time is
    * larger than the autocorrelation time of the fine level process.
    */
-  std::vector<int> t_sampler(n_level,0);
-  std::vector<int> n_indep(n_level,0);
-  // Vector with target samples on each level. Record at least 100 samples.
   for (int level=0;level<n_level;++level) {
     stats_sampler[level]->reset();
-    stats_qoi[level]->reset();
+    t_sampler[level] = 0;
+    n_indep[level] = 0;
+    t_indep[level] = 0;
   }
   double two_epsilon_inv2 = 2./(epsilon*epsilon);
-  int level = n_level-1; // Current level
-  // Samples on a given level
-  std::vector<int> n_samples_burnin(n_level,0);
-  // Burnin phase
-  do {
-    // The QoI for the coarse path sampler on the current level
-    double qoi_sampler;
-    if (level == (n_level-1)) {
-      coarse_sampler->draw(x_path[level]);
-      coarse_sampler->draw(x_sampler_path[level]);
-      qoi_sampler = qoi->evaluate(x_sampler_path[level]);
-    } else {
-      twolevel_step[level]->draw(x_sampler_path[level+1],x_path[level]);
-      if (level > 0) {
-        twolevel_step[level]->draw(x_sampler_path[level+1],
-                                   x_sampler_path[level]);
-      }
-      qoi_sampler = qoi->evaluate(x_sampler_path[level]);
-    }
-    t_sampler[level]++;
-    stats_sampler[level]->record_sample(qoi_sampler);
-    n_samples_burnin[level]++;
-    if (level > 0) {
-      if ( (stats_sampler[level]->samples()>n_min_samples_corr) and
-           (t_sampler[level]>=ceil(stats_sampler[level]->tau_int())) ) {
-        t_sampler[level] = 0;
-        // If we haven't reached the finest level, pass down to next level
-        level--;
+
+  // Burn in phase
+  // Loop over all levels and create n_burnin samples
+  for (int level=n_level-1;level>=0;level--) {
+    for (int j=0;j<n_burnin;++j) {
+      if (level==n_level-1) {
+        draw_independent_sample(level,x_path[level]);
       } else {
-        // Cycle back to coarsest level to pull down further samples
-        level = n_level-1;
-      } 
-    } else {
-      // Check that we've collected sufficient samples
-      if (std::all_of(n_samples_burnin.begin(),
-                      n_samples_burnin.end(),
-                      [=](int n_samples) { return n_samples > n_burnin; })) {
-        break;
+        draw_independent_sample(level+1,x_coarse_path[level+1]);
+        twolevel_step[level]->draw(x_coarse_path[level+1],x_path[level]);
       }
-      level = n_level-1;
-    }      
-  } while(true);
-  
+    }
+  }
   std::cout << "Burnin completed" << std::endl;
 
-  double sum_s_ell2_C_ell_eff = 1E9;
   // Reset everything before actual run
   for (int level=0;level<n_level;++level) {
-    stats_sampler[level]->reset();
     stats_qoi[level]->reset();
-    t_sampler[level] = 0;
-    t_indep[level] = 0;
-    n_indep[level] = 0;
+    n_target[level] = n_min_samples_qoi;
   }
+
   timer.reset();
   timer.start();
-  level = n_level-1;
-  std::vector<bool> sufficient_stats(n_level,false);
+  bool sufficient_stats=false;
   do {
-    // The QoI which is recorded on this level. This is Q_{L-1} on the
-    // coarsest level and Y_{ell} = Q_{ell+1}-Q_{ell} on all othe levels
-    double qoi_Y;
-    // The QoI of the independent sampler, Q_{ell}
-    double qoi_sampler;
+    // Loop over all levels and measure QoI
+    for (int level=n_level-1;level>=0;level--) {
+      double qoi_Y;
+      unsigned int j_start = stats_qoi[level]->samples();
+      for (int j=j_start;j<n_target[level];++j) {
+        if (level==n_level-1) {
+          draw_independent_sample(level,x_path[level]);
+          qoi_Y = qoi->evaluate(x_path[level]);
+        } else {
+          draw_independent_sample(level+1,x_coarse_path[level+1]);
+          twolevel_step[level]->draw(x_coarse_path[level+1],x_path[level]);
+          double qoi_fine = qoi->evaluate(x_path[level]);
+          double qoi_coarse = qoi->evaluate(x_sampler_path[level+1]);
+          qoi_Y = qoi_fine-qoi_coarse;
+        }
+        stats_qoi[level]->record_sample(qoi_Y);
+      }
+    }
+    // Now recompute target numbers on all levels
+    sufficient_stats = true;
+    double sum_s_ell2_C_ell_eff = 0;
+    for (int ell=0;ell<n_level;++ell) {
+      double V_ell = stats_qoi[ell]->variance();
+      double C_ell_eff = cost_eff(ell);
+      sum_s_ell2_C_ell_eff += sqrt(V_ell*C_ell_eff);
+    }
+    for (int ell=0;ell<n_level;++ell) {
+      int n_samples = stats_qoi[ell]->samples();
+      // Calculate variance and predict new number of target samples
+      double V_ell = stats_qoi[ell]->variance();
+      double tau_int = stats_qoi[ell]->tau_int();
+      double C_ell_eff = cost_eff(ell);
+      n_target[ell] = ceil(two_epsilon_inv2*sum_s_ell2_C_ell_eff*sqrt(V_ell/C_ell_eff)*tau_int);
+      sufficient_stats = sufficient_stats and (n_samples > n_target[ell]);
+    }
+  } while (not sufficient_stats); 
+  timer.stop();
+}
+
+/* Draw an independent sample on a particular level */
+void MonteCarloMultiLevel::draw_independent_sample(const int ell,
+                                                   std::shared_ptr<Path> x_path) {
+  int level = n_level-1;
+  do {
     if (level == (n_level-1)) {
       /* Sample directly on coarsest level */
-      coarse_sampler->draw(x_path[level]); // Path used for measuring QoI
-      coarse_sampler->draw(x_sampler_path[level]); // Path used on next level
-      qoi_sampler = qoi->evaluate(x_sampler_path[level]);
-      qoi_Y = qoi->evaluate(x_path[level]);
+      coarse_sampler->draw(x_sampler_path[level]);
     } else {
       /* 
        * On all other levels, sample by using the two level MCMC process
@@ -180,78 +184,35 @@ void MonteCarloMultiLevel::evaluate() {
        * algorithm only ever proceeds to the next finer level if this is the
        * case.
        */
-      twolevel_step[level]->draw(x_sampler_path[level+1],x_path[level]);
-      if (level > 0) {
-        // Generate a new sample which can be used on the next finer level
-        twolevel_step[level]->draw(x_sampler_path[level+1],
-                                   x_sampler_path[level]);
-      }
-      qoi_sampler = qoi->evaluate(x_sampler_path[level]);
-      double qoi_fine = qoi->evaluate(x_path[level]);
-      double qoi_coarse = qoi->evaluate(x_sampler_path[level+1]);
-      qoi_Y = qoi_fine-qoi_coarse;
+      twolevel_step[level]->draw(x_sampler_path[level+1],
+                                 x_sampler_path[level]);
     }
+    // The QoI of the independent sampler, Q_{ell}
+    double qoi_sampler = qoi->evaluate(x_sampler_path[level]);
     stats_sampler[level]->record_sample(qoi_sampler);
     t_sampler[level]++;
-    stats_qoi[level]->record_sample(qoi_Y);
-    bool recompute_targets = false;
-    if (level > 0) {
-      if ( (stats_sampler[level]->samples() > n_min_samples_corr) and
-           (t_sampler[level] >= ceil(stats_sampler[level]->tau_int())) ) {
-        // t_sampler[level] is the number of x_sampler_path samples
-        // generated on this level since the last independent sample was used
-        t_indep[level] = (n_indep[level]*t_indep[level]+t_sampler[level])/(1.0+n_indep[level]);
-        // t_indep[level] is the average number of samples between indpendent
-        // samples
-        n_indep[level]++;
-        // n_indep is the number of independent samples of x_sampler_path on
-        // this level
-        t_sampler[level] = 0; // Reset number of independent samples
-        // Check whether we actually need further samples on the finer levels
-        bool sufficient_stats_finer_levels = true;
-        for (int ell=0;ell<level;++ell) {
-          sufficient_stats_finer_levels = sufficient_stats_finer_levels and sufficient_stats[ell];
-        }
-        if (not sufficient_stats_finer_levels) {
-          level--;
-        } else {
-          level = n_level-1;
-          recompute_targets = true;
-        }
-      } else {
-        level = n_level-1;
-        recompute_targets = true;
-      }
+    if ( (stats_sampler[level]->samples() > n_min_samples_corr) and
+         (t_sampler[level] >= ceil(stats_sampler[level]->tau_int())) ) {
+      // t_sampler[level] is the number of x_sampler_path samples
+      // generated on this level since the last independent sample was used
+      t_indep[level] = (n_indep[level]*t_indep[level]+t_sampler[level])/(1.0+n_indep[level]);
+      // t_indep[level] is the average number of samples between indpendent
+      // samples
+      n_indep[level]++;
+      // n_indep is the number of independent samples of x_sampler_path on
+      // this level
+      t_sampler[level] = 0; // Reset number of independent samples
+      // Move to next-finer level if we have obtained a new independent sample
+      level--;
     } else {
-      recompute_targets = true;
-    }
-    if (recompute_targets) {
-      sum_s_ell2_C_ell_eff = 0;
-      for (int ell=0;ell<n_level;++ell) {
-        double V_ell = stats_qoi[ell]->variance();
-        double C_ell_eff = cost_eff(ell);
-        sum_s_ell2_C_ell_eff += sqrt(V_ell*C_ell_eff);
-      }
-      for (int ell=0;ell<n_level;++ell) {
-        int n_samples = stats_qoi[ell]->samples();
-        // Calculate variance and predict new number of target samples
-        double V_ell = stats_qoi[ell]->variance();
-        double tau_int = stats_qoi[ell]->tau_int();
-        double C_ell_eff = cost_eff(ell);
-        n_target[ell] = ceil(two_epsilon_inv2*sum_s_ell2_C_ell_eff*sqrt(V_ell/C_ell_eff)*tau_int);
-        sufficient_stats[ell] = (n_samples > std::max(int(n_min_samples_qoi),n_target[ell]));
-      }
-      if (std::all_of(sufficient_stats.begin(),
-                      sufficient_stats.end(),
-                      [](bool v){return v;})) {
-          break;
-      }
+      // Return to coarsest level
       level = n_level-1;
     }
-    // Abort if we have collected sufficient statistics, this can
-    // only be judged on the coarsest level
-  } while (true);
-  timer.stop();
+  } while (level>=ell);
+  // Copy path
+  std::copy(x_sampler_path[ell]->data,
+            x_sampler_path[ell]->data+x_sampler_path[ell]->M_lat,
+            x_path->data);
 }
 
 /* Calculate effective cost on a particular level ell */
