@@ -198,9 +198,15 @@ void MonteCarloMultiLevel::evaluate() {
     if (level > 0) {
       if ( (stats_sampler[level]->samples() > n_min_samples_corr) and
            (t_sampler[level] >= ceil(stats_sampler[level]->tau_int())) ) {
+        // t_sampler[level] is the number of x_sampler_path samples
+        // generated on this level since the last independent sample was used
         t_indep[level] = (n_indep[level]*t_indep[level]+t_sampler[level])/(1.0+n_indep[level]);
+        // t_indep[level] is the average number of samples between indpendent
+        // samples
         n_indep[level]++;
-        t_sampler[level] = 0;
+        // n_indep is the number of independent samples of x_sampler_path on
+        // this level
+        t_sampler[level] = 0; // Reset number of independent samples
         // Check whether we actually need further samples on the finer levels
         bool sufficient_stats_finer_levels = true;
         for (int ell=0;ell<level;++ell) {
