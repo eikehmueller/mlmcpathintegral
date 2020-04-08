@@ -142,14 +142,25 @@ void MonteCarloMultiLevel::evaluate() {
           draw_independent_sample(level+1,x_coarse_path[level+1]);
           twolevel_step[level]->draw(x_coarse_path[level+1],x_path[level]);
           double qoi_fine = qoi->evaluate(x_path[level]);
-          double qoi_coarse = qoi->evaluate(x_sampler_path[level+1]);
+          double qoi_coarse = qoi->evaluate(x_coarse_path[level+1]);
           qoi_Y = qoi_fine-qoi_coarse;
         }
         stats_qoi[level]->record_sample(qoi_Y);
       }
     }
-    // Now recompute target numbers on all levels
+    // Now recompute target numbers on all levels \ell=0...L-1
+    //
+    // N_\ell^{eff} = 2/\epsilon^2*S*\sqrt{V_\ell/C_\ell^{eff}}
+    //
+    // with:
+    //   * C_\ell^{eff} = cost for generating a sample on level \ell
+    //   * V_\ell = variance on level \ell
+    //   * S = \sum_{\ell=0}^{L-1} \sqrt{V_\ell*C_\ell^{eff}}
+    //
+    // Taking into account autocorrelations, the target number on level \ell
+    // is then N_\ell = \ceil(\tau_\ell^{int}*N_\ell^{eff})
     sufficient_stats = true;
+    // Compute sum S defined above
     double sum_s_ell2_C_ell_eff = 0;
     for (int ell=0;ell<n_level;++ell) {
       double V_ell = stats_qoi[ell]->variance();
@@ -163,7 +174,7 @@ void MonteCarloMultiLevel::evaluate() {
       double tau_int = stats_qoi[ell]->tau_int();
       double C_ell_eff = cost_eff(ell);
       n_target[ell] = ceil(two_epsilon_inv2*sum_s_ell2_C_ell_eff*sqrt(V_ell/C_ell_eff)*tau_int);
-      sufficient_stats = sufficient_stats and (n_samples > n_target[ell]);
+      sufficient_stats = sufficient_stats and (n_samples >= n_target[ell]);
     }
   } while (not sufficient_stats); 
   timer.stop();
@@ -191,8 +202,8 @@ void MonteCarloMultiLevel::draw_independent_sample(const int ell,
     double qoi_sampler = qoi->evaluate(x_sampler_path[level]);
     stats_sampler[level]->record_sample(qoi_sampler);
     t_sampler[level]++;
-    if ( (stats_sampler[level]->samples() > n_min_samples_sampler) and
-         (t_sampler[level] >= ceil(stats_sampler[level]->tau_int())) ) {
+    if ( (stats_sampler[level]->samples() >= n_min_samples_sampler) and
+         (t_sampler[level] >= 2*ceil(stats_sampler[level]->tau_int())) ) {
       // t_sampler[level] is the number of x_sampler_path samples
       // generated on this level since the last independent sample was used
       t_indep[level] = (n_indep[level]*t_indep[level]+t_sampler[level])/(1.0+n_indep[level]);
@@ -202,7 +213,8 @@ void MonteCarloMultiLevel::draw_independent_sample(const int ell,
       // n_indep is the number of independent samples of x_sampler_path on
       // this level
       t_sampler[level] = 0; // Reset number of independent samples
-      // Move to next-finer level if we have obtained a new independent sample
+      // Move to next-finer level since we have obtained a new independent
+      // sample
       level--;
     } else {
       // Return to coarsest level
