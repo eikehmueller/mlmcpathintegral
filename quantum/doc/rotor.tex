@@ -93,7 +93,9 @@ Since $\sin^2(\psi/2)$ is a montonously increasing function of $\psi$, we have t
   \item Accept this sample with the probability $p_\sigma(\hat{\psi})/q_\sigma(\hat{\psi})$. Otherwise, continue with Step 1 (and repeat until a sample is accepted).
 \end{enumerate}
 The points $\psi_i$ should probably be chosen such that they are clustered closer together where the slope of $\sin^2(\psi/2)$ is large. This will ensure that the ratio $p_\sigma(\psi)/q_\sigma(\psi)$ is not too far from one, i.e. we accept as many points as possible.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Continuum limit}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 The Lagrangian of a free particle of mass $M_0$ constrained to a circle of radius $R$ is given by
 \begin{equation}
 \begin{aligned}
@@ -117,6 +119,7 @@ Note that $\theta$ looks a lot like an external current. Making the ansatz
 energy eigenvalues are
 \begin{equation}
   E_m(\theta) = \frac{1}{2I}\left(m-\frac{\theta}{2\pi}\right)^2.
+  \label{eqn:energy_continuum}
 \end{equation}
 The partition function at finite temperature $T$ is
 \begin{equation}
@@ -145,7 +148,7 @@ The topological susceptibility is given by
 \end{equation}
 Where the function $S(z)=S_1(z)$ is defined by
 \begin{equation}
-  S_n(z) = z^n \frac{\sum_{Q^{2n}\in\mathbb{Z}}Q^2 \exp\left[-\frac{1}{2}zQ^2\right]}{\sum_{Q\in\mathbb{Z}}\exp\left[-\frac{1}{2}zQ^2\right]}\label{eqn:Sz}
+  S_n(z) = z^n \frac{\sum_{Q\in\mathbb{Z}}Q^{2n} \exp\left[-\frac{1}{2}zQ^2\right]}{\sum_{Q\in\mathbb{Z}}\exp\left[-\frac{1}{2}zQ^2\right]}\label{eqn:Sz}
 \end{equation}
 The variance of $\chi_t$ is given by
 \begin{equation}
@@ -168,6 +171,99 @@ The infinite volume limit $T\rightarrow\infty$ corresponds to $z\rightarrow 0$, 
   S_n(z) \approx \frac{\int_{-\infty}^\infty q^{2n} \exp\left[-\frac{1}{2}q^2\right]\;dq}{\int_{-\infty}^\infty \exp\left[-\frac{1}{2}q^2\right]\;dq}=(2n-1)!
 \end{equation}
 in particular $S(z)=S_1(z)\rightarrow 1$, $S_2(z)\rightarrow 3$ and $R(z)\rightarrow 1$.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Topological susceptibility for finite $T$ and $a$}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+For finite lattice spacing $a$ and volume $T$ the energy eigenvalues $E_m(\theta)$ in Eq. \eqref{eqn:energy_continuum} are replaced by $E_m^s(\theta)$ with \cite{Bietenholz1997}
+\begin{equation}
+  \exp\left[-aE_m^s(\theta)\right] = \sqrt{\frac{I}{2\pi a}} \int_{-\pi}^{\pi}d\phi\; \exp\left[-\frac{I}{a}(1-\cos(\phi))-i\left(m-\frac{\theta}{2\pi}\right)\phi\right].
+\end{equation}
+The partition function is
+\begin{equation}
+  \begin{aligned}
+    Z(\theta) &= \operatorname{Tr} \exp\left[-TH(\theta)\right] = \sum_{m\in\mathbb{Z}}\exp\left[-TE_m^s(\theta)\right]\\
+    &= \mathcal{Z}^{-1} \sum_{m\in\mathbb{Z}}g_m(\theta)
+    \end{aligned}
+\end{equation}
+with
+\begin{xalignat}{3}
+  \mathcal{Z} &:= \left(2\pi\frac{a}{I}\right)^{\frac{T}{2a}}, &
+  g_m(\theta) &:= I_m(\theta)^{\frac{T}{a}}, &
+  I_m(\theta) &:= \int_{-\pi}^{\pi}d\phi\; \exp\left[-\frac{I}{a}(1-\cos(\phi))-i\left(m-\frac{\theta}{2\pi}\right)\phi\right].
+\end{xalignat}
+Now the topological susceptibility is
+\begin{equation}
+  \begin{aligned}
+    \chi_t &= -\frac{1}{T}\left[\frac{\partial^2}{\partial\theta^2}\log(Z(\theta))\right]_{\theta=0}\\
+    &= -\frac{1}{T}\frac{\left(\sum_{m\in\mathbb{Z}}g_m''(0)\right)\left(\sum_{m\in\mathbb{Z}}g_m(0)\right)-\left(\sum_{m\in\mathbb{Z}}g_m'(0)\right)^2}{\left(\sum_{m\in\mathbb{Z}}g_m(0)\right)^2}
+    = -\frac{1}{T}\frac{\sum_{m\in\mathbb{Z}}g_m''(0)}{\sum_{m\in\mathbb{Z}}g_m(0)}\\
+    &= -\frac{1}{a}\frac{\sum_{m\in\mathbb{Z}}\left(\frac{I_m''(0)}{I_m(0)}+\left(\frac{T}{a}-1\right)\left(\frac{I_m'(0)}{I_m(0)}\right)^2\right)I_m(0)^{T/a}}{\sum_{m\in\mathbb{Z}}I_m(0)^{T/a}}
+  \end{aligned}
+\end{equation}
+Here we used the fact that $I_{-m}(0)=I_m(0)$, $I'_{-m}(0)=-I_m'(0)$, which implies that
+\begin{equation*}
+  g_m'(0)=\frac{T}{a}I_m'(0)I_m(0)^{T/a-1}=-g_{-m}(0)
+\end{equation*}
+and hence the sum $\sum_{m\in\mathbb{Z}}g_m'(0)$ vanishes.
+
+Next, define the following special functions
+\begin{equation}
+  \begin{aligned}
+    A_0(z,m) &= \frac{1}{\sqrt{2\pi z}}\int_{-\pi}^\pi d\phi\; \exp\left[-\frac{1}{z}(1-\cos(\phi))-im\phi\right],\\
+    A_1(z,m) &= \frac{1}{\sqrt{2\pi z^3}}\int_{-\pi}^\pi d\phi\; \phi\exp\left[-\frac{1}{z}(1-\cos(\phi))-im\phi\right],\\
+    A_2(z,m) &= \frac{1}{\sqrt{2\pi z^3}}\int_{-\pi}^\pi d\phi\; \phi^2\exp\left[-\frac{1}{z}(1-\cos(\phi))-im\phi\right].
+  \end{aligned}
+\end{equation}
+Since
+\begin{xalignat*}{3}
+  I_m(0) &= \sqrt{2\pi\frac{a}{I}}A_0(a/I,m), &
+  I_m'(0) &= \frac{i}{2\pi}\frac{a}{I}\sqrt{2\pi\frac{a}{I}}A_1(a/I,m), &
+  I_m''(0) &= -\frac{1}{4\pi^2}\frac{a}{I}\sqrt{2\pi\frac{a}{I}}A_2(a/I,m)
+\end{xalignat*}
+the topological susceptibility can be expressed in terms of the functions $A_0$, $A_1$ and $A_2$ as
+\begin{equation}
+  \chi_t = \frac{1}{4\pi^2 I}\frac{\sum_{m\in\mathbb{Z}}\left[\frac{A_2(a/I,m)}{A_0(a/I,m)}+\left(\frac{T}{I}-\frac{a}{I}\right)\left(\frac{A_1(a/I,m)}{A_0(a/I,m)}\right)^2\right]A_0(a/I,m)^{T/a}}{\sum_{m\in\mathbb{Z}}A_0(a/I,m)^{T/a}}
+  \label{eqn:chit_A}
+\end{equation}
+Using the method of steepest descent, it can be shown that
+\begin{equation}
+  \begin{aligned}
+    A_0(z,m) &= 1 + \left(\frac{1}{8}-\frac{1}{2}m^2\right)z + \left(\frac{27}{384}-\frac{5}{16}m^2+\frac{1}{8}m^4\right)z^2+\mathcal{O}(z^3),\\
+    A_1(z,m) &= -im \left(1+\left(\frac{5}{8}-\frac{1}{2}m^2\right)z\right)+\mathcal{O}(z^2),\\
+    A_2(z,m) &= 1 + \left(\frac{5}{8}-\frac{3}{2}m^2\right)z+\mathcal{O}(z^2).
+  \end{aligned}
+\end{equation}
+which implies that
+\begin{equation}
+  A_0(a/I,m)^{T/a} = \exp\left[\frac{T}{8I}\right]\exp\left[-\frac{T}{2I}m^2\right]\left(1+\frac{T}{2I}\left(\frac{1}{8}-\frac{1}{2}m^2\right)\frac{a}{I}+\mathcal{O}((a/I)^2)\right)
+\end{equation}
+Let $\xi:=T/I$ and $z:=a/I$. Taylor-expanding Eq. \eqref{eqn:chit_A} in powers of the lattice spacing $a$ results in
+\begin{equation}
+  \begin{aligned}
+    \chi_t &= \frac{1}{4\pi^2 I}\frac{\Sigma_0(\xi)-\xi\Sigma_2(\xi)+\left[\left(\frac{1}{2}+\frac{1}{16}\xi\right)\Sigma_0(\xi)-\left(\frac{5}{4}+\frac{1}{16}\xi\right)\xi\Sigma_2(\xi)+\frac{1}{4}\xi^2\Sigma_4(\xi)\right]z}{\Sigma_0(\xi)+\left[\frac{1}{16}\xi\Sigma_0(\xi)-\frac{1}{4}\xi\Sigma_2(\xi)\right]z}+\mathcal{O}(z^2)\\
+    &= \frac{1}{4\pi^2 I}\left(1-\xi\widehat{\Sigma}_2(\xi)+\left[\frac{1}{2}-\xi\widehat{\Sigma}_2(\xi)+\frac{1}{4}\xi^2\left(\widehat{\Sigma}_4(\xi)-\widehat{\Sigma}_2(\xi)^2\right)\right]z\right)+\mathcal{O}(z^2)
+  \end{aligned}
+\end{equation}
+where
+\begin{xalignat}{2}
+  \Sigma_p(\xi) &:= \sum_{m\in\mathbb{Z}}m^p \exp\left[-\frac{1}{2}\xi m^2\right], &
+  \widehat{\Sigma}_p(\xi) &:= \frac{\Sigma_p(\xi)}{\Sigma_0(\xi)}.
+\end{xalignat}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Coarse level matching}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+On the coarse level it might be better to use a renormalised momentum of inertia $I^{(c)}$, which is chosen such that
+\begin{equation}
+  \chi_t(2a,I^{(c)},T) = \chi_t(a,I,T).
+\end{equation}
+In the limit $a/I\ll 1$ write $I^{(c)}$ as
+\begin{equation}
+  I^{(c)} = \left(1+\delta_I \frac{a}{I}\right)I.
+\end{equation}
+A straightforward calculation gives
+\begin{equation}
+  \delta_I = \frac{1}{2}\cdot \frac{1-2\xi\widehat{\Sigma}_2(\xi)+\frac{1}{2}\xi^2\left(\widehat{\Sigma}_4(\xi)-\widehat{\Sigma}_2(\xi)^2\right)}{1-2\xi\widehat{\Sigma}_2(\xi)+\xi^2\left(\widehat{\Sigma}_4(\xi)-\widehat{\Sigma}_2(\xi)^2\right)}.
+\end{equation}
 \bibliographystyle{unsrt}
 \bibliography{rotor}
 \end{document}
