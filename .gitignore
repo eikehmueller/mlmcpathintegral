@@ -10,6 +10,7 @@
 *.o
 *.x
 quantum/doc/plan.pdf
+quantum/doc/*.pdf
 quantum/doc/plots/*.pdf
 quantum/src/c/parameters.in
 quantum/src/c/doc
