@@ -15,4 +15,6 @@ quantum/src/c/parameters.in
 quantum/src/c/doc
 quantum/src/c/.dependencies
 quantum/src/plots/*.pdf
+quantum/src/numerical_experiments/*.pdf
+quantum/src/numerical_experiments/runs_*
 local.mk
