@@ -80,11 +80,11 @@ void MonteCarloSingleLevel::evaluate() {
       stats_Q->record_sample(qoi_Q);
     }
     if (n_samples > 0) {
-      sufficient_stats = true;
+      n_target = n_samples;
     } else {
       n_target = ceil(stats_Q->tau_int()*two_epsilon_inv2*stats_Q->variance());
-      sufficient_stats = (stats_Q->samples() > n_target);
     }
+    sufficient_stats = (stats_Q->samples() >= n_target);
     // If the target number of samples is given explicitly, generate exactly
     // the number of requested samples
   } while (not sufficient_stats);
