@@ -8,7 +8,6 @@
 /** Draw next sample */
 void HMCSampler::draw(std::shared_ptr<Path> x_path) {
   const unsigned int M_lat = action->getM_lat();
-  const double T_final = action->getT_final();
   // Initial kinetic energy
   double T_kin_cur = 0.0;
   // Draw random momentum from normal distribution

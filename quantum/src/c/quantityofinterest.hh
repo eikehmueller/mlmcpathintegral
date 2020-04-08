@@ -43,6 +43,9 @@ public:
    */
   QoIXsquared() {}
 
+  /** @brief Destructor */
+  virtual ~QoIXsquared() {}
+  
   /** @brief Evaluate on a path
    *
    * @param[in] x_path Path \f$X\f$ on which to evaluate the QoI
@@ -69,6 +72,9 @@ public:
    * @param[in] M_lat_ Number of time slices \f$M\f$
    */
   QoISusceptibility() : four_pi2_inv(0.25/(M_PI*M_PI)) {}
+
+  /** @brief Destructor */
+  virtual ~QoISusceptibility() {}
 
   /** @brief Evaluate on a path
    *

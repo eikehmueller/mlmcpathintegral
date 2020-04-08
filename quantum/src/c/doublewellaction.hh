@@ -101,6 +101,9 @@ public:
       inv_sigma2(1./(sigma_*sigma_)) {
   }
 
+  /** @brief destructor */
+  virtual ~DoubleWellAction() {};
+  
   /** @brief Construct coarsened version of action
    *
    * This returns a coarsened version of the action on the next level

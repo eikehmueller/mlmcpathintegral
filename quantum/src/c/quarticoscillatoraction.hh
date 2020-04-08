@@ -100,6 +100,9 @@ public:
       mu2(mu2_), lambda(lambda_), x0(x0_) {
   }
 
+  /** @brief Destructor */
+  virtual ~QuarticOscillatorAction() {};
+  
   /** @brief Construct coarsened version of action
    *
    * This returns a coarsened version of the action on the next level

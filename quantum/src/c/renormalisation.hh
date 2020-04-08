@@ -24,7 +24,7 @@ public:
   RenormalisedParameters(const unsigned int M_lat_,
                          const double T_final_,
                          const RenormalisationType renormalisation_) :
-    T_final(T_final_), M_lat(M_lat_),
+    M_lat(M_lat_), T_final(T_final_), 
     a_lat(T_final_/M_lat_), renormalisation(renormalisation_) {}
   
 protected:

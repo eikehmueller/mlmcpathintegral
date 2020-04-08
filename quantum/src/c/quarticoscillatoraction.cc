@@ -29,9 +29,8 @@ void QuarticOscillatorAction::force(const std::shared_ptr<Path> x_path,
   double tmp_1 = m0/a_lat;
   double tmp_2 = 2.+a_lat*a_lat*mu2;
   double tmp_3 = a_lat*lambda;
-  double X_j;
+  double X_j = x_path->data[0];
   double X_j_shifted = X_j - x0;
-  X_j = x_path->data[0];
   p_path->data[0] = tmp_1*(tmp_2*X_j - x_path->data[M_lat-1] - x_path->data[1])+tmp_3*X_j_shifted*X_j_shifted*X_j_shifted;
   // Interior points
   for (unsigned int j=1;j<M_lat-1;++j) {

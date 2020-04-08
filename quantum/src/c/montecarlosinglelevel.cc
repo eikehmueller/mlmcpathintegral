@@ -48,12 +48,11 @@ void MonteCarloSingleLevel::evaluate() {
   std::shared_ptr<Path> x_path =
     std::make_shared<Path>(action->getM_lat(),
                            action->getT_final());
-  for (int i=i;i<n_burnin;++i)
+  for (int i=0;i<n_burnin;++i)
     sampler->draw(x_path);
   
   double two_epsilon_inv2 = 2./(epsilon*epsilon);
   stats_Q->reset();
-  int t=0;
   bool sufficient_stats = false;
   int n_target;
   if (n_samples > 0) {

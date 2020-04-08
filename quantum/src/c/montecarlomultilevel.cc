@@ -16,13 +16,13 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
   qoi(qoi_),
   n_level(param_multilevelmc.n_level()),
   epsilon(param_multilevelmc.epsilon()),
-  n_autocorr_window(param_stats.n_autocorr_window()),
-  n_min_samples_sampler(param_multilevelmc.n_min_samples_sampler()),
-  n_min_samples_qoi(param_stats.n_min_samples_qoi()),
   n_target(param_multilevelmc.n_level(),0),
   t_indep(param_multilevelmc.n_level(),0.0),
   n_indep(param_multilevelmc.n_level(),0),
   t_sampler(param_multilevelmc.n_level(),0),
+  n_autocorr_window(param_stats.n_autocorr_window()),
+  n_min_samples_qoi(param_stats.n_min_samples_qoi()),
+  n_min_samples_sampler(param_multilevelmc.n_min_samples_sampler()),
   timer("MultilevelMC") {
   // Check that Number of lattice points permits number of levels
   unsigned int M_lat = fine_action->getM_lat();

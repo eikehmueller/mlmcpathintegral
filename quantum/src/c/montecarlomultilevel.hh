@@ -202,10 +202,10 @@ private:
   std::vector<int> t_sampler;
   /** @brief Size of autocorrelation window */
   unsigned int n_autocorr_window;
-  /** @brief Minimal number of samples for sampler */
-  unsigned int n_min_samples_sampler;
   /** @brief Minimal number of samples for qoi */
   unsigned int n_min_samples_qoi;
+  /** @brief Minimal number of samples for sampler */
+  unsigned int n_min_samples_sampler;
   /** @brief Timer class */
   Timer timer;
 };

@@ -136,8 +136,6 @@ private:
   std::shared_ptr<Statistics> stats_Q;
   /** @brief Size of autocorrelation window */
   unsigned int n_autocorr_window;
-  /** @brief Minimal number of samples for correlated quantities */
-  unsigned int n_min_samples_corr;
   /** @brief Minimal number of samples for qoi */
   unsigned int n_min_samples_qoi;
   /** @brief Exact number of samples to use (ignored if zero) */

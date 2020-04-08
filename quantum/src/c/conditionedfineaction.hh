@@ -82,6 +82,9 @@ public:
     engine.seed(11897197);
   }
 
+  /** @brief Destructor */
+  virtual ~GaussianConditionedFineAction() {}
+  
   /** @brief Fill in fine points
    * 
    * Given a path \f$X\f$ for which the coarse points have been set, fill in
@@ -138,6 +141,9 @@ public:
     engine.seed(11897197);
   }
 
+  /** @brief Destructor */
+  virtual ~RotorConditionedFineAction() {}
+  
   /** @brief Fill in fine points
    * 
    * Given a path \f$X\f$ for which the coarse points have been set, fill in

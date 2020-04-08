@@ -109,7 +109,7 @@ public:
    * 
    * Delete any temporary arrays
    */
-  ~RotorAction() {}
+  virtual ~RotorAction() {}
 
   /** @brief Construct coarsened version of action
    *

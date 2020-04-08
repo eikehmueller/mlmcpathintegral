@@ -66,6 +66,9 @@ public:
     reset_stats();
   }
 
+  /** @brief Destructor */
+  virtual ~TwoLevelMetropolisStep() {}
+
   /** @brief draw new fine path given a coarse path
    *
    * @param[out] x_coarse_path Coarse path
