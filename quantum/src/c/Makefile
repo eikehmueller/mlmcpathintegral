@@ -15,7 +15,6 @@ CFLAGS_OPT=-O3 -std=c++11 -I$(EIGEN_INCLUDE_DIR) -I$(GSL_INCLUDE_DIR)
 CFLAGS_DEBUG=-g -Wall -O0 -std=c++11 -I$(EIGEN_INCLUDE_DIR) -I$(GSL_INCLUDE_DIR)
 LFLAGS=-L$(GSL_LIB_DIR) $(LOCAL_LFLAGS)
 LLIBS=-lgsl -lgslcblas 
-CXX=g++
 
 SOURCES=$(wildcard *.hh *.cc)
 MAIN=driver.x
@@ -26,6 +25,13 @@ ifeq ($(DEBUG),True)
 	CFLAGS=$(CFLAGS_DEBUG)
 else
 	CFLAGS=$(CFLAGS_OPT)
+endif
+
+ifeq ($(USE_MPI),True)
+	CXX=mpic++
+	CFLAGS:=$(CFLAGS) -DUSE_MPI
+else
+	CXX=g++
 endif
 
 all: $(MAIN)

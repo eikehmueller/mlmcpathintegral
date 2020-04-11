@@ -41,7 +41,6 @@ public:
     if (!readSuccess) {
       m0_ = getContents("m0")->getDouble();
       std::string renormalisation_str = getContents("renormalisation")->getString();
-      std::cout << "renormalisation_str " << renormalisation_str << std::endl;
       if (renormalisation_str == "none") {
         renormalisation_ = RenormalisationNone;
       } else if (renormalisation_str == "perturbative") {

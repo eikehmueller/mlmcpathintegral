@@ -7,6 +7,7 @@
 #include<fstream>
 #include<map>
 #include<vector>
+#include "mpi_wrapper.hh"
 
 /** @file parameters.hh
  * 
@@ -112,13 +113,20 @@ public:
    *
    * @param[in] valueString String containing new value
    */
+  
   // set data
   virtual void setValue(const std::string valueString) {
   };
+
+  /** @brief Get value string */
+  std::string getValueString() {
+    return valueString_;
+  }
+  
 protected:
   /** @brief string with label */
   const std::string label_;
-private:
+protected:
   /** @brief string with value */
   std::string valueString_;
 };
@@ -149,9 +157,11 @@ public:
    * @param[in] valueString String with value
    */
   virtual void setValue(const std::string valueString) {
+    valueString_=valueString;
     value=atof(valueString.c_str());
     check_constraint();
   }
+
 private:
   /** @brief Check constraints of current value */
   void check_constraint() {
@@ -203,6 +213,7 @@ public:
    * @param[in] valueString String with value
    */
   virtual void setValue(const std::string valueString) {
+    valueString_=valueString;
     value=atoi(valueString.c_str());
     check_constraint();
   }
@@ -255,6 +266,7 @@ public:
    * @param[in] valueString String with value
    */
   virtual void setValue(const std::string valueString) {
+    valueString_=valueString;
     value = valueString.substr(1, valueString.size()-2);
   }
 private:
@@ -288,6 +300,7 @@ public:
    * @param[in] valueString String with value
    */
   virtual void setValue(const std::string valueString) {
+    valueString_=valueString;
     value = ( ( valueString == "true" ) ||
               ( valueString == "True" ) ||
               ( valueString == "TRUE" ) ) ;

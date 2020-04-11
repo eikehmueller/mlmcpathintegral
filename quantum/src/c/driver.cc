@@ -19,6 +19,7 @@
 #include "clustersampler.hh"
 #include "config.h"
 #include "statistics.hh"
+#include "mpi_wrapper.hh"
 
 /** @file driver.cc
  * @brief File with main program
@@ -30,18 +31,25 @@
 
 /** Main program */
 int main(int argc, char* argv[]) {
-  std::cout << "++===================================++" << std::endl;
-  std::cout << "!!   Path integral multilevel MCMC   !!" << std::endl;
-  std::cout << "++===================================++" << std::endl;
-  std::cout << std::endl;
-  if (argc != 2) {
-    std::cout << "Usage: " << argv[0] << " PARAMETERFILE" << std::endl;
+  mpi_init();
+  if (mpi_master()) {
+    std::cout << "++===================================++" << std::endl;
+    std::cout << "!!   Path integral multilevel MCMC   !!" << std::endl;
+    std::cout << "++===================================++" << std::endl;
     std::cout << std::endl;
+  }
+  if (argc != 2) {
+    if (mpi_master()) {
+      std::cout << "Usage: " << argv[0] << " PARAMETERFILE" << std::endl;
+      std::cout << std::endl;
+    }
     return 0;
   }
   std::string filename = argv[1];
-  std::cout << " Reading parameter from file \'" << filename << "\'" << std::endl;
+  if (mpi_master()) {
+    std::cout << " Reading parameter from file \'" << filename << "\'" << std::endl;
     std::cout << std::endl;
+  }
   
   /* ====== Read parameters ====== */
   GeneralParameters param_general;
@@ -52,68 +60,100 @@ int main(int argc, char* argv[]) {
   DoubleWellParameters param_dw;
   RotorParameters param_rotor;
   if (param_general.readFile(filename)) return 1;
-  std::cout << param_general << std::endl;
+  if (mpi_master()) {
+    std::cout << param_general << std::endl;
+  }
   if (param_lattice.readFile(filename)) return 1;
-  std::cout << param_lattice << std::endl;
+  if (mpi_master()) {
+    std::cout << param_lattice << std::endl;
+  }
   if (param_stats.readFile(filename)) return 1;
-  std::cout << param_stats << std::endl;
+  if (mpi_master()) {
+    std::cout << param_stats << std::endl;
+  }
   switch (param_general.action()) {
   case (ActionHarmonicOscillator): {
     if (param_ho.readFile(filename)) return 1;
-    std::cout << param_ho << std::endl;
+    if (mpi_master()) {
+      std::cout << param_ho << std::endl;
+    }
     break;
   }
   case (ActionQuarticOscillator): {
     if (param_qo.readFile(filename)) return 1;
-    std::cout << param_qo << std::endl;
+    if (mpi_master()) {
+      std::cout << param_qo << std::endl;
+    }
     break;
   }
   case (ActionDoubleWell): {
     if (param_dw.readFile(filename)) return 1;
-    std::cout << param_dw << std::endl;
+    if (mpi_master()) {
+      std::cout << param_dw << std::endl;
+    }
     break;
   }
   case (ActionRotor): {
     if (param_rotor.readFile(filename)) return 1;
-    std::cout << param_rotor << std::endl;
+    if (mpi_master()) {
+      std::cout << param_rotor << std::endl;
+    }
     break;
   }
   }
 
   HMCParameters param_hmc;
   if (param_hmc.readFile(filename)) return 1;
-  std::cout << param_hmc << std::endl;
+  if (mpi_master()) {
+    std::cout << param_hmc << std::endl;
+  }
 
   ClusterParameters param_cluster;
   if (param_cluster.readFile(filename)) return 1;
-  std::cout << param_cluster << std::endl;
+  if (mpi_master()) {
+    std::cout << param_cluster << std::endl;
+  }
 
   SingleLevelMCParameters param_singlelevelmc;
   if (param_singlelevelmc.readFile(filename)) return 1;
-  std::cout << param_singlelevelmc << std::endl;
+  if (mpi_master()) {
+    std::cout << param_singlelevelmc << std::endl;
+  }
 
   TwoLevelMCParameters param_twolevelmc;
   if (param_twolevelmc.readFile(filename)) return 1;
-  std::cout << param_twolevelmc << std::endl;
+  if (mpi_master()) {
+    std::cout << param_twolevelmc << std::endl;
+  }
 
   MultiLevelMCParameters param_multilevelmc;
   if (param_multilevelmc.readFile(filename)) return 1;
-  std::cout << param_multilevelmc << std::endl;
-
+  if (mpi_master()) {
+    std::cout << param_multilevelmc << std::endl;
+  }
+  
   /* ====== Select quantity of interest ====== */
   std::shared_ptr<QoI> qoi;
-  std::cout << std::endl;
+  if (mpi_master()) {
+    std::cout << std::endl;
+  }
   if ( (param_general.action() == ActionHarmonicOscillator) or
        (param_general.action() == ActionQuarticOscillator) or
        (param_general.action() == ActionDoubleWell) ) {
     qoi=std::make_shared<QoIXsquared>();
-    std::cout << "QoI = X^2 " << std::endl;
+    if (mpi_master()) {
+      std::cout << "QoI = X^2 " << std::endl;
+    }
   }
   if ( (param_general.action() == ActionRotor) ) {
     qoi=std::make_shared<QoISusceptibility>();
-    std::cout << "QoI = Susceptibility Q[X]^2/T " << std::endl;
+    if (mpi_master()) {
+      std::cout << "QoI = Susceptibility Q[X]^2/T " << std::endl;
+    }
   }
-  std::cout << std::endl;
+  if (mpi_master()) {
+    std::cout << std::endl;
+  }
   
   /* ====== Select action ====== */
   std::shared_ptr<Action> action;
@@ -168,22 +208,26 @@ int main(int argc, char* argv[]) {
         std::dynamic_pointer_cast<HarmonicOscillatorAction>(action);
       double exact_result = ho_action->Xsquared_exact();
       double exact_result_continuum = ho_action->Xsquared_exact_continuum();
-      std::cout << std::endl;
-      std::cout << std::setprecision(6) << std::fixed;
-      std::cout << " Exact result             <x^2> = " << exact_result << std::endl;
-      std::cout << " Continuum limit [a -> 0] <x^2> = " << exact_result_continuum << std::endl;
-      std::cout << std::endl;
+      if (mpi_master()) {
+        std::cout << std::endl;
+        std::cout << std::setprecision(6) << std::fixed;
+        std::cout << " Exact result             <x^2> = " << exact_result << std::endl;
+        std::cout << " Continuum limit [a -> 0] <x^2> = " << exact_result_continuum << std::endl;
+        std::cout << std::endl;
+      }
     }
     if (param_general.action() == ActionRotor) {
       std::shared_ptr<RotorAction> rotor_action =
         std::dynamic_pointer_cast<RotorAction>(action);
       double exact_result_continuum = rotor_action->chit_exact_continuum();
       double exact_result_perturbative = rotor_action->chit_exact_perturbative();
-      std::cout << std::endl;
-      std::cout << std::setprecision(6) << std::fixed;
-      std::cout << " Exact result             <chi_t> = " << exact_result_perturbative << " + O((a/I)^2), a/I = " << action->geta_lat()/action->getm0() << std::endl;
-      std::cout << " Continuum limit [a -> 0] <chi_t> = " << exact_result_continuum << std::endl;
-      std::cout << std::endl;
+      if (mpi_master()) {
+        std::cout << std::endl;
+        std::cout << std::setprecision(6) << std::fixed;
+        std::cout << " Exact result             <chi_t> = " << exact_result_perturbative << " + O((a/I)^2), a/I = " << action->geta_lat()/action->getm0() << std::endl;
+        std::cout << " Continuum limit [a -> 0] <chi_t> = " << exact_result_continuum << std::endl;
+        std::cout << std::endl;
+      }
     }
   }
   
@@ -192,10 +236,12 @@ int main(int argc, char* argv[]) {
    * **************************************** */  
 
   if (param_general.do_singlelevelmc()) {
-    std::cout << "+--------------------------------+" << std::endl;
-    std::cout << "! Single level MC                !" << std::endl;
-    std::cout << "+--------------------------------+" << std::endl;
-    std::cout << std::endl;
+    if (mpi_master()) {
+      std::cout << "+--------------------------------+" << std::endl;
+      std::cout << "! Single level MC                !" << std::endl;
+      std::cout << "+--------------------------------+" << std::endl;
+      std::cout << std::endl;
+    }
 
     /* ====== Construct single level MC ====== */
     MonteCarloSingleLevel montecarlo_singlelevel(action,
@@ -207,11 +253,13 @@ int main(int argc, char* argv[]) {
                                                  param_singlelevelmc);
   
     montecarlo_singlelevel.evaluate();
-    std::cout << std::endl;
-    montecarlo_singlelevel.show_statistics();
-    std::cout << "=== Sampler statistics === " << std::endl; 
-    montecarlo_singlelevel.get_sampler()->show_stats();
-    std::cout << std::endl;
+    if (mpi_master()) {
+      std::cout << std::endl;
+      montecarlo_singlelevel.show_statistics();
+      std::cout << "=== Sampler statistics === " << std::endl; 
+      montecarlo_singlelevel.get_sampler()->show_stats();
+      std::cout << std::endl;
+    }
 
   }
 
@@ -270,4 +318,5 @@ int main(int argc, char* argv[]) {
       montecarlo_multilevel.show_detailed_statistics();
     }
   }
+  mpi_finalize();
 }
