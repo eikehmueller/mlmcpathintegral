@@ -17,6 +17,7 @@
 #include "hmcsampler.hh"
 #include "clustersampler.hh"
 #include "montecarlo.hh"
+#include "mpi_wrapper.hh"
 
 /** @file montecarlomultilevel.hh
  * @brief Header file for multilevel Monte Carlo classes
@@ -66,9 +67,9 @@ public:
       } else if (sampler_str == "exact") {
         coarsesampler_ = SamplerExact;
       } else  {
-        std::cerr << " ERROR: Unknown coarse sampler: " << sampler_str;
-        std::cerr << std::endl;
-        std::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
+        mpi_parallel::cerr << " ERROR: Unknown coarse sampler: " << sampler_str;
+        mpi_parallel::cerr << std::endl;
+        mpi_parallel::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
         exit(-1);
       }
     }

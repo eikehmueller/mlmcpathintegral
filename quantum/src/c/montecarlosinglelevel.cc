@@ -27,7 +27,7 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
                                            param_hmc.n_burnin());
   } else if (param_singlelevelmc.sampler() == SamplerCluster) {
     if (param_general.action() != ActionRotor) {
-      std::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
+      mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
       exit(-1);
     }
     sampler = std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(action),
@@ -35,7 +35,7 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
                                                param_cluster.n_updates());
   } else if (param_singlelevelmc.sampler() == SamplerExact) {
     if (param_general.action() != ActionHarmonicOscillator) {
-      std::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
+      mpi_parallel::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
       exit(-1);
     }
     sampler = std::dynamic_pointer_cast<Sampler>(action);
@@ -93,8 +93,8 @@ void MonteCarloSingleLevel::evaluate() {
 
 /* Print out statistics */
 void MonteCarloSingleLevel::show_statistics() {
-  std::cout << *stats_Q;
-  std::cout << std::endl;
-  std::cout << timer << std::endl;
-  std::cout << std::endl;
+  mpi_parallel::cout << *stats_Q;
+  mpi_parallel::cout << std::endl;
+  mpi_parallel::cout << timer << std::endl;
+  mpi_parallel::cout << std::endl;
 }

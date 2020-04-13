@@ -84,25 +84,25 @@ public:
 
   /** @brief Return value as double (if possible), return error by default */
   virtual const double getDouble() const {
-    std::cerr << " Invalid data type (double). " << std::endl;
+    mpi_parallel::cerr << " Invalid data type (double). " << std::endl;
     return 0.0;
   };
 
   /** @brief Return value as integer (if possible), return error by default */
   virtual const int getInt() const {
-    std::cerr << " Invalid data type. " << std::endl;
+    mpi_parallel::cerr << " Invalid data type. " << std::endl;
     return 0;
   };
 
   /** @brief Return value as integer (if possible), return error by default */
   virtual const std::string getString() const {
-    std::cerr << " Invalid data type. " << std::endl;
+    mpi_parallel::cerr << " Invalid data type. " << std::endl;
     return std::string("");
   };
 
   /** @brief Return value as bool (if possible), return error by default */
   virtual const bool getBool() const {
-    std::cerr << " Invalid data type. " << std::endl;
+    mpi_parallel::cerr << " Invalid data type. " << std::endl;
     return false;
   };
 
@@ -166,19 +166,19 @@ private:
   /** @brief Check constraints of current value */
   void check_constraint() {
     if ( (num_constraint == Positive) and (not (value > 0)) ) {
-      std::cerr << "ERROR: expected positive number for parameter " << label_ << std::endl;
+      mpi_parallel::cerr << "ERROR: expected positive number for parameter " << label_ << std::endl;
       exit(1);
     }
     if ( (num_constraint == NonNegative) and (not (value >= 0)) ) {
-      std::cerr << "ERROR: expected non-negative number for parameter " << label_ << std::endl;
+      mpi_parallel::cerr << "ERROR: expected non-negative number for parameter " << label_ << std::endl;
       exit(1);
     }
     if ( (num_constraint == Negative) and (not (value < 0)) ) {
-      std::cerr << "ERROR: expected negative number for parameter " << label_ << std::endl;
+      mpi_parallel::cerr << "ERROR: expected negative number for parameter " << label_ << std::endl;
       exit(1);
     }
     if ( (num_constraint == NonPositive) and (not (value <= 0)) ) {
-      std::cerr << "ERROR: expected non-positive number for parameter " << label_ << std::endl;
+      mpi_parallel::cerr << "ERROR: expected non-positive number for parameter " << label_ << std::endl;
       exit(1);
     }
   }
@@ -221,19 +221,19 @@ private:
   /** @brief Check constraints of current value */
   void check_constraint() {
     if ( (num_constraint == Positive) and (not (value > 0)) ) {
-      std::cerr << "ERROR: expected positive number for parameter " << label_ << std::endl;
+      mpi_parallel::cerr << "ERROR: expected positive number for parameter " << label_ << std::endl;
       exit(1);
     }
     if ( (num_constraint == NonNegative) and (not (value >= 0)) ) {
-      std::cerr << "ERROR: expected non-negative number for parameter " << label_ << std::endl;
+      mpi_parallel::cerr << "ERROR: expected non-negative number for parameter " << label_ << std::endl;
       exit(1);
     }
     if ( (num_constraint == Negative) and (not (value < 0)) ) {
-      std::cerr << "ERROR: expected negative number for parameter " << label_ << std::endl;
+      mpi_parallel::cerr << "ERROR: expected negative number for parameter " << label_ << std::endl;
       exit(1);
     }
     if ( (num_constraint == NonPositive) and (not (value <= 0)) ) {
-      std::cerr << "ERROR: expected non-positive number for parameter " << label_ << std::endl;
+      mpi_parallel::cerr << "ERROR: expected non-positive number for parameter " << label_ << std::endl;
       exit(1);
     }
   }

@@ -71,7 +71,7 @@ int Parameters::readFile(const std::string filename) {
       // Comment
       if (!regexec(&regexComment_,line,0,0,0)) {
         if (verbose > 0)
-          std::cout << " >>> COMMENT: " << line << std::endl;
+          mpi_parallel::cout << " >>> COMMENT: " << line << std::endl;
         lineValid = true;
       }
       // Section Keyword
@@ -80,7 +80,7 @@ int Parameters::readFile(const std::string filename) {
         std::string section = sline.substr(matchKeyword[1].rm_so,
                                            matchKeyword[1].rm_eo);
         if (verbose > 0)
-          std::cout << " >>> SECTION: \'" << section << "\'"<< std::endl;
+          mpi_parallel::cout << " >>> SECTION: \'" << section << "\'"<< std::endl;
         if (section == section_) {
           // Start parsing section
           parseSection = true;
@@ -103,8 +103,8 @@ int Parameters::readFile(const std::string filename) {
                                          matchKeyValueAny[2].rm_so);
         std::vector<std::string> split_value = split_string(value);
         if (verbose > 0)
-          std::cout << " >>> KEY: \'" << key << "\' VALUE: \'"
-                    << value << "\'" << std::endl;
+          mpi_parallel::cout << " >>> KEY: \'" << key << "\' VALUE: \'"
+                             << value << "\'" << std::endl;
         if (parseSection) {
           if (keywords.count(key) > 0) {
             if (!found[key]) {
@@ -140,50 +140,50 @@ int Parameters::readFile(const std::string filename) {
                 }
               } else {
                 // Parameter has wrong type
-                std::cerr << " ERROR reading parameters: Parameter: \'"
-                          << key << " = " << value
-                          << "\' in section \'" << section_ << "\' "
-                          << " has wrong type." << std::endl;
+                mpi_parallel::cerr << " ERROR reading parameters: Parameter: \'"
+                                   << key << " = " << value
+                                   << "\' in section \'" << section_ << "\' "
+                                   << " has wrong type." << std::endl;
                 error_code = 1;
               }
               found[key] = true;
             } else {
-              std::cerr << " ERROR reading parameters: Duplicate parameter: \'"
-                        << key << " = " << value
-                        << "\' in section \'" << section_ << "\' " << std::endl;
+              mpi_parallel::cerr << " ERROR reading parameters: Duplicate parameter: \'"
+                                 << key << " = " << value
+                                 << "\' in section \'" << section_ << "\' " << std::endl;
               error_code = 1;
             }
             // Unexpected key-value pair in section
           } else {
-            std::cerr << " ERROR reading parameters: Invalid parameter: \'"
-                      << key << " = " << value
-                      << "\' in section \'" << section_ << "\'" << std::endl;
+            mpi_parallel::cerr << " ERROR reading parameters: Invalid parameter: \'"
+                               << key << " = " << value
+                               << "\' in section \'" << section_ << "\'" << std::endl;
             error_code = 1;
           }
         }
         lineValid = true;
       }
       if (!lineValid) {
-        std::cerr << " ERROR reading parameters: Can not parse expression: \'"
-                  << line
-                  << "\' in section \'" << section_ << "\'" << std::endl;
+        mpi_parallel::cerr << " ERROR reading parameters: Can not parse expression: \'"
+                           << line
+                           << "\' in section \'" << section_ << "\'" << std::endl;
         error_code = 1;
       }
     }
     // ERROR handling
     // Check whether we found the section
     if (!foundSection) {
-      std::cerr << " ERROR reading parameters: Can not find section: \'"
-                << section_ << "\'" << std::endl;
+      mpi_parallel::cerr << " ERROR reading parameters: Can not find section: \'"
+                         << section_ << "\'" << std::endl;
       error_code = 1;
     }
     // Check whether we have found all key-value pair of this section
     typedef std::map<std::string,bool>::iterator FIterator;
     for (FIterator it = found.begin(); it!= found.end();++it) {
       if (!(*it).second) {
-        std::cerr << " ERROR reading parameters: parameter \'"
-                  << (*it).first << "\' in section \'" << section_
-                  << "\' has not been specified." << std::endl;
+        mpi_parallel::cerr << " ERROR reading parameters: parameter \'"
+                           << (*it).first << "\' in section \'" << section_
+                           << "\' has not been specified." << std::endl;
         error_code = 1;
       }
     }

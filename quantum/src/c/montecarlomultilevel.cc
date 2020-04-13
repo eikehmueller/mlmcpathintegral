@@ -27,9 +27,9 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
   // Check that Number of lattice points permits number of levels
   unsigned int M_lat = fine_action->getM_lat();
   if ( (M_lat>>n_level)<<n_level == M_lat) {
-    std::cout << " M_lat = " << M_lat << " = 2^{" << n_level << "} * " << (M_lat>>n_level) << std::endl;
+    mpi_parallel::cout << " M_lat = " << M_lat << " = 2^{" << n_level << "} * " << (M_lat>>n_level) << std::endl;
   } else {
-    std::cout << "ERROR: M_lat = " << M_lat << " is not a multiple of 2^{n_level} = 2^{"<<n_level << "}" << std::endl;
+    mpi_parallel::cout << "ERROR: M_lat = " << M_lat << " is not a multiple of 2^{n_level} = 2^{"<<n_level << "}" << std::endl;
   }
   action.push_back(fine_action);
   // Construct action and two-level MCMC step on all levels
@@ -68,7 +68,7 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
                                                   param_hmc.n_burnin());
   } else if (param_multilevelmc.coarsesampler() == SamplerCluster) {
     if (param_general.action() != ActionRotor) {
-      std::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
+      mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
       exit(-1);
     }
     coarse_sampler =
@@ -77,7 +77,7 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
                                        param_cluster.n_updates());
   } else if (param_multilevelmc.coarsesampler() == SamplerExact) {
     if (param_general.action() != ActionHarmonicOscillator) {
-      std::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
+      mpi_parallel::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
       exit(-1);
     }
     coarse_sampler = std::dynamic_pointer_cast<Sampler>(coarse_action);
@@ -118,7 +118,7 @@ void MonteCarloMultiLevel::evaluate() {
       }
     }
   }
-  std::cout << "Burnin completed" << std::endl;
+  mpi_parallel::cout << "Burnin completed" << std::endl;
 
   // Reset everything before actual run
   for (int level=0;level<n_level;++level) {
@@ -242,23 +242,23 @@ unsigned int MonteCarloMultiLevel::cost_eff(const int ell) const {
   
 /* Show detailed statistics on all levels */
 void MonteCarloMultiLevel::show_detailed_statistics() {
-  std::cout << "=== Statistics of coarse level samplers ===" << std::endl;
+  mpi_parallel::cout << "=== Statistics of coarse level samplers ===" << std::endl;
   for (int level=1;level<n_level;++level) {
-    std::cout << "level = " << level << std::endl;
-    std::cout << *stats_sampler[level];
-    std::cout << " spacing between samples " << t_indep[level] << std::endl;
-    std::cout << "------------------------------------" << std::endl;
+    mpi_parallel::cout << "level = " << level << std::endl;
+    mpi_parallel::cout << *stats_sampler[level];
+    mpi_parallel::cout << " spacing between samples " << t_indep[level] << std::endl;
+    mpi_parallel::cout << "------------------------------------" << std::endl;
   }
-  std::cout << std::endl;
-  std::cout << "=== Statistics of QoI ===" << std::endl;
+  mpi_parallel::cout << std::endl;
+  mpi_parallel::cout << "=== Statistics of QoI ===" << std::endl;
   for (int level=0;level<n_level;++level) {
-    std::cout << "level = " << level << std::endl;
-    std::cout << *stats_qoi[level];
-    std::cout << " target number of samples = " << n_target[level] << std::endl;
-    std::cout << " cost " << cost_eff(level) << std::endl;
-    std::cout << "------------------------------------" << std::endl;
+    mpi_parallel::cout << "level = " << level << std::endl;
+    mpi_parallel::cout << *stats_qoi[level];
+    mpi_parallel::cout << " target number of samples = " << n_target[level] << std::endl;
+    mpi_parallel::cout << " cost " << cost_eff(level) << std::endl;
+    mpi_parallel::cout << "------------------------------------" << std::endl;
   }
-  std::cout << std::endl;
+  mpi_parallel::cout << std::endl;
 }
 
 /* Show summary statistics and timing */
@@ -271,10 +271,10 @@ void MonteCarloMultiLevel::show_statistics() {
     qoi_error += error*error;
   }
   qoi_error = sqrt(qoi_error);
-  std::cout << std::setprecision(6) << std::fixed;
-  std::cout << std::endl;
-  std::cout << " Q: Avg +/- Err = " << qoi_value << " +/- " << qoi_error << std::endl;
-  std::cout << std::endl;
-  std::cout << timer << std::endl;
-  std::cout << std::endl;
+  mpi_parallel::cout << std::setprecision(6) << std::fixed;
+  mpi_parallel::cout << std::endl;
+  mpi_parallel::cout << " Q: Avg +/- Err = " << qoi_value << " +/- " << qoi_error << std::endl;
+  mpi_parallel::cout << std::endl;
+  mpi_parallel::cout << timer << std::endl;
+  mpi_parallel::cout << std::endl;
 }

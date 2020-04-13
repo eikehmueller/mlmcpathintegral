@@ -3,6 +3,8 @@
 #include <math.h>
 #include "auxilliary.hh"
 #include "parameters.hh"
+#include "mpi_wrapper.hh"
+
 /** @file renormalisation.hh
  * @brief Methods for calculation renormalised parameters
  */
@@ -153,7 +155,7 @@ public:
       m0coarse = (1.+deltaI(T_final/m0)*a_lat/m0)*m0;
       break;
     case RenormalisationExact:
-      std::cerr << "ERROR: exact renormalisation not implemented for rotor action " << std::endl;
+      mpi_parallel::cerr << "ERROR: exact renormalisation not implemented for rotor action " << std::endl;
       exit(1);
       break;
     }

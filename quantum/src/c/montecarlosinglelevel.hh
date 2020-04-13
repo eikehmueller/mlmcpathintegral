@@ -14,6 +14,7 @@
 #include "hmcsampler.hh"
 #include "clustersampler.hh"
 #include "montecarlo.hh"
+#include "mpi_wrapper.hh"
 
 /** @file montecarlosinglelevel.hh
  * @brief Header file for single level Monte Carlo classes
@@ -56,8 +57,8 @@ public:
       } else if (sampler_str == "exact") {
         sampler_ = SamplerExact;
       } else  {
-        std::cerr << " ERROR: Unknown sampler: " << sampler_str << std::endl;
-        std::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
+        mpi_parallel::cerr << " ERROR: Unknown sampler: " << sampler_str << std::endl;
+        mpi_parallel::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
         exit(-1);
       }
     }

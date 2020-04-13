@@ -9,6 +9,7 @@
 #include "path.hh"
 #include "sampler.hh"
 #include "renormalisation.hh"
+#include "mpi_wrapper.hh"
 
 /** @file action.hh
  * @brief Header file for action base class
@@ -67,7 +68,7 @@ public:
    * of the multigrid hierarchy.
    */
   std::shared_ptr<Action> virtual coarse_action() {
-    std::cerr << "ERROR: cannot coarsen action" << std::endl;
+    mpi_parallel::cerr << "ERROR: cannot coarsen action" << std::endl;
     exit(1);
   };
     

@@ -9,6 +9,7 @@
 #include "path.hh"
 #include "clusteraction.hh"
 #include "parameters.hh"
+#include "mpi_wrapper.hh"
 
 /** @file rotoraction.hh
  * @brief Header file for quantum mechanical rotor action class
@@ -117,7 +118,7 @@ public:
    */
   std::shared_ptr<Action> virtual coarse_action() {
     if (M_lat%2) {
-      std::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
+      mpi_parallel::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
       exit(1);
     }
     RenormalisedRotorParameters c_param(M_lat,T_final,m0,renormalisation);

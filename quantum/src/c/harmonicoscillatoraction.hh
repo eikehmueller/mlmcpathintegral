@@ -117,7 +117,7 @@ public:
    */
   std::shared_ptr<Action> virtual coarse_action() {
     if (M_lat%2) {
-      std::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
+      mpi_parallel::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
       exit(1);
     }
     RenormalisedHOParameters c_param(M_lat,T_final,m0,mu2,renormalisation);

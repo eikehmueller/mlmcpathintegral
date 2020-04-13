@@ -4,6 +4,8 @@
 #define USE_MPI 1
 
 #include <string>
+#include <iostream>
+#include <ostream>
 
 #ifdef USE_MPI
 #include <mpi.h>
@@ -63,5 +65,56 @@ void mpi_bcast(bool& x,const int root=0);
  * @param root processor to broadcast from
  */
 void mpi_bcast(std::string& x,const int root=0);
+
+namespace mpi_parallel {
+
+  /** @class MPIMasterStream 
+   * 
+   * @brief Class for wrapping output stream to print on MPI master only
+   *
+   * Based on the ideas for the LoggedStream class described at
+   * https://stackoverflow.com/questions/772355/how-to-inherit-from-stdostream
+   */
+  class MPIMasterStream {
+  public:
+    /** @brief Constructor 
+     * 
+     * @param[in] out_ Stream to wrap
+     */
+    MPIMasterStream(std::ostream& out_) : out(out_) {}
+    
+    template <typename T>
+    /** @brief Output only on MPI master
+     *
+     * @param[in] v Object to pass to << operator
+     */
+    const MPIMasterStream& operator<<(const T& v) const {
+      if (mpi_master()) {
+        out << v;
+      }
+      return *this;
+    }
+
+    /** @brief Output only on MPI master
+     *
+     * @param[in] F Functor to use
+     */
+    MPIMasterStream const& operator<<(std::ostream& (*F)(std::ostream&)) const
+    {
+      if (mpi_master()) {
+        F(out);
+      }
+      return *this;
+    }
+    
+  protected:
+    std::ostream& out; /** @brief Wrapped output stream */
+  };
+
+  /** @brief wrapped std::cout object */
+  static MPIMasterStream cout(std::cout);
+  /** @brief wrapped std::cerr object */
+  static MPIMasterStream cerr(std::cerr);
+}
 
 #endif // MPI_HH

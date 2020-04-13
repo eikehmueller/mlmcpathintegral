@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include "mpi_wrapper.hh"
 
 /** @file mcmcstep.hh
  * @brief Header file for MCMCStep class
