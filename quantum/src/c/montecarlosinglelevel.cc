@@ -83,7 +83,7 @@ void MonteCarloSingleLevel::evaluate() {
       double qoi_Q = qoi->evaluate(x_path);
       stats_Q->record_sample(qoi_Q);
 #ifdef LOG_QOI
-      //qoi_file.write( reinterpret_cast<char*>( &qoi_Q ), sizeof(double));
+      qoi_file.write( reinterpret_cast<char*>( &qoi_Q ), sizeof(double));
 #endif // LOG_QOI
     }
     if (n_samples > 0) {
