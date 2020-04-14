@@ -7,6 +7,7 @@
 #include "rotoraction.hh"
 #include "expsin2distribution.hh"
 #include "auxilliary.hh"
+#include "mpi_random.hh"
 
 /** @file conditionedfineaction.hh
  * @brief Header file for conditioned fine action classes
@@ -107,7 +108,7 @@ private:
   /** @brief Underlying action class */
   const std::shared_ptr<Action> action;
   /** @brief Random number engine */
-  typedef std::mt19937_64 Engine;
+  typedef mpi_parallel::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */
   mutable Engine engine;
   /** @brief Type of normal distribution */
@@ -167,7 +168,7 @@ private:
   /** @brief Underlying action class */
   const std::shared_ptr<RotorAction> action;
   /** @brief Random number engine */
-  typedef std::mt19937_64 Engine;
+  typedef mpi_parallel::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */
   mutable Engine engine;
 };

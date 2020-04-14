@@ -9,6 +9,7 @@
 #include "sampler.hh"
 #include "action.hh"
 #include "parameters.hh"
+#include "mpi_random.hh"
 
 /** @file harmonicoscillatoraction.hh
  * @brief Header file for harmonic oscillator action base class
@@ -247,7 +248,7 @@ private:
   /** @brief Cholesky factor of the covariance matrix \f$\Sigma=L^TL\f$ */
   Matrix L_cov;
   /** @brief Type for Mersenne twister engine */
-  typedef std::mt19937_64 Engine;
+  typedef mpi_parallel::mt19937_64 Engine;
   /** @brief Random number engine */
   mutable Engine engine;
   /** @brief Type for normal distribution */

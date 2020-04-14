@@ -10,6 +10,7 @@
 #include "clusteraction.hh"
 #include "parameters.hh"
 #include "mpi_wrapper.hh"
+#include "mpi_random.hh"
 
 /** @file rotoraction.hh
  * @brief Header file for quantum mechanical rotor action class
@@ -240,7 +241,7 @@ protected:
   /** @brief reflection angle for current subgroup \f$H_{\overline{x}}\f$ */
   mutable double xbar;
   /** @brief Random number engine */
-  typedef std::mt19937_64 Engine;
+  typedef mpi_parallel::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */
   mutable Engine engine;
   /** @brief Type of uniform distribution */
