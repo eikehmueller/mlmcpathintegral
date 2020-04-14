@@ -1,8 +1,6 @@
 #ifndef MPI_WRAPPER_HH
 #define MPI_WRAPPER_HH MPI_WRAPPER_HH
 
-#define USE_MPI 1
-
 #include <string>
 #include <iostream>
 #include <ostream>
@@ -30,13 +28,13 @@ bool mpi_master();
  * 
  * @param x quantity to sum across all processes
  */ 
-double mpi_allreduce_sum_scalar(const double x);
+double mpi_allreduce_sum(const double x);
 
 /** @brief Parallel sum for scalar valued quantities
  * 
  * @param x quantity to sum across all processes
  */ 
-int mpi_allreduce_sum_scalar(const int x);
+int mpi_allreduce_sum(const int x);
 
 /** @brief Broadcast double value to all processes 
  *
@@ -66,6 +64,19 @@ void mpi_bcast(bool& x,const int root=0);
  */
 void mpi_bcast(std::string& x,const int root=0);
 
+/** @brief Scatter values to all processes 
+ * 
+ * @param[in] data List to scatter
+ * @param[out] x Resulting values of all processes
+ * 
+ * This takes the list [x[0],x[1],x[2],...,x[nproc-1]] and scatters it.
+ */
+void mpi_scatter(unsigned int* data, unsigned int& x);
+
+/* The following code implements output stream that can be used in parallel 
+ * such that the output is only printed to std::cout/std::cerr on the 
+ * master process.
+ */
 namespace mpi_parallel {
 
   /** @class MPIMasterStream 

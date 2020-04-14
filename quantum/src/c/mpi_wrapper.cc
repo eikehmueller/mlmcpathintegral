@@ -2,14 +2,14 @@
 
 /* Initialise MPI */
 void mpi_init() {
-# ifdef USE_MPI
+#ifdef USE_MPI
   MPI_Init(NULL, NULL);
 #endif // USE_MPI
 }
 
 /* Finalise MPI */
 void mpi_finalize() {
-# ifdef USE_MPI
+#ifdef USE_MPI
   MPI_Finalize();
 #endif // USE_MPI
 }
@@ -38,7 +38,7 @@ bool mpi_master() {
 }
 
 /* Parallel sum for scalar valued quantities */
-double mpi_allreduce_sum_scalar(const double x) {
+double mpi_allreduce_sum(const double x) {
   double recv_data=x;
 #ifdef USE_MPI
   MPI_Allreduce(&x, &recv_data, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD);
@@ -47,7 +47,7 @@ double mpi_allreduce_sum_scalar(const double x) {
 }
 
 /* Parallel sum for scalar valued quantities */ 
-int mpi_allreduce_sum_scalar(const int x) {
+int mpi_allreduce_sum(const int x) {
   int recv_data=x;
 #ifdef USE_MPI
   MPI_Allreduce(&x, &recv_data, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD);
@@ -94,5 +94,17 @@ void mpi_bcast(std::string& x,const int root) {
     x[j] = char_array[j];
   }
   free(char_array);
+#endif // USE_MPI
+}
+
+/* Scatter list of unsigned int values  to all processes */
+void mpi_scatter(unsigned int* data, unsigned int& x) {
+#ifdef USE_MPI
+  int n_rank = mpi_comm_size();
+  MPI_Scatter(data,1,MPI_UNSIGNED,
+              &x,1,MPI_UNSIGNED,
+              0,MPI_COMM_WORLD);
+#else
+  x = data[0];  
 #endif // USE_MPI
 }
