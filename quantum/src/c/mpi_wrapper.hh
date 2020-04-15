@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 #include <ostream>
+#include <vector>
+#include <cmath>
 #include <stdlib.h>
 
 #ifdef USE_MPI
@@ -31,11 +33,41 @@ bool mpi_master();
  */ 
 double mpi_allreduce_sum(const double x);
 
+/** @brief Parallel average for scalar valued quantities
+ * 
+ * @param x quantity to average across all processes
+ */ 
+double mpi_allreduce_avg(const double x);
+
+/** @brief Parallel average for vector valued quantities
+ * 
+ * @param x quantity to average across all processes
+ */
+std::vector<double> mpi_allreduce_avg(const std::vector<double> x);
+
+/** @brief Parallel minimum for scalar valued quantities
+ * 
+ * @param x quantity to take minimum of across all processes
+ */ 
+int mpi_allreduce_min(const int x);
+
 /** @brief Parallel sum for scalar valued quantities
  * 
  * @param x quantity to sum across all processes
  */ 
 int mpi_allreduce_sum(const int x);
+
+/** @brief Parallel sum for scalar valued quantities
+ * 
+ * @param x quantity to sum across all processes
+ */ 
+unsigned int mpi_allreduce_sum(const unsigned int x);
+
+/** @brief Parallel logical and for scalar valued quantities
+ * 
+ * @param x quantity to take logical and of across all processes
+ */ 
+bool mpi_allreduce_and(const bool x);
 
 /** @brief Broadcast double value to all processes 
  *
@@ -79,6 +111,17 @@ void mpi_scatter(unsigned int* data, unsigned int& x);
  * @param[in] exit_code Exit code
  */
 void mpi_exit(const int exit_code);
+
+/** @brief distribute a number evenly between processors
+ *
+ * Split the number n as evenly as possible between processors, i.e.
+ * return n_p on processor p, such that n_0 + n_1 + ... + n_{nproc-1} = n.
+ *
+ * @param[in] n Number to distribute
+ */
+unsigned int distribute_n(const unsigned int n);
+
+static bool mpi_initialised=false;
 
 /* The following code implements output stream that can be used in parallel 
  * such that the output is only printed to std::cout/std::cerr on the 
