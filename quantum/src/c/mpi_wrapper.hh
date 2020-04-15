@@ -99,7 +99,21 @@ namespace mpi_parallel {
      * 
      * @param[in] out_ Stream to wrap
      */
-    MPIMasterStream(std::ostream& out_) : out(out_) {}
+    MPIMasterStream(std::ostream& out_) {
+      mpi_init();
+      if (not mpi_master()) {
+        out = new(std::ostream)(nullptr);
+        out->setstate(std::ios_base::badbit);
+      } else {
+        out = &out_;
+      }
+    }
+
+    ~MPIMasterStream() {
+      if (not mpi_master()) {
+        delete(out);
+      }
+    }
     
     template <typename T>
     /** @brief Output only on MPI master
@@ -107,9 +121,7 @@ namespace mpi_parallel {
      * @param[in] v Object to pass to << operator
      */
     const MPIMasterStream& operator<<(const T& v) const {
-      if (mpi_master()) {
-        out << v;
-      }
+      *out << v;
       return *this;
     }
 
@@ -119,14 +131,13 @@ namespace mpi_parallel {
      */
     MPIMasterStream const& operator<<(std::ostream& (*F)(std::ostream&)) const
     {
-      if (mpi_master()) {
-        F(out);
-      }
+      F(*out);
       return *this;
     }
     
   protected:
-    std::ostream& out; /** @brief Wrapped output stream */
+    std::ostream* out; /** @brief Wrapped output stream */
+    std::ostream* null_stream;
   };
 
   /** @brief wrapped std::cout object */
