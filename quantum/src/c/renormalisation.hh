@@ -156,7 +156,7 @@ public:
       break;
     case RenormalisationExact:
       mpi_parallel::cerr << "ERROR: exact renormalisation not implemented for rotor action " << std::endl;
-      exit(1);
+      mpi_exit(EXIT_FAILURE);
       break;
     }
     return m0coarse;
