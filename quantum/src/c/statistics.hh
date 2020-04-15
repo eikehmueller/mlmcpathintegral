@@ -12,6 +12,7 @@
 #include <string>
 #include <iomanip>
 #include "parameters.hh"
+#include "mpi_wrapper.hh"
 
 /** @class StatisticsParameters
  *
@@ -92,6 +93,9 @@ private:
  *    S_k = \frac{1}{N_k} \sum_{i=k}^{N-1} S_i S_{i-k}
  * \f]
  * for \f$k=0,\dots,k_{\max}\f$ where \f$N_k:=N-k\f$.
+ *
+ * The class is inherently parallel, i.e. it will always report the statistics
+ * accumulated across all processors.
  * 
  */
 class Statistics {
@@ -125,59 +129,32 @@ public:
    * 
    * @param[in] Q Value of new sample
    */
-  void record_sample(const double Q) {
-    n_samples++;
-    Q_k.push_front(Q);
-    // Push out last sample from deque
-    if (Q_k.size()>k_max) {
-      Q_k.pop_back();
-    }
-    // Update running average
-    avg = ((n_samples-1.0)*avg + Q)/(1.0*n_samples);
-    // Update running S_k
-    for (int k=0;k<Q_k.size();++k) {
-      unsigned int N_k = n_samples - k;
-      S_k[k] = ((N_k-1.0)*S_k[k] + Q_k[0]*Q_k[k])/(1.0*N_k);
-    }
-  }
-  
+  void record_sample(const double Q);
 
   /** @brief Return estimator for variance
    */
-  double variance() const {
-    return 1.0*n_samples/(n_samples-1.0)*(S_k[0]-avg*avg);
-  }
+  double variance() const;
 
   /** @brief Return estimator for average */
-  double average() const {
-    return avg;
-  }
+  double average() const;
+  
   /** @brief Return estimator for error of average */
-  double error() const {
-    return sqrt(tau_int()*variance()/(1.0*n_samples));
-  }
+  double error() const;
 
   /** @brief Return vector with autocorrelation function \f$C(k)\f$ */
-  std::vector<double> auto_corr() const {
-    std::vector<double> S_k_tmp(S_k.size());
-    std::copy(S_k.begin(),S_k.end(),S_k_tmp.begin());
-    for (auto it=S_k_tmp.begin();it!=S_k_tmp.end();++it) {
-      *it -= avg*avg;
-    }
-    return S_k_tmp;
-  }
+  std::vector<double> auto_corr() const;
 
   /** @brief Return integrated autocorrelation time \f$\tau_{\text{int}}\f$ */
-  double tau_int() const {
-    double tau_int_tmp=0.0;
-    for(int k=1;k<Q_k.size();++k) {
-      tau_int_tmp += (1.-k/(1.0*n_samples))*(S_k[k]-avg*avg);
-    }
-    return 1.0+2.0*tau_int_tmp/(S_k[0]-avg*avg);
-  }
+  double tau_int() const;
 
-  /** @brief Return the number of samples */
-  unsigned int samples() const { return n_samples; }
+  /** @brief Return the number of global samples */
+  unsigned int samples() const;
+
+  /** @brief Return number of local samples
+   *
+   * This returns the number of samples collected on each process
+   */
+  unsigned int local_samples() const;
   
 private:
   /** @brief Label for identifying object */

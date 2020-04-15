@@ -54,20 +54,22 @@ void MonteCarloSingleLevel::evaluate() {
   double two_epsilon_inv2 = 2./(epsilon*epsilon);
   stats_Q->reset();
   bool sufficient_stats = false;
-  int n_target;
+  unsigned int n_target;
+  unsigned int n_local_target;
   if (n_samples > 0) {
     n_target = n_samples;
   } else {
     n_target = n_min_samples_qoi;
   }
+  n_local_target = distribute_n(n_target);
   timer.reset();
   timer.start();
   do {
-    int k_start = stats_Q->samples();
-    for (int k=k_start;k<n_target;++k) {
+    int k_start = stats_Q->local_samples();
+    for (int k=k_start;k<n_local_target;++k) {
       sampler->draw(x_path);
 #ifdef SAVE_PATHS
-      if ( (SAVE_FIRST_PATH<=k) and (k<=SAVE_LAST_PATH) ) {
+      if ( (SAVE_FIRST_PATH<=k) and (k<=SAVE_LAST_PATH) and (mpi_master())) {
         std::stringstream filename;      
         filename << "path_";
         filename << std::setw(8) << std::setfill('0');
@@ -84,7 +86,8 @@ void MonteCarloSingleLevel::evaluate() {
     } else {
       n_target = ceil(stats_Q->tau_int()*two_epsilon_inv2*stats_Q->variance());
     }
-    sufficient_stats = (stats_Q->samples() >= n_target);
+    n_local_target = distribute_n(n_target);
+    sufficient_stats = mpi_allreduce_and(stats_Q->local_samples() >= n_local_target);
     // If the target number of samples is given explicitly, generate exactly
     // the number of requested samples
   } while (not sufficient_stats);
