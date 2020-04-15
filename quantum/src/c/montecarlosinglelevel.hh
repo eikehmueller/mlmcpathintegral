@@ -59,7 +59,7 @@ public:
       } else  {
         mpi_parallel::cerr << " ERROR: Unknown sampler: " << sampler_str << std::endl;
         mpi_parallel::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
-        exit(-1);
+        mpi_exit(EXIT_FAILURE);
       }
     }
     return readSuccess;

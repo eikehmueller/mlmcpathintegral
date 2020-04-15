@@ -10,7 +10,7 @@ void parallel_mt19937_64::seed(result_type value) {
   // Check that the seed engine really uses unsigned int's
   if (not std::is_same<SeedEngine::result_type,unsigned int>::value) {
     mpi_parallel::cerr << "ERROR: Data type of seed engine has to be unsigned int" << std::endl;
-    exit(1);
+    mpi_exit(EXIT_FAILURE);
   }
   // Generate seeds on master processor
   if (mpi_master()) {

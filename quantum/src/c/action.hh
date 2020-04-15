@@ -69,7 +69,7 @@ public:
    */
   std::shared_ptr<Action> virtual coarse_action() {
     mpi_parallel::cerr << "ERROR: cannot coarsen action" << std::endl;
-    exit(1);
+    mpi_exit(EXIT_FAILURE);
     throw std::runtime_error("...");
   };
     

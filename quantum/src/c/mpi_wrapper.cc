@@ -108,3 +108,9 @@ void mpi_scatter(unsigned int* data, unsigned int& x) {
   x = data[0];  
 #endif // USE_MPI
 }
+
+/* Call mpi_finalize() and exit */
+void mpi_exit(const int exit_code) {
+  mpi_finalize();
+  exit(exit_code);
+}

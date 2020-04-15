@@ -119,7 +119,7 @@ public:
   std::shared_ptr<Action> virtual coarse_action() {
     if (M_lat%2) {
       mpi_parallel::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
-      exit(1);
+      mpi_exit(EXIT_FAILURE);
     }
     RenormalisedHOParameters c_param(M_lat,T_final,m0,mu2,renormalisation);
     return std::make_shared<HarmonicOscillatorAction>(M_lat/2,

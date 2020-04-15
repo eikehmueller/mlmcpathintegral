@@ -70,7 +70,7 @@ public:
         mpi_parallel::cerr << " ERROR: Unknown coarse sampler: " << sampler_str;
         mpi_parallel::cerr << std::endl;
         mpi_parallel::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
-        exit(-1);
+        mpi_exit(EXIT_FAILURE);
       }
     }
     return readSuccess;

@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <ostream>
+#include <stdlib.h>
 
 #ifdef USE_MPI
 #include <mpi.h>
@@ -72,6 +73,12 @@ void mpi_bcast(std::string& x,const int root=0);
  * This takes the list [x[0],x[1],x[2],...,x[nproc-1]] and scatters it.
  */
 void mpi_scatter(unsigned int* data, unsigned int& x);
+
+/** @brief Call mpi_finalize and exit
+ *
+ * @param[in] exit_code Exit code
+ */
+void mpi_exit(const int exit_code);
 
 /* The following code implements output stream that can be used in parallel 
  * such that the output is only printed to std::cout/std::cerr on the 

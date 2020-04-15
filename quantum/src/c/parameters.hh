@@ -167,19 +167,19 @@ private:
   void check_constraint() {
     if ( (num_constraint == Positive) and (not (value > 0)) ) {
       mpi_parallel::cerr << "ERROR: expected positive number for parameter " << label_ << std::endl;
-      exit(1);
+      mpi_exit(EXIT_FAILURE);
     }
     if ( (num_constraint == NonNegative) and (not (value >= 0)) ) {
       mpi_parallel::cerr << "ERROR: expected non-negative number for parameter " << label_ << std::endl;
-      exit(1);
+      mpi_exit(EXIT_FAILURE);
     }
     if ( (num_constraint == Negative) and (not (value < 0)) ) {
       mpi_parallel::cerr << "ERROR: expected negative number for parameter " << label_ << std::endl;
-      exit(1);
+      mpi_exit(EXIT_FAILURE);
     }
     if ( (num_constraint == NonPositive) and (not (value <= 0)) ) {
       mpi_parallel::cerr << "ERROR: expected non-positive number for parameter " << label_ << std::endl;
-      exit(1);
+      mpi_exit(EXIT_FAILURE);
     }
   }
   /** @brief Numerical constraint flag */
@@ -222,19 +222,19 @@ private:
   void check_constraint() {
     if ( (num_constraint == Positive) and (not (value > 0)) ) {
       mpi_parallel::cerr << "ERROR: expected positive number for parameter " << label_ << std::endl;
-      exit(1);
+      mpi_exit(EXIT_FAILURE);
     }
     if ( (num_constraint == NonNegative) and (not (value >= 0)) ) {
       mpi_parallel::cerr << "ERROR: expected non-negative number for parameter " << label_ << std::endl;
-      exit(1);
+      mpi_exit(EXIT_FAILURE);
     }
     if ( (num_constraint == Negative) and (not (value < 0)) ) {
       mpi_parallel::cerr << "ERROR: expected negative number for parameter " << label_ << std::endl;
-      exit(1);
+      mpi_exit(EXIT_FAILURE);
     }
     if ( (num_constraint == NonPositive) and (not (value <= 0)) ) {
       mpi_parallel::cerr << "ERROR: expected non-positive number for parameter " << label_ << std::endl;
-      exit(1);
+      mpi_exit(EXIT_FAILURE);
     }
   }
   /** @brief Numerical constraint flag */
