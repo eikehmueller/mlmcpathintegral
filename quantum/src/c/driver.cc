@@ -34,7 +34,12 @@ int main(int argc, char* argv[]) {
   mpi_init();
   mpi_parallel::cout << "++===================================++" << std::endl;
   mpi_parallel::cout << "!!   Path integral multilevel MCMC   !!" << std::endl;
-  mpi_parallel::cout << "++===================================++" << std::endl;
+  mpi_parallel::cout << "++===================================++" << std::endl;  mpi_parallel::cout << std::endl;
+#ifdef USE_MPI
+  mpi_parallel::cout << "MPI parallel version running on " << mpi_comm_size() << " processes." << std::endl; 
+#else
+  mpi_parallel::cout << "Sequential version." << std::endl;
+#endif // USE_MPI
   mpi_parallel::cout << std::endl;
   if (argc != 2) {
     mpi_parallel::cout << "Usage: " << argv[0] << " PARAMETERFILE" << std::endl;
