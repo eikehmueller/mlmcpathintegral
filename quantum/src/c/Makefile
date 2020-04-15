@@ -22,16 +22,18 @@ OBJS=$(patsubst %.cc,%.o,$(wildcard *.cc))
 
 
 ifeq ($(DEBUG),True)
-	CFLAGS=$(CFLAGS_DEBUG)
+  CFLAGS=$(CFLAGS_DEBUG)
 else
-	CFLAGS=$(CFLAGS_OPT)
+  CFLAGS=$(CFLAGS_OPT)
 endif
 
 ifeq ($(USE_MPI),True)
-	CXX=mpic++
-	CFLAGS:=$(CFLAGS) -DUSE_MPI
+  CXX=mpic++
+  CFLAGS:=$(CFLAGS) -DUSE_MPI
+  $(info Compiling in MPI parallel mode. Compiler is $(CXX))
 else
-	CXX=g++
+CXX=g++
+  $(info Compiling in sequential mode. Compiler is $(CXX))
 endif
 
 all: $(MAIN)
