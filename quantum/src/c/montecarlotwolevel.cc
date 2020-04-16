@@ -68,9 +68,10 @@ void MonteCarloTwoLevel::evaluate_difference(Statistics& stats_fine,
     twolevel_step->draw(x_coarse_path,x_path);
   }
 
+  unsigned int n_local_samples = distribute_n(n_samples);
   // Sampling phase
   stats_diff.reset();
-  for (unsigned int k=0;k<n_samples;++k) {
+  for (unsigned int k=0;k<n_local_samples;++k) {
     coarse_sampler->draw(x_coarse_path);
     twolevel_step->draw(x_coarse_path,x_path);
     double qoi_fine = qoi->evaluate(x_path);
