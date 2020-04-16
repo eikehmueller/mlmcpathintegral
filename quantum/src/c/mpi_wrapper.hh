@@ -142,18 +142,20 @@ namespace mpi_parallel {
      * 
      * @param[in] out_ Stream to wrap
      */
-    MPIMasterStream(std::ostream& out_) {
+    MPIMasterStream(std::ostream& out_) : is_dummy(true) {
       mpi_init();
       if (not mpi_master()) {
         out = new(std::ostream)(nullptr);
         out->setstate(std::ios_base::badbit);
       } else {
+        is_dummy = false;
         out = &out_;
       }
     }
 
+    /** @brief Destructor, free memory if it has been allocated */
     ~MPIMasterStream() {
-      if (not mpi_master()) {
+      if (is_dummy) {
         delete(out);
       }
     }
@@ -180,7 +182,7 @@ namespace mpi_parallel {
     
   protected:
     std::ostream* out; /** @brief Wrapped output stream */
-    std::ostream* null_stream;
+    bool is_dummy; /** @brief Set to true if not master process */ 
   };
 
   /** @brief wrapped std::cout object */

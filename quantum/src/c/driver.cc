@@ -276,4 +276,5 @@ int main(int argc, char* argv[]) {
       montecarlo_multilevel.show_detailed_statistics();
     }
   }
+  mpi_finalize();
 }
