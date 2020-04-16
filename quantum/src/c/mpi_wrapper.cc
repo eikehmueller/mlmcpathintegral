@@ -189,20 +189,15 @@ void mpi_barrier() {
 /* Distribute number between processors */
 unsigned int distribute_n(const unsigned int n) {
 #ifdef USE_MPI
-  unsigned int n_local;
   int n_proc = mpi_comm_size();
-  unsigned int* n_local_list = (unsigned int*) malloc(n_proc);
+  int rank = mpi_comm_rank();
   unsigned int n_floor = (unsigned int) floor(n/(1.0*n_proc));
   unsigned int n_overflow = n-n_floor*n_proc;
-  for (int j=0;j<n_proc;++j) {
-    n_local_list[j] = n_floor;
-    if (j<n_overflow) n_local_list[j]++;
+  if (rank < n_overflow) {
+    return n_floor+1;
+  } else {
+    return n_floor;
   }
-  MPI_Scatter(n_local_list,1,MPI::UNSIGNED,
-              &n_local,1,MPI::UNSIGNED,
-              0,MPI_COMM_WORLD);
-  free(n_local_list);
-  return n_local;
 #else
   return n;
 #endif // USE_MPI
