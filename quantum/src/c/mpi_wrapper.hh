@@ -124,8 +124,6 @@ void mpi_barrier();
  */
 unsigned int distribute_n(const unsigned int n);
 
-static bool mpi_initialised=false;
-
 /* The following code implements output stream that can be used in parallel 
  * such that the output is only printed to std::cout/std::cerr on the 
  * master process.

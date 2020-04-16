@@ -1,5 +1,7 @@
 #include "mpi_wrapper.hh"
 
+static bool mpi_initialised=false;
+
 /* Initialise MPI */
 void mpi_init() {
 #ifdef USE_MPI
