@@ -155,6 +155,7 @@ public:
       m0coarse = (1.+deltaI(T_final/m0)*a_lat/m0)*m0;
       break;
     case RenormalisationExact:
+      m0coarse = 1.0;
       mpi_parallel::cerr << "ERROR: exact renormalisation not implemented for rotor action " << std::endl;
       mpi_exit(EXIT_FAILURE);
       break;
