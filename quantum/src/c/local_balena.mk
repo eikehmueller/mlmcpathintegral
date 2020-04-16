@@ -14,3 +14,6 @@ DEBUG=False
 
 # Use MPI?
 USE_MPI=True
+
+# MPI compiler
+MPICXX=mpicxx
