@@ -48,7 +48,7 @@ void MonteCarloSingleLevel::evaluate() {
   std::shared_ptr<Path> x_path =
     std::make_shared<Path>(action->getM_lat(),
                            action->getT_final());
-  for (int i=0;i<n_burnin;++i)
+  for (unsigned int i=0;i<n_burnin;++i)
     sampler->draw(x_path);
   
   double two_epsilon_inv2 = 2./(epsilon*epsilon);
@@ -65,8 +65,8 @@ void MonteCarloSingleLevel::evaluate() {
   timer.reset();
   timer.start();
   do {
-    int k_start = stats_Q->local_samples();
-    for (int k=k_start;k<n_local_target;++k) {
+    unsigned int k_start = stats_Q->local_samples();
+    for (unsigned int k=k_start;k<n_local_target;++k) {
       sampler->draw(x_path);
 #ifdef SAVE_PATHS
       if ( (SAVE_FIRST_PATH<=k) and (k<=SAVE_LAST_PATH) and (mpi_master())) {

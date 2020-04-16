@@ -148,7 +148,7 @@ private:
    * @param[in] ell level ell
    * @param[inout] x_path generated path \f$\Theta_\ell\f$ 
    */
-  void draw_independent_sample(const int ell,
+  void draw_independent_sample(const unsigned int ell,
                                std::shared_ptr<Path> x_path);
 
 

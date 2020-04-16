@@ -192,7 +192,7 @@ void mpi_barrier() {
 unsigned int distribute_n(const unsigned int n) {
 #ifdef USE_MPI
   int n_proc = mpi_comm_size();
-  int rank = mpi_comm_rank();
+  unsigned int rank = mpi_comm_rank();
   unsigned int n_floor = (unsigned int) floor(n/(1.0*n_proc));
   unsigned int n_overflow = n-n_floor*n_proc;
   if (rank < n_overflow) {

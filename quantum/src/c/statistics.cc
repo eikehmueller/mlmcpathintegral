@@ -11,7 +11,7 @@ void Statistics::record_sample(const double Q) {
   // Update running average
   avg = ((n_samples-1.0)*avg + Q)/(1.0*n_samples);
   // Update running S_k
-  for (int k=0;k<Q_k.size();++k) {
+  for (unsigned int k=0;k<Q_k.size();++k) {
     unsigned int N_k = n_samples - k;
     S_k[k] = ((N_k-1.0)*S_k[k] + Q_k[0]*Q_k[k])/(1.0*N_k);
   }
@@ -62,7 +62,7 @@ double Statistics::tau_int() const {
   std::vector<double> C_k_ = auto_corr();
   unsigned n_samples_ = samples();
   double tau_int_tmp=0.0;
-  for(int k=1;k<C_k_.size();++k) {
+  for(unsigned int k=1;k<C_k_.size();++k) {
     tau_int_tmp += (1.-k/(1.0*n_samples_))*C_k_[k];
   }
   return 1.0+2.0*tau_int_tmp/C_k_[0];

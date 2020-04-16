@@ -3,7 +3,7 @@
 
 /* Seed random number generator */
 void parallel_mt19937_64::seed(result_type value) {
-  int n_rank = mpi_comm_size(); // Number of processors
+  unsigned int n_rank = mpi_comm_size(); // Number of processors
   unsigned int* master_seed_list=nullptr;
   unsigned int local_seed; // Local seed
   typedef std::linear_congruential_engine<unsigned int, 48271, 0, 2147483647> SeedEngine;
