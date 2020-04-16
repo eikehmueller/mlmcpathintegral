@@ -28,7 +28,7 @@ else
 endif
 
 ifeq ($(USE_MPI),True)
-  CXX=mpic++
+  CXX=$(MPICXX)
   CFLAGS:=$(CFLAGS) -DUSE_MPI
   $(info Compiling in MPI parallel mode. Compiler is $(CXX))
 else
