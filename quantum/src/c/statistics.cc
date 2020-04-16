@@ -22,7 +22,7 @@ double Statistics::variance() const {
   double avg_ = mpi_allreduce_avg(avg);
   double avg2_ = mpi_allreduce_avg(S_k[0]);
   unsigned int n_samples_ = samples();
-  return 1.0*n_samples_/(n_samples-1.0)*(avg2_-avg_*avg_);
+  return 1.0*n_samples_/(n_samples_-1.0)*(avg2_-avg_*avg_);
 }
 
 /* Return estimator for average */
