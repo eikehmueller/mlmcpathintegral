@@ -165,7 +165,6 @@ void mpi_bcast(std::string& x,const int root) {
 /* Scatter list of unsigned int values  to all processes */
 void mpi_scatter(unsigned int* data, unsigned int& x) {
 #ifdef USE_MPI
-  int n_rank = mpi_comm_size();
   MPI_Scatter(data,1,MPI::UNSIGNED,
               &x,1,MPI::UNSIGNED,
               0,MPI_COMM_WORLD);
