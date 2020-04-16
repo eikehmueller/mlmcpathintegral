@@ -8,7 +8,7 @@ GSL_LIB_DIR=/home/em459/Library/gsl-2.5/lib/
 EIGEN_INCLUDE_DIR=/home/em459/Library/eigen-3.3.4/include/eigen3/
 
 # Additional linker flags
-LOCAL_LFLAGS=-static
+LOCAL_LFLAGS=
 
 # Compile in debugging mode (set to True, if required)?
 DEBUG=False
