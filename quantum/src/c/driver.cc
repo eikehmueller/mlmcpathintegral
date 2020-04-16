@@ -225,6 +225,10 @@ int main(int argc, char* argv[]) {
    * Two level method                         *
    * **************************************** */
   if (param_general.do_twolevelmc()) {
+    if (mpi_comm_size() > 1) {
+      mpi_parallel::cerr << " Two level method has not been parallelised (yet)." << std::endl;
+      mpi_exit(EXIT_FAILURE);
+    }
     mpi_parallel::cout << "+--------------------------------+" << std::endl;
     mpi_parallel::cout << "! Two level MC                   !" << std::endl;
     mpi_parallel::cout << "+--------------------------------+" << std::endl;
@@ -258,6 +262,10 @@ int main(int argc, char* argv[]) {
    * Multilevel method                         *
    * **************************************** */
   if (param_general.do_multilevelmc()) {
+    if (mpi_comm_size() > 1) {
+      mpi_parallel::cerr << " Multilevel method has not been parallelised (yet)." << std::endl;
+      mpi_exit(EXIT_FAILURE);
+    }
     mpi_parallel::cout << "+--------------------------------+" << std::endl;
     mpi_parallel::cout << "! Multilevel MC                  !" << std::endl;
     mpi_parallel::cout << "+--------------------------------+" << std::endl;
