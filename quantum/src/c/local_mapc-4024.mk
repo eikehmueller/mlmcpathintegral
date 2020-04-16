@@ -12,3 +12,6 @@ LOCAL_LFLAGS=-static
 
 # Compile in debugging mode (set to True, if required)?
 DEBUG=False
+
+# Use MPI?
+USE_MPI=False
