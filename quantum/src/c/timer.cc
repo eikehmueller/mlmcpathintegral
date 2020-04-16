@@ -6,11 +6,13 @@
 
 /* Start timer */
 void Timer::start() {
+  mpi_barrier();
   tp_start = Clock::now();
 }
 
 /* Stop timer */
 void Timer::stop() {
+  mpi_barrier();
   tp_finish = Clock::now();
   std::chrono::duration<double> t_duration = tp_finish - tp_start;
   t_elapsed = double(t_duration.count());

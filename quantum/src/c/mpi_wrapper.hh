@@ -112,6 +112,9 @@ void mpi_scatter(unsigned int* data, unsigned int& x);
  */
 void mpi_exit(const int exit_code);
 
+/** @brief Barrier */
+void mpi_barrier();
+
 /** @brief distribute a number evenly between processors
  *
  * Split the number n as evenly as possible between processors, i.e.

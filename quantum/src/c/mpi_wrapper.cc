@@ -180,6 +180,13 @@ void mpi_exit(const int exit_code) {
   exit(exit_code);
 }
 
+/* Barrier */
+void mpi_barrier() {
+#ifdef USE_MPI
+  MPI_Barrier(MPI_COMM_WORLD);
+#endif // USE_MPI
+}
+
 /* Distribute number between processors */
 unsigned int distribute_n(const unsigned int n) {
 #ifdef USE_MPI
