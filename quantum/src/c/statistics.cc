@@ -44,6 +44,7 @@ std::vector<double> Statistics::auto_corr() const {
   std::vector<double> S_k_result;
   double avg_ = average();
   if (mpi_comm_size() == 1) {
+    S_k_result.resize(S_k.size());
     std::copy(S_k.begin(),S_k.end(),S_k_result.begin());
   } else {
     std::vector<double> S_k_global = mpi_allreduce_avg(S_k);
