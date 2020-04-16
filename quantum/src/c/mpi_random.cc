@@ -6,12 +6,7 @@ void parallel_mt19937_64::seed(result_type value) {
   int n_rank = mpi_comm_size(); // Number of processors
   unsigned int* master_seed_list;
   unsigned int local_seed; // Local seed
-  typedef std::minstd_rand SeedEngine;
-  // Check that the seed engine really uses unsigned int's
-  if (not std::is_same<SeedEngine::result_type,unsigned int>::value) {
-    mpi_parallel::cerr << "ERROR: Data type of seed engine has to be unsigned int" << std::endl;
-    mpi_exit(EXIT_FAILURE);
-  }
+  typedef std::linear_congruential_engine<unsigned int, 48271, 0, 2147483647> SeedEngine;
   // Generate seeds on master processor
   if (mpi_master()) {
     SeedEngine seed_engine;
