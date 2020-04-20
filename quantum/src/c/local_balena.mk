@@ -1,11 +1,10 @@
 # Include directory of Gnu Scientific Library (GSL)
-GSL_INCLUDE_DIR=/home/em459/Library/gsl-2.5/include/gsl
-
+GSL_INCLUDE_DIR=/apps/gsl/2.1/include/gsl
 # Lib directory of Gnu Scientific Library (GSL)
-GSL_LIB_DIR=/home/em459/Library/gsl-2.5/lib/
+GSL_LIB_DIR=/apps/gsl/2.1/lib/
 
 # Directory of eigen library
-EIGEN_INCLUDE_DIR=/home/em459/Library/eigen-3.3.4/include/eigen3/
+EIGEN_INCLUDE_DIR=/home/n/em459/scratch/library/eigen-3.3.7/include/eigen3/
 
 # Additional linker flags
 LOCAL_LFLAGS=
@@ -14,7 +13,7 @@ LOCAL_LFLAGS=
 DEBUG=False
 
 # Use MPI?
-USE_MPI=False
+USE_MPI=True
 
 # MPI compiler
-MPICXX=mpic++
+MPICXX=mpicxx

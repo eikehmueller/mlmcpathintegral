@@ -5,6 +5,7 @@
 #include "path.hh"
 #include "action.hh"
 #include "parameters.hh"
+#include "mpi_wrapper.hh"
 
 /** @file doublewellaction.hh
  * @brief Header file for double well action class
@@ -111,8 +112,8 @@ public:
    */
   std::shared_ptr<Action> virtual coarse_action() {
     if (M_lat%2) {
-      std::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
-      exit(1);
+      mpi_parallel::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
+      mpi_exit(EXIT_FAILURE);
     }
     return std::make_shared<DoubleWellAction>(M_lat/2,
                                               T_final,

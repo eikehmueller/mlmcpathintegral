@@ -7,6 +7,7 @@
 #include "action.hh"
 #include "parameters.hh"
 #include "sampler.hh"
+#include "mpi_random.hh"
 
 /** @file hmcsampler.hh
  * @brief Header file for Hybrid Monte Carlo sampler base class
@@ -87,7 +88,7 @@ public:
     dt_hmc(dt_hmc_),
     n_burnin(n_burnin_)
   {
-    engine.seed(8923759233);
+    engine.seed(8923759);
     const unsigned int M_lat = action->getM_lat();
     const double T_final = action->getT_final();
     // Create temporary workspace
@@ -140,7 +141,7 @@ protected:
   /** @brief temporary increment for momenta */
   mutable std::shared_ptr<Path> dp_path;
   /** @brief Random number engine */
-  typedef std::mt19937_64 Engine;
+  typedef mpi_parallel::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */
   mutable Engine engine;
   /** @brief Type of normal distribution */

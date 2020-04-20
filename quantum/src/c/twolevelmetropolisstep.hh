@@ -5,6 +5,7 @@
 #include "action.hh"
 #include "mcmcstep.hh"
 #include "conditionedfineaction.hh"
+#include "mpi_random.hh"
 
 /** @file twolevelmetropolisstep.hh
  * @brief Header file for two level Metropolis step
@@ -91,7 +92,7 @@ protected:
   /** @brief Trial state vector on fine level \f$\theta'_{\ell}\f$ */
   mutable std::shared_ptr<Path> theta_prime;
   /** @brief Random number engine */
-  typedef std::mt19937_64 Engine;
+  typedef mpi_parallel::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */
   mutable Engine engine;
   /** @brief Type of uniform distribution */

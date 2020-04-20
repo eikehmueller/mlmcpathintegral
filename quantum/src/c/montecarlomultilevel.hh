@@ -17,6 +17,7 @@
 #include "hmcsampler.hh"
 #include "clustersampler.hh"
 #include "montecarlo.hh"
+#include "mpi_wrapper.hh"
 
 /** @file montecarlomultilevel.hh
  * @brief Header file for multilevel Monte Carlo classes
@@ -66,10 +67,10 @@ public:
       } else if (sampler_str == "exact") {
         coarsesampler_ = SamplerExact;
       } else  {
-        std::cerr << " ERROR: Unknown coarse sampler: " << sampler_str;
-        std::cerr << std::endl;
-        std::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
-        exit(-1);
+        mpi_parallel::cerr << " ERROR: Unknown coarse sampler: " << sampler_str;
+        mpi_parallel::cerr << std::endl;
+        mpi_parallel::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
+        mpi_exit(EXIT_FAILURE);
       }
     }
     return readSuccess;
@@ -147,7 +148,7 @@ private:
    * @param[in] ell level ell
    * @param[inout] x_path generated path \f$\Theta_\ell\f$ 
    */
-  void draw_independent_sample(const int ell,
+  void draw_independent_sample(const unsigned int ell,
                                std::shared_ptr<Path> x_path);
 
 

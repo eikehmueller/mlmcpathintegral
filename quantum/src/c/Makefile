@@ -15,7 +15,6 @@ CFLAGS_OPT=-O3 -std=c++11 -I$(EIGEN_INCLUDE_DIR) -I$(GSL_INCLUDE_DIR)
 CFLAGS_DEBUG=-g -Wall -O0 -std=c++11 -I$(EIGEN_INCLUDE_DIR) -I$(GSL_INCLUDE_DIR)
 LFLAGS=-L$(GSL_LIB_DIR) $(LOCAL_LFLAGS)
 LLIBS=-lgsl -lgslcblas 
-CXX=g++
 
 SOURCES=$(wildcard *.hh *.cc)
 MAIN=driver.x
@@ -23,9 +22,18 @@ OBJS=$(patsubst %.cc,%.o,$(wildcard *.cc))
 
 
 ifeq ($(DEBUG),True)
-	CFLAGS=$(CFLAGS_DEBUG)
+  CFLAGS=$(CFLAGS_DEBUG)
 else
-	CFLAGS=$(CFLAGS_OPT)
+  CFLAGS=$(CFLAGS_OPT)
+endif
+
+ifeq ($(USE_MPI),True)
+  CXX=$(MPICXX)
+  CFLAGS:=$(CFLAGS) -DUSE_MPI
+  $(info Compiling in MPI parallel mode. Compiler is $(CXX))
+else
+CXX=g++
+  $(info Compiling in sequential mode. Compiler is $(CXX))
 endif
 
 all: $(MAIN)

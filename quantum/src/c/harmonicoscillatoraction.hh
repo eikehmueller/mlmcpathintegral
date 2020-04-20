@@ -9,6 +9,7 @@
 #include "sampler.hh"
 #include "action.hh"
 #include "parameters.hh"
+#include "mpi_random.hh"
 
 /** @file harmonicoscillatoraction.hh
  * @brief Header file for harmonic oscillator action base class
@@ -117,8 +118,8 @@ public:
    */
   std::shared_ptr<Action> virtual coarse_action() {
     if (M_lat%2) {
-      std::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
-      exit(1);
+      mpi_parallel::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
+      mpi_exit(EXIT_FAILURE);
     }
     RenormalisedHOParameters c_param(M_lat,T_final,m0,mu2,renormalisation);
     return std::make_shared<HarmonicOscillatorAction>(M_lat/2,
@@ -247,7 +248,7 @@ private:
   /** @brief Cholesky factor of the covariance matrix \f$\Sigma=L^TL\f$ */
   Matrix L_cov;
   /** @brief Type for Mersenne twister engine */
-  typedef std::mt19937_64 Engine;
+  typedef mpi_parallel::mt19937_64 Engine;
   /** @brief Random number engine */
   mutable Engine engine;
   /** @brief Type for normal distribution */

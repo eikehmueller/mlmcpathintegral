@@ -24,8 +24,6 @@ lattice:
 statistics:
   n_autocorr_window = 20   # Size of window over which to measure
                            # autocorrelations
-  n_min_samples_corr = 100 # Minimal number of samples for correlated
-                           # estimators
   n_min_samples_qoi = 100  # Minimal number of samples for uncorrelated
                            # estimators
 

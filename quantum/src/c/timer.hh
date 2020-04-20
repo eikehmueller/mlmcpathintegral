@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <chrono>
+#include "mpi_wrapper.hh"
 
 /** @file timer.hh
  * @brief Header file for timer class

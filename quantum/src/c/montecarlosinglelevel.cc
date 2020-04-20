@@ -27,16 +27,16 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
                                            param_hmc.n_burnin());
   } else if (param_singlelevelmc.sampler() == SamplerCluster) {
     if (param_general.action() != ActionRotor) {
-      std::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
-      exit(-1);
+      mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
+      mpi_exit(EXIT_FAILURE);
     }
     sampler = std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(action),
                                                param_cluster.n_burnin(),
                                                param_cluster.n_updates());
   } else if (param_singlelevelmc.sampler() == SamplerExact) {
     if (param_general.action() != ActionHarmonicOscillator) {
-      std::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
-      exit(-1);
+      mpi_parallel::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
+      mpi_exit(EXIT_FAILURE);
     }
     sampler = std::dynamic_pointer_cast<Sampler>(action);
   }
@@ -49,30 +49,36 @@ void MonteCarloSingleLevel::evaluate() {
   std::shared_ptr<Path> x_path =
     std::make_shared<Path>(action->getM_lat(),
                            action->getT_final());
-  for (int i=0;i<n_burnin;++i)
+  for (unsigned int i=0;i<n_burnin;++i)
     sampler->draw(x_path);
   
   double two_epsilon_inv2 = 2./(epsilon*epsilon);
   stats_Q->reset();
   bool sufficient_stats = false;
-  int n_target;
+  unsigned int n_target;
+  unsigned int n_local_target;
   if (n_samples > 0) {
     n_target = n_samples;
   } else {
     n_target = n_min_samples_qoi;
   }
 #ifdef LOG_QOI
+  if (mpi_comm_size() > 1) {
+    mpi_parallel::cerr << "ERROR: can only log QoI in sequential runs." << std::endl;
+    mpi_exit(EXIT_FAILURE);
+  }
   qoi_file.open("qoi.dat");
 #endif // LOG_QOI
+  n_local_target = distribute_n(n_target);
   timer.reset();
   timer.start();
   do {
-    int k_start = stats_Q->samples();
-    for (int k=k_start;k<n_target;++k) {
+    unsigned int k_start = stats_Q->local_samples();
+    for (unsigned int k=k_start;k<n_local_target;++k) {
       sampler->draw(x_path);
 #ifdef SAVE_PATHS
-      if ( (SAVE_FIRST_PATH<=k) and (k<=SAVE_LAST_PATH) ) {
-        std::stringstream filename;
+      if ( (SAVE_FIRST_PATH<=k) and (k<=SAVE_LAST_PATH) and (mpi_master())) {
+        std::stringstream filename;      
         filename << "path_";
         filename << std::setw(8) << std::setfill('0');
         filename << k << ".dat";
@@ -91,7 +97,8 @@ void MonteCarloSingleLevel::evaluate() {
     } else {
       n_target = ceil(stats_Q->tau_int()*two_epsilon_inv2*stats_Q->variance());
     }
-    sufficient_stats = (stats_Q->samples() >= n_target);
+    n_local_target = distribute_n(n_target);
+    sufficient_stats = mpi_allreduce_and(stats_Q->local_samples() >= n_local_target);
     // If the target number of samples is given explicitly, generate exactly
     // the number of requested samples
   } while (not sufficient_stats);
@@ -103,8 +110,8 @@ void MonteCarloSingleLevel::evaluate() {
 
 /* Print out statistics */
 void MonteCarloSingleLevel::show_statistics() {
-  std::cout << *stats_Q;
-  std::cout << std::endl;
-  std::cout << timer << std::endl;
-  std::cout << std::endl;
+  mpi_parallel::cout << *stats_Q;
+  mpi_parallel::cout << std::endl;
+  mpi_parallel::cout << timer << std::endl;
+  mpi_parallel::cout << std::endl;
 }

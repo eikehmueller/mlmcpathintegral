@@ -25,7 +25,7 @@ std::pair<bool,int> ClusterSampler::process_link(const int i,
 /** Draw next sample */
 void ClusterSampler::draw(std::shared_ptr<Path> x_path) {
   const unsigned int M_lat = action->getM_lat();
-  for (int i=0;i<n_updates;i++) {
+  for (unsigned int i=0;i<n_updates;i++) {
     // Pick new subgroup
     action->new_angle();
     // Pick a random site and flip it

@@ -9,6 +9,8 @@
 #include "path.hh"
 #include "clusteraction.hh"
 #include "parameters.hh"
+#include "mpi_wrapper.hh"
+#include "mpi_random.hh"
 
 /** @file rotoraction.hh
  * @brief Header file for quantum mechanical rotor action class
@@ -41,7 +43,6 @@ public:
     if (!readSuccess) {
       m0_ = getContents("m0")->getDouble();
       std::string renormalisation_str = getContents("renormalisation")->getString();
-      std::cout << "renormalisation_str " << renormalisation_str << std::endl;
       if (renormalisation_str == "none") {
         renormalisation_ = RenormalisationNone;
       } else if (renormalisation_str == "perturbative") {
@@ -118,8 +119,8 @@ public:
    */
   std::shared_ptr<Action> virtual coarse_action() {
     if (M_lat%2) {
-      std::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
-      exit(1);
+      mpi_parallel::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
+      mpi_exit(EXIT_FAILURE);
     }
     RenormalisedRotorParameters c_param(M_lat,T_final,m0,renormalisation);
     return std::make_shared<RotorAction>(M_lat/2,
@@ -240,7 +241,7 @@ protected:
   /** @brief reflection angle for current subgroup \f$H_{\overline{x}}\f$ */
   mutable double xbar;
   /** @brief Random number engine */
-  typedef std::mt19937_64 Engine;
+  typedef mpi_parallel::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */
   mutable Engine engine;
   /** @brief Type of uniform distribution */

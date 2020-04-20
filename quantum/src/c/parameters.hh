@@ -7,6 +7,7 @@
 #include<fstream>
 #include<map>
 #include<vector>
+#include "mpi_wrapper.hh"
 
 /** @file parameters.hh
  * 
@@ -83,25 +84,25 @@ public:
 
   /** @brief Return value as double (if possible), return error by default */
   virtual const double getDouble() const {
-    std::cerr << " Invalid data type (double). " << std::endl;
+    mpi_parallel::cerr << " Invalid data type (double). " << std::endl;
     return 0.0;
   };
 
   /** @brief Return value as integer (if possible), return error by default */
   virtual const int getInt() const {
-    std::cerr << " Invalid data type. " << std::endl;
+    mpi_parallel::cerr << " Invalid data type. " << std::endl;
     return 0;
   };
 
   /** @brief Return value as integer (if possible), return error by default */
   virtual const std::string getString() const {
-    std::cerr << " Invalid data type. " << std::endl;
+    mpi_parallel::cerr << " Invalid data type. " << std::endl;
     return std::string("");
   };
 
   /** @brief Return value as bool (if possible), return error by default */
   virtual const bool getBool() const {
-    std::cerr << " Invalid data type. " << std::endl;
+    mpi_parallel::cerr << " Invalid data type. " << std::endl;
     return false;
   };
 
@@ -112,13 +113,20 @@ public:
    *
    * @param[in] valueString String containing new value
    */
+  
   // set data
   virtual void setValue(const std::string valueString) {
   };
+
+  /** @brief Get value string */
+  std::string getValueString() {
+    return valueString_;
+  }
+  
 protected:
   /** @brief string with label */
   const std::string label_;
-private:
+protected:
   /** @brief string with value */
   std::string valueString_;
 };
@@ -149,27 +157,29 @@ public:
    * @param[in] valueString String with value
    */
   virtual void setValue(const std::string valueString) {
+    valueString_=valueString;
     value=atof(valueString.c_str());
     check_constraint();
   }
+
 private:
   /** @brief Check constraints of current value */
   void check_constraint() {
     if ( (num_constraint == Positive) and (not (value > 0)) ) {
-      std::cerr << "ERROR: expected positive number for parameter " << label_ << std::endl;
-      exit(1);
+      mpi_parallel::cerr << "ERROR: expected positive number for parameter " << label_ << std::endl;
+      mpi_exit(EXIT_FAILURE);
     }
     if ( (num_constraint == NonNegative) and (not (value >= 0)) ) {
-      std::cerr << "ERROR: expected non-negative number for parameter " << label_ << std::endl;
-      exit(1);
+      mpi_parallel::cerr << "ERROR: expected non-negative number for parameter " << label_ << std::endl;
+      mpi_exit(EXIT_FAILURE);
     }
     if ( (num_constraint == Negative) and (not (value < 0)) ) {
-      std::cerr << "ERROR: expected negative number for parameter " << label_ << std::endl;
-      exit(1);
+      mpi_parallel::cerr << "ERROR: expected negative number for parameter " << label_ << std::endl;
+      mpi_exit(EXIT_FAILURE);
     }
     if ( (num_constraint == NonPositive) and (not (value <= 0)) ) {
-      std::cerr << "ERROR: expected non-positive number for parameter " << label_ << std::endl;
-      exit(1);
+      mpi_parallel::cerr << "ERROR: expected non-positive number for parameter " << label_ << std::endl;
+      mpi_exit(EXIT_FAILURE);
     }
   }
   /** @brief Numerical constraint flag */
@@ -203,6 +213,7 @@ public:
    * @param[in] valueString String with value
    */
   virtual void setValue(const std::string valueString) {
+    valueString_=valueString;
     value=atoi(valueString.c_str());
     check_constraint();
   }
@@ -210,20 +221,20 @@ private:
   /** @brief Check constraints of current value */
   void check_constraint() {
     if ( (num_constraint == Positive) and (not (value > 0)) ) {
-      std::cerr << "ERROR: expected positive number for parameter " << label_ << std::endl;
-      exit(1);
+      mpi_parallel::cerr << "ERROR: expected positive number for parameter " << label_ << std::endl;
+      mpi_exit(EXIT_FAILURE);
     }
     if ( (num_constraint == NonNegative) and (not (value >= 0)) ) {
-      std::cerr << "ERROR: expected non-negative number for parameter " << label_ << std::endl;
-      exit(1);
+      mpi_parallel::cerr << "ERROR: expected non-negative number for parameter " << label_ << std::endl;
+      mpi_exit(EXIT_FAILURE);
     }
     if ( (num_constraint == Negative) and (not (value < 0)) ) {
-      std::cerr << "ERROR: expected negative number for parameter " << label_ << std::endl;
-      exit(1);
+      mpi_parallel::cerr << "ERROR: expected negative number for parameter " << label_ << std::endl;
+      mpi_exit(EXIT_FAILURE);
     }
     if ( (num_constraint == NonPositive) and (not (value <= 0)) ) {
-      std::cerr << "ERROR: expected non-positive number for parameter " << label_ << std::endl;
-      exit(1);
+      mpi_parallel::cerr << "ERROR: expected non-positive number for parameter " << label_ << std::endl;
+      mpi_exit(EXIT_FAILURE);
     }
   }
   /** @brief Numerical constraint flag */
@@ -255,6 +266,7 @@ public:
    * @param[in] valueString String with value
    */
   virtual void setValue(const std::string valueString) {
+    valueString_=valueString;
     value = valueString.substr(1, valueString.size()-2);
   }
 private:
@@ -288,6 +300,7 @@ public:
    * @param[in] valueString String with value
    */
   virtual void setValue(const std::string valueString) {
+    valueString_=valueString;
     value = ( ( valueString == "true" ) ||
               ( valueString == "True" ) ||
               ( valueString == "TRUE" ) ) ;

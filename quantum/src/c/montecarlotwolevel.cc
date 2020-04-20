@@ -25,8 +25,8 @@ MonteCarloTwoLevel::MonteCarloTwoLevel(std::shared_ptr<Action> fine_action_,
                                                   param_hmc.n_burnin());
   } else if (param_twolevelmc.coarsesampler() == SamplerCluster) {
     if (param_general.action() != ActionRotor) {
-      std::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
-      exit(-1);
+      mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
+      mpi_exit(EXIT_FAILURE);
     }
     coarse_sampler =
       std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(coarse_action),
@@ -34,8 +34,8 @@ MonteCarloTwoLevel::MonteCarloTwoLevel(std::shared_ptr<Action> fine_action_,
                                        param_cluster.n_updates());
   } else if (param_twolevelmc.coarsesampler() == SamplerExact) {
     if (param_general.action() != ActionHarmonicOscillator) {
-      std::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
-      exit(-1);
+      mpi_parallel::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
+      mpi_exit(EXIT_FAILURE);
     }
     coarse_sampler = std::dynamic_pointer_cast<Sampler>(coarse_action);
   }
@@ -68,9 +68,10 @@ void MonteCarloTwoLevel::evaluate_difference(Statistics& stats_fine,
     twolevel_step->draw(x_coarse_path,x_path);
   }
 
+  unsigned int n_local_samples = distribute_n(n_samples);
   // Sampling phase
   stats_diff.reset();
-  for (unsigned int k=0;k<n_samples;++k) {
+  for (unsigned int k=0;k<n_local_samples;++k) {
     coarse_sampler->draw(x_coarse_path);
     twolevel_step->draw(x_coarse_path,x_path);
     double qoi_fine = qoi->evaluate(x_path);
