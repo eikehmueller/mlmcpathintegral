@@ -108,7 +108,7 @@ void MonteCarloMultiLevel::evaluate() {
 
   // Burn in phase
   // Loop over all levels and create n_burnin samples
-  for (unsigned int level=n_level-1;level>=0;level--) {
+  for (int level=n_level-1;level>=0;level--) {
     for (unsigned int j=0;j<n_burnin;++j) {
       if (level==n_level-1) {
         draw_independent_sample(level,x_path[level]);
@@ -131,7 +131,7 @@ void MonteCarloMultiLevel::evaluate() {
   bool sufficient_stats=false;
   do {
     // Loop over all levels and measure QoI
-    for (unsigned int level=n_level-1;level>=0;level--) {
+    for (int level=n_level-1;level>=0;level--) {
       double qoi_Y;
       unsigned int j_start = stats_qoi[level]->samples();
       for (int j=j_start;j<n_target[level];++j) {
@@ -183,7 +183,7 @@ void MonteCarloMultiLevel::evaluate() {
 /* Draw an independent sample on a particular level */
 void MonteCarloMultiLevel::draw_independent_sample(const unsigned int ell,
                                                    std::shared_ptr<Path> x_path) {
-  unsigned int level = n_level-1;
+  int level = n_level-1;
   do {
     if (level == (n_level-1)) {
       /* Sample directly on coarsest level */
@@ -220,7 +220,7 @@ void MonteCarloMultiLevel::draw_independent_sample(const unsigned int ell,
       // Return to coarsest level
       level = n_level-1;
     }
-  } while (level>=ell);
+  } while (level>=(int)ell);
   // Copy path
   std::copy(x_sampler_path[ell]->data,
             x_sampler_path[ell]->data+x_sampler_path[ell]->M_lat,
