@@ -22,10 +22,10 @@ public:
   /** @brief Construct a new instance */
   HMCParameters() :
     Parameters("hmc"),
-    T_(1.0),
+    nt_(100),
     dt_(0.1),
     n_burnin_(100) {
-    addKey("T",Double,Positive);
+    addKey("nt",Integer,Positive);
     addKey("dt",Double,Positive);
     addKey("n_burnin",Integer,Positive);
   }
@@ -38,21 +38,21 @@ public:
 
     int readSuccess = Parameters::readFile(filename);
     if (!readSuccess) {
-      T_ = getContents("T")->getDouble();
+      nt_ = getContents("nt")->getInt();
       dt_ = getContents("dt")->getDouble();
       n_burnin_ = getContents("n_burnin")->getInt();
     }
     return readSuccess;
   }
-  /** @brief Return length of integration interval \f$T\f$ */
-  double T() const { return T_; }
+  /** @brief Return number of integration steps */
+  unsigned int nt() const { return nt_; }
   /** @brief Return integration timestep \f$dt\f$ */
   double dt() const { return dt_; }
   /** @brief Return number of burnin samples */
   unsigned int n_burnin() const { return n_burnin_; }
 private:
-  /** @brief Integration time interval \f$T\f$ */
-  double T_;
+  /** @brief Number of integration steps */
+  unsigned int nt_;
   /** @brief Integration time step \f$dt\f$ */
   double dt_;
   /** @brief Number of burnin samples */
@@ -74,17 +74,17 @@ public:
   /** @brief Create new instance
    *
    * @param[in] action_ Action to sample from
-   * @param[in] T_hmc_ Length \f$T_{HMC}\f$ of HMC trajectories 
+   * @param[in] nt_hmc_ Number of HMC steps 
    * @param[in] dt_hmc_ Step size \f$\Delta t_{HMC}\f$ of HMC trajectories 
    * @param[in] n_burnin_ Number of burnin steps
    */
   HMCSampler(const std::shared_ptr<Action> action_,
-             const double T_hmc_,
+             const unsigned int nt_hmc_,
              const double dt_hmc_,
              const unsigned int n_burnin_) :
     Sampler(),
     action(action_),
-    T_hmc(T_hmc_),
+    nt_hmc(nt_hmc_),
     dt_hmc(dt_hmc_),
     n_burnin(n_burnin_)
   {
@@ -126,8 +126,8 @@ public:
 protected:
   /** @brief Action to sample from */
   const std::shared_ptr<Action> action;
-  /** @brief Length of deterministic trajectories */
-  const double T_hmc;
+  /** @brief Number of steps in trajectory */
+  const unsigned int nt_hmc;
   /** @brief Time step size of determininistic trajectories */
   const double dt_hmc;
   /** @brief Number of burn-in steps */

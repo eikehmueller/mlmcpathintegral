@@ -21,14 +21,13 @@ void HMCSampler::draw(std::shared_ptr<Path> x_path) {
   std::copy(x_path_cur->data,
             x_path_cur->data+M_lat,
             x_path_trial->data);
-  unsigned int n_hmc_steps = floor(T_hmc/dt_hmc);
-  for(unsigned int k =0;k<=n_hmc_steps;++k) {
+  for(unsigned int k =0;k<=nt_hmc;++k) {
     double dt_p = dt_hmc;
     double dt_x = dt_hmc;
     if (k==0) {
       dt_p = 0.5*dt_hmc;
     }
-    if (k==n_hmc_steps) {
+    if (k==nt_hmc) {
       dt_p = 0.5*dt_hmc;
       dt_x = 0.0;
     }

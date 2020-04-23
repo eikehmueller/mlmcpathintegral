@@ -22,7 +22,7 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
   timer("SinglevelMC") {
   if (param_singlelevelmc.sampler() == SamplerHMC) {
     sampler = std::make_shared<HMCSampler>(action,
-                                           param_hmc.T(),
+                                           param_hmc.nt(),
                                            param_hmc.dt(),
                                            param_hmc.n_burnin());
   } else if (param_singlelevelmc.sampler() == SamplerCluster) {

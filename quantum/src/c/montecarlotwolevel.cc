@@ -20,7 +20,7 @@ MonteCarloTwoLevel::MonteCarloTwoLevel(std::shared_ptr<Action> fine_action_,
   coarse_action = fine_action->coarse_action();
   if (param_twolevelmc.coarsesampler() == SamplerHMC) {
     coarse_sampler = std::make_shared<HMCSampler>(coarse_action,
-                                                  param_hmc.T(),
+                                                  param_hmc.nt(),
                                                   param_hmc.dt(),
                                                   param_hmc.n_burnin());
   } else if (param_twolevelmc.coarsesampler() == SamplerCluster) {

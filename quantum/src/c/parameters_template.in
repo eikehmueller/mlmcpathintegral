@@ -90,7 +90,7 @@ multilevelmc:
 # HMC sampler parameters
 ###########################################
 hmc:
-  T = 10.0        # HMC integration time
+  nt = 100        # Number of HMC steps
   dt = 0.01       # HMC time step
   n_burnin = 100  # Number of burnin samples
 

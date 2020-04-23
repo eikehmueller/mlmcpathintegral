@@ -62,7 +62,7 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
   // Construct sampler on coarsest level
   if (param_multilevelmc.coarsesampler() == SamplerHMC) {
     coarse_sampler = std::make_shared<HMCSampler>(coarse_action,
-                                                  param_hmc.T(),
+                                                  param_hmc.nt(),
                                                   param_hmc.dt(),
                                                   param_hmc.n_burnin());
   } else if (param_multilevelmc.coarsesampler() == SamplerCluster) {
