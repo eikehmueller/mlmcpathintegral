@@ -22,7 +22,6 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
   t_sampler(param_multilevelmc.n_level(),0),
   n_autocorr_window(param_stats.n_autocorr_window()),
   n_min_samples_qoi(param_stats.n_min_samples_qoi()),
-  n_min_samples_sampler(param_multilevelmc.n_min_samples_sampler()),
   timer("MultilevelMC") {
   // Check that Number of lattice points permits number of levels
   unsigned int M_lat = fine_action->getM_lat();
@@ -99,7 +98,8 @@ void MonteCarloMultiLevel::evaluate() {
    * larger than the autocorrelation time of the fine level process.
    */
   for (unsigned int level=0;level<n_level;++level) {
-    stats_sampler[level]->reset();
+    stats_sampler[level]->hard_reset();
+    stats_qoi[level]->hard_reset();
     t_sampler[level] = 0;
     n_indep[level] = 0;
     t_indep[level] = 0;
@@ -109,13 +109,19 @@ void MonteCarloMultiLevel::evaluate() {
   // Burn in phase
   // Loop over all levels and create n_burnin samples
   for (int level=n_level-1;level>=0;level--) {
+    double qoi_Y;
     for (unsigned int j=0;j<n_burnin;++j) {
       if (level==n_level-1) {
         draw_independent_sample(level,x_path[level]);
+        qoi_Y = qoi->evaluate(x_path[level]);
       } else {
         draw_independent_sample(level+1,x_coarse_path[level+1]);
         twolevel_step[level]->draw(x_coarse_path[level+1],x_path[level]);
+        double qoi_fine = qoi->evaluate(x_path[level]);
+        double qoi_coarse = qoi->evaluate(x_coarse_path[level+1]);
+        qoi_Y = qoi_fine-qoi_coarse;
       }
+      stats_qoi[level]->record_sample(qoi_Y);
     }
   }
   mpi_parallel::cout << "Burnin completed" << std::endl;
@@ -123,6 +129,7 @@ void MonteCarloMultiLevel::evaluate() {
   // Reset everything before actual run
   for (unsigned int level=0;level<n_level;++level) {
     stats_qoi[level]->reset();
+    stats_sampler[level]->reset();
     n_target[level] = n_min_samples_qoi;
   }
 
@@ -202,8 +209,7 @@ void MonteCarloMultiLevel::draw_independent_sample(const unsigned int ell,
     double qoi_sampler = qoi->evaluate(x_sampler_path[level]);
     stats_sampler[level]->record_sample(qoi_sampler);
     t_sampler[level]++;
-    if ( (stats_sampler[level]->samples() >= n_min_samples_sampler) and
-         (t_sampler[level] >= 2*ceil(stats_sampler[level]->tau_int())) ) {
+    if (t_sampler[level] >= 2*ceil(stats_sampler[level]->tau_int())) {
       // t_sampler[level] is the number of x_sampler_path samples
       // generated on this level since the last independent sample was used
       t_indep[level] = (n_indep[level]*t_indep[level]+t_sampler[level])/(1.0+n_indep[level]);

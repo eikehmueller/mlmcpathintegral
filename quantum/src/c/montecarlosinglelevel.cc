@@ -49,8 +49,14 @@ void MonteCarloSingleLevel::evaluate() {
   std::shared_ptr<Path> x_path =
     std::make_shared<Path>(action->getM_lat(),
                            action->getT_final());
-  for (unsigned int i=0;i<n_burnin;++i)
+  stats_Q->hard_reset();
+  for (unsigned int i=0;i<n_burnin;++i) {
     sampler->draw(x_path);
+    double qoi_Q = qoi->evaluate(x_path);
+    stats_Q->record_sample(qoi_Q);
+  }
+
+  mpi_parallel::cout << "Burnin completed" << std::endl;
   
   double two_epsilon_inv2 = 2./(epsilon*epsilon);
   stats_Q->reset();

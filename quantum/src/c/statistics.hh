@@ -94,6 +94,10 @@ private:
  * \f]
  * for \f$k=0,\dots,k_{\max}\f$ where \f$N_k:=N-k\f$.
  *
+ * The calculation of autocorrelation time and variance will only be
+ * reset if the hard_reset() method is called. This ensures that statistics
+ * for those quantities can already be collected in the warmup-phase.
+ *
  * The class is inherently parallel, i.e. it will always report the statistics
  * accumulated across all processors.
  * 
@@ -108,7 +112,7 @@ public:
   Statistics(const std::string label_,
              const unsigned int k_max_) :
     obj_label(label_), k_max(k_max_) {
-    reset();
+    hard_reset();
   }
 
   /** @brief Return label */
@@ -119,12 +123,20 @@ public:
   /** @brief Reset all counters */
   void reset() {
     n_samples = 0;
-    Q_k.clear();
-    S_k.clear();
-    S_k.resize(k_max,0.0);
     avg = 0.0;
   }
 
+  /** @brief Reset all counters, including the ones for long term statistics */
+  void hard_reset() {
+    reset();
+    Q_k.clear();
+    S_k.clear();
+    S_k.resize(k_max,0.0);
+    avg_longterm = 0.0;
+    n_samples_longterm = 0;
+  }
+
+  
   /** @brief Record a new sample
    * 
    * @param[in] Q Value of new sample
@@ -161,6 +173,8 @@ private:
   const std::string obj_label;
   /** @brief Window over which auto-correlations are measured */
   const unsigned int k_max;
+  /** @brief Number of collected samples for long term averages */
+  unsigned int n_samples_longterm;
   /** @brief Number of collected samples */
   unsigned int n_samples;
   /** @brief Deque holding the last samples
@@ -172,8 +186,10 @@ private:
    * This stores (in this order) \f$S_0,S_1,\dots,S_{k_{\max}}\f$.
    */
   std::vector<double> S_k;
-  /** @brief Running average */
+  /** @brief Running average for quantity */
   double avg;
+  /** @brief Running average for long term quantities */
+  double avg_longterm;
 };
 
 std::ostream& operator<<(std::ostream& os, const Statistics& stats);
