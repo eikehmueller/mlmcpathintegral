@@ -4,13 +4,13 @@
  *
  * @brief Several auxilliary functions
  */
+#include "config.h"
 #include <cmath>
 
 /* Generate coloured output? This is pretty, but will add escape
  * sequences if the output is precessed with a program which does not
  * support this
  */
-#define USECOLOR 1
 #ifdef USECOLOR
 #define RST "\x1B[0m"
 #define CBOLD "\x1B[1m"
