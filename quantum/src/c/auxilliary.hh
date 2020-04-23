@@ -6,6 +6,31 @@
  */
 #include <cmath>
 
+/* Generate coloured output? This is pretty, but will add escape
+ * sequences if the output is precessed with a program which does not
+ * support this
+ */
+#define USECOLOR 1
+#ifdef USECOLOR
+#define RST "\x1B[0m"
+#define CBOLD "\x1B[1m"
+#define CRED "\x1B[31m"
+#define CBLUE "\x1B[34m"
+#define CGREEN "\x1B[32m"
+#define CMAGENTA "\x1B[35m"
+#define FBOLD(X) CBOLD X RST
+#define FRED(X) CRED X RST
+#define FBLUE(X) CBLUE X RST
+#define FGREEN(X) CGREEN X RST
+#define FMAGENTA(X) CMAGENTA X RST
+#else
+#define FBOLD(X) X
+#define FRED(X) X
+#define FBLUE(X) X
+#define FGREEN(X) X
+#define FMAGENTA(X) X
+#endif // USECOLOR
+
 /** @brief Calculate \f$ x mod [-pi,pi) \f$
  *
  * @param[in] x Value of \f$x\f$

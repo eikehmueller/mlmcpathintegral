@@ -106,6 +106,23 @@ int main(int argc, char* argv[]) {
   MultiLevelMCParameters param_multilevelmc;
   if (param_multilevelmc.readFile(filename)) return 1;
   mpi_parallel::cout << param_multilevelmc << std::endl;
+
+#ifdef DEBUG_BUILD
+    mpi_parallel::cout << FRED("CAUTION: built in debug mode.") << std::endl;
+#endif // DEBUG_BUILD
+
+#ifdef OPT_BUILD
+    mpi_parallel::cout << FGREEN("Built in optimised mode.") << std::endl;
+#endif // OPT_BUILD
+    
+#ifdef SAVE_PATHS
+  mpi_parallel::cout << FRED("CAUTION: logging paths will impact performance!") << std::endl;
+#endif // SAVE_PATHS
+
+#ifdef LOG_QOI
+  mpi_parallel::cout << FRED("CAUTION: logging QoI will impact performance!") << std::endl;
+#endif // LOG_QOI
+
   
   /* ====== Select quantity of interest ====== */
   std::shared_ptr<QoI> qoi;
