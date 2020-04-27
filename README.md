@@ -8,10 +8,10 @@ Repository for the implementation of **multilevel MCMC path integral methods in 
 
 The multilevel MCMC methods are described in [3]. Further details can be found in the scientific documentation in the directory `quantum/doc`.
 
-![Path integral](./quantum/doc/figures/path_integral.svg)
+![Path integral](./figures/path_integral.svg)
 *Fig. 1: Path integrals on a lattice*
 
-![Multilevel MCMC](./quantum/doc/figures/multilevel_schematic.svg)
+![Multilevel MCMC](./figures/multilevel_schematic.svg)
 *Fig. 2: Grid hierarchy in multilevel methods*
 
 ### Directory layout ###
