@@ -209,7 +209,7 @@ void MonteCarloMultiLevel::draw_independent_sample(const unsigned int ell,
     double qoi_sampler = qoi->evaluate(x_sampler_path[level]);
     stats_sampler[level]->record_sample(qoi_sampler);
     t_sampler[level]++;
-    if (t_sampler[level] >= 2*ceil(stats_sampler[level]->tau_int())) {
+    if (t_sampler[level] >= ceil(2.*stats_sampler[level]->tau_int())) {
       // t_sampler[level] is the number of x_sampler_path samples
       // generated on this level since the last independent sample was used
       t_indep[level] = (n_indep[level]*t_indep[level]+t_sampler[level])/(1.0+n_indep[level]);
