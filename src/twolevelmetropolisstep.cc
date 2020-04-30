@@ -41,7 +41,7 @@ void TwoLevelMetropolisStep::draw(const std::shared_ptr<Path> x_coarse_path,
     - conditioned_fine_action->evaluate(theta_prime);
 
   double deltaS = deltaS_fine + deltaS_coarse + deltaS_trial;
-  bool accept = false;
+  accept = false;
   if (deltaS < 0.0) {
     accept = true;
   } else {

@@ -17,6 +17,7 @@
 #include "mcmcstep.hh"
 #include "hmcsampler.hh"
 #include "clustersampler.hh"
+#include "hierarchicalsampler.hh"
 #include "config.h"
 #include "statistics.hh"
 #include "mpi_wrapper.hh"
@@ -228,7 +229,8 @@ int main(int argc, char* argv[]) {
                                                  param_stats,
                                                  param_hmc,
                                                  param_cluster,
-                                                 param_singlelevelmc);
+                                                 param_singlelevelmc,
+                                                 param_multilevelmc);
   
     montecarlo_singlelevel.evaluate();
     mpi_parallel::cout << std::endl;

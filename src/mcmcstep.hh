@@ -21,7 +21,7 @@ public:
   /** @brief Create new instance
    *
    */
-  MCMCStep() {
+  MCMCStep() : accept(false) {
     reset_stats();
   }
 
@@ -42,12 +42,17 @@ public:
    * Print out statistics 
    */
   void show_stats();
-    
+
+  /** @brief has last sample been accepted? */
+  bool accepted() const { return accept; }
+  
 protected:
   /** @brief Collect statistics on acceptance probability and autocorrelation */
   mutable unsigned int n_accepted_samples;
   /** @brief Number of total samples */  
   mutable unsigned int n_total_samples;
+  /** @brief Has last sample been accepted? */
+  mutable bool accept;
 };
 
 #endif // MCMCSTEP_HH

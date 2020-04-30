@@ -47,7 +47,7 @@ void HMCSampler::draw(std::shared_ptr<Path> x_path) {
     T_kin_trial += 0.5*tmp*tmp;
   }
   // STEP 2: Accept-reject step
-  bool accept = false;
+  accept = false;
   // Change in action S(X)
   double deltaS = action->evaluate(x_path_trial) - action->evaluate(x_path_cur);
   // Change in kinetic energy T(P)

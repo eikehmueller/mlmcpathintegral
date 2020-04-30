@@ -55,4 +55,5 @@ void ClusterSampler::draw(std::shared_ptr<Path> x_path) {
   std::copy(x_path_cur->data,
             x_path_cur->data+M_lat,
             x_path->data);
+  accept = true;
 }

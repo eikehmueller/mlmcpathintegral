@@ -10,11 +10,12 @@
 #include "quantityofinterest.hh"
 #include "statistics.hh"
 #include "parameters.hh"
-#include "parameters.hh"
 #include "hmcsampler.hh"
 #include "clustersampler.hh"
 #include "montecarlo.hh"
 #include "mpi_wrapper.hh"
+#include "hierarchicalsampler.hh"
+#include "montecarlomultilevel.hh"
 
 /** @file montecarlosinglelevel.hh
  * @brief Header file for single level Monte Carlo classes
@@ -56,6 +57,8 @@ public:
         sampler_ = SamplerCluster;
       } else if (sampler_str == "exact") {
         sampler_ = SamplerExact;
+      } else if (sampler_str == "hierarchical") {
+        sampler_ = SamplerHierarchical;
       } else  {
         mpi_parallel::cerr << " ERROR: Unknown sampler: " << sampler_str << std::endl;
         mpi_parallel::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
@@ -101,14 +104,16 @@ public:
    * @param[in] param_hmc HMC sampler parameters
    * @param[in] param_cluster Cluster sampler parameters
    * @param[in] param_singlelevelmc Single level sampler parameters
-   */
+   * @param[in] param_multilevelmc Multi level sampler parameters (required for hierarchical sampler)
+  */ 
   MonteCarloSingleLevel(std::shared_ptr<Action> action_,
                         std::shared_ptr<QoI> qoi_,
                         const GeneralParameters param_general,
                         const StatisticsParameters param_stats,
                         const HMCParameters param_hmc,
                         const ClusterParameters param_cluster,
-                        const SingleLevelMCParameters param_singlelevelmc);
+                        const SingleLevelMCParameters param_singlelevelmc,
+                        const MultiLevelMCParameters param_multilevelmc);
   
   /** @brief Calculate QoI
    * 

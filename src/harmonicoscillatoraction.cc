@@ -61,6 +61,7 @@ void HarmonicOscillatorAction::draw(std::shared_ptr<Path> x_path) {
   x = L_cov * y;
   n_total_samples++;
   n_accepted_samples ++;
+  accept = true;
 }
 
 /** Exact expression for expectation value of \f$X^2\f$ */

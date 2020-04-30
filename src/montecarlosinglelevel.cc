@@ -11,7 +11,8 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
                                              const StatisticsParameters param_stats,
                                              const HMCParameters param_hmc,
                                              const ClusterParameters param_cluster,
-                                             const SingleLevelMCParameters param_singlelevelmc) :
+                                             const SingleLevelMCParameters param_singlelevelmc,
+                                             const MultiLevelMCParameters param_multilevelmc) :
   MonteCarlo(param_singlelevelmc.n_burnin()),
   action(action_), 
   qoi(qoi_),
@@ -39,6 +40,15 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
       mpi_exit(EXIT_FAILURE);
     }
     sampler = std::dynamic_pointer_cast<Sampler>(action);
+  } else if (param_singlelevelmc.sampler() == SamplerHierarchical) {
+    sampler = std::make_shared<HierarchicalSampler>(action,
+                                                    param_general,
+                                                    param_hmc,
+                                                    param_cluster,
+                                                    param_multilevelmc);
+  } else {
+    mpi_parallel::cerr << " ERROR: Unknown sampler." << std::endl;
+    mpi_exit(EXIT_FAILURE);
   }
   stats_Q = std::make_shared<Statistics>("Q",n_autocorr_window);
   }

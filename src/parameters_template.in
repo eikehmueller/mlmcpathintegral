@@ -66,7 +66,7 @@ singlelevelmc:
   n_burnin = 100     # Number of burnin samples
   n_samples = 0      # Number of samples, set to 0 to use epsilon instead 
   epsilon = 1.0E-2   # Tolerance epsilon
-  sampler = 'HMC'    # Sampler to use [HMC, cluster, exact]
+  sampler = 'HMC'    # Sampler to use [HMC, cluster, exact, hierarchical]
 
 ###########################################
 # Two level Monte Carlo parameters

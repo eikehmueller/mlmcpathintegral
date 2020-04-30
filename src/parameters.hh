@@ -46,11 +46,13 @@ enum RenormalisationType {
  *  - 0: HMC
  *  - 1: cluster algorithm (only some actions)
  *  - 2: exact (only some actions)
+ *  - 3: hierarchical
 */
 enum SamplerType {
   SamplerHMC = 0,
   SamplerCluster = 1,
-  SamplerExact = 2
+  SamplerExact = 2,
+  SamplerHierarchical = 3
 };
 
 /** @brief Flags with constraint on numbers
