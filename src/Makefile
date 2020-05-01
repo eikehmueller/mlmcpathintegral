@@ -23,7 +23,9 @@ LFLAGS=-L$(GSL_LIB_DIR) $(LOCAL_LFLAGS)
 LLIBS=-lgsl -lgslcblas 
 
 SOURCES=$(wildcard *.hh *.cc)
-MAIN=driver.x
+ifeq ($(MAIN),)
+  MAIN=driver.x
+endif
 OBJS=$(patsubst %.cc,%.o,$(wildcard *.cc))
 
 
