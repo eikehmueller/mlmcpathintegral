@@ -80,7 +80,6 @@ void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
       coarse_sampler->draw(x_sampler_path[ell]);
       if (not coarse_sampler->accepted()) {
         accept = false;
-        break;
       } 
     } else {
       /* 
@@ -93,7 +92,6 @@ void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
                                x_sampler_path[ell]);
       if (not twolevel_step[ell]->accepted()) {
         accept = false;
-        break;
       }
     }
   }
