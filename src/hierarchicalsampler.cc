@@ -96,11 +96,6 @@ void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
         break;
       }
     }
-    /*
-    if (accept) {
-      std::cout << "Accepted on level " << ell << std::endl;
-    }
-    */
   }
   n_total_samples++;
   n_accepted_samples += (int) accept;
