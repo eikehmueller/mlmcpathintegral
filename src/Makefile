@@ -2,12 +2,18 @@
 # Use this for machine-dependent settings by copying over one of the files
 # local_XXX.mk
 
-COM_COLOR   = \033[0;1m
-OBJ_COLOR   = \033[0;37m
-NO_COLOR    = \033[m
-
 COM_MESSAGE   = "Compiling"
 LINK_MESSAGE  = "Linking"
+
+ifeq ($(NOCOMCOLOR),1)
+  COM_COLOR   =
+  OBJ_COLOR   =
+  NO_COLOR    =
+else
+  COM_COLOR   = \033[0;1m
+  OBJ_COLOR   = \033[0;37m
+  NO_COLOR    = \033[m
+endif
 
 include local.mk
 
