@@ -257,6 +257,8 @@ void MonteCarloMultiLevel::show_detailed_statistics() {
     mpi_parallel::cout << " two-level acceptance probability = " << twolevel_accept << std::endl;
     mpi_parallel::cout << "------------------------------------" << std::endl;    
   }
+  mpi_parallel::cout << "coarsest level sampler" << std::endl;
+  coarse_sampler->show_stats();
   mpi_parallel::cout << std::endl;
   mpi_parallel::cout << "=== Statistics of QoI ===" << std::endl;
   for (unsigned int level=0;level<n_level;++level) {

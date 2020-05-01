@@ -2,6 +2,8 @@
 #define HIERARCHICALSAMPLER_HH HIERARCHICALSAMPLER_HH
 #include <vector>
 #include <memory>
+#include <string>
+#include <sstream>
 #include "mpi_wrapper.hh"
 #include "path.hh"
 #include "action.hh"
@@ -53,6 +55,12 @@ public:
    */
   virtual void draw(std::shared_ptr<Path> x_path);
   
+/** @brief Show statistics
+     *
+     * Print out statistics
+     */
+    virtual void show_stats();
+    
 private:
   /** @brief Action to sample from */
   std::vector<std::shared_ptr<Action>> action;

@@ -41,7 +41,7 @@ public:
    *
    * Print out statistics 
    */
-  void show_stats();
+  virtual void show_stats();
 
   /** @brief has last sample been accepted? */
   bool accepted() const { return accept; }

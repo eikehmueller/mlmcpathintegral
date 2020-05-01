@@ -109,3 +109,33 @@ void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
             x_sampler_path[0]->data+x_sampler_path[0]->M_lat,
             x_path->data); 
 }
+
+/* Show statistics on all levels */
+void HierarchicalSampler::show_stats() {
+    MCMCStep::show_stats();
+    mpi_parallel::cout << std::setprecision(3) << std::fixed;
+    mpi_parallel::cout << "   acceptance/rejection probability   p      1-p" << std::endl;
+    for (unsigned int ell=0;ell<n_level;++ell) {
+        double p_acc;
+        if (ell == n_level-1) {
+            p_acc = coarse_sampler->p_accept();
+        } else {
+            p_acc = twolevel_step[ell]->p_accept();
+        }
+        std::string level_str;
+        if (ell == 0) {
+            level_str = "[finest]  ";
+        } else if (ell == n_level-1) {
+            level_str = "[coarsest]";
+        } else {
+            level_str = "          ";
+        }
+        std::stringstream sstream;
+        sstream.setf(std::ios::fixed);
+        sstream.width(2);
+        sstream.precision(3);
+        sstream << "   level " << ell << " " << level_str <<" : ";
+        sstream << "              " << p_acc << "  " << 1.-p_acc;
+        mpi_parallel::cout << sstream.str() << std::endl;
+    }
+}
