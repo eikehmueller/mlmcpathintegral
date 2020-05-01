@@ -70,8 +70,9 @@ void HMCSampler::draw(std::shared_ptr<Path> x_path) {
   n_accepted_samples += (int) accept;
   
   // Copy to output vector
-  std::copy(x_path_cur->data,
-            x_path_cur->data+M_lat,
-            x_path->data);
-
+  if (copy_if_rejected or accept) {
+    std::copy(x_path_cur->data,
+              x_path_cur->data+M_lat,
+              x_path->data);
+  }
 }

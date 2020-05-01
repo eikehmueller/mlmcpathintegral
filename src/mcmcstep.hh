@@ -21,7 +21,7 @@ public:
   /** @brief Create new instance
    *
    */
-  MCMCStep() : accept(false) {
+  MCMCStep() : accept(false), copy_if_rejected(false) {
     reset_stats();
   }
 
@@ -53,6 +53,8 @@ protected:
   mutable unsigned int n_total_samples;
   /** @brief Has last sample been accepted? */
   mutable bool accept;
+  /** @brief Copy path even if it has been rejected */
+  mutable bool copy_if_rejected;
 };
 
 #endif // MCMCSTEP_HH

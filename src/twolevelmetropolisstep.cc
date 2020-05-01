@@ -56,8 +56,10 @@ void TwoLevelMetropolisStep::draw(const std::shared_ptr<Path> x_coarse_path,
   n_total_samples++;
   n_accepted_samples += (int) accept;
   // Copy back to path
-  std::copy(theta_fine->data,
-            theta_fine->data+M_lat,
-            x_path->data);
+  if (copy_if_rejected or accept) {
+    std::copy(theta_fine->data,
+              theta_fine->data+M_lat,
+              x_path->data);
+  }
 }
 

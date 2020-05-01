@@ -100,9 +100,11 @@ void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
   n_total_samples++;
   n_accepted_samples += (int) accept;
   // Copy path
-  std::copy(x_sampler_path[0]->data,
-            x_sampler_path[0]->data+x_sampler_path[0]->M_lat,
-            x_path->data); 
+  if (copy_if_rejected or accept) {
+    std::copy(x_sampler_path[0]->data,
+              x_sampler_path[0]->data+x_sampler_path[0]->M_lat,
+              x_path->data);
+  }
 }
 
 /* Show statistics on all levels */
