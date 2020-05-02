@@ -7,6 +7,7 @@
 #include "action.hh"
 #include "parameters.hh"
 #include "sampler.hh"
+#include "mpi_wrapper.hh"
 #include "mpi_random.hh"
 
 /** @file hmcsampler.hh
@@ -107,6 +108,9 @@ public:
     for (unsigned int i=0;i<n_burnin;++i) {
       draw(x_path_tmp);
     }
+    autotune_stepsize(0.8);
+    // Reset counters
+    reset_stats();
   }
 
   /** @brief Destroy instance
@@ -115,6 +119,14 @@ public:
    */
   virtual ~HMCSampler() {}
 
+  /** @brief auto-tune step size
+   *
+   * Adjust HMC step to achieve a desired acceptance rate
+   *
+   * @param[in] p_accept_target target acceptance rate
+   */
+  void autotune_stepsize(const double p_accept_target);
+  
   /** @brief Draw a sample 
    *
    * returns a sample path \f$X\f$
@@ -129,7 +141,7 @@ protected:
   /** @brief Number of steps in trajectory */
   const unsigned int nt_hmc;
   /** @brief Time step size of determininistic trajectories */
-  const double dt_hmc;
+  mutable double dt_hmc;
   /** @brief Number of burn-in steps */
   const unsigned int n_burnin;
   /** @brief Current state (path) */

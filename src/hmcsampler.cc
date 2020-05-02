@@ -76,3 +76,42 @@ void HMCSampler::draw(std::shared_ptr<Path> x_path) {
               x_path->data);
   }
 }
+
+/* automatically tune stepsize */
+void HMCSampler::autotune_stepsize(const double p_accept_target) {
+  unsigned int n_autotune_samples=1000;
+  double tolerance = 1.E-2; // Tolerance
+  const unsigned int M_lat = action->getM_lat();
+  const double T_final = action->getT_final();
+  std::shared_ptr<Path> x_path_tmp =
+    std::make_shared<Path>(M_lat,T_final);
+  double dt_hmc_original = dt_hmc;
+  double dt_hmc_min = 0.5*dt_hmc;
+  double dt_hmc_max = 2.*dt_hmc;
+  bool converged=false;
+  mpi_parallel::cout << std::setprecision(4);
+  mpi_parallel::cout << std::endl;
+  mpi_parallel::cout << " Auto-tuning HMC step size to achieve acceptance rate of " << p_accept_target << " ..." << std::endl;
+  mpi_parallel::cout << "  Starting with dt_{HMC} = " << dt_hmc << std::endl;
+  for (unsigned int k=0;k<100;++k) {
+    reset_stats();
+    dt_hmc = 0.5*(dt_hmc_min+dt_hmc_max);
+    for (unsigned int j=0;j<n_autotune_samples;++j) {
+      draw(x_path_tmp);
+    }
+    if (p_accept() > p_accept_target) {
+      dt_hmc_min = dt_hmc;
+    } else {
+      dt_hmc_max = dt_hmc;
+    }
+    if (fabs(p_accept()-p_accept_target) < tolerance) converged=true;
+  }
+  if (converged) {
+    mpi_parallel::cout << "  Tuned         dt_{HMC} = " << dt_hmc << std::endl;
+  } else {
+    dt_hmc = dt_hmc_original;
+    mpi_parallel::cout << "  FAILED to tune, reverting to " << dt_hmc << std::endl;
+  }
+  mpi_parallel::cout << std::endl;
+  reset_stats();
+}
