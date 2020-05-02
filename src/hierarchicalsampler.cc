@@ -16,7 +16,7 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
   // Check that Number of lattice points permits number of levels
   unsigned int M_lat = fine_action->getM_lat();
   if ( (M_lat>>n_level)<<n_level == M_lat) {
-    mpi_parallel::cout << " M_lat = " << M_lat << " = 2^{" << n_level << "} * " << (M_lat>>n_level) << std::endl;
+    mpi_parallel::cout << " M_lat = " << M_lat << " = 2^{" << n_level << "-1} * " << (M_lat>>(n_level-1)) << std::endl;
   } else {
     mpi_parallel::cout << "ERROR: M_lat = " << M_lat << " is not a multiple of 2^{n_level} = 2^{"<<n_level << "}" << std::endl;
   }
