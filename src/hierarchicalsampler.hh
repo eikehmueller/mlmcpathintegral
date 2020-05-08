@@ -14,6 +14,7 @@
 #include "statistics.hh"
 #include "hmcsampler.hh"
 #include "clustersampler.hh"
+#include "timer.hh"
 
 /** @class HierarchicalSamplerParameters
  *
@@ -27,8 +28,18 @@ public:
     n_level_(2),
   coarsesampler_(SamplerHMC) {
     addKey("n_level",Integer,Positive);
-    addKey("n_burnin",Integer,Positive);
     addKey("coarsesampler",String);
+  }
+  
+  /** @brief Constructor for setting specific values
+   *  @param[in] n_lvl Number of levels
+   *  @param[in] coarse_spl Coarse level sampler
+   */
+  HierarchicalParameters(const unsigned int n_lvl,
+                         const SamplerType coarse_spl) :
+  Parameters("hierarchical") {
+    n_level_ = n_lvl;
+    coarsesampler_ = coarse_spl;
   }
 
   /** @brief Read parameters from file
@@ -112,7 +123,12 @@ public:
      * Print out statistics
      */
     virtual void show_stats();
-    
+  
+  /** @brief Return cost per sample (in microseconds) */
+  double cost_per_sample() {
+    return cost_per_sample_;
+  }
+  
 private:
   /** @brief Action to sample from */
   std::vector<std::shared_ptr<Action>> action;
@@ -124,7 +140,8 @@ private:
   std::shared_ptr<Sampler> coarse_sampler;
   /** @brief Sampler path on each level  */
   std::vector<std::shared_ptr<Path> > x_sampler_path;
-
+  /** @brief cost per sample */
+  double cost_per_sample_;
 };
 
 #endif // HIERARCHICALSAMPLER

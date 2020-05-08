@@ -2,6 +2,35 @@
 /** @file twolevelmetropolissampler.cc
  * @brief Implementation of twolevelmetropolissampler.hh
  */
+TwoLevelMetropolisStep::TwoLevelMetropolisStep(const std::shared_ptr<Action> coarse_action_, const std::shared_ptr<Action> fine_action_, const std::shared_ptr<ConditionedFineAction> conditioned_fine_action_) :
+   MCMCStep(),
+   coarse_action(coarse_action_),
+   fine_action(fine_action_),
+   conditioned_fine_action(conditioned_fine_action_),
+   cost_per_sample_(0.0) {
+   assert(2*coarse_action->getM_lat()==fine_action->getM_lat());
+   theta_fine = std::make_shared<Path>(fine_action->getM_lat(),
+                                       coarse_action->getT_final());
+   theta_fine_C = std::make_shared<Path>(coarse_action->getM_lat(),
+                                         coarse_action->getT_final());
+   theta_prime = std::make_shared<Path>(fine_action->getM_lat(),
+                                        coarse_action->getT_final());
+   engine.seed(89216491);
+   std::shared_ptr<Path> x_fine = std::make_shared<Path>(fine_action->getM_lat(),
+                                   coarse_action->getT_final());
+   std::shared_ptr<Path> x_coarse = std::make_shared<Path>(coarse_action->getM_lat(),
+                                     coarse_action->getT_final());
+
+   Timer timer_meas;
+   unsigned int n_meas = 10000;
+   timer_meas.start();
+   for (unsigned int k=0;k<n_meas;++k) {
+       draw(x_coarse,x_fine);
+   }
+   timer_meas.stop();
+   cost_per_sample_ = 1.E6*timer_meas.elapsed()/n_meas;
+   reset_stats();
+ }
 
 /** Draw new sample pair */
 void TwoLevelMetropolisStep::draw(const std::shared_ptr<Path> x_coarse_path,

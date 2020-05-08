@@ -11,12 +11,13 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
                                          const ClusterParameters param_cluster,
                                          const HierarchicalParameters param_hierarchical) :
   Sampler(),
-  n_level(param_hierarchical.n_level()) {
+  n_level(param_hierarchical.n_level()),
+  cost_per_sample_(0.0){
   
   // Check that Number of lattice points permits number of levels
   unsigned int M_lat = fine_action->getM_lat();
   if ( (M_lat>>n_level)<<n_level == M_lat) {
-    mpi_parallel::cout << " M_lat = " << M_lat << " = 2^{" << n_level << "-1} * " << (M_lat>>(n_level-1)) << std::endl;
+    mpi_parallel::cout << " Hierarchical sampler: M_lat = " << M_lat << " = 2^{" << n_level << "-1} * " << (M_lat>>(n_level-1)) << std::endl;
   } else {
     mpi_parallel::cout << "ERROR: M_lat = " << M_lat << " is not a multiple of 2^{n_level} = 2^{"<<n_level << "}" << std::endl;
   }
@@ -69,6 +70,15 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
     }
     coarse_sampler = std::dynamic_pointer_cast<Sampler>(coarse_action);
   }
+  std::shared_ptr<Path> meas_path=std::make_shared<Path>(fine_action->getM_lat(),fine_action->getT_final());
+  Timer timer_meas;
+  unsigned int n_meas = 10000;
+    timer_meas.start();
+  for (unsigned int k=0;k<n_meas;++k) {
+    draw(meas_path);
+  }
+  timer_meas.stop();
+  cost_per_sample_ = 1.E6*timer_meas.elapsed()/n_meas;
 }
 
 /* Draw next sample */
@@ -107,8 +117,9 @@ void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
 
 /* Show statistics on all levels */
 void HierarchicalSampler::show_stats() {
-    MCMCStep::show_stats();
-    mpi_parallel::cout << std::setprecision(3) << std::fixed;
+  MCMCStep::show_stats();
+  mpi_parallel::cout << std::setprecision(3) << std::fixed;
+  mpi_parallel::cout << "   cost per sample = " << cost_per_sample() << " mu s" << std::endl;
     mpi_parallel::cout << "   acceptance/rejection probability   p      1-p" << std::endl;
     for (unsigned int ell=0;ell<n_level;++ell) {
         double p_acc;

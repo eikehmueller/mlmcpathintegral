@@ -6,6 +6,7 @@
 #include "mcmcstep.hh"
 #include "conditionedfineaction.hh"
 #include "mpi_random.hh"
+#include "timer.hh"
 
 /** @file twolevelmetropolisstep.hh
  * @brief Header file for two level Metropolis step
@@ -51,21 +52,7 @@ public:
    */
   TwoLevelMetropolisStep(const std::shared_ptr<Action> coarse_action_,
                          const std::shared_ptr<Action> fine_action_,
-                         const std::shared_ptr<ConditionedFineAction> conditioned_fine_action_) :
-    MCMCStep(),
-    coarse_action(coarse_action_),
-    fine_action(fine_action_),
-    conditioned_fine_action(conditioned_fine_action_) {
-    assert(2*coarse_action->getM_lat()==fine_action->getM_lat());
-    theta_fine = std::make_shared<Path>(fine_action->getM_lat(),
-                                        coarse_action->getT_final());
-    theta_fine_C = std::make_shared<Path>(coarse_action->getM_lat(),
-                                          coarse_action->getT_final());
-    theta_prime = std::make_shared<Path>(fine_action->getM_lat(),
-                                         coarse_action->getT_final());
-    engine.seed(89216491);
-    reset_stats();
-  }
+                         const std::shared_ptr<ConditionedFineAction> conditioned_fine_action_);
 
   /** @brief Destructor */
   virtual ~TwoLevelMetropolisStep() {}
@@ -77,7 +64,12 @@ public:
    */
   virtual void draw(const std::shared_ptr<Path> x_coarse_path,
                     std::shared_ptr<Path> x_path);
-                              
+               
+  /** @brief Return cost per sample (in microseconds) */
+  double cost_per_sample() {
+    return cost_per_sample_;
+  }
+
 protected:
   /** @brief Action on coarse level */
   const std::shared_ptr<Action> coarse_action;
@@ -99,5 +91,7 @@ protected:
   typedef std::uniform_real_distribution<double> Uniform;
   /** @brief Uniform distribution in [0,1] for accept/reject step */
   mutable Uniform uniform_dist;
+  /** @brief cost per sample */
+  double cost_per_sample_;
 };
 #endif // TWOLEVELMETROPOLISSTEP_HH

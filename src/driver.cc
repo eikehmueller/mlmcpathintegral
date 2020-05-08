@@ -297,7 +297,8 @@ int main(int argc, char* argv[]) {
                                                param_stats,
                                                param_hmc,
                                                param_cluster,
-                                               param_multilevelmc);
+                                               param_multilevelmc,
+                                               param_hierarchical);
     montecarlo_multilevel.evaluate();
     montecarlo_multilevel.show_statistics();
     if (param_multilevelmc.show_detailed_stats()) {
