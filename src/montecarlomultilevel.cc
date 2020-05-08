@@ -221,12 +221,25 @@ void MonteCarloMultiLevel::show_detailed_statistics() {
     mpi_parallel::cout << "level = " << level << std::endl;
     mpi_parallel::cout << *stats_qoi[level];
     mpi_parallel::cout << " target number of samples = " << n_target[level] << std::endl;
-    mpi_parallel::cout << " cost [per indep. sample]            " << cost_eff(level) << " mu s" << std::endl;
+    mpi_parallel::cout << " cost [per indep. sample]              " << cost_eff(level) << " mu s" << std::endl;
     if (level < n_level-1) {
       mpi_parallel::cout << " cost [per sample in two-level step] " << twolevel_step[level]->cost_per_sample() << " mu s" << std::endl;
     }
     mpi_parallel::cout << "------------------------------------" << std::endl;
   }
+  mpi_parallel::cout << std::endl;
+  mpi_parallel::cout << "=== Breakdown of cost ===" << std::endl;
+  std::vector<double> cost_level;
+  double cost_total=0.0;
+  for (unsigned int level=0;level<n_level;++level) {
+    double cost_per_level = 1.E-6*cost_eff(level)/ceil(stats_qoi[level]->tau_int())*stats_qoi[level]->samples();
+    cost_level.push_back(cost_per_level);
+    cost_total+=cost_per_level;
+  }
+  for (unsigned int level=0;level<n_level;++level) {
+    mpi_parallel::cout << " level " << level << " : " << cost_level[level] << " s [ " << 100*cost_level[level]/cost_total << " ] %" << std::endl;
+  }
+  mpi_parallel::cout << " total = " << cost_total << " s" << std::endl;
   mpi_parallel::cout << std::endl;
 }
 
