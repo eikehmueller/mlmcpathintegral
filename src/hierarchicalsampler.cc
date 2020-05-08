@@ -9,9 +9,9 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
                                          const GeneralParameters param_general,
                                          const HMCParameters param_hmc,
                                          const ClusterParameters param_cluster,
-                                         const MultiLevelMCParameters param_multilevelmc) :
+                                         const HierarchicalParameters param_hierarchical) :
   Sampler(),
-  n_level(param_multilevelmc.n_level()) {
+  n_level(param_hierarchical.n_level()) {
   
   // Check that Number of lattice points permits number of levels
   unsigned int M_lat = fine_action->getM_lat();
@@ -48,12 +48,12 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
     x_sampler_path.push_back(std::make_shared<Path>(M_lat,T_final));
   }
   // Construct sampler on coarsest level
-  if (param_multilevelmc.coarsesampler() == SamplerHMC) {
+  if (param_hierarchical.coarsesampler() == SamplerHMC) {
     coarse_sampler = std::make_shared<HMCSampler>(coarse_action,
                                                   param_hmc.nt(),
                                                   param_hmc.dt(),
                                                   param_hmc.n_burnin());
-  } else if (param_multilevelmc.coarsesampler() == SamplerCluster) {
+  } else if (param_hierarchical.coarsesampler() == SamplerCluster) {
     if (param_general.action() != ActionRotor) {
       mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
       mpi_exit(EXIT_FAILURE);
@@ -62,7 +62,7 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
       std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(coarse_action),
                                        param_cluster.n_burnin(),
                                        param_cluster.n_updates());
-  } else if (param_multilevelmc.coarsesampler() == SamplerExact) {
+  } else if (param_hierarchical.coarsesampler() == SamplerExact) {
     if (param_general.action() != ActionHarmonicOscillator) {
       mpi_parallel::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
       mpi_exit(EXIT_FAILURE);

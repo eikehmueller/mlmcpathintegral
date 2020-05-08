@@ -9,12 +9,64 @@
 #include "action.hh"
 #include "parameters.hh"
 #include "sampler.hh"
-#include "montecarlomultilevel.hh"
 #include "conditionedfineaction.hh"
 #include "twolevelmetropolisstep.hh"
 #include "statistics.hh"
 #include "hmcsampler.hh"
 #include "clustersampler.hh"
+
+/** @class HierarchicalSamplerParameters
+ *
+ * @brief Class for storing parameters of Hierarchical sampler.
+ */
+class HierarchicalParameters : public Parameters {
+public:
+  /** @brief Construct a new instance */
+  HierarchicalParameters() :
+    Parameters("hierarchical"),
+    n_level_(2),
+  coarsesampler_(SamplerHMC) {
+    addKey("n_level",Integer,Positive);
+    addKey("n_burnin",Integer,Positive);
+    addKey("coarsesampler",String);
+  }
+
+  /** @brief Read parameters from file
+   *
+   * @param[in] filename Name of file to read
+   */
+  int readFile(const std::string filename) {
+
+    int readSuccess = Parameters::readFile(filename);
+    if (!readSuccess) {
+      n_level_ = getContents("n_level")->getInt();
+      std::string sampler_str = getContents("coarsesampler")->getString();
+      if (sampler_str == "HMC") {
+        coarsesampler_ = SamplerHMC;
+      } else if (sampler_str == "cluster") {
+        coarsesampler_ = SamplerCluster;
+      } else if (sampler_str == "exact") {
+        coarsesampler_ = SamplerExact;
+      } else  {
+        mpi_parallel::cerr << " ERROR: Unknown coarse sampler: " << sampler_str;
+        mpi_parallel::cerr << std::endl;
+        mpi_parallel::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
+        mpi_exit(EXIT_FAILURE);
+      }
+    }
+    return readSuccess;
+  }
+
+  /** @brief Return number of levels */
+  unsigned int n_level() const { return n_level_; }
+  /** @brief Return sampler type */
+  SamplerType coarsesampler() const { return coarsesampler_; }
+private:
+  /** @brief Number of levels */
+  unsigned int n_level_;
+  /** @brief tolerance epsilon */
+  SamplerType coarsesampler_;
+};
 
 /** @file hierarchicalsampler.hh
  * @brief Header file for Hierarchical sampler class
@@ -34,13 +86,13 @@ public:
    * @param[in] param_general General parameters
    * @param[in] param_hmc HMC sampler parameters
    * @param[in] param_cluster Cluster sampler parameters
-   * @param[in] param_multilevelmc Multilevel parameters
+   * @param[in] param_hierarchical Hierarchical sampler parameters
    */
   HierarchicalSampler(const std::shared_ptr<Action> fine_action,
                       const GeneralParameters param_general,
                       const HMCParameters param_hmc,
                       const ClusterParameters param_cluster,
-                      const MultiLevelMCParameters param_multilevelmc);
+                      const HierarchicalParameters param_hierarchical);
   /** @brief Destroy instance
    *
    * Deallocate memory

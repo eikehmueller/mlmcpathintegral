@@ -108,6 +108,11 @@ int main(int argc, char* argv[]) {
   if (param_multilevelmc.readFile(filename)) return 1;
   mpi_parallel::cout << param_multilevelmc << std::endl;
 
+  HierarchicalParameters param_hierarchical;
+  if (param_hierarchical.readFile(filename)) return 1;
+  mpi_parallel::cout << param_hierarchical << std::endl;
+
+  
 #ifdef DEBUG_BUILD
     mpi_parallel::cout << FRED("CAUTION: built in debug mode.") << std::endl;
 #endif // DEBUG_BUILD
@@ -230,7 +235,7 @@ int main(int argc, char* argv[]) {
                                                  param_hmc,
                                                  param_cluster,
                                                  param_singlelevelmc,
-                                                 param_multilevelmc);
+                                                 param_hierarchical);
   
     montecarlo_singlelevel.evaluate();
     mpi_parallel::cout << std::endl;

@@ -15,7 +15,6 @@
 #include "montecarlo.hh"
 #include "mpi_wrapper.hh"
 #include "hierarchicalsampler.hh"
-#include "montecarlomultilevel.hh"
 
 /** @file montecarlosinglelevel.hh
  * @brief Header file for single level Monte Carlo classes
@@ -104,7 +103,7 @@ public:
    * @param[in] param_hmc HMC sampler parameters
    * @param[in] param_cluster Cluster sampler parameters
    * @param[in] param_singlelevelmc Single level sampler parameters
-   * @param[in] param_multilevelmc Multi level sampler parameters (required for hierarchical sampler)
+   * @param[in] param_hierarchical Hierarchical sampler parameters
   */ 
   MonteCarloSingleLevel(std::shared_ptr<Action> action_,
                         std::shared_ptr<QoI> qoi_,
@@ -113,7 +112,7 @@ public:
                         const HMCParameters param_hmc,
                         const ClusterParameters param_cluster,
                         const SingleLevelMCParameters param_singlelevelmc,
-                        const MultiLevelMCParameters param_multilevelmc);
+                        const HierarchicalParameters param_hierarchical);
   
   /** @brief Calculate QoI
    * 

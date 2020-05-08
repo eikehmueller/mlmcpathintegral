@@ -12,7 +12,7 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
                                              const HMCParameters param_hmc,
                                              const ClusterParameters param_cluster,
                                              const SingleLevelMCParameters param_singlelevelmc,
-                                             const MultiLevelMCParameters param_multilevelmc) :
+                                             const HierarchicalParameters param_hierarchical) :
   MonteCarlo(param_singlelevelmc.n_burnin()),
   action(action_), 
   qoi(qoi_),
@@ -45,7 +45,7 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
                                                     param_general,
                                                     param_hmc,
                                                     param_cluster,
-                                                    param_multilevelmc);
+                                                    param_hierarchical);
   } else {
     mpi_parallel::cerr << " ERROR: Unknown sampler." << std::endl;
     mpi_exit(EXIT_FAILURE);
