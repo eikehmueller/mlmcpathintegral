@@ -88,9 +88,6 @@ void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
     if (ell == (n_level-1)) {
       /* Sample directly on coarsest level */
       coarse_sampler->draw(x_sampler_path[ell]);
-      if (not coarse_sampler->accepted()) {
-        accept = false;
-      } 
     } else {
       /* 
        * On all other levels, sample by using the two level MCMC process
@@ -100,11 +97,9 @@ void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
        */
       twolevel_step[ell]->draw(x_sampler_path[ell+1],
                                x_sampler_path[ell]);
-      if (not twolevel_step[ell]->accepted()) {
-        accept = false;
-      }
     }
   }
+  accept = twolevel_step[0]->accepted();
   n_total_samples++;
   n_accepted_samples += (int) accept;
   // Copy path
@@ -117,7 +112,6 @@ void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
 
 /* Show statistics on all levels */
 void HierarchicalSampler::show_stats() {
-  MCMCStep::show_stats();
   mpi_parallel::cout << std::setprecision(3) << std::fixed;
   mpi_parallel::cout << "   cost per sample = " << cost_per_sample() << " mu s" << std::endl;
     mpi_parallel::cout << "   acceptance/rejection probability   p      1-p" << std::endl;
