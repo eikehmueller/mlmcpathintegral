@@ -24,7 +24,7 @@ LLIBS=-lgsl -lgslcblas
 
 SOURCES=$(wildcard *.hh *.cc)
 ifeq ($(MAIN),)
-  MAIN=driver.x
+  MAIN=driver
 endif
 OBJS=$(patsubst %.cc,%.o,$(wildcard *.cc))
 
