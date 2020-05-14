@@ -190,13 +190,19 @@ int main(int argc, char* argv[]) {
     break;
   }
   }
+  
+  // Exact result (if known)
+  double exact_result;
+  // numerical result and statistical error
+  double numerical_result;
+  double statistical_error;
 
   if (param_general.do_singlelevelmc() or param_general.do_multilevelmc()) {
     /* ====== Print out exact result for harmonic oscillator */
     if (param_general.action() == ActionHarmonicOscillator) {
       std::shared_ptr<HarmonicOscillatorAction> ho_action =
         std::dynamic_pointer_cast<HarmonicOscillatorAction>(action);
-      double exact_result = ho_action->Xsquared_exact();
+      exact_result = ho_action->Xsquared_exact();
       double exact_result_continuum = ho_action->Xsquared_exact_continuum();
       mpi_parallel::cout << std::endl;
       mpi_parallel::cout << std::setprecision(6) << std::fixed;
@@ -208,10 +214,10 @@ int main(int argc, char* argv[]) {
       std::shared_ptr<RotorAction> rotor_action =
         std::dynamic_pointer_cast<RotorAction>(action);
       double exact_result_continuum = rotor_action->chit_exact_continuum();
-      double exact_result_perturbative = rotor_action->chit_exact_perturbative();
+      exact_result = rotor_action->chit_exact_perturbative();
       mpi_parallel::cout << std::endl;
       mpi_parallel::cout << std::setprecision(6) << std::fixed;
-      mpi_parallel::cout << " Exact result             <chi_t> = " << exact_result_perturbative << " + O((a/I)^2), a/I = " << action->geta_lat()/action->getm0() << std::endl;
+      mpi_parallel::cout << " Exact result             <chi_t> = " << exact_result << " + O((a/I)^2), a/I = " << action->geta_lat()/action->getm0() << std::endl;
       mpi_parallel::cout << " Continuum limit [a -> 0] <chi_t> = " << exact_result_continuum << std::endl;
       mpi_parallel::cout << std::endl;
     }
@@ -240,7 +246,9 @@ int main(int argc, char* argv[]) {
     montecarlo_singlelevel.evaluate();
     mpi_parallel::cout << std::endl;
     montecarlo_singlelevel.show_statistics();
-    mpi_parallel::cout << "=== Sampler statistics === " << std::endl; 
+    numerical_result = montecarlo_singlelevel.numerical_result();
+    statistical_error = montecarlo_singlelevel.statistical_error();
+    mpi_parallel::cout << "=== Sampler statistics === " << std::endl;
     montecarlo_singlelevel.get_sampler()->show_stats();
     mpi_parallel::cout << std::endl;
   }
@@ -304,6 +312,21 @@ int main(int argc, char* argv[]) {
     if (param_multilevelmc.show_detailed_stats()) {
       montecarlo_multilevel.show_detailed_statistics();
     }
+    numerical_result = montecarlo_multilevel.numerical_result();
+    statistical_error = montecarlo_multilevel.statistical_error();
   }
+  
+  // Compare to exact results
+  if ( (param_general.action() == ActionHarmonicOscillator) or
+       (param_general.action() == ActionRotor) ) {
+    double diff = fabs(numerical_result-exact_result);
+    double ratio = diff/statistical_error;
+    mpi_parallel::cout << std::setprecision(8) << std::fixed;
+    mpi_parallel::cout << "Comparison to exact result " << std::endl;
+    mpi_parallel::cout << "  (exact - numerical) = " << diff;
+    mpi_parallel::cout << std::setprecision(3) << std::fixed;
+    mpi_parallel::cout << " = " << ratio << " * (statistical error) " << std::endl << std::endl;
+  }
+  
   mpi_finalize();
 }

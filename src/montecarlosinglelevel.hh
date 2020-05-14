@@ -129,6 +129,15 @@ public:
   /** @brief Return sampler */
   std::shared_ptr<Sampler> get_sampler() { return sampler; }
   
+  /** @brief Return numerical result */
+  double numerical_result() const {
+    return stats_Q->average();
+  }
+  
+  /** @brief Return statistical error */
+  double statistical_error() const {
+    return stats_Q->error();
+  }
 
 private:
   /** @brief Action action to use */

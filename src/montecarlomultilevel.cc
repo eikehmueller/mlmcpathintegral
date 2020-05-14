@@ -243,19 +243,30 @@ void MonteCarloMultiLevel::show_detailed_statistics() {
   mpi_parallel::cout << std::endl;
 }
 
-/* Show summary statistics and timing */
-void MonteCarloMultiLevel::show_statistics() {
+/* Calculate numerical value */
+double MonteCarloMultiLevel::numerical_result() const {
   double qoi_value = 0.0;
-  double qoi_error = 0.0;
   for (unsigned int level=0;level<n_level;++level) {
     qoi_value += stats_qoi[level]->average();
+  }
+  return qoi_value;
+}
+
+/* Calculate statistical error */
+double MonteCarloMultiLevel::statistical_error() const {
+  double qoi_error = 0.0;
+  for (unsigned int level=0;level<n_level;++level) {
     double error = stats_qoi[level]->error();
     qoi_error += error*error;
   }
-  qoi_error = sqrt(qoi_error);
+  return sqrt(qoi_error);
+}
+
+/* Show summary statistics and timing */
+void MonteCarloMultiLevel::show_statistics() {
   mpi_parallel::cout << std::setprecision(6) << std::fixed;
   mpi_parallel::cout << std::endl;
-  mpi_parallel::cout << " Q: Avg +/- Err = " << qoi_value << " +/- " << qoi_error << std::endl;
+  mpi_parallel::cout << " Q: Avg +/- Err = " << numerical_result() << " +/- " << statistical_error() << std::endl;
   mpi_parallel::cout << std::endl;
   mpi_parallel::cout << timer << std::endl;
   mpi_parallel::cout << std::endl;

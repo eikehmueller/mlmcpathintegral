@@ -112,7 +112,13 @@ public:
   
   /** @brief Print out statistics */
   void show_statistics();
-
+  
+  /** @brief Return numerical result */
+  double numerical_result() const;
+  
+  /** @brief Return statistical error */
+  double statistical_error() const;
+  
 private:
 
   /** Draw independent sample on particular level 
@@ -141,8 +147,6 @@ private:
    * @param[in] ell Level \f$\ell\f$
    */
   double cost_eff(const int ell) const;
-  
-
   
 private:
   /** @brief Action on fine level */
