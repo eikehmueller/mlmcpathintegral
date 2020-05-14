@@ -8,6 +8,23 @@
 /** Draw next sample */
 void HMCSampler::draw(std::shared_ptr<Path> x_path) {
   const unsigned int M_lat = action->getM_lat();
+  accept = false;
+  for (unsigned int r=0;r<n_rep;++r) {
+    accept = accept or single_step();
+  }
+  n_total_samples++;
+  n_accepted_samples += (int) accept;
+  // Copy to output vector
+  if (copy_if_rejected or accept) {
+    std::copy(x_path_cur->data,
+              x_path_cur->data+M_lat,
+              x_path->data);
+  }
+}
+
+/* Do a single HMC accept/reject step */
+bool HMCSampler::single_step() {
+  const unsigned int M_lat = action->getM_lat();
   // Initial kinetic energy
   double T_kin_cur = 0.0;
   // Draw random momentum from normal distribution
@@ -47,7 +64,7 @@ void HMCSampler::draw(std::shared_ptr<Path> x_path) {
     T_kin_trial += 0.5*tmp*tmp;
   }
   // STEP 2: Accept-reject step
-  accept = false;
+  bool accept_step = false;
   // Change in action S(X)
   double deltaS = action->evaluate(x_path_trial) - action->evaluate(x_path_cur);
   // Change in kinetic energy T(P)
@@ -55,36 +72,24 @@ void HMCSampler::draw(std::shared_ptr<Path> x_path) {
   // Change in H(X,P) = T(P) + S(X)
   double deltaH = deltaS + deltaT;
   if (deltaH < 0.0) {
-    accept = true;
+    accept_step = true;
   } else {
     double threshold = exp(-deltaH);
-    accept = (uniform_dist(engine) < threshold);
+    accept_step = (uniform_dist(engine) < threshold);
   }
   // If accepted, copy state
-  if (accept) {
+  if (accept_step) {
     std::copy(x_path_trial->data,
               x_path_trial->data+M_lat,
               x_path_cur->data);
   }
-  n_total_samples++;
-  n_accepted_samples += (int) accept;
-  
-  // Copy to output vector
-  if (copy_if_rejected or accept) {
-    std::copy(x_path_cur->data,
-              x_path_cur->data+M_lat,
-              x_path->data);
-  }
+  return accept_step;
 }
 
 /* automatically tune stepsize */
 void HMCSampler::autotune_stepsize(const double p_accept_target) {
   unsigned int n_autotune_samples=1000;
   double tolerance = 1.E-2; // Tolerance
-  const unsigned int M_lat = action->getM_lat();
-  const double T_final = action->getT_final();
-  std::shared_ptr<Path> x_path_tmp =
-    std::make_shared<Path>(M_lat,T_final);
   double dt_hmc_original = dt_hmc;
   double dt_hmc_min = 0.5*dt_hmc;
   double dt_hmc_max = 2.*dt_hmc;
@@ -96,7 +101,8 @@ void HMCSampler::autotune_stepsize(const double p_accept_target) {
     reset_stats();
     dt_hmc = 0.5*(dt_hmc_min+dt_hmc_max);
     for (unsigned int j=0;j<n_autotune_samples;++j) {
-      draw(x_path_tmp);
+      n_accepted_samples += (int) single_step();
+      n_total_samples++;
     }
     if (p_accept() > p_accept_target) {
       dt_hmc_min = dt_hmc;

@@ -98,6 +98,7 @@ hmc:
   nt = 100        # Number of HMC steps
   dt = 0.05       # HMC time step
   n_burnin = 100  # Number of burnin samples
+  n_rep = 1     # Number of repetitions
 
 ###########################################
 # Cluster sampler parameters

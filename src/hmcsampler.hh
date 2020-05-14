@@ -25,9 +25,11 @@ public:
     Parameters("hmc"),
     nt_(100),
     dt_(0.1),
+    n_rep_(1),
     n_burnin_(100) {
     addKey("nt",Integer,Positive);
     addKey("dt",Double,Positive);
+    addKey("n_rep",Integer,Positive);
     addKey("n_burnin",Integer,Positive);
   }
 
@@ -41,12 +43,15 @@ public:
     if (!readSuccess) {
       nt_ = getContents("nt")->getInt();
       dt_ = getContents("dt")->getDouble();
+      n_rep_ = getContents("n_rep")->getInt();
       n_burnin_ = getContents("n_burnin")->getInt();
     }
     return readSuccess;
   }
   /** @brief Return number of integration steps */
   unsigned int nt() const { return nt_; }
+  /** @brief Return number of repetitions */
+  unsigned int n_rep() const { return n_rep_; }
   /** @brief Return integration timestep \f$dt\f$ */
   double dt() const { return dt_; }
   /** @brief Return number of burnin samples */
@@ -56,6 +61,8 @@ private:
   unsigned int nt_;
   /** @brief Integration time step \f$dt\f$ */
   double dt_;
+  /** @brief Number of repetitions */
+  unsigned int n_rep_;
   /** @brief Number of burnin samples */
   unsigned int n_burnin_;
 };
@@ -82,11 +89,13 @@ public:
   HMCSampler(const std::shared_ptr<Action> action_,
              const unsigned int nt_hmc_,
              const double dt_hmc_,
-             const unsigned int n_burnin_) :
+             const unsigned int n_burnin_,
+             const unsigned int n_rep_) :
     Sampler(),
     action(action_),
     nt_hmc(nt_hmc_),
     dt_hmc(dt_hmc_),
+    n_rep(n_rep_),
     n_burnin(n_burnin_)
   {
     engine.seed(8923759);
@@ -135,6 +144,11 @@ public:
    */
   virtual void draw(std::shared_ptr<Path> x_path);
 
+private:
+  
+  /** @brief Integrate a single HMC trajectory */
+  bool single_step();
+  
 protected:
   /** @brief Action to sample from */
   const std::shared_ptr<Action> action;
@@ -142,6 +156,8 @@ protected:
   const unsigned int nt_hmc;
   /** @brief Time step size of determininistic trajectories */
   mutable double dt_hmc;
+  /** @brief Number of repetitions */
+  const unsigned int n_rep;
   /** @brief Number of burn-in steps */
   const unsigned int n_burnin;
   /** @brief Current state (path) */
