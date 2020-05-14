@@ -4,5 +4,6 @@
 src/parameters.in
 src/doc
 src/.dependencies
+src/driver
 local.mk
 MLMC Pathintegral
