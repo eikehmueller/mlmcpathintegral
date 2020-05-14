@@ -17,6 +17,17 @@
  * storing them in appropriate classes.
  */
 
+/** @brief Enum for different methods
+ *   - 0: Single-level
+ *   - 1: Two-level
+ *   - 2: Multi-level
+ */
+enum MethodType {
+  MethodSingleLevel = 0,
+  MethodTwoLevel = 1,
+  MethodMultiLevel = 2
+};
+
 /** @brief Enum for different actions
  *  - 0: Harmonic Oscillator
  *  - 1: Quartic Oscillator
@@ -434,13 +445,9 @@ public:
   /** @brief Construct a new instance */
   GeneralParameters() :
     Parameters("general"),
-    do_singlelevelmc_(true),
-    do_twolevelmc_(true),
-    do_multilevelmc_(true),
+    method_(MethodSingleLevel),
     action_(ActionHarmonicOscillator) {
-    addKey("do_singlelevelmc",Bool);
-    addKey("do_twolevelmc",Bool);
-    addKey("do_multilevelmc",Bool);
+    addKey("method",String);
     addKey("action",String);
   }
 
@@ -452,9 +459,15 @@ public:
 
     int readSuccess = Parameters::readFile(filename);
     if (!readSuccess) {
-      do_singlelevelmc_ = getContents("do_singlelevelmc")->getBool();
-      do_twolevelmc_ = getContents("do_twolevelmc")->getBool();
-      do_multilevelmc_ = getContents("do_multilevelmc")->getBool();
+      std::string method_str = getContents("method")->getString();
+      if (method_str=="singlelevel") {
+        method_ = MethodSingleLevel;
+      } else if (method_str=="twolevel") {
+        method_ = MethodTwoLevel;
+      } else if (method_str=="multilevel") {
+        method_ = MethodMultiLevel;
+      } else {
+      }
       std::string action_str = getContents("action")->getString();
       if (action_str=="harmonicoscillator") {
         action_ = ActionHarmonicOscillator;
@@ -470,22 +483,14 @@ public:
     return readSuccess;
   }
 
-  /** @brief Run single level MC algorithm? */
-  bool do_singlelevelmc() const { return do_singlelevelmc_; }
-  /** @brief Run two level MC algorithm? */
-  bool do_twolevelmc() const { return do_twolevelmc_; }
-  /** @brief Run multilevel MC algorithm? */
-  bool do_multilevelmc() const { return do_multilevelmc_; }
+  /** @brief Method to use (single-, two-, or multi-level  */
+  MethodType method() const { return method_; }
   /** @brief Return the action type */
   ActionType action() const { return action_; }
 
 private:
-  /** @brief Run single level MC algorithm? */
-  bool do_singlelevelmc_;
-  /** @brief Run two level MC algorithm? */
-  bool do_twolevelmc_;
-  /** @brief Run multilevel MC algorithm? */
-  bool do_multilevelmc_;
+  /** @brief Method to use */
+  MethodType method_;
   /** @brief Type of action */
   ActionType action_;
 };

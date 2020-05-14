@@ -197,7 +197,8 @@ int main(int argc, char* argv[]) {
   double numerical_result;
   double statistical_error;
 
-  if (param_general.do_singlelevelmc() or param_general.do_multilevelmc()) {
+  if ( (param_general.method() == MethodSingleLevel) or
+       (param_general.method() == MethodMultiLevel) ) {
     /* ====== Print out exact result for harmonic oscillator */
     if (param_general.action() == ActionHarmonicOscillator) {
       std::shared_ptr<HarmonicOscillatorAction> ho_action =
@@ -227,7 +228,7 @@ int main(int argc, char* argv[]) {
    * Single level method                      *
    * **************************************** */  
 
-  if (param_general.do_singlelevelmc()) {
+  if (param_general.method() == MethodSingleLevel) {
     mpi_parallel::cout << "+--------------------------------+" << std::endl;
     mpi_parallel::cout << "! Single level MC                !" << std::endl;
     mpi_parallel::cout << "+--------------------------------+" << std::endl;
@@ -256,7 +257,7 @@ int main(int argc, char* argv[]) {
   /* **************************************** * 
    * Two level method                         *
    * **************************************** */
-  if (param_general.do_twolevelmc()) {
+  if (param_general.method() == MethodTwoLevel) {
     mpi_parallel::cout << "+--------------------------------+" << std::endl;
     mpi_parallel::cout << "! Two level MC                   !" << std::endl;
     mpi_parallel::cout << "+--------------------------------+" << std::endl;
@@ -289,7 +290,7 @@ int main(int argc, char* argv[]) {
   /* **************************************** * 
    * Multilevel method                         *
    * **************************************** */
-  if (param_general.do_multilevelmc()) {
+  if (param_general.method() == MethodMultiLevel) {
     if (mpi_comm_size() > 1) {
       mpi_parallel::cerr << " Multilevel method has not been parallelised (yet)." << std::endl;
       mpi_exit(EXIT_FAILURE);
@@ -316,7 +317,7 @@ int main(int argc, char* argv[]) {
     statistical_error = montecarlo_multilevel.statistical_error();
   }
   
-  // Compare to exact results
+  // Compare numerical results to exact result (if possible)
   if ( (param_general.action() == ActionHarmonicOscillator) or
        (param_general.action() == ActionRotor) ) {
     double diff = fabs(numerical_result-exact_result);

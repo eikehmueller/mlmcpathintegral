@@ -2,9 +2,8 @@
 # General parameters
 ###########################################
 general:
-  do_singlelevelmc = true # Run single level MC algorithm?
-  do_twolevelmc = true # Run two level MC algorithm?
-  do_multilevelmc = true # Run multilevel MC algorithm?
+  method = 'singlelevel' # Method to use. Allowed values are:
+                         # [singlelevel,twolevel,multilevel]
   action = 'harmonicoscillator' # action to use. Allowed values are:
                                 # [harmonicoscillator,
                                 #  quarticoscillator,
