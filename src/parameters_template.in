@@ -14,7 +14,7 @@ general:
 # Lattice parameters
 ###########################################
 lattice:
-  M_lat = 16        # Number of lattice sites
+  M_lat = 64        # Number of lattice sites
   T_final = 1.0     # Final time
 
 ###########################################
@@ -82,14 +82,13 @@ multilevelmc:
   n_level = 3      # Number of levels
   n_burnin = 100      # Number of burnin samples
   epsilon = 1.0    # Tolerance epsilon
-  coarsesampler = 'HMC' # Sampler to use [HMC, cluster, exact]
   show_detailed_stats = false  # Print out detailed statistics?
 
 ###########################################
 # Hierarchical sampler parameters
 ###########################################
-hierarchicalsampler:
-  n_level = 3           # Number of levels
+hierarchical:
+  n_level = 2           # Number of levels
   coarsesampler = 'HMC' # Sampler to use [HMC, cluster, exact]
 
 ###########################################
@@ -97,7 +96,7 @@ hierarchicalsampler:
 ###########################################
 hmc:
   nt = 100        # Number of HMC steps
-  dt = 0.01       # HMC time step
+  dt = 0.05       # HMC time step
   n_burnin = 100  # Number of burnin samples
 
 ###########################################
