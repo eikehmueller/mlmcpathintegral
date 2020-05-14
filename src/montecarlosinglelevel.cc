@@ -23,10 +23,7 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
   timer("SinglevelMC") {
   if (param_singlelevelmc.sampler() == SamplerHMC) {
     sampler = std::make_shared<HMCSampler>(action,
-                                           param_hmc.nt(),
-                                           param_hmc.dt(),
-                                           param_hmc.n_burnin(),
-                                           param_hmc.n_rep());
+                                           param_hmc);
   } else if (param_singlelevelmc.sampler() == SamplerCluster) {
     if (param_general.action() != ActionRotor) {
       mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;

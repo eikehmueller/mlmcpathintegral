@@ -51,10 +51,7 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
   // Construct sampler on coarsest level
   if (param_hierarchical.coarsesampler() == SamplerHMC) {
     coarse_sampler = std::make_shared<HMCSampler>(coarse_action,
-                                                  param_hmc.nt(),
-                                                  param_hmc.dt(),
-                                                param_hmc.n_burnin(),
-                                                  param_hmc.n_rep());
+                                                  param_hmc);
   } else if (param_hierarchical.coarsesampler() == SamplerCluster) {
     if (param_general.action() != ActionRotor) {
       mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;

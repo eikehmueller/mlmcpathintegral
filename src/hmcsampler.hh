@@ -87,16 +87,13 @@ public:
    * @param[in] n_burnin_ Number of burnin steps
    */
   HMCSampler(const std::shared_ptr<Action> action_,
-             const unsigned int nt_hmc_,
-             const double dt_hmc_,
-             const unsigned int n_burnin_,
-             const unsigned int n_rep_) :
+             const HMCParameters hmc_param_) :
     Sampler(),
     action(action_),
-    nt_hmc(nt_hmc_),
-    dt_hmc(dt_hmc_),
-    n_rep(n_rep_),
-    n_burnin(n_burnin_)
+    nt_hmc(hmc_param_.nt()),
+    dt_hmc(hmc_param_.dt()),
+    n_rep(hmc_param_.n_rep()),
+    n_burnin(hmc_param_.n_burnin())
   {
     engine.seed(8923759);
     const unsigned int M_lat = action->getM_lat();
