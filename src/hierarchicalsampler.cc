@@ -87,7 +87,9 @@ void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
   for (int ell=n_level-1;ell>=0;--ell) {
     if (ell == (n_level-1)) {
       /* Sample directly on coarsest level */
-      coarse_sampler->draw(x_sampler_path[ell]);
+      for (int i=0;i<1;++i) {
+        coarse_sampler->draw(x_sampler_path[ell]);
+      }
     } else {
       /* 
        * On all other levels, sample by using the two level MCMC process
@@ -99,7 +101,11 @@ void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
                                x_sampler_path[ell]);
     }
   }
-  accept = twolevel_step[0]->accepted();
+  if (n_level > 1) {
+    accept = twolevel_step[0]->accepted();
+  } else {
+    accept = coarse_sampler->accepted();
+  }
   n_total_samples++;
   n_accepted_samples += (int) accept;
   // Copy path
