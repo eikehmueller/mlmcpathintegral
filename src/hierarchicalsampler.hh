@@ -14,6 +14,8 @@
 #include "statistics.hh"
 #include "hmcsampler.hh"
 #include "clustersampler.hh"
+#include "statistics.hh"
+#include "quantityofinterest.hh"
 #include "timer.hh"
 
 /** @class HierarchicalSamplerParameters
@@ -100,7 +102,9 @@ public:
    * @param[in] param_hierarchical Hierarchical sampler parameters
    */
   HierarchicalSampler(const std::shared_ptr<Action> fine_action,
+                      const std::shared_ptr<QoI> qoi_,
                       const GeneralParameters param_general,
+                      const StatisticsParameters param_stats,
                       const HMCParameters param_hmc,
                       const ClusterParameters param_cluster,
                       const HierarchicalParameters param_hierarchical);
@@ -132,6 +136,8 @@ public:
 private:
   /** @brief Action to sample from */
   std::vector<std::shared_ptr<Action>> action;
+  /** @brief Quantity of interest */
+  const std::shared_ptr<QoI> qoi;
   /** @brief Number of levels in hierarchy */
   const unsigned int n_level;
   /** @brief Two level step on all levels of the multigrid hierarchy */
@@ -142,6 +148,16 @@ private:
   std::vector<std::shared_ptr<Path> > x_sampler_path;
   /** @brief cost per sample */
   double cost_per_sample_;
+  /** @brief number of skipped samples between independent samples on all levels */
+  std::vector<double> t_indep;
+  /** @brief number of independent samples on all levels */
+  std::vector<int> n_indep;
+  /** @brief number of samples generated since last independent sample */
+  std::vector<int> t_sampler;
+  /** @brief vector with statistics of sampler paths */
+  std::vector<std::shared_ptr<Statistics> > stats_sampler;
+  /** @brief size of window for computing autocorrleations */
+  unsigned int n_autocorr_window;
 };
 
 #endif // HIERARCHICALSAMPLER

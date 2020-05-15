@@ -121,29 +121,13 @@ public:
   
 private:
 
-  /** Draw independent sample on particular level 
-   * 
-   * Generate a new independent sample \f$\Theta_\ell\f$ on level \f$\ell\f$
-   * using Algorithm 3 written down in
-   * Dodwell, Ketelsen, Scheichl, Teckentrup (2015) SIAM J. of Uncert. Quant.
-   *
-   * @param[in] ell level ell
-   * @param[inout] x_path generated path \f$\Theta_\ell\f$ 
-   */
-  void draw_independent_sample(const unsigned int ell,
-                               std::shared_ptr<Path> x_path);
-
-
   /** @brief Calculate effective cost \f$C_{\ell}^{eff}\f$ on a level
    * 
    * Calculate
    * \f[
-   *   C^{eff}_{\ell} = \lceil \tau^{int}_{\ell} \rceil \sum_{k=\ell}^{L-1} T_k C_{k}
+   *   C^{eff}_{\ell} = \lceil \tau^{int}_{\ell} \rceil (C_\ell + C_{\ell+1}^{indep})
    * \f]
-   * where \f$C_{k}=\alpha M_{k}\f$ is the cost on level \f$k\f$ and
-   * \f$T_k = t_k T_{k-1} = \prod_{k'=\ell+1}^{k}t_{k'}\f$, \f$T_{\ell}=1\f$.
-   * \f$t_k\f$ is the spacing between independent samples on level \f$k\f$.
-   * 
+   *
    * @param[in] ell Level \f$\ell\f$
    */
   double cost_eff(const int ell) const;
@@ -165,20 +149,12 @@ private:
   std::vector<std::shared_ptr<Path> > x_path;
   /** @brief Coarse path on a particular level */
   std::vector<std::shared_ptr<Path> > x_coarse_path;
-  /** @brief vector with statistics of sampler paths */
-  std::vector<std::shared_ptr<Statistics> > stats_sampler;
   /** @brief vector with statistics of uncorrelated Y's*/
   std::vector<std::shared_ptr<Statistics> > stats_qoi;
   /** @brief hierarchical sampler on each level */
   std::vector<std::shared_ptr<HierarchicalSampler>> hierarchical_sampler;
   /** @brief target number of samples on each level */
   std::vector<int> n_target;
-  /** @brief number of skipped samples between independent samples on all levels */
-  std::vector<double> t_indep;
-  /** @brief number of independent samples on all levels */
-  std::vector<int> n_indep;
-  /** @brief number of samples generated since last independent sample */
-  std::vector<int> t_sampler;
   /** @brief Size of autocorrelation window */
   unsigned int n_autocorr_window;
   /** @brief Minimal number of samples for qoi */

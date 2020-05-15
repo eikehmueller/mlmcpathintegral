@@ -18,9 +18,6 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
   n_level(param_multilevelmc.n_level()),
   epsilon(param_multilevelmc.epsilon()),
   n_target(param_multilevelmc.n_level(),0),
-  t_indep(param_multilevelmc.n_level(),0.0),
-  n_indep(param_multilevelmc.n_level(),0),
-  t_sampler(param_multilevelmc.n_level(),0),
   n_autocorr_window(param_stats.n_autocorr_window()),
   n_min_samples_qoi(param_stats.n_min_samples_qoi()),
   timer("MultilevelMC") {
@@ -53,7 +50,9 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
     HierarchicalParameters param_hierarchical_tmp = HierarchicalParameters(param_hierarchical.n_level()-ell,
                                param_hierarchical.coarsesampler());
     std::shared_ptr<HierarchicalSampler> sampler_tmp = std::make_shared<HierarchicalSampler>(coarse_action_tmp,
+                                              qoi,
                                               param_general,
+                                              param_stats,
                                               param_hmc,
                                               param_cluster,
                                               param_hierarchical_tmp);
@@ -69,9 +68,6 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
   }
   // Construct statistics on all levels
   for (unsigned int level=0;level<n_level;++level) {
-    std::stringstream stats_sampler_label;
-    stats_sampler_label << "Q_{sampler}[" << level << "]";
-    stats_sampler.push_back(std::make_shared<Statistics>(stats_sampler_label.str(),n_autocorr_window));
     std::stringstream stats_qoi_label;
     stats_qoi_label << "Y[" << level << "]";
     stats_qoi.push_back(std::make_shared<Statistics>(stats_qoi_label.str(),n_autocorr_window));
@@ -84,11 +80,7 @@ void MonteCarloMultiLevel::evaluate() {
    * larger than the autocorrelation time of the fine level process.
    */
   for (unsigned int level=0;level<n_level;++level) {
-    stats_sampler[level]->hard_reset();
     stats_qoi[level]->hard_reset();
-    t_sampler[level] = 0;
-    n_indep[level] = 0;
-    t_indep[level] = 0;
   }
   double two_epsilon_inv2 = 2./(epsilon*epsilon);
 
@@ -98,10 +90,10 @@ void MonteCarloMultiLevel::evaluate() {
     double qoi_Y;
     for (unsigned int j=0;j<n_burnin;++j) {
       if (level==n_level-1) {
-        draw_independent_sample(level,x_path[level]);
+        hierarchical_sampler[level-1]->draw(x_path[level]);
         qoi_Y = qoi->evaluate(x_path[level]);
       } else {
-        draw_independent_sample(level+1,x_coarse_path[level+1]);
+        hierarchical_sampler[level]->draw(x_path[level+1]);
         twolevel_step[level]->draw(x_coarse_path[level+1],x_path[level]);
         double qoi_fine = qoi->evaluate(x_path[level]);
         double qoi_coarse = qoi->evaluate(x_coarse_path[level+1]);
@@ -115,7 +107,6 @@ void MonteCarloMultiLevel::evaluate() {
   // Reset everything before actual run
   for (unsigned int level=0;level<n_level;++level) {
     stats_qoi[level]->reset();
-    stats_sampler[level]->reset();
     n_target[level] = n_min_samples_qoi;
   }
 
@@ -129,10 +120,10 @@ void MonteCarloMultiLevel::evaluate() {
       unsigned int j_start = stats_qoi[level]->samples();
       for (int j=j_start;j<n_target[level];++j) {
         if (level==n_level-1) {
-          draw_independent_sample(level,x_path[level]);
+          hierarchical_sampler[level-1]->draw(x_path[level]);
           qoi_Y = qoi->evaluate(x_path[level]);
         } else {
-          draw_independent_sample(level+1,x_coarse_path[level+1]);
+          hierarchical_sampler[level]->draw(x_coarse_path[level+1]);
           twolevel_step[level]->draw(x_coarse_path[level+1],x_path[level]);
           double qoi_fine = qoi->evaluate(x_path[level]);
           double qoi_coarse = qoi->evaluate(x_coarse_path[level+1]);
@@ -173,33 +164,16 @@ void MonteCarloMultiLevel::evaluate() {
   timer.stop();
 }
 
-/* Draw an independent sample on a particular level */
-void MonteCarloMultiLevel::draw_independent_sample(const unsigned int ell,
-                                                   std::shared_ptr<Path> x_path) {
-  while (true) {
-    hierarchical_sampler[ell-1]->draw(x_path);
-    double qoi_sampler = qoi->evaluate(x_path);
-    stats_sampler[ell]->record_sample(qoi_sampler);
-    t_sampler[ell]++;
-    if (t_sampler[ell] >= ceil(stats_sampler[ell]->tau_int())) {
-      t_indep[ell] = (n_indep[ell]*t_indep[ell]+t_sampler[ell])/(1.0+n_indep[ell]);
-      n_indep[ell]++;
-      t_sampler[ell] = 0;
-      break;
-    }
-  }
-}
-
 /* Calculate effective cost on a particular level ell */
 double MonteCarloMultiLevel::cost_eff(const int ell) const {
   // Cost on current level
   double cost;
   if (ell==n_level-1) {
-    cost = hierarchical_sampler[ell-1]->cost_per_sample()*t_indep[ell];
+    cost = hierarchical_sampler[ell-1]->cost_per_sample();
   } else {
     double cost_twolevel = twolevel_step[ell]->cost_per_sample();
     double cost_coarse = hierarchical_sampler[ell]->cost_per_sample();
-    cost = cost_twolevel + t_indep[ell+1]*cost_coarse;
+    cost = cost_twolevel + cost_coarse;
   }
   return ceil(stats_qoi[ell]->tau_int())*cost;
 }
@@ -209,8 +183,6 @@ void MonteCarloMultiLevel::show_detailed_statistics() {
   mpi_parallel::cout << "=== Statistics of coarse level samplers ===" << std::endl;
   for (unsigned int level=1;level<n_level;++level) {
     mpi_parallel::cout << "level = " << level << std::endl;
-    mpi_parallel::cout << *stats_sampler[level];
-    mpi_parallel::cout << " spacing between samples " << t_indep[level] << std::endl;
     mpi_parallel::cout << " hierarchical sampler stats " << std::endl;
     hierarchical_sampler[level-1]->show_stats();
     mpi_parallel::cout << "------------------------------------" << std::endl;    
