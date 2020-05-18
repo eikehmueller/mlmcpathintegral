@@ -94,6 +94,7 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
 
 /* Draw next sample */
 void MultilevelSampler::draw(std::shared_ptr<Path> x_path) {
+  accept = true;
   int level = n_level-1;
   do {
     if (level == (n_level-1)) {
@@ -132,17 +133,12 @@ void MultilevelSampler::draw(std::shared_ptr<Path> x_path) {
     }
   } while (level>=0);
   // Copy path
-  std::copy(x_sampler_path[0]->data,
-            x_sampler_path[0]->data+x_sampler_path[0]->M_lat,
-            x_path->data);
+  x_path->copy(x_sampler_path[0]);
 }
 
 /* Set current state */
 void MultilevelSampler::set_state(std::shared_ptr<Path> x_path) {
-  const unsigned int M_lat = x_path->M_lat;
-  std::copy(x_path->data,
-            x_path->data+M_lat,
-            x_sampler_path[0]->data);
+  x_sampler_path[0]->copy(x_path);
 }
 
 /* Show statistics on all levels */

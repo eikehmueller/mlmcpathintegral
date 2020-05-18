@@ -84,10 +84,7 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
 void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
   accept = true;
   for (int ell=1;ell<n_level;++ell) {
-    unsigned int M_lat = x_sampler_path[ell]->M_lat;
-    for (unsigned int k=0;k<M_lat;++k) {
-      x_sampler_path[ell]->data[k] = x_sampler_path[ell-1]->data[2*k];
-    }
+    x_sampler_path[ell]->copy_strided(x_sampler_path[ell-1],2);
   }
   for (int ell=n_level-1;ell>=0;--ell) {
     if (ell == (n_level-1)) {
@@ -106,18 +103,14 @@ void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
   n_total_samples++;
   n_accepted_samples += (int) accept;
   if (accept or copy_if_rejected) {
-    std::copy(x_sampler_path[0]->data,
-              x_sampler_path[0]->data+x_sampler_path[0]->M_lat,
-              x_path->data);
+    x_path->copy(x_sampler_path[0]);
   }
 }
 
 /* Set current state */
 void HierarchicalSampler::set_state(std::shared_ptr<Path> x_path) {
   const unsigned int M_lat = x_path->M_lat;
-  std::copy(x_path->data,
-            x_path->data+M_lat,
-            x_sampler_path[0]->data);
+  x_sampler_path[0]->copy(x_path);
 }
 
 /* Show statistics on all levels */

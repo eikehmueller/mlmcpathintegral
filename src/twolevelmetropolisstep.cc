@@ -78,24 +78,17 @@ void TwoLevelMetropolisStep::draw(const std::shared_ptr<Path> x_coarse_path,
     accept = (uniform_dist(engine) < threshold);
   }
   if (accept) {
-    std::copy(theta_prime->data,
-              theta_prime->data+M_lat,
-              theta_fine->data);
+    theta_fine->copy(theta_prime);
   }
   n_total_samples++;
   n_accepted_samples += (int) accept;
   // Copy back to path
   if (copy_if_rejected or accept) {
-    std::copy(theta_fine->data,
-              theta_fine->data+M_lat,
-              x_path->data);
+    x_path->copy(theta_fine);
   }
 }
 
 /* Set current state */
 void TwoLevelMetropolisStep::set_state(std::shared_ptr<Path> x_path) {
-  const unsigned int M_lat = x_path->M_lat;
-  std::copy(x_path->data,
-            x_path->data+M_lat,
-            theta_fine->data);
+  theta_fine->copy(x_path);
 }

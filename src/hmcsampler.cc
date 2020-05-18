@@ -16,9 +16,7 @@ void HMCSampler::draw(std::shared_ptr<Path> x_path) {
   n_accepted_samples += (int) accept;
   // Copy to output vector
   if (copy_if_rejected or accept) {
-    std::copy(x_path_cur->data,
-              x_path_cur->data+M_lat,
-              x_path->data);
+    x_path->copy(x_path_cur);
   }
 }
 
@@ -35,9 +33,7 @@ bool HMCSampler::single_step() {
   }
   // STEP 1: Integrate deterministic trajectories with symplectic Euler method
   // Copy current state to trial state
-  std::copy(x_path_cur->data,
-            x_path_cur->data+M_lat,
-            x_path_trial->data);
+  x_path_trial->copy(x_path_cur);
   for(unsigned int k =0;k<=nt_hmc;++k) {
     double dt_p = dt_hmc;
     double dt_x = dt_hmc;
@@ -79,19 +75,14 @@ bool HMCSampler::single_step() {
   }
   // If accepted, copy state
   if (accept_step) {
-    std::copy(x_path_trial->data,
-              x_path_trial->data+M_lat,
-              x_path_cur->data);
+    x_path_cur->copy(x_path_trial);
   }
   return accept_step;
 }
 
 /* Set current state */
 void HMCSampler::set_state(std::shared_ptr<Path> x_path) {
-  const unsigned int M_lat = x_path->M_lat;
-  std::copy(x_path->data,
-            x_path->data+M_lat,
-            x_path_cur->data);
+  x_path_cur->copy(x_path);
 }
 
 /* automatically tune stepsize */

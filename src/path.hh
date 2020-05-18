@@ -46,6 +46,22 @@ public:
    */
   void save_to_disk(const std::string filename);
 
+  /** @brief Copy data from other path
+   * @param[in] other Path to copy from
+   */
+  void copy(const std::shared_ptr<Path> other);
+
+  /** @brief Copy data from other path with stride n
+   *
+   * Set data[j] = other->data[stride*j] for j=0,...,M_lat/stride
+   *
+   * @param[in] other Path to copy from
+   * @param[in] stride Stride to use
+   */
+  void copy_strided(const std::shared_ptr<Path> other,
+                    const unsigned int stride);
+
+  
   /** @brief Number of time slices */
   const unsigned int M_lat;
   /** @brief Final time */
