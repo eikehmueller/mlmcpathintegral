@@ -39,7 +39,7 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
     }
     sampler = std::dynamic_pointer_cast<Sampler>(action);
   } else if (param_singlelevelmc.sampler() == SamplerHierarchical) {
-    sampler = std::make_shared<HierarchicalSampler>(action,
+    sampler = std::make_shared<MultilevelSampler>(action,
                                                     qoi,
                                                     param_general,
                                                     param_stats,

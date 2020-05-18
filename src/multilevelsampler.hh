@@ -1,5 +1,5 @@
-#ifndef HIERARCHICALSAMPLER_HH
-#define HIERARCHICALSAMPLER_HH HIERARCHICALSAMPLER_HH
+#ifndef MULTILEVELSAMPLER_HH
+#define MULTILEVELSAMPLER_HH MULTILEVELSAMPLER_HH
 #include <vector>
 #include <memory>
 #include <string>
@@ -17,6 +17,10 @@
 #include "statistics.hh"
 #include "quantityofinterest.hh"
 #include "timer.hh"
+
+/** @file multilevelsampler.hh
+* @brief Header file for Hierarchical sampler class
+*/
 
 /** @class HierarchicalSamplerParameters
  *
@@ -81,17 +85,13 @@ private:
   SamplerType coarsesampler_;
 };
 
-/** @file hierarchicalsampler.hh
- * @brief Header file for Hierarchical sampler class
- */
-
-/** @class HierarchicalSampler
+/** @class MultilevelSampler
  * @brief Hierarchical sampler
  *
  * Implementation of hierarchical sampling. Generate samples by successively screening samplers
  * from coarser levels
  */
-class HierarchicalSampler : public Sampler {
+class MultilevelSampler : public Sampler {
 public:
   /** @brief Create new instance
    *
@@ -101,7 +101,7 @@ public:
    * @param[in] param_cluster Cluster sampler parameters
    * @param[in] param_hierarchical Hierarchical sampler parameters
    */
-  HierarchicalSampler(const std::shared_ptr<Action> fine_action,
+  MultilevelSampler(const std::shared_ptr<Action> fine_action,
                       const std::shared_ptr<QoI> qoi_,
                       const GeneralParameters param_general,
                       const StatisticsParameters param_stats,
@@ -112,7 +112,7 @@ public:
    *
    * Deallocate memory
    */
-  virtual ~HierarchicalSampler() {}
+  virtual ~MultilevelSampler() {}
 
   /** @brief Draw a sample 
    *
@@ -160,4 +160,4 @@ private:
   unsigned int n_autocorr_window;
 };
 
-#endif // HIERARCHICALSAMPLER
+#endif // MULTILEVELSAMPLER

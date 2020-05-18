@@ -1,11 +1,11 @@
-#include "hierarchicalsampler.hh"
+#include "multilevelsampler.hh"
 
-/** @file hierarchicalsampler.cc
- * @brief Implementation of hierarchicalsampler.hh
+/** @file multilevelsampler.cc
+ * @brief Implementation of multilevelsampler.hh
  */
 
 /* Construct new instance */
-HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_action,
+MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
                                          const std::shared_ptr<QoI> qoi_,
                                          const GeneralParameters param_general,
                                          const StatisticsParameters param_stats,
@@ -92,7 +92,7 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
 }
 
 /* Draw next sample */
-void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
+void MultilevelSampler::draw(std::shared_ptr<Path> x_path) {
   int level = n_level-1;
   do {
     if (level == (n_level-1)) {
@@ -137,7 +137,7 @@ void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
 }
 
 /* Show statistics on all levels */
-void HierarchicalSampler::show_stats() {
+void MultilevelSampler::show_stats() {
   mpi_parallel::cout << std::setprecision(3) << std::fixed;
   mpi_parallel::cout << "  cost per sample = " << cost_per_sample() << " mu s" << std::endl << std::endl;
   for (unsigned int ell=0;ell<n_level;++ell) {

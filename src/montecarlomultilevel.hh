@@ -16,7 +16,7 @@
 #include "parameters.hh"
 #include "hmcsampler.hh"
 #include "clustersampler.hh"
-#include "hierarchicalsampler.hh"
+#include "multilevelsampler.hh"
 #include "montecarlo.hh"
 #include "mpi_wrapper.hh"
 
@@ -152,7 +152,7 @@ private:
   /** @brief vector with statistics of uncorrelated Y's*/
   std::vector<std::shared_ptr<Statistics> > stats_qoi;
   /** @brief hierarchical sampler on each level */
-  std::vector<std::shared_ptr<HierarchicalSampler>> hierarchical_sampler;
+  std::vector<std::shared_ptr<MultilevelSampler>> hierarchical_sampler;
   /** @brief target number of samples on each level */
   std::vector<int> n_target;
   /** @brief Size of autocorrelation window */

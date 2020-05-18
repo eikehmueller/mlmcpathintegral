@@ -49,7 +49,7 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
     twolevel_step.push_back(twolevel_step_tmp);
     HierarchicalParameters param_hierarchical_tmp = HierarchicalParameters(param_hierarchical.n_level()-ell,
                                param_hierarchical.coarsesampler());
-    std::shared_ptr<HierarchicalSampler> sampler_tmp = std::make_shared<HierarchicalSampler>(coarse_action_tmp,
+    std::shared_ptr<MultilevelSampler> sampler_tmp = std::make_shared<MultilevelSampler>(coarse_action_tmp,
                                               qoi,
                                               param_general,
                                               param_stats,

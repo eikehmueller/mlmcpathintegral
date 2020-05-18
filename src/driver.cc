@@ -17,7 +17,7 @@
 #include "mcmcstep.hh"
 #include "hmcsampler.hh"
 #include "clustersampler.hh"
-#include "hierarchicalsampler.hh"
+#include "multilevelsampler.hh"
 #include "config.h"
 #include "statistics.hh"
 #include "mpi_wrapper.hh"
