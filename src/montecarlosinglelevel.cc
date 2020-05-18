@@ -45,6 +45,14 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
                                                     param_hmc,
                                                     param_cluster,
                                                     param_hierarchical);
+  } else if (param_singlelevelmc.sampler() == SamplerMultilevel) {
+      sampler = std::make_shared<MultilevelSampler>(action,
+                                                    qoi,
+                                                    param_general,
+                                                    param_stats,
+                                                    param_hmc,
+                                                    param_cluster,
+                                                    param_hierarchical);
   } else {
     mpi_parallel::cerr << " ERROR: Unknown sampler." << std::endl;
     mpi_exit(EXIT_FAILURE);

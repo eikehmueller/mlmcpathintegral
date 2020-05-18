@@ -65,18 +65,16 @@ public:
      * Print out statistics
      */
     virtual void show_stats();
-  
-  /** @brief Return cost per sample (in microseconds) */
-  double cost_per_sample() {
-    return cost_per_sample_;
-  }
-  
+    
   /** @brief Set current state to particular value
    *
    * @param[in] x_path
    */
   virtual void set_state(std::shared_ptr<Path> x_path);
-  
+
+  /** Return cost per sample */
+  virtual double cost_per_sample() { return cost_per_sample_; }
+
 private:
   /** @brief Action to sample from */
   std::vector<std::shared_ptr<Action>> action;
@@ -90,8 +88,6 @@ private:
   std::shared_ptr<Sampler> coarse_sampler;
   /** @brief Sampler path on each level  */
   std::vector<std::shared_ptr<Path> > x_sampler_path;
-  /** @brief cost per sample */
-  double cost_per_sample_;
   /** @brief number of skipped samples between independent samples on all levels */
   std::vector<double> t_indep;
   /** @brief number of independent samples on all levels */
@@ -102,6 +98,8 @@ private:
   std::vector<std::shared_ptr<Statistics> > stats_sampler;
   /** @brief size of window for computing autocorrleations */
   unsigned int n_autocorr_window;
+  /** @brief cost per sample */
+  mutable double cost_per_sample_;
 };
 
 #endif // MULTILEVELSAMPLER

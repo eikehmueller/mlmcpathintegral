@@ -15,11 +15,11 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
   Sampler(),
   qoi(qoi_),
   n_level(param_hierarchical.n_level()),
-  cost_per_sample_(0.0),
   t_indep(param_hierarchical.n_level(),0.0),
   n_indep(param_hierarchical.n_level(),0),
   t_sampler(param_hierarchical.n_level(),0),
-  n_autocorr_window(param_stats.n_autocorr_window()) {
+  n_autocorr_window(param_stats.n_autocorr_window()),
+  cost_per_sample_(0.0){
   
   // Check that Number of lattice points permits number of levels
   unsigned int M_lat = fine_action->getM_lat();

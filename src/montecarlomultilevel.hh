@@ -36,10 +36,12 @@ public:
     n_level_(2),
     n_burnin_(100),
     epsilon_(1.0),
-    show_detailed_stats_(false) {
+    show_detailed_stats_(false),
+    sampler_(SamplerMultilevel) {
     addKey("n_level",Integer,Positive);
     addKey("n_burnin",Integer,Positive);
     addKey("epsilon",Double,Positive);
+    addKey("sampler",String);
     addKey("show_detailed_stats",Bool);
   }
 
@@ -55,6 +57,16 @@ public:
       n_burnin_ = getContents("n_burnin")->getInt();
       epsilon_ = getContents("epsilon")->getDouble();
       show_detailed_stats_ = getContents("show_detailed_stats")->getBool();
+      std::string sampler_str = getContents("sampler")->getString();
+      if (sampler_str == "hierarchical") {
+        sampler_ = SamplerHierarchical;
+      } else if (sampler_str == "multilevel") {
+          sampler_ = SamplerMultilevel;
+      } else {
+        mpi_parallel::cerr << " ERROR: Unknown sampler: " << sampler_str << std::endl;
+        mpi_parallel::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
+        mpi_exit(EXIT_FAILURE);
+      }
     }
     return readSuccess;
   }
@@ -67,6 +79,9 @@ public:
   double epsilon() const { return epsilon_; }
   /** @brief Show detailed statistics? */
   bool show_detailed_stats() const { return show_detailed_stats_; }
+  /** @brief Return sampler type */
+  SamplerType sampler() const { return sampler_; }
+
 private:
   /** @brief Number of levels */
   unsigned int n_level_;
@@ -76,6 +91,8 @@ private:
   double epsilon_;
   /** @brief Show detailed statistics? */
   bool show_detailed_stats_;
+  /** @brief Sampler type */
+  SamplerType sampler_;
 };
 
 /** @class MonteCarloMultiLevel
@@ -152,7 +169,7 @@ private:
   /** @brief vector with statistics of uncorrelated Y's*/
   std::vector<std::shared_ptr<Statistics> > stats_qoi;
   /** @brief hierarchical sampler on each level */
-  std::vector<std::shared_ptr<MultilevelSampler>> hierarchical_sampler;
+  std::vector<std::shared_ptr<Sampler>> coarse_sampler;
   /** @brief target number of samples on each level */
   std::vector<int> n_target;
   /** @brief Size of autocorrelation window */

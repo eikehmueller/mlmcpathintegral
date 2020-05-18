@@ -22,7 +22,9 @@ public:
   /** @brief Create new instance
    *
    */
-  MCMCStep() : accept(false), copy_if_rejected(false) {
+  MCMCStep() :
+    accept(false),
+    copy_if_rejected(false) {
     reset_stats();
   }
 
@@ -52,6 +54,13 @@ public:
    * @param[in] x_path
    */
   virtual void set_state(std::shared_ptr<Path> x_path)=0;
+  
+  /** Return cost per sample */
+  virtual double cost_per_sample() {
+    mpi_parallel::cerr << " ERROR: Cost per sample not defined for class " << typeid(*this).name() << std::endl;
+    mpi_exit(EXIT_FAILURE);
+    return 0.0;
+  }
   
 protected:
   /** @brief Collect statistics on acceptance probability and autocorrelation */

@@ -49,15 +49,29 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
     twolevel_step.push_back(twolevel_step_tmp);
     HierarchicalParameters param_hierarchical_tmp = HierarchicalParameters(param_hierarchical.n_level()-ell,
                                param_hierarchical.coarsesampler());
-    std::shared_ptr<MultilevelSampler> sampler_tmp
-      = std::make_shared<MultilevelSampler>(coarse_action_tmp,
-                                            qoi,
-                                            param_general,
-                                            param_stats,
-                                            param_hmc,
-                                            param_cluster,
-                                            param_hierarchical_tmp);
-    hierarchical_sampler.push_back(sampler_tmp);
+    std::shared_ptr<Sampler> sampler_tmp;
+    if (param_multilevelmc.sampler() == SamplerMultilevel) {
+      sampler_tmp
+        = std::make_shared<MultilevelSampler>(coarse_action_tmp,
+                                              qoi,
+                                              param_general,
+                                              param_stats,
+                                              param_hmc,
+                                              param_cluster,
+                                              param_hierarchical_tmp);
+    } else if (param_multilevelmc.sampler() == SamplerHierarchical) {
+      sampler_tmp
+        = std::make_shared<HierarchicalSampler>(coarse_action_tmp,
+                                                param_general,
+                                                param_stats,
+                                                param_hmc,
+                                                param_cluster,
+                                                param_hierarchical_tmp);
+    } else {
+      mpi_parallel::cerr << " ERROR: Unknown sampler." << std::endl;
+      mpi_exit(EXIT_FAILURE);
+    }
+    coarse_sampler.push_back(sampler_tmp);
   }
   std::shared_ptr<Action> coarse_action = action[n_level-1];
   // Construct paths on all levels
@@ -91,10 +105,10 @@ void MonteCarloMultiLevel::evaluate() {
     double qoi_Y;
     for (unsigned int j=0;j<n_burnin;++j) {
       if (level==n_level-1) {
-        hierarchical_sampler[level-1]->draw(x_path[level]);
+        coarse_sampler[level-1]->draw(x_path[level]);
         qoi_Y = qoi->evaluate(x_path[level]);
       } else {
-        hierarchical_sampler[level]->draw(x_path[level+1]);
+        coarse_sampler[level]->draw(x_path[level+1]);
         twolevel_step[level]->draw(x_coarse_path[level+1],x_path[level]);
         double qoi_fine = qoi->evaluate(x_path[level]);
         double qoi_coarse = qoi->evaluate(x_coarse_path[level+1]);
@@ -121,10 +135,10 @@ void MonteCarloMultiLevel::evaluate() {
       unsigned int j_start = stats_qoi[level]->samples();
       for (int j=j_start;j<n_target[level];++j) {
         if (level==n_level-1) {
-          hierarchical_sampler[level-1]->draw(x_path[level]);
+          coarse_sampler[level-1]->draw(x_path[level]);
           qoi_Y = qoi->evaluate(x_path[level]);
         } else {
-          hierarchical_sampler[level]->draw(x_coarse_path[level+1]);
+          coarse_sampler[level]->draw(x_coarse_path[level+1]);
           twolevel_step[level]->draw(x_coarse_path[level+1],x_path[level]);
           double qoi_fine = qoi->evaluate(x_path[level]);
           double qoi_coarse = qoi->evaluate(x_coarse_path[level+1]);
@@ -170,10 +184,10 @@ double MonteCarloMultiLevel::cost_eff(const int ell) const {
   // Cost on current level
   double cost;
   if (ell==n_level-1) {
-    cost = hierarchical_sampler[ell-1]->cost_per_sample();
+    cost = coarse_sampler[ell-1]->cost_per_sample();
   } else {
     double cost_twolevel = twolevel_step[ell]->cost_per_sample();
-    double cost_coarse = hierarchical_sampler[ell]->cost_per_sample();
+    double cost_coarse = coarse_sampler[ell]->cost_per_sample();
     cost = cost_twolevel + cost_coarse;
   }
   return ceil(stats_qoi[ell]->tau_int())*cost;
@@ -185,7 +199,7 @@ void MonteCarloMultiLevel::show_detailed_statistics() {
   for (unsigned int level=1;level<n_level;++level) {
     mpi_parallel::cout << "level = " << level << std::endl;
     mpi_parallel::cout << " hierarchical sampler stats " << std::endl;
-    hierarchical_sampler[level-1]->show_stats();
+    coarse_sampler[level-1]->show_stats();
     mpi_parallel::cout << "------------------------------------" << std::endl;    
   }
   mpi_parallel::cout << std::endl;

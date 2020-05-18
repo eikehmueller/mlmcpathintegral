@@ -65,17 +65,15 @@ public:
   virtual void draw(const std::shared_ptr<Path> x_coarse_path,
                     std::shared_ptr<Path> x_path);
                
-  /** @brief Return cost per sample (in microseconds) */
-  double cost_per_sample() {
-    return cost_per_sample_;
-  }
-  
   /** @brief Set current state to particular value
    *
    * @param[in] x_path
    */
   virtual void set_state(std::shared_ptr<Path> x_path);
 
+  /** Return cost per sample */
+  virtual double cost_per_sample() { return cost_per_sample_; }
+  
 protected:
   /** @brief Action on coarse level */
   const std::shared_ptr<Action> coarse_action;
@@ -98,6 +96,6 @@ protected:
   /** @brief Uniform distribution in [0,1] for accept/reject step */
   mutable Uniform uniform_dist;
   /** @brief cost per sample */
-  double cost_per_sample_;
+  mutable double cost_per_sample_;
 };
 #endif // TWOLEVELMETROPOLISSTEP_HH

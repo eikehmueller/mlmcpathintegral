@@ -126,16 +126,14 @@ public:
      */
     virtual void show_stats();
   
-  /** @brief Return cost per sample (in microseconds) */
-  double cost_per_sample() {
-    return cost_per_sample_;
-  }
-
   /** @brief Set current state to particular value
    *
    * @param[in] x_path
    */
   virtual void set_state(std::shared_ptr<Path> x_path);
+  
+  /** Return cost per sample */
+  virtual double cost_per_sample() { return cost_per_sample_; }
   
 private:
   /** @brief Action to sample from */

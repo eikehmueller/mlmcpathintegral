@@ -15,6 +15,7 @@
 #include "montecarlo.hh"
 #include "mpi_wrapper.hh"
 #include "hierarchicalsampler.hh"
+#include "multilevelsampler.hh"
 
 /** @file montecarlosinglelevel.hh
  * @brief Header file for single level Monte Carlo classes
@@ -58,6 +59,8 @@ public:
         sampler_ = SamplerExact;
       } else if (sampler_str == "hierarchical") {
         sampler_ = SamplerHierarchical;
+      } else if (sampler_str == "multilevel") {
+          sampler_ = SamplerMultilevel;
       } else  {
         mpi_parallel::cerr << " ERROR: Unknown sampler: " << sampler_str << std::endl;
         mpi_parallel::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
