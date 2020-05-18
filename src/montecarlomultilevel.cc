@@ -152,7 +152,7 @@ void MonteCarloMultiLevel::evaluate() {
           draw_coarse_sample(level,x_path[level]);
           qoi_Y = qoi->evaluate(x_path[level]);
         } else {
-          draw_coarse_sample(level+1,x_path[level+1]);
+          draw_coarse_sample(level+1,x_coarse_path[level+1]);
           twolevel_step[level]->draw(x_coarse_path[level+1],x_path[level]);
           double qoi_fine = qoi->evaluate(x_path[level]);
           double qoi_coarse = qoi->evaluate(x_coarse_path[level+1]);
