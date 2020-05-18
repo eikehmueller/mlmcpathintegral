@@ -69,6 +69,12 @@ public:
   double cost_per_sample() {
     return cost_per_sample_;
   }
+  
+  /** @brief Set current state to particular value
+   *
+   * @param[in] x_path
+   */
+  virtual void set_state(std::shared_ptr<Path> x_path);
 
 protected:
   /** @brief Action on coarse level */

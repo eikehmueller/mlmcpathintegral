@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <vector>
 #include "mpi_wrapper.hh"
+#include "path.hh"
 
 /** @file mcmcstep.hh
  * @brief Header file for MCMCStep class
@@ -45,6 +46,12 @@ public:
 
   /** @brief has last sample been accepted? */
   bool accepted() const { return accept; }
+  
+  /** @brief Set current state to particular value
+   *
+   * @param[in] x_path
+   */
+  virtual void set_state(std::shared_ptr<Path> x_path)=0;
   
 protected:
   /** @brief Collect statistics on acceptance probability and autocorrelation */

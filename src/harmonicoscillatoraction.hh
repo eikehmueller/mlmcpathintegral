@@ -234,6 +234,12 @@ public:
    */
   const double Xsquared_exact_continuum();
 
+  /** @brief Set current state to particular value
+   *
+   *  @param[in] x_path
+   */
+  virtual void set_state(std::shared_ptr<Path> x_path) {};
+  
 private:
   /** @brief Construct Cholesky factor of covariance matrix */
   void build_covariance();

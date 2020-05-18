@@ -14,7 +14,7 @@
 #include "clustersampler.hh"
 #include "montecarlo.hh"
 #include "mpi_wrapper.hh"
-#include "multilevelsampler.hh"
+#include "hierarchicalsampler.hh"
 
 /** @file montecarlosinglelevel.hh
  * @brief Header file for single level Monte Carlo classes

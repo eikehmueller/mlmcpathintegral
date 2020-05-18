@@ -86,6 +86,14 @@ bool HMCSampler::single_step() {
   return accept_step;
 }
 
+/* Set current state */
+void HMCSampler::set_state(std::shared_ptr<Path> x_path) {
+  const unsigned int M_lat = x_path->M_lat;
+  std::copy(x_path->data,
+            x_path->data+M_lat,
+            x_path_cur->data);
+}
+
 /* automatically tune stepsize */
 void HMCSampler::autotune_stepsize(const double p_accept_target) {
   unsigned int n_autotune_samples=1000;

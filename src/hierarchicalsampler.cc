@@ -1,30 +1,24 @@
-#include "multilevelsampler.hh"
+#include "hierarchicalsampler.hh"
 
-/** @file multilevelsampler.cc
- * @brief Implementation of multilevelsampler.hh
+/** @file hierarchicalsampler.cc
+ * @brief Implementation of hierarchicalsampler.hh
  */
 
 /* Construct new instance */
-MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
-                                     const std::shared_ptr<QoI> qoi_,
-                                     const GeneralParameters param_general,
-                                     const StatisticsParameters param_stats,
-                                     const HMCParameters param_hmc,
-                                     const ClusterParameters param_cluster,
-                                     const HierarchicalParameters param_hierarchical) :
+HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_action,
+                                         const GeneralParameters param_general,
+                                         const StatisticsParameters param_stats,
+                                         const HMCParameters param_hmc,
+                                         const ClusterParameters param_cluster,
+                                         const HierarchicalParameters param_hierarchical) :
   Sampler(),
-  qoi(qoi_),
   n_level(param_hierarchical.n_level()),
-  cost_per_sample_(0.0),
-  t_indep(param_hierarchical.n_level(),0.0),
-  n_indep(param_hierarchical.n_level(),0),
-  t_sampler(param_hierarchical.n_level(),0),
-  n_autocorr_window(param_stats.n_autocorr_window()) {
+  cost_per_sample_(0.0) {
   
   // Check that Number of lattice points permits number of levels
   unsigned int M_lat = fine_action->getM_lat();
   if ( (M_lat>>n_level)<<n_level == M_lat) {
-    mpi_parallel::cout << " Multilevel sampler: M_lat = " << M_lat << " = 2^{" << n_level << "-1} * " << (M_lat>>(n_level-1)) << std::endl;
+    mpi_parallel::cout << " Hierarchical sampler: M_lat = " << M_lat << " = 2^{" << n_level << "-1} * " << (M_lat>>(n_level-1)) << std::endl;
   } else {
     mpi_parallel::cout << "ERROR: M_lat = " << M_lat << " is not a multiple of 2^{n_level} = 2^{"<<n_level << "}" << std::endl;
   }
@@ -75,11 +69,7 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
     }
     coarse_sampler = std::dynamic_pointer_cast<Sampler>(coarse_action);
   }
-  // Statistics on all levels
-  for (unsigned int level=0;level<n_level;++level) {
-    std::stringstream stats_sampler_label;
-    stats_sampler_label << "   Q_{sampler}[" << level << "]"; stats_sampler.push_back(std::make_shared<Statistics>(stats_sampler_label.str(),n_autocorr_window));
-  }
+
   std::shared_ptr<Path> meas_path=std::make_shared<Path>(fine_action->getM_lat(),fine_action->getT_final());
   Timer timer_meas;
   unsigned int n_meas = 10000;
@@ -91,53 +81,39 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
   cost_per_sample_ = 1.E6*timer_meas.elapsed()/n_meas;
 }
 
-/* Draw next sample */
-void MultilevelSampler::draw(std::shared_ptr<Path> x_path) {
-  int level = n_level-1;
-  do {
-    if (level == (n_level-1)) {
+void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
+  accept = true;
+  for (int ell=1;ell<n_level;++ell) {
+    unsigned int M_lat = x_sampler_path[ell]->M_lat;
+    for (unsigned int k=0;k<M_lat;++k) {
+      x_sampler_path[ell]->data[k] = x_sampler_path[ell-1]->data[2*k];
+    }
+  }
+  for (int ell=n_level-1;ell>=0;--ell) {
+    if (ell == (n_level-1)) {
       /* Sample directly on coarsest level */
-      coarse_sampler->draw(x_sampler_path[level]);
+      coarse_sampler->set_state(x_sampler_path[ell]);
+      coarse_sampler->draw(x_sampler_path[ell]);
+      accept = accept and coarse_sampler->accepted();
     } else {
-      /*
-       * On all other levels, sample by using the two level MCMC process
-       * We know that the coarse level samples are decorrelated, since the
-       * algorithm only ever proceeds to the next finer level if this is the
-       * case.
-       */
-      twolevel_step[level]->draw(x_sampler_path[level+1],
-                                 x_sampler_path[level]);
+      twolevel_step[ell]->set_state(x_sampler_path[ell]);
+      twolevel_step[ell]->draw(x_sampler_path[ell+1],
+                               x_sampler_path[ell]);
+      accept = accept and twolevel_step[ell]->accepted();
     }
-    // The QoI of the independent sampler, Q_{ell}
-    double qoi_sampler = qoi->evaluate(x_sampler_path[level]);
-    stats_sampler[level]->record_sample(qoi_sampler);
-    t_sampler[level]++;
-    if (t_sampler[level] >= ceil(stats_sampler[level]->tau_int())) {
-      // t_sampler[level] is the number of x_sampler_path samples
-      // generated on this level since the last independent sample was used
-      t_indep[level] = (n_indep[level]*t_indep[level]+t_sampler[level])/(1.0+n_indep[level]);
-      // t_indep[level] is the average number of samples between indpendent
-      // samples
-      n_indep[level]++;
-      // n_indep is the number of independent samples of x_sampler_path on
-      // this level
-      t_sampler[level] = 0; // Reset number of independent samples
-      // Move to next-finer level since we have obtained a new independent
-      // sample
-      level--;
-    } else {
-      // Return to coarsest level
-      level = n_level-1;
-    }
-  } while (level>=0);
-  // Copy path
-  std::copy(x_sampler_path[0]->data,
-            x_sampler_path[0]->data+x_sampler_path[0]->M_lat,
-            x_path->data);
+    if (not accept) break;
+  }
+  n_total_samples++;
+  n_accepted_samples += (int) accept;
+  if (accept or copy_if_rejected) {
+    std::copy(x_sampler_path[0]->data,
+              x_sampler_path[0]->data+x_sampler_path[0]->M_lat,
+              x_path->data);
+  }
 }
 
 /* Set current state */
-void MultilevelSampler::set_state(std::shared_ptr<Path> x_path) {
+void HierarchicalSampler::set_state(std::shared_ptr<Path> x_path) {
   const unsigned int M_lat = x_path->M_lat;
   std::copy(x_path->data,
             x_path->data+M_lat,
@@ -145,30 +121,31 @@ void MultilevelSampler::set_state(std::shared_ptr<Path> x_path) {
 }
 
 /* Show statistics on all levels */
-void MultilevelSampler::show_stats() {
+void HierarchicalSampler::show_stats() {
   mpi_parallel::cout << std::setprecision(3) << std::fixed;
   mpi_parallel::cout << "  cost per sample = " << cost_per_sample() << " mu s" << std::endl << std::endl;
+  mpi_parallel::cout << "  acceptance rate = " << p_accept() << std::endl;
   for (unsigned int ell=0;ell<n_level;++ell) {
+    double p_acc;
+    if (ell==n_level-1) {
+      p_acc = coarse_sampler->p_accept();
+    } else {
+      p_acc = twolevel_step[ell]->p_accept();
+    }
     std::string level_str;
     if (ell == 0) {
-        level_str = "[finest]  ";
+      level_str = "[finest]  ";
     } else if (ell == n_level-1) {
-        level_str = "[coarsest]";
+      level_str = "[coarsest]";
     } else {
-        level_str = "          ";
+      level_str = "          ";
     }
     std::stringstream sstream;
     sstream.setf(std::ios::fixed);
     sstream.width(2);
     sstream.precision(3);
-    sstream << " level " << ell << " " << level_str <<" :";
-    mpi_parallel::cout << sstream .str() << std::endl;
-    if (ell==n_level-1) {
-      coarse_sampler->show_stats();
-    } else {
-      twolevel_step[ell]->show_stats();
-    }
-    mpi_parallel::cout << "    average spacing between sample " << t_indep[ell] << std::endl;
-    mpi_parallel::cout << *stats_sampler[ell] << std::endl;
+    sstream << "  level " << ell << " " << level_str <<" : ";
+    sstream << " p = " << p_acc << std::endl;
+    mpi_parallel::cout << sstream.str();
   }
 }

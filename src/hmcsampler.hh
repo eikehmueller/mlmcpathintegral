@@ -141,6 +141,12 @@ public:
    */
   virtual void draw(std::shared_ptr<Path> x_path);
 
+  /** @brief Set current state to particular value
+   *
+   * @param[in] x_path
+   */
+  virtual void set_state(std::shared_ptr<Path> x_path);
+
 private:
   
   /** @brief Integrate a single HMC trajectory */

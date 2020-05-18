@@ -92,3 +92,10 @@ void TwoLevelMetropolisStep::draw(const std::shared_ptr<Path> x_coarse_path,
   }
 }
 
+/* Set current state */
+void TwoLevelMetropolisStep::set_state(std::shared_ptr<Path> x_path) {
+  const unsigned int M_lat = x_path->M_lat;
+  std::copy(x_path->data,
+            x_path->data+M_lat,
+            theta_fine->data);
+}

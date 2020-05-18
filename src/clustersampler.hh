@@ -119,7 +119,12 @@ private:
  */
   std::pair<bool,int> process_link(const int i,
                                    const int direction);
-  
+  /** @brief Set current state to particular value
+   *
+   * @param[in] x_path
+   */
+  virtual void set_state(std::shared_ptr<Path> x_path) {};
+
 protected:
   /** @brief Action to sample from */
   const std::shared_ptr<ClusterAction> action;
