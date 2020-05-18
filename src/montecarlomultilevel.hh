@@ -5,6 +5,7 @@
 #include <cmath>
 #include <iostream>
 #include <sstream>
+#include <typeinfo>
 #include "timer.hh"
 #include "path.hh"
 #include "sampler.hh"
@@ -138,6 +139,13 @@ public:
   
 private:
 
+  /** Draw (independent) coarse level sample
+   * @param[in] level Level on which to draw sample (i.e. the coarse level)
+   * @param[out] x_path Path which will contain the sample
+   */
+  void draw_coarse_sample(const unsigned int level,
+                          std::shared_ptr<Path> x_path);
+  
   /** @brief Calculate effective cost \f$C_{\ell}^{eff}\f$ on a level
    * 
    * Calculate
@@ -178,6 +186,16 @@ private:
   unsigned int n_min_samples_qoi;
   /** @brief Timer class */
   Timer timer;
+  /** @brief number of skipped samples between independent coarse samples on all levels */
+  std::vector<double> t_indep;
+  /** @brief number of independent coarse samples on all levels */
+  std::vector<int> n_indep;
+  /** @brief number of samples generated since last independent coarse sample */
+  std::vector<int> t_sampler;
+  /** @brief vector with statistics of coarse sampler paths */
+  std::vector<std::shared_ptr<Statistics> > stats_coarse_sampler;
+  /** @brief Sub-sample coarse level sampler? */
+  bool sub_sample_coarse;
 };
 
 #endif // MONTECARLOMULTILEVEL_HH

@@ -78,7 +78,8 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
   // Statistics on all levels
   for (unsigned int level=0;level<n_level;++level) {
     std::stringstream stats_sampler_label;
-    stats_sampler_label << "   Q_{sampler}[" << level << "]"; stats_sampler.push_back(std::make_shared<Statistics>(stats_sampler_label.str(),n_autocorr_window));
+    stats_sampler_label << "   Q_{sampler}[" << level << "]";
+    stats_sampler.push_back(std::make_shared<Statistics>(stats_sampler_label.str(),n_autocorr_window));
   }
   std::shared_ptr<Path> meas_path=std::make_shared<Path>(fine_action->getM_lat(),fine_action->getT_final());
   Timer timer_meas;
