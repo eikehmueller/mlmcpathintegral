@@ -102,7 +102,7 @@ void HMCSampler::autotune_stepsize(const double p_accept_target) {
   double dt_hmc_min = 0.5*dt_hmc;
   double dt_hmc_max = 2.*dt_hmc;
   bool converged=false;
-  mpi_parallel::cout << std::setprecision(4);
+  mpi_parallel::cout << std::setprecision(4) << std::fixed;
   mpi_parallel::cout << " Auto-tuning HMC step size to achieve acceptance rate of " << p_accept_target << " ..." << std::endl;
   mpi_parallel::cout << "  Starting with dt_{HMC} = " << dt_hmc << std::endl;
   for (unsigned int k=0;k<100;++k) {
