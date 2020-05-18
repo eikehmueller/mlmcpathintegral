@@ -218,7 +218,7 @@ double MonteCarloMultiLevel::cost_eff(const int ell) const {
   // Cost on current level
   double cost;
   if (ell==n_level-1) {
-    cost = coarse_sampler[ell-1]->cost_per_sample()*t_indep[ell-1];
+    cost = t_indep[ell-1]*coarse_sampler[ell-1]->cost_per_sample();
   } else {
     double cost_twolevel = twolevel_step[ell]->cost_per_sample();
     double cost_coarse = t_indep[ell]*coarse_sampler[ell]->cost_per_sample();
