@@ -5,6 +5,7 @@
 #include <cmath>
 #include <iostream>
 #include <sstream>
+#include <memory>
 #include <typeinfo>
 #include "timer.hh"
 #include "path.hh"
