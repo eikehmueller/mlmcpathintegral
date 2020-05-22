@@ -3,6 +3,7 @@
 #include <fstream>
 #include <algorithm>
 #include <memory>
+#include <cassert>
 
 /** @file path.hh
  * @brief Header file for path class
