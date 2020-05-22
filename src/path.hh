@@ -2,6 +2,7 @@
 #define PATH_HH PATH_HH
 #include <fstream>
 #include <algorithm>
+#include <memory>
 
 /** @file path.hh
  * @brief Header file for path class
