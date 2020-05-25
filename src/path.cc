@@ -6,7 +6,7 @@
 /* Copy data */
 void Path::copy(const std::shared_ptr<Path> other) {
   assert(other->M_lat == M_lat);
-  std::copy(other->data,other->data+M_lat,data);
+  std::copy_n(other->data,M_lat,data);
 }
 
 /* Copy data with stride */
