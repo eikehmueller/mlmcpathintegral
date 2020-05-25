@@ -133,8 +133,6 @@ void MonteCarloMultiLevel::evaluate() {
     stats_qoi[level]->reset();
     if (level < n_level-1) {
       stats_coarse_sampler[level]->reset();
-      t_indep[level] = 0;
-      n_indep[level] = 0;
     }
     n_target[level] = n_min_samples_qoi;
   }
