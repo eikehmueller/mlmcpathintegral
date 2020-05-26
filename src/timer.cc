@@ -30,3 +30,10 @@ std::ostream& operator<<(std::ostream& out, const Timer& t) {
   out << "[timer " << t.Label() << "] : " << std::scientific << t.elapsed() << " s";
   return out;
 }
+
+/* return current time as string */
+std::string current_time() {
+  auto time_now = std::chrono::system_clock::now();
+  std::time_t t = std::chrono::system_clock::to_time_t(time_now);
+  return std::ctime(&t);
+}

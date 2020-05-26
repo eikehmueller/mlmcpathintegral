@@ -33,6 +33,8 @@
 /** Main program */
 int main(int argc, char* argv[]) {
   mpi_init();
+  Timer total_time("total");
+  total_time.start();
   mpi_parallel::cout << "++===================================++" << std::endl;
   mpi_parallel::cout << "!!   Path integral multilevel MCMC   !!" << std::endl;
   mpi_parallel::cout << "++===================================++" << std::endl;  mpi_parallel::cout << std::endl;
@@ -42,6 +44,7 @@ int main(int argc, char* argv[]) {
   mpi_parallel::cout << "Sequential version." << std::endl;
 #endif // USE_MPI
   mpi_parallel::cout << std::endl;
+  mpi_parallel::cout << "Starting run at " << current_time() << std::endl;
   if (argc != 2) {
     mpi_parallel::cout << "Usage: " << argv[0] << " PARAMETERFILE" << std::endl;
     mpi_parallel::cout << std::endl;
@@ -328,6 +331,7 @@ int main(int argc, char* argv[]) {
     mpi_parallel::cout << std::setprecision(3) << std::fixed;
     mpi_parallel::cout << " = " << ratio << " * (statistical error) " << std::endl << std::endl;
   }
-  
+  total_time.stop();
+  mpi_parallel::cout << total_time << std::endl;
   mpi_finalize();
 }

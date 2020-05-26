@@ -2,6 +2,7 @@
 #define TIMER_HH TIMER_HH
 
 #include <time.h>
+#include <ctime>
 #include <string>
 #include <iostream>
 #include <chrono>
@@ -54,8 +55,13 @@ private:
   Timepoint tp_finish;
 };
 
+/** @brief Current time
+ * Return current time as a string
+ */
+std::string current_time();
+
 /** @brief Write timer to stream
- * 
+ *
  * @param[in] t Instance of timer class to print out 
  * @param[inout] out Output stream to write to
  */
