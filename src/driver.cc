@@ -321,8 +321,10 @@ int main(int argc, char* argv[]) {
   }
   
   // Compare numerical results to exact result (if possible)
-  if ( (param_general.action() == ActionHarmonicOscillator) or
-       (param_general.action() == ActionRotor) ) {
+  if ( ( (param_general.action() == ActionHarmonicOscillator) or
+       (param_general.action() == ActionRotor) ) and
+       ( (param_general.method() == MethodSingleLevel) or
+       ( (param_general.method() == MethodMultiLevel) ) ) ) {
     double diff = fabs(numerical_result-exact_result);
     double ratio = diff/statistical_error;
     mpi_parallel::cout << std::setprecision(8) << std::fixed;
