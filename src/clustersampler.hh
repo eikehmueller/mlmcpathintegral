@@ -70,8 +70,7 @@ public:
    * @param[in] n_updates_ Number of cluster updates between steps
    */
   ClusterSampler(const std::shared_ptr<ClusterAction> action_,
-                 const unsigned int n_burnin_,
-                 const unsigned int n_updates_);
+                 const ClusterParameters cluster_param);
 
   /** @brief Destroy instance
    *

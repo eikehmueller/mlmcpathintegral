@@ -6,12 +6,11 @@
 
 /* Constructor */
 ClusterSampler::ClusterSampler(const std::shared_ptr<ClusterAction> action_,
-                               const unsigned int n_burnin_,
-                               const unsigned int n_updates_) :
+                               const ClusterParameters cluster_param) :
   Sampler(),
   action(action_),
-  n_burnin(n_burnin_),
-  n_updates(n_updates_),
+  n_burnin(cluster_param.n_burnin()),
+  n_updates(cluster_param.n_updates()),
   uniform_dist(0.0,1.0),
   uniform_int_dist(0,action_->getM_lat()-1)
 {

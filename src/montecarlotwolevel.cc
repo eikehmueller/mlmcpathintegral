@@ -28,8 +28,7 @@ MonteCarloTwoLevel::MonteCarloTwoLevel(std::shared_ptr<Action> fine_action_,
     }
     coarse_sampler =
       std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(coarse_action),
-                                       param_cluster.n_burnin(),
-                                       param_cluster.n_updates());
+                                       param_cluster);
   } else if (param_twolevelmc.coarsesampler() == SamplerExact) {
     if (param_general.action() != ActionHarmonicOscillator) {
       mpi_parallel::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;

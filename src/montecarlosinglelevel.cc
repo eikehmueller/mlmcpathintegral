@@ -30,8 +30,7 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
       mpi_exit(EXIT_FAILURE);
     }
     sampler = std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(action),
-                                               param_cluster.n_burnin(),
-                                               param_cluster.n_updates());
+                                               param_cluster);
   } else if (param_singlelevelmc.sampler() == SamplerExact) {
     if (param_general.action() != ActionHarmonicOscillator) {
       mpi_parallel::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
