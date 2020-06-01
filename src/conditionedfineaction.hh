@@ -138,7 +138,7 @@ public:
    *
    * @param[in] action_ Underlying action class
    */
-  RotorConditionedFineAction (const std::shared_ptr<RotorAction> action_) : action(action_) {
+  RotorConditionedFineAction (const std::shared_ptr<RotorAction> action_) : action(action_), exp_sin2_dist(0.0,0) {
     engine.seed(11897197);
   }
 
@@ -171,6 +171,8 @@ private:
   typedef mpi_parallel::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */
   mutable Engine engine;
+  /** Probability distribution */
+  const ExpSin2Distribution exp_sin2_dist;
 };
 
 #endif // CONDITIONEDFINEACTION_HH

@@ -42,28 +42,30 @@ public:
    *                  constant distribution
    */
   ExpSin2Distribution(const double sigma_,
-                      const unsigned int nint_=16) : sigma(sigma_),
-                                                     nint(nint_),
-                                                     Znorm_inv(1./(2.0*M_PI*exp(-0.5*sigma)*gsl_sf_bessel_I0(0.5*sigma))),
-                                                     distribution(0.0,1.0) {
+                      const unsigned int nint_=0) : sigma(sigma_),
+                                                    nint(nint_),
+                                                    Znorm_inv(1./(2.0*M_PI*exp(-0.5*sigma)*gsl_sf_bessel_I0(0.5*sigma))),
+                                                    distribution(0.0,1.0) {
     /* Calculate cumulative probability density for piecewise constant
      * distribution */
     // Width of intervales
-    double h = M_PI/(1.0*nint);
-    p_cdf.push_back(0.0);
-    for (unsigned int i=0;i<=nint;++i) {
-      double x_tmp = i*h;
-      x.push_back(x_tmp);
-      if (i<nint) {
-        double sin_psi_half = sin(0.5*x_tmp);
-        double p = exp(-sigma*sin_psi_half*sin_psi_half);
-        p_pdf.push_back(p);
-        p_cdf.push_back(p_cdf.back()+p);                       
+   if (nint>0) {
+      double h = M_PI/(1.0*nint);
+      p_cdf.push_back(0.0);
+      for (unsigned int i=0;i<=nint;++i) {
+        double x_tmp = i*h;
+        x.push_back(x_tmp);
+        if (i<nint) {
+          double sin_psi_half = sin(0.5*x_tmp);
+          double p = exp(-sigma*sin_psi_half*sin_psi_half);
+          p_pdf.push_back(p);
+          p_cdf.push_back(p_cdf.back()+p);
+        }
       }
-    }
-    double p_cdf_total_inv = 1.0/p_cdf[nint];
-    for (unsigned int i=0;i<=nint;++i) {
-      p_cdf[i] *= p_cdf_total_inv;
+      double p_cdf_total_inv = 1.0/p_cdf[nint];
+      for (unsigned int i=0;i<=nint;++i) {
+        p_cdf[i] *= p_cdf_total_inv;
+      }
     }
   }
 
@@ -72,28 +74,51 @@ public:
    * @param[in] engine Random number generator engine
    */
   template <class URNG>
-  const double operator()(URNG& engine) const {
+  const double draw(URNG& engine) const {
     // Repeat until a number is accepted (and return in this case)
-    while (true) {
-      double r_interval = distribution(engine);
-      // Find interval
-      unsigned int i=0;
-      while (r_interval > p_cdf[i+1]) i++;
-      // Draw uniform number from interval
-      double r_x = x[i] + distribution(engine)*(x[i+1]-x[i]);
-      // accept or reject with given probability
-      double r_accept = distribution(engine);
-      double sin_psi_half = sin(0.5*r_x);
-      if ( r_accept < exp(-sigma*sin_psi_half*sin_psi_half)/p_pdf[i] ) {
-        // Find sign
-        double r_sign = 2.0*(distribution(engine)>0.5)-1.0;
-        return r_sign*r_x;
+    if (nint==0) {
+      return draw(engine,sigma);
+    } else {
+      while (true) {
+        double r_interval = distribution(engine);
+        // Find interval
+        unsigned int i=0;
+        while (r_interval > p_cdf[i+1]) i++;
+        // Draw uniform number from interval
+        double r_x = x[i] + distribution(engine)*(x[i+1]-x[i]);
+        // accept or reject with given probability
+        double r_accept = distribution(engine);
+        double sin_psi_half = sin(0.5*r_x);
+        if ( r_accept < exp(-sigma*sin_psi_half*sin_psi_half)/p_pdf[i] ) {
+          // Find sign
+          double r_sign = 2.0*(distribution(engine)>0.5)-1.0;
+          return r_sign*r_x;
+        }
       }
     }
   }
 
+  /** @brief Draw number from distribution for different \f$sigma\f$
+   *
+   * @param[in] engine Random number generator engine
+   * @param[in] sigma_ Value of \f$\sigma\f$
+   */
+  template <class URNG>
+  const double draw(URNG& engine, const double sigma_) const {
+    // Repeat until a number is accepted (and return in this case)
+    while (true) {
+      double r_x = M_PI*(2.0*distribution(engine)-1.0);
+      double sin_psi_half = sin(0.5*r_x);
+      double r_accept = distribution(engine);
+      if ( r_accept < exp(-sigma_*sin_psi_half*sin_psi_half)) {
+        return r_x;
+      }
+    }
+  }
+
+  
   /** @brief Evaluate distribution 
-   * 
+  *
    * Calculate the value of the distribution \f$p(x)\f$ at a point
    * \f$x\in[-\pi,\pi]\f$.
    *
@@ -101,6 +126,16 @@ public:
    */
   double evaluate(const double x) const;
 
+  /** @brief Evaluate distribution for a different value of \f$\sigma\f$
+  *
+   * Calculate the value of the distribution \f$p(x)\f$ at a point
+   * \f$x\in[-\pi,\pi]\f$.
+   *
+   * @param[in] x Point \f$x\f$ at which to evaluate the distribution
+   * @param[in] sigma_ Value of sigma
+   */
+  double evaluate(const double x, const double sigma_) const;
+  
 private:
   /** @brief Parameter \f$\sigma\f$ of distribution */
   const double sigma;
