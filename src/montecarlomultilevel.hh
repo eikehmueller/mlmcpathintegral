@@ -64,9 +64,11 @@ public:
         sampler_ = SamplerHierarchical;
       } else if (sampler_str == "multilevel") {
           sampler_ = SamplerMultilevel;
+      } else if (sampler_str == "cluster") {
+          sampler_ = SamplerCluster;
       } else {
         mpi_parallel::cerr << " ERROR: Unknown sampler: " << sampler_str << std::endl;
-        mpi_parallel::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
+        mpi_parallel::cerr << "        allowed values are \'hierarchical\', \'multilevel\', \'cluster\'" << std::endl;
         mpi_exit(EXIT_FAILURE);
       }
     }

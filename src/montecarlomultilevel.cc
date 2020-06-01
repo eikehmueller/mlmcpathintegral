@@ -72,6 +72,16 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
                                                 param_cluster,
                                                 param_hierarchical_tmp);
       sub_sample_coarse = true;
+    } else if (param_multilevelmc.sampler() == SamplerCluster) {
+      if (param_general.action() != ActionRotor) {
+        mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
+        mpi_exit(EXIT_FAILURE);
+      }
+      sampler_tmp
+        = std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(coarse_action_tmp),
+                                           param_cluster.n_burnin(),
+                                           param_cluster.n_updates());
+      sub_sample_coarse = false;
     } else {
       mpi_parallel::cerr << " ERROR: Unknown sampler." << std::endl;
       mpi_exit(EXIT_FAILURE);

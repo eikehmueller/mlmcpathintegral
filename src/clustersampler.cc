@@ -4,6 +4,39 @@
  * @brief Implementation of clustersampler.hh
  */
 
+/* Constructor */
+ClusterSampler::ClusterSampler(const std::shared_ptr<ClusterAction> action_,
+                               const unsigned int n_burnin_,
+                               const unsigned int n_updates_) :
+  Sampler(),
+  action(action_),
+  n_burnin(n_burnin_),
+  n_updates(n_updates_),
+  uniform_dist(0.0,1.0),
+  uniform_int_dist(0,action_->getM_lat()-1)
+{
+  engine.seed(2141517);
+  const unsigned int M_lat = action->getM_lat();
+  const double T_final = action->getT_final();
+  // Create temporary workspace
+  x_path_cur = std::make_shared<Path>(M_lat,T_final);
+  action->initialise_path(x_path_cur);
+  // Measure cost per sample
+  Timer timer_meas;
+  unsigned int n_meas = 10000;
+    timer_meas.start();
+  for (unsigned int k=0;k<n_meas;++k) {
+    draw(x_path_cur);
+  }
+  timer_meas.stop();
+  cost_per_sample_ = 1.E6*timer_meas.elapsed()/n_meas;
+  // Burn in
+  std::shared_ptr<Path> x_path_tmp = std::make_shared<Path>(M_lat,T_final);
+  for (unsigned int i=0;i<n_burnin;++i) {
+    draw(x_path_tmp);
+  }
+}
+
 /** Process next link */
 std::pair<bool,int> ClusterSampler::process_link(const int i,
                                                  const int direction) {

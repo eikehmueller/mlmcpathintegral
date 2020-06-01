@@ -84,7 +84,7 @@ multilevelmc:
   n_burnin = 100      # Number of burnin samples
   epsilon = 1.0    # Tolerance epsilon
   show_detailed_stats = false  # Print out detailed statistics?
-  sampler = 'multilevel'    # Sampler to use [hierarchical, multilevel]
+  sampler = 'multilevel'    # Sampler to use [hierarchical, multilevel, cluster]
 
 ###########################################
 # Hierarchical sampler parameters
