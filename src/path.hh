@@ -53,15 +53,19 @@ public:
    */
   void copy(const std::shared_ptr<Path> other);
 
-  /** @brief Copy data from other path with stride n
+  /** @brief Copy data from other path with stride
    *
-   * Set data[j] = other->data[stride*j] for j=0,...,M_lat/stride
+   * Let s = |stride| be the absolute value of the stride. Depending on whether
+   * stride is positive or negative, do the following:
+   * if stride>0: set data[j] = other->data[s*j] for j=0,...,M_lat
+   * if stride<0: set data[s*j] = other->data[j] for j=0,...,M_lat/s
+
    *
    * @param[in] other Path to copy from
    * @param[in] stride Stride to use
    */
   void copy_strided(const std::shared_ptr<Path> other,
-                    const unsigned int stride);
+                    const int stride);
 
   
   /** @brief Number of time slices */
