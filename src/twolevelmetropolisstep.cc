@@ -21,6 +21,8 @@ TwoLevelMetropolisStep::TwoLevelMetropolisStep(const std::shared_ptr<Action> coa
    std::shared_ptr<Path> x_coarse = std::make_shared<Path>(coarse_action->getM_lat(),
                                      coarse_action->getT_final());
 
+   fine_action_theta_fine = fine_action->evaluate(theta_fine);
+   conditioned_fine_action_theta_fine = conditioned_fine_action->evaluate(theta_fine);
    Timer timer_meas;
    unsigned int n_meas = 10000;
    timer_meas.start();
@@ -45,8 +47,8 @@ void TwoLevelMetropolisStep::draw(const std::shared_ptr<Path> x_coarse_path,
    * required to calculate the ratio
    * \pi^{\ell}(\theta'_\ell)/\pi^{\ell}(\theta_\ell^{n}) 
    */
-  double deltaS_fine = fine_action->evaluate(theta_prime)
-    - fine_action->evaluate(theta_fine);
+  double fine_action_theta_prime = fine_action->evaluate(theta_prime);
+  double deltaS_fine = fine_action_theta_prime - fine_action_theta_fine;
   /*
    * Calculate the difference in level-(\ell-1) actions,
    * required to calculate the ratio   
@@ -62,8 +64,8 @@ void TwoLevelMetropolisStep::draw(const std::shared_ptr<Path> x_coarse_path,
    * q_{ML}^{\ell,F}(\theta_{\ell,F}^{n}|\theta'_{\ell,C}) /
    * q_{ML}^{\ell,F}(\theta'_{\ell,F}|\theta_{\ell,C}^{n})
    */
-  double deltaS_trial = conditioned_fine_action->evaluate(theta_fine) \
-    - conditioned_fine_action->evaluate(theta_prime);
+  double conditioned_fine_action_theta_prime = conditioned_fine_action->evaluate(theta_prime);
+  double deltaS_trial = conditioned_fine_action_theta_fine - conditioned_fine_action_theta_prime;
 
   double deltaS = deltaS_fine + deltaS_coarse + deltaS_trial;
   accept = false;
@@ -75,6 +77,8 @@ void TwoLevelMetropolisStep::draw(const std::shared_ptr<Path> x_coarse_path,
   }
   if (accept) {
     theta_fine->copy(theta_prime);
+    fine_action_theta_fine = fine_action_theta_prime;
+    conditioned_fine_action_theta_fine = conditioned_fine_action_theta_prime;
   }
   n_total_samples++;
   n_accepted_samples += (int) accept;
@@ -87,4 +91,6 @@ void TwoLevelMetropolisStep::draw(const std::shared_ptr<Path> x_coarse_path,
 /* Set current state */
 void TwoLevelMetropolisStep::set_state(std::shared_ptr<Path> x_path) {
   theta_fine->copy(x_path);
+  fine_action_theta_fine = fine_action->evaluate(theta_fine);
+  conditioned_fine_action_theta_fine = conditioned_fine_action->evaluate(theta_fine);
 }

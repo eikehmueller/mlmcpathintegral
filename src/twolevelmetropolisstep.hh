@@ -97,5 +97,9 @@ protected:
   mutable Uniform uniform_dist;
   /** @brief cost per sample */
   mutable double cost_per_sample_;
+  /** @brief cached value of fine action evaluated for current state */
+  mutable double fine_action_theta_fine;
+  /** @brief cached value of conditioned fine action evaluated for current state */
+  mutable double conditioned_fine_action_theta_fine;
 };
 #endif // TWOLEVELMETROPOLISSTEP_HH
