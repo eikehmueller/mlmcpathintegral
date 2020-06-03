@@ -3,8 +3,10 @@
 #include <algorithm>
 #include <random>
 #include <vector>
+#include <iostream>
 #include <cmath>
 #include <gsl/gsl_sf_bessel.h>
+#include "auxilliary.hh"
 
 /** @file expsin2distribution.hh
  * @brief Header file for exponential sin-squared distribution 
@@ -45,7 +47,9 @@ public:
                       const unsigned int nint_=0) : sigma(sigma_),
                                                     nint(nint_),
                                                     Znorm_inv(1./(2.0*M_PI*exp(-0.5*sigma)*gsl_sf_bessel_I0(0.5*sigma))),
-                                                    distribution(0.0,1.0) {
+                                                    distribution(0.0,1.0),
+                                                    normal_distribution(0.0,1.0),
+                                                    sigma_threshold(32.) {
     /* Calculate cumulative probability density for piecewise constant
      * distribution */
     // Width of intervales
@@ -105,13 +109,18 @@ public:
    */
   template <class URNG>
   const double draw(URNG& engine, const double sigma_) const {
-    // Repeat until a number is accepted (and return in this case)
-    while (true) {
-      double r_x = M_PI*(2.0*distribution(engine)-1.0);
-      double sin_psi_half = sin(0.5*r_x);
-      double r_accept = distribution(engine);
-      if ( r_accept < exp(-sigma_*sin_psi_half*sin_psi_half)) {
-        return r_x;
+    if (sigma_>sigma_threshold) {
+      // Sample from approximate distribution
+      return sqrt(2./sigma_)*normal_distribution(engine);
+    } else {
+      // Repeat until a number is accepted (and return in this case)
+      while (true) {
+        double r_x = M_PI*(2.0*distribution(engine)-1.0);
+        double sin_psi_half = sin(0.5*r_x);
+        double r_accept = distribution(engine);
+        if ( r_accept < exp(-sigma_*sin_psi_half*sin_psi_half)) {
+          return r_x;
+        }
       }
     }
   }
@@ -151,6 +160,10 @@ private:
   const double Znorm_inv;
   /** @brief Uniform distribution for sampling */
   mutable std::uniform_real_distribution<double> distribution;
+  /** @brief Normal distribution for approximate sampling */
+  mutable std::normal_distribution<double> normal_distribution;
+  /** @brief Threshold for using approximate distribution */
+  const double sigma_threshold;
 };
 
 #endif // EXPSIN2DISTRIBUTIONHH
