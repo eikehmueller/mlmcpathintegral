@@ -49,7 +49,7 @@ public:
                                                     Znorm_inv(1./(2.0*M_PI*exp(-0.5*sigma)*gsl_sf_bessel_I0(0.5*sigma))),
                                                     distribution(0.0,1.0),
                                                     normal_distribution(0.0,1.0),
-                                                    sigma_threshold(32.) {
+                                                    sigma_threshold(16.) {
     /* Calculate cumulative probability density for piecewise constant
      * distribution */
     // Width of intervales
