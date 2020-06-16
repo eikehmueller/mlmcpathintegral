@@ -62,7 +62,7 @@ public:
       }
     }
   }
-
+  
   /** @brief Evaluate distribution for a different value of \f$\sigma\f$
   *
    * Calculate the value of the distribution \f$p(x)\f$ at a point
@@ -74,6 +74,13 @@ public:
   double evaluate(const double x, const double sigma_) const;
   
 private:
+  /** @brief Fast bessel function
+   * Compute \f$2\pi e^{-z}I_0(z)\f$, using a Taylor approximation for large values of z
+   *
+   *  @param[in] z Value at which the function is evaluated
+   */
+  double fast_2pi_I0_scaled(const double z) const;
+  
   /** @brief Uniform distribution for sampling */
   mutable std::uniform_real_distribution<double> distribution;
   /** @brief Normal distribution for approximate sampling */
