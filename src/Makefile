@@ -26,8 +26,11 @@ SOURCES=$(wildcard *.hh *.cc)
 ifeq ($(MAIN),)
   MAIN=driver
 endif
-OBJS=$(patsubst %.cc,%.o,$(wildcard *.cc))
 
+MAIN_TESTDIST=test_distribution
+
+MAINS=driver.o test_distribution.o
+OBJS=$(filter-out $(MAINS),$(patsubst %.cc,%.o,$(wildcard *.cc)))
 
 ifeq ($(DEBUG),True)
   CFLAGS=$(CFLAGS_DEBUG)
@@ -44,7 +47,7 @@ else
   $(info Compiling in sequential mode. Compiler is $(CXX))
 endif
 
-all: $(MAIN)
+all: $(MAIN) $(MAIN_TESTDIST)
 
 # Sort out dependencies, see
 # http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
@@ -68,16 +71,22 @@ $(DEPDIR)/%.d: ;
 
 include $(wildcard $(patsubst %,$(DEPDIR)/%.d,$(basename $(SOURCES))))
 
-$(MAIN): $(OBJS) config.h
+# main programme
+$(MAIN): driver.o $(OBJS) config.h
 	@printf "%b" "$(COM_COLOR)$(LINK_MESSAGE) $(OBJ_COLOR)$(@)$(NO_COLOR)\n";
-	@$(CXX) $(LFLAGS) -o $(MAIN) $(OBJS) $(LLIBS)
+	@$(CXX) $(LFLAGS) -o $(MAIN) $(OBJS) driver.o $(LLIBS)
+
+# test expsin2 distribution
+$(MAIN_TESTDIST): test_distribution.o $(OBJS) config.h
+	@printf "%b" "$(COM_COLOR)$(LINK_MESSAGE) $(OBJ_COLOR)$(@)$(NO_COLOR)\n";
+	@$(CXX) $(LFLAGS) -o test_distribution $(OBJS) test_distribution.o $(LLIBS)
 
 doc: $(SOURCES) config.h
 	doxygen doxygen.cfg
 
 .phony: clean
 clean:
-	rm -rf *~ *.o $(DEPDIR) $(MAIN)
+	rm -rf *~ *.o $(DEPDIR) $(MAIN) $(MAIN_TESTDIST)
 
 .phony: cleandoc
 cleandoc:

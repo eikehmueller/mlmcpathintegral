@@ -23,4 +23,4 @@
 #define SAVE_LAST_PATH 5100
 
 /* Log QoI in singlelevel method? */
-//#define LOG_QOI 1
+#define LOG_QOI 1

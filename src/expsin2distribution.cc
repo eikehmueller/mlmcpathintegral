@@ -4,25 +4,14 @@
  */
 
 /** Evaluate distribution */
-double ExpSin2Distribution::evaluate(const double x) const {
+double ExpSin2Distribution::evaluate(const double x, const double sigma) const {
   double sin_x_half = sin(0.5*x);
-  return Znorm_inv*exp(-sigma*sin_x_half*sin_x_half);
-}
-
-/** Evaluate distribution */
-double ExpSin2Distribution::evaluate(const double x, const double sigma_) const {
-  if (sigma_>sigma_threshold) {
-    double m_x = mod_2pi(x);
-    return sqrt(sigma_/(4.*M_PI))*exp(-0.25*sigma_*m_x*m_x);
+  double besselI0;
+  if (sigma>100.) {
+    double sigma_inv = 1./sigma;
+    besselI0 = 2.*sqrt(M_PI*sigma_inv)*(1.+0.25*sigma_inv+9.0/(32.*sigma_inv*sigma_inv));
   } else {
-    double sin_x_half = sin(0.5*x);
-    double besselI0;
-    if (sigma_>100.) {
-      besselI0 = 1./sqrt(M_PI*sigma_)*(1.+0.25/sigma_+9.0/(32.*sigma_*sigma_));
-    } else {
-      besselI0 = exp(-0.5*sigma_)*gsl_sf_bessel_I0(0.5*sigma_);
-    }
-    double Znorm_inv_ = 1./(2.0*M_PI*besselI0);
-    return Znorm_inv_*exp(-sigma_*sin_x_half*sin_x_half);
+    besselI0 = 2*M_PI*gsl_sf_bessel_I0_scaled(0.5*sigma);
   }
+  return exp(-sigma*sin_x_half*sin_x_half)/besselI0;
 }

@@ -139,7 +139,7 @@ public:
    *
    * @param[in] action_ Underlying action class
    */
-  RotorConditionedFineAction (const std::shared_ptr<RotorAction> action_) : action(action_), exp_sin2_dist(0.0,0) {
+  RotorConditionedFineAction (const std::shared_ptr<RotorAction> action_) : action(action_) {
     engine.seed(11897197);
   }
 
