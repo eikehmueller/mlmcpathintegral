@@ -80,7 +80,7 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
       sampler_tmp
         = std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(coarse_action_tmp),
                                            param_cluster);
-      sub_sample_coarse = false;
+      sub_sample_coarse = true;
     } else {
       mpi_parallel::cerr << " ERROR: Unknown sampler." << std::endl;
       mpi_exit(EXIT_FAILURE);
