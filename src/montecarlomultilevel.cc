@@ -205,7 +205,7 @@ void MonteCarloMultiLevel::draw_coarse_sample(const unsigned int level,
                                               std::shared_ptr<Path> x_path) {
   // sub-sample if we are using the hierarchical sampler
   if (sub_sample_coarse) {
-    while (t_sampler[level-1] < ceil(stats_coarse_sampler[level-1]->tau_int())) {
+    while (t_sampler[level-1] < ceil(2.*stats_coarse_sampler[level-1]->tau_int())) {
       coarse_sampler[level-1]->draw(x_path);
       double qoi_sampler = qoi->evaluate(x_path);
       stats_coarse_sampler[level-1]->record_sample(qoi_sampler);
