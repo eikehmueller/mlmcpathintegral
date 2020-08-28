@@ -7,56 +7,19 @@
 /* Constructor */
 MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
                                              std::shared_ptr<QoI> qoi_,
-                                             const GeneralParameters param_general,
+                                             std::shared_ptr<Sampler> sampler_,
                                              const StatisticsParameters param_stats,
-                                             const HMCParameters param_hmc,
-                                             const ClusterParameters param_cluster,
-                                             const SingleLevelMCParameters param_singlelevelmc,
-                                             const HierarchicalParameters param_hierarchical) :
+                                             const SingleLevelMCParameters param_singlelevelmc) :
   MonteCarlo(param_singlelevelmc.n_burnin()),
   action(action_), 
   qoi(qoi_),
+  sampler(sampler_),
   n_autocorr_window(param_stats.n_autocorr_window()),
   n_min_samples_qoi(param_stats.n_min_samples_qoi()),
   n_samples(param_singlelevelmc.n_samples()),
   epsilon(param_singlelevelmc.epsilon()),
   timer("SinglevelMC") {
-  if (param_singlelevelmc.sampler() == SamplerHMC) {
-    sampler = std::make_shared<HMCSampler>(action,
-                                           param_hmc);
-  } else if (param_singlelevelmc.sampler() == SamplerCluster) {
-    if (param_general.action() != ActionRotor) {
-      mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
-      mpi_exit(EXIT_FAILURE);
-    }
-    sampler = std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(action),
-                                               param_cluster);
-  } else if (param_singlelevelmc.sampler() == SamplerExact) {
-    if (param_general.action() != ActionHarmonicOscillator) {
-      mpi_parallel::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
-      mpi_exit(EXIT_FAILURE);
-    }
-    sampler = std::dynamic_pointer_cast<Sampler>(action);
-  } else if (param_singlelevelmc.sampler() == SamplerHierarchical) {
-    sampler = std::make_shared<HierarchicalSampler>(action,
-                                                    param_general,
-                                                    param_stats,
-                                                    param_hmc,
-                                                    param_cluster,
-                                                    param_hierarchical);
-  } else if (param_singlelevelmc.sampler() == SamplerMultilevel) {
-      sampler = std::make_shared<MultilevelSampler>(action,
-                                                    qoi,
-                                                    param_general,
-                                                    param_stats,
-                                                    param_hmc,
-                                                    param_cluster,
-                                                    param_hierarchical);
-  } else {
-    mpi_parallel::cerr << " ERROR: Unknown sampler." << std::endl;
-    mpi_exit(EXIT_FAILURE);
-  }
-  stats_Q = std::make_shared<Statistics>("Q",n_autocorr_window);
+    stats_Q = std::make_shared<Statistics>("Q",n_autocorr_window);
   }
 
 /** Calculate Monte Carlo estimate with single level method */

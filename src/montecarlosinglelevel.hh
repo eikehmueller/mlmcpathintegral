@@ -110,12 +110,9 @@ public:
   */ 
   MonteCarloSingleLevel(std::shared_ptr<Action> action_,
                         std::shared_ptr<QoI> qoi_,
-                        const GeneralParameters param_general,
+                        std::shared_ptr<Sampler> sampler_,
                         const StatisticsParameters param_stats,
-                        const HMCParameters param_hmc,
-                        const ClusterParameters param_cluster,
-                        const SingleLevelMCParameters param_singlelevelmc,
-                        const HierarchicalParameters param_hierarchical);
+                        const SingleLevelMCParameters param_singlelevelmc);
   
   /** @brief Calculate QoI
    * 
