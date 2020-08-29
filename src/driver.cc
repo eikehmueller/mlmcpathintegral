@@ -73,8 +73,8 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
   } else {
     mpi_parallel::cerr << " ERROR: Unknown sampler." << std::endl;
     mpi_exit(EXIT_FAILURE);
-    return nullptr;
   }
+  return sampler_factory;
 }
 
 /** Main program */
