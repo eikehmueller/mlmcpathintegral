@@ -91,13 +91,13 @@ public:
    * @param[in] fine_action_ Action on fine level
    * @param[in] qoi_ Quantity of interest
    * @param[in] sampler_factory Factory for constructing coarse level sampler
-   * @param[in] param_general General parameters
+   * @param[in] sampler_factory Factory for constructing conditioned fine actions
    * @param[in] param_twolevelmc Two level sampler parameters
    */
-  MonteCarloTwoLevel(std::shared_ptr<Action> fine_action_,
-                     std::shared_ptr<QoI> qoi_,
-                     std::shared_ptr<SamplerFactory> sampler_factory,
-                     const GeneralParameters param_general,
+  MonteCarloTwoLevel(const std::shared_ptr<Action> fine_action_,
+                     const std::shared_ptr<QoI> qoi_,
+                     const std::shared_ptr<SamplerFactory> sampler_factory,
+                     const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                      const TwoLevelMCParameters param_twolevelmc);
   
   /** @brief Calculate mean and variance of difference

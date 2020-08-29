@@ -60,6 +60,13 @@ public:
   virtual double evaluate(const std::shared_ptr<Path> x_path) const = 0;  
 };
 
+struct ConditionedFineActionFactory {
+  /** @brief Abstract method for constructing a conditioned fine action
+   * @param[in] action Coarse level action
+   */
+  virtual std::shared_ptr<ConditionedFineAction> get(std::shared_ptr<Action> action) = 0;
+};
+
 /** @class GaussianConditionedFineAction
  *
  * @brief Gaussian conditioned fine action
@@ -119,6 +126,15 @@ private:
 
 };
 
+struct GaussianConditionedFineActionFactory : public ConditionedFineActionFactory {
+  /** @brief Abstract method for constructing a conditioned fine action
+   * @param[in] action Coarse level action
+   */
+  virtual std::shared_ptr<ConditionedFineAction> get(std::shared_ptr<Action> action) {
+    return std::make_shared<GaussianConditionedFineAction>(action);
+  }
+};
+
 /** @class RotorConditionedFineAction
  *
  * @brief Conditioned fine action for the QM rotor
@@ -176,6 +192,16 @@ private:
   const ExpSin2Distribution exp_sin2_dist;
 };
 
+struct RotorConditionedFineActionFactory : public ConditionedFineActionFactory {
+  /** @brief Abstract method for constructing a conditioned fine action
+   * @param[in] action Coarse level action
+   */
+  virtual std::shared_ptr<ConditionedFineAction> get(std::shared_ptr<Action> action) {
+    return std::make_shared<RotorConditionedFineAction>(std::dynamic_pointer_cast<RotorAction>(action));
+  }
+};
+
+
 class RotorNonTrigonometricConditionedFineAction : public ConditionedFineAction {
 public:
   /** @brief Constructor
@@ -228,5 +254,13 @@ private:
   mutable std::normal_distribution<double> norm_dist;
 };
 
+struct RotorNonTrigonometricConditionedFineActionFactory : public ConditionedFineActionFactory {
+  /** @brief Abstract method for constructing a conditioned fine action
+   * @param[in] action Coarse level action
+   */
+  virtual std::shared_ptr<ConditionedFineAction> get(std::shared_ptr<Action> action) {
+    return std::make_shared<RotorNonTrigonometricConditionedFineAction>(std::dynamic_pointer_cast<RotorAction>(action));
+  }
+};
 
 #endif // CONDITIONEDFINEACTION_HH

@@ -84,13 +84,13 @@ public:
   /** @brief Create new instance
    *
    * @param[in] fine_action_ Fine level Action to sample from
-   * @param[in] coarse_sampler_factory Sampler factory for generating coarse level sampler
-   * @param[in] param_general General parameters
+   * @param[in] coarse_sampler_factory Factory for generating coarse level sampler
+   * @param[in] conditioned_fine_action_factory factory for generating conditioned fine actions
    * @param[in] param_hierarchical Hierarchical sampler parameters
    */
   HierarchicalSampler(const std::shared_ptr<Action> fine_action,
                       const std::shared_ptr<SamplerFactory> coarse_sampler_factory,
-                      const GeneralParameters param_general,
+                      const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                       const HierarchicalParameters param_hierarchical);
   
   /** @brief Destroy instance
@@ -142,14 +142,14 @@ class HierarchicalSamplerFactory : public SamplerFactory {
   /** @brief Create new instance
    *
    * @param[in] coarse_sampler_factory_ Factory for coarse level sampler
-   * @param[in] param_hierarchical General parameters
+   * @param[in] conditioned_fine_action_factory factory for generating conditioned fine actions
    * @param[in] param_hierarchical Hierarchical sampler parameters
    */
   HierarchicalSamplerFactory(const std::shared_ptr<SamplerFactory> coarse_sampler_factory_,
-                             const GeneralParameters param_general_,
+                             const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory_,
                              const HierarchicalParameters param_hierarchical_) :
     coarse_sampler_factory(coarse_sampler_factory_),
-    param_general(param_general_),
+    conditioned_fine_action_factory(conditioned_fine_action_factory_),
     param_hierarchical(param_hierarchical_) {}
   
   /** @brief Return sampler for a specific  action
@@ -159,14 +159,14 @@ class HierarchicalSamplerFactory : public SamplerFactory {
   virtual std::shared_ptr<Sampler> get(std::shared_ptr<Action> action) {
     return std::make_shared<HierarchicalSampler>(action,
                                                  coarse_sampler_factory,
-                                                 param_general,
+                                                 conditioned_fine_action_factory,
                                                  param_hierarchical);
   }
 private:
   /** Factory for coarsest level sampler*/
   const std::shared_ptr<SamplerFactory> coarse_sampler_factory;
-  /** General parameters */
-  const GeneralParameters param_general;
+  /** Conditioned fine action factory */
+  const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory;
   /** Hierarchical sampler parameters */
   const HierarchicalParameters param_hierarchical;
 };

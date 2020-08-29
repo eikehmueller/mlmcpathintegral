@@ -7,7 +7,7 @@
 MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
                                            std::shared_ptr<QoI> qoi_,
                                            std::shared_ptr<SamplerFactory> sampler_factory,                                           
-                                           const GeneralParameters param_general,
+                                           std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                                            const StatisticsParameters param_stats,
                                            const MultiLevelMCParameters param_multilevelmc) :
   MonteCarlo(param_multilevelmc.n_burnin()),
@@ -35,14 +35,7 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
     std::shared_ptr<Action> action_tmp = action[ell];
     std::shared_ptr<Action> coarse_action_tmp = action[ell]->coarse_action();
     action.push_back(coarse_action_tmp);
-    std::shared_ptr<ConditionedFineAction> conditioned_fine_action;
-    if (param_general.action() == ActionRotor) {
-      conditioned_fine_action =
-        std::make_shared<RotorConditionedFineAction>(std::dynamic_pointer_cast<RotorAction>(action_tmp));
-    } else {
-      conditioned_fine_action =
-        std::make_shared<GaussianConditionedFineAction>(action_tmp);
-    }      
+    std::shared_ptr<ConditionedFineAction> conditioned_fine_action=conditioned_fine_action_factory->get(action_tmp);
     std::shared_ptr<TwoLevelMetropolisStep> twolevel_step_tmp =
       std::make_shared<TwoLevelMetropolisStep>(coarse_action_tmp,
                                                action_tmp,

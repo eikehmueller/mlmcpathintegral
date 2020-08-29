@@ -7,10 +7,10 @@
  * @brief Implementation of montecarlotwolevel.hh 
  */
 /* Constructor */
-MonteCarloTwoLevel::MonteCarloTwoLevel(std::shared_ptr<Action> fine_action_,
-                                       std::shared_ptr<QoI> qoi_,
-                                       std::shared_ptr<SamplerFactory> sampler_factory,
-                                       const GeneralParameters param_general,
+MonteCarloTwoLevel::MonteCarloTwoLevel(const std::shared_ptr<Action> fine_action_,
+                                       const std::shared_ptr<QoI> qoi_,
+                                       const std::shared_ptr<SamplerFactory> sampler_factory,
+                                       const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                                        const TwoLevelMCParameters param_twolevelmc) :
   MonteCarlo(param_twolevelmc.n_burnin()),
   n_samples(param_twolevelmc.n_samples()),
@@ -18,13 +18,7 @@ MonteCarloTwoLevel::MonteCarloTwoLevel(std::shared_ptr<Action> fine_action_,
   qoi(qoi_) {
   coarse_action = fine_action->coarse_action();
   coarse_sampler = sampler_factory->get(coarse_action);
-  if (param_general.action() == ActionRotor) {
-    conditioned_fine_action =
-      std::make_shared<RotorConditionedFineAction>(std::dynamic_pointer_cast<RotorAction>(fine_action));
-  } else {
-    conditioned_fine_action =
-      std::make_shared<GaussianConditionedFineAction>(fine_action);
-  }
+  conditioned_fine_action = conditioned_fine_action_factory->get(fine_action);
   twolevel_step = std::make_shared<TwoLevelMetropolisStep>(coarse_action,
                                                            fine_action,
                                                            conditioned_fine_action);

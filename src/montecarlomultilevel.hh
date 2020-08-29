@@ -113,14 +113,14 @@ public:
    * @param[in] fine_action_ Action on fine level
    * @param[in] qoi_ Quantity of interest
    * @param[in] sampler_factory Factory for generating coarse level samplers
-   * @param[in] param_general General parameters
+   * @param[in] conditioned_fine_action_factory Factory for generating conditioned actions
    * @param[in] param_stats Statistics parameters
    * @param[in] param_multilevelmc Multilevel MC parameters
    */
   MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
                        std::shared_ptr<QoI> qoi_,
                        std::shared_ptr<SamplerFactory> sampler_factory,
-                       const GeneralParameters param_general,
+                       std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                        const StatisticsParameters param_stats,
                        const MultiLevelMCParameters param_multilevelmc);
 

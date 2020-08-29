@@ -7,7 +7,7 @@
 /* Construct new instance */
 HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_action,
                                          const std::shared_ptr<SamplerFactory> coarse_sampler_factory,
-                                         const GeneralParameters param_general,
+                                         const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                                          const HierarchicalParameters param_hierarchical) :
   Sampler(),
   n_level(param_hierarchical.n_max_level()-fine_action->get_coarsening_level()),
@@ -26,13 +26,7 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
     std::shared_ptr<Action> coarse_action_tmp = action[ell]->coarse_action();
     action.push_back(coarse_action_tmp);
     std::shared_ptr<ConditionedFineAction> conditioned_fine_action;
-    if (param_general.action() == ActionRotor) {
-      conditioned_fine_action =
-        std::make_shared<RotorConditionedFineAction>(std::dynamic_pointer_cast<RotorAction>(action_tmp));
-    } else {
-      conditioned_fine_action =
-        std::make_shared<GaussianConditionedFineAction>(action_tmp);
-    } 
+    conditioned_fine_action = conditioned_fine_action_factory->get(action_tmp);
     std::shared_ptr<TwoLevelMetropolisStep> twolevel_step_tmp =
       std::make_shared<TwoLevelMetropolisStep>(coarse_action_tmp,
                                                action_tmp,

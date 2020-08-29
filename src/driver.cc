@@ -34,6 +34,7 @@
 std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
                                                           const std::shared_ptr<QoI> qoi,
                                                           const std::shared_ptr<SamplerFactory> coarse_sampler_factory,
+                                                          const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                                                           const GeneralParameters param_general,
                                                           const HMCParameters param_hmc,
                                                           const ClusterParameters param_cluster,
@@ -60,13 +61,13 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
   } else if (samplerid == SamplerHierarchical) {
     /* ---- CASE 4: Hierarchical sampler */
     sampler_factory = std::make_shared<HierarchicalSamplerFactory>(coarse_sampler_factory,
-                                                                   param_general,
+                                                                   conditioned_fine_action_factory,
                                                                    param_hierarchical);
   } else if (samplerid == SamplerMultilevel) {
   /* ---- CASE 5: Multilevel sampler */
     sampler_factory = std::make_shared<MultilevelSamplerFactory>(qoi,
                                                                  coarse_sampler_factory,
-                                                                 param_general,
+                                                                 conditioned_fine_action_factory,
                                                                  param_stats,
                                                                  param_hierarchical);
   } else {
@@ -273,6 +274,14 @@ int main(int argc, char* argv[]) {
     }
   }
   
+  /* Construction conditioned fine action factory */
+  std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory;
+  if (param_general.action() == ActionRotor) {
+    conditioned_fine_action_factory = std::make_shared<RotorConditionedFineActionFactory>();
+  } else {
+    conditioned_fine_action_factory = std::make_shared<GaussianConditionedFineActionFactory>();
+  }
+  
   /* Construct coarse level sampler factory, which might be used by the hierarchical samplers */
   std::shared_ptr<SamplerFactory> coarse_sampler_factory;
   /* Note that here it does not make sense to use the hierarchical- or multilevel-sampler,
@@ -281,6 +290,7 @@ int main(int argc, char* argv[]) {
   coarse_sampler_factory = construct_sampler_factory(param_hierarchical.coarsesampler(),
                                                      nullptr,
                                                      nullptr,
+                                                     conditioned_fine_action_factory,
                                                      param_general,
                                                      param_hmc,
                                                      param_cluster,
@@ -301,6 +311,7 @@ int main(int argc, char* argv[]) {
     sampler_factory = construct_sampler_factory(param_singlelevelmc.sampler(),
                                                 qoi,
                                                 coarse_sampler_factory,
+                                                conditioned_fine_action_factory,
                                                 param_general,
                                                 param_hmc,
                                                 param_cluster,
@@ -336,6 +347,7 @@ int main(int argc, char* argv[]) {
     sampler_factory = construct_sampler_factory(param_twolevelmc.sampler(),
                                                 qoi,
                                                 coarse_sampler_factory,
+                                                conditioned_fine_action_factory,
                                                 param_general,
                                                 param_hmc,
                                                 param_cluster,
@@ -344,7 +356,7 @@ int main(int argc, char* argv[]) {
     MonteCarloTwoLevel montecarlo_twolevel(action,
                                            qoi,
                                            sampler_factory,
-                                           param_general,
+                                           conditioned_fine_action_factory,
                                            param_twolevelmc);
     Statistics stats_fine("QoI[fine]",10);
     Statistics stats_coarse("QoI[coarse]",10);
@@ -381,6 +393,7 @@ int main(int argc, char* argv[]) {
     sampler_factory = construct_sampler_factory(param_multilevelmc.sampler(),
                                                 qoi,
                                                 coarse_sampler_factory,
+                                                conditioned_fine_action_factory,
                                                 param_general,
                                                 param_hmc,
                                                 param_cluster,
@@ -390,7 +403,7 @@ int main(int argc, char* argv[]) {
     MonteCarloMultiLevel montecarlo_multilevel(action,
                                                qoi,
                                                sampler_factory,
-                                               param_general,
+                                               conditioned_fine_action_factory,
                                                param_stats,
                                                param_multilevelmc);
     
