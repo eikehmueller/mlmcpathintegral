@@ -12,6 +12,7 @@
 #include "sampler.hh"
 #include "action.hh"
 #include "conditionedfineaction.hh"
+#include "harmonicoscillatoraction.hh"
 #include "quantityofinterest.hh"
 #include "twolevelmetropolisstep.hh"
 #include "statistics.hh"
@@ -111,19 +112,17 @@ public:
    *
    * @param[in] fine_action_ Action on fine level
    * @param[in] qoi_ Quantity of interest
+   * @param[in] sampler_factory Factory for generating coarse level samplers
    * @param[in] param_general General parameters
-   * @param[in] param_hmc HMC sampler parameters
-   * @param[in] param_cluster Cluster sampler parameters
-   * @param[in] param_multilevelmc Multilevel parameters
+   * @param[in] param_stats Statistics parameters
+   * @param[in] param_multilevelmc Multilevel MC parameters
    */
   MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
                        std::shared_ptr<QoI> qoi_,
+                       std::shared_ptr<SamplerFactory> sampler_factory,
                        const GeneralParameters param_general,
                        const StatisticsParameters param_stats,
-                       const HMCParameters param_hmc,
-                       const ClusterParameters param_cluster,
-                       const MultiLevelMCParameters param_multilevelmc,
-                       const HierarchicalParameters param_hierarchical);
+                       const MultiLevelMCParameters param_multilevelmc);
 
   /** @brief Run multilevel method */
   void evaluate();

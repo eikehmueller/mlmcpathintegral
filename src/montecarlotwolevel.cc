@@ -9,33 +9,15 @@
 /* Constructor */
 MonteCarloTwoLevel::MonteCarloTwoLevel(std::shared_ptr<Action> fine_action_,
                                        std::shared_ptr<QoI> qoi_,
+                                       std::shared_ptr<SamplerFactory> sampler_factory,
                                        const GeneralParameters param_general,
-                                       const HMCParameters param_hmc,
-                                       const ClusterParameters param_cluster,
                                        const TwoLevelMCParameters param_twolevelmc) :
   MonteCarlo(param_twolevelmc.n_burnin()),
   n_samples(param_twolevelmc.n_samples()),
   fine_action(fine_action_),
   qoi(qoi_) {
   coarse_action = fine_action->coarse_action();
-  if (param_twolevelmc.coarsesampler() == SamplerHMC) {
-    coarse_sampler = std::make_shared<HMCSampler>(coarse_action,
-                                                  param_hmc);
-  } else if (param_twolevelmc.coarsesampler() == SamplerCluster) {
-    if (param_general.action() != ActionRotor) {
-      mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
-      mpi_exit(EXIT_FAILURE);
-    }
-    coarse_sampler =
-      std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(coarse_action),
-                                       param_cluster);
-  } else if (param_twolevelmc.coarsesampler() == SamplerExact) {
-    if (param_general.action() != ActionHarmonicOscillator) {
-      mpi_parallel::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
-      mpi_exit(EXIT_FAILURE);
-    }
-    coarse_sampler = std::dynamic_pointer_cast<Sampler>(coarse_action);
-  }
+  coarse_sampler = sampler_factory->get(coarse_action);
   if (param_general.action() == ActionRotor) {
     conditioned_fine_action =
       std::make_shared<RotorConditionedFineAction>(std::dynamic_pointer_cast<RotorAction>(fine_action));

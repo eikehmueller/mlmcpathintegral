@@ -110,7 +110,7 @@ public:
   */ 
   MonteCarloSingleLevel(std::shared_ptr<Action> action_,
                         std::shared_ptr<QoI> qoi_,
-                        std::shared_ptr<Sampler> sampler_,
+                        std::shared_ptr<SamplerFactory> sampler_factory,
                         const StatisticsParameters param_stats,
                         const SingleLevelMCParameters param_singlelevelmc);
   

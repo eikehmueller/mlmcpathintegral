@@ -7,17 +7,16 @@
 /* Construct new instance */
 MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
                                      const std::shared_ptr<QoI> qoi_,
+                                     const std::shared_ptr<SamplerFactory> coarse_sampler_factory,
                                      const GeneralParameters param_general,
                                      const StatisticsParameters param_stats,
-                                     const HMCParameters param_hmc,
-                                     const ClusterParameters param_cluster,
                                      const HierarchicalParameters param_hierarchical) :
   Sampler(),
   qoi(qoi_),
-  n_level(param_hierarchical.n_level()),
-  t_indep(param_hierarchical.n_level(),0.0),
-  n_indep(param_hierarchical.n_level(),0),
-  t_sampler(param_hierarchical.n_level(),0),
+  n_level(param_hierarchical.n_max_level()-fine_action->get_coarsening_level()),
+  t_indep(param_hierarchical.n_max_level()-fine_action->get_coarsening_level(),0.0),
+  n_indep(param_hierarchical.n_max_level()-fine_action->get_coarsening_level(),0),
+  t_sampler(param_hierarchical.n_max_level()-fine_action->get_coarsening_level(),0),
   n_autocorr_window(param_stats.n_autocorr_window()),
   cost_per_sample_(0.0){
   
@@ -56,24 +55,7 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
     x_sampler_path.push_back(std::make_shared<Path>(M_lat,T_final));
   }
   // Construct sampler on coarsest level
-  if (param_hierarchical.coarsesampler() == SamplerHMC) {
-    coarse_sampler = std::make_shared<HMCSampler>(coarse_action,
-                                                  param_hmc);
-  } else if (param_hierarchical.coarsesampler() == SamplerCluster) {
-    if (param_general.action() != ActionRotor) {
-      mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
-      mpi_exit(EXIT_FAILURE);
-    }
-    coarse_sampler =
-      std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(coarse_action),
-                                       param_cluster);
-  } else if (param_hierarchical.coarsesampler() == SamplerExact) {
-    if (param_general.action() != ActionHarmonicOscillator) {
-      mpi_parallel::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
-      mpi_exit(EXIT_FAILURE);
-    }
-    coarse_sampler = std::dynamic_pointer_cast<Sampler>(coarse_action);
-  }
+  coarse_sampler = coarse_sampler_factory->get(coarse_action);
   // Statistics on all levels
   for (unsigned int level=0;level<n_level;++level) {
     std::stringstream stats_sampler_label;

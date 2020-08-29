@@ -30,6 +30,52 @@
  * formulation of quantum mechanics.
  */
 
+/** Helper function to construct suitable sampler factory for given samplerid */
+std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
+                                                          const std::shared_ptr<QoI> qoi,
+                                                          const std::shared_ptr<SamplerFactory> coarse_sampler_factory,
+                                                          const GeneralParameters param_general,
+                                                          const HMCParameters param_hmc,
+                                                          const ClusterParameters param_cluster,
+                                                          const StatisticsParameters param_stats,
+                                                          const HierarchicalParameters param_hierarchical) {
+  std::shared_ptr<SamplerFactory> sampler_factory;
+  if (samplerid == SamplerHMC) {
+    /* --- CASE 1: HMC sampler ---- */
+    sampler_factory = std::make_shared<HMCSamplerFactory>(param_hmc);
+  } else if (samplerid == SamplerCluster) {
+    /* --- CASE 2: cluster sampler ---- */
+    if (param_general.action() != ActionRotor) {
+      mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
+      mpi_exit(EXIT_FAILURE);
+    }
+    sampler_factory = std::make_shared<ClusterSamplerFactory>(param_cluster);
+  } else if (samplerid == SamplerExact) {
+  /* --- CASE 3: exact sampler (for HO action) ---- */
+    if (param_general.action() != ActionHarmonicOscillator) {
+      mpi_parallel::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
+      mpi_exit(EXIT_FAILURE);
+    }
+    sampler_factory = std::make_shared<HarmonicOscillatorSamplerFactory>();
+  } else if (samplerid == SamplerHierarchical) {
+    /* ---- CASE 4: Hierarchical sampler */
+    sampler_factory = std::make_shared<HierarchicalSamplerFactory>(coarse_sampler_factory,
+                                                                   param_general,
+                                                                   param_hierarchical);
+  } else if (samplerid == SamplerMultilevel) {
+  /* ---- CASE 5: Multilevel sampler */
+    sampler_factory = std::make_shared<MultilevelSamplerFactory>(qoi,
+                                                                 coarse_sampler_factory,
+                                                                 param_general,
+                                                                 param_stats,
+                                                                 param_hierarchical);
+  } else {
+    mpi_parallel::cerr << " ERROR: Unknown sampler." << std::endl;
+    mpi_exit(EXIT_FAILURE);
+    return nullptr;
+  }
+}
+
 /** Main program */
 int main(int argc, char* argv[]) {
   mpi_init();
@@ -227,9 +273,23 @@ int main(int argc, char* argv[]) {
     }
   }
   
+  /* Construct coarse level sampler factory, which might be used by the hierarchical samplers */
+  std::shared_ptr<SamplerFactory> coarse_sampler_factory;
+  /* Note that here it does not make sense to use the hierarchical- or multilevel-sampler,
+   * so we can pass null pointers for the QoI and coarse level sampler factory
+   */
+  coarse_sampler_factory = construct_sampler_factory(param_hierarchical.coarsesampler(),
+                                                     nullptr,
+                                                     nullptr,
+                                                     param_general,
+                                                     param_hmc,
+                                                     param_cluster,
+                                                     param_stats,
+                                                     param_hierarchical);
+  
   /* **************************************** * 
    * Single level method                      *
-   * **************************************** */  
+   * **************************************** */
 
   if (param_general.method() == MethodSingleLevel) {
     mpi_parallel::cout << "+--------------------------------+" << std::endl;
@@ -237,47 +297,19 @@ int main(int argc, char* argv[]) {
     mpi_parallel::cout << "+--------------------------------+" << std::endl;
     mpi_parallel::cout << std::endl;
     
-    /* ==== Construct sampler ==== */
-    std::shared_ptr<Sampler> sampler;
-    if (param_singlelevelmc.sampler() == SamplerHMC) {
-      sampler = std::make_shared<HMCSampler>(action,
-                                             param_hmc);
-    } else if (param_singlelevelmc.sampler() == SamplerCluster) {
-      if (param_general.action() != ActionRotor) {
-        mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
-        mpi_exit(EXIT_FAILURE);
-      }
-      sampler = std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(action),
-                                                 param_cluster);
-    } else if (param_singlelevelmc.sampler() == SamplerExact) {
-      if (param_general.action() != ActionHarmonicOscillator) {
-        mpi_parallel::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
-        mpi_exit(EXIT_FAILURE);
-      }
-      sampler = std::dynamic_pointer_cast<Sampler>(action);
-    } else if (param_singlelevelmc.sampler() == SamplerHierarchical) {
-      sampler = std::make_shared<HierarchicalSampler>(action,
-                                                      param_general,
-                                                      param_stats,
-                                                      param_hmc,
-                                                      param_cluster,
-                                                      param_hierarchical);
-    } else if (param_singlelevelmc.sampler() == SamplerMultilevel) {
-        sampler = std::make_shared<MultilevelSampler>(action,
-                                                      qoi,
-                                                      param_general,
-                                                      param_stats,
-                                                      param_hmc,
-                                                      param_cluster,
-                                                      param_hierarchical);
-    } else {
-      mpi_parallel::cerr << " ERROR: Unknown sampler." << std::endl;
-      mpi_exit(EXIT_FAILURE);
-    }
+    std::shared_ptr<SamplerFactory> sampler_factory;
+    sampler_factory = construct_sampler_factory(param_singlelevelmc.sampler(),
+                                                qoi,
+                                                coarse_sampler_factory,
+                                                param_general,
+                                                param_hmc,
+                                                param_cluster,
+                                                param_stats,
+                                                param_hierarchical);
     /* ====== Construct single level MC ====== */
     MonteCarloSingleLevel montecarlo_singlelevel(action,
                                                  qoi,
-                                                 sampler,
+                                                 sampler_factory,
                                                  param_stats,
                                                  param_singlelevelmc);
   
@@ -300,11 +332,19 @@ int main(int argc, char* argv[]) {
     mpi_parallel::cout << "+--------------------------------+" << std::endl;
     mpi_parallel::cout << std::endl;
     
+    std::shared_ptr<SamplerFactory> sampler_factory;
+    sampler_factory = construct_sampler_factory(param_twolevelmc.sampler(),
+                                                qoi,
+                                                coarse_sampler_factory,
+                                                param_general,
+                                                param_hmc,
+                                                param_cluster,
+                                                param_stats,
+                                                param_hierarchical);
     MonteCarloTwoLevel montecarlo_twolevel(action,
                                            qoi,
+                                           sampler_factory,
                                            param_general,
-                                           param_hmc,
-                                           param_cluster,
                                            param_twolevelmc);
     Statistics stats_fine("QoI[fine]",10);
     Statistics stats_coarse("QoI[coarse]",10);
@@ -337,14 +377,23 @@ int main(int argc, char* argv[]) {
     mpi_parallel::cout << "+--------------------------------+" << std::endl;
     mpi_parallel::cout << std::endl;
     
+    std::shared_ptr<SamplerFactory> sampler_factory;
+    sampler_factory = construct_sampler_factory(param_multilevelmc.sampler(),
+                                                qoi,
+                                                coarse_sampler_factory,
+                                                param_general,
+                                                param_hmc,
+                                                param_cluster,
+                                                param_stats,
+                                                param_hierarchical);
+
     MonteCarloMultiLevel montecarlo_multilevel(action,
                                                qoi,
+                                               sampler_factory,
                                                param_general,
                                                param_stats,
-                                               param_hmc,
-                                               param_cluster,
-                                               param_multilevelmc,
-                                               param_hierarchical);
+                                               param_multilevelmc);
+    
     montecarlo_multilevel.evaluate();
     montecarlo_multilevel.show_statistics();
     if (param_multilevelmc.show_detailed_stats()) {

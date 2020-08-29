@@ -7,7 +7,6 @@
 #include <Eigen/Dense>
 #include <iostream>
 #include "path.hh"
-#include "sampler.hh"
 #include "renormalisation.hh"
 #include "mpi_wrapper.hh"
 
@@ -42,7 +41,7 @@ public:
          const double m0_)
     : M_lat(M_lat_), T_final(T_final_),
       renormalisation(renormalisation_),
-      m0(m0_), a_lat(T_final_/M_lat_) {
+      m0(m0_), a_lat(T_final_/M_lat_), coarsening_level(0) {
     assert(m0>0.0);
     assert(T_final>0.0);
   }
@@ -132,6 +131,16 @@ public:
   double virtual inline getWminimum(const double x_m,
                                     const double x_p) const = 0;
   
+  /** @brief Return coarsening level of action */
+  const int get_coarsening_level() const { return coarsening_level; }
+  
+  /** @brief Set coarsening level of action
+   *
+   * @param[in] coarsening_level_ new value of coarsening level
+   */
+  void set_coarsening_level(const int coarsening_level_) { coarsening_level = coarsening_level_; }
+  
+  
 protected:
   /** @brief Number of time slices */
   const unsigned int M_lat;
@@ -143,6 +152,8 @@ protected:
   const double m0;
   /** @brief lattice spacing */
   const double a_lat;
+  /** @brief coarsening level (0=finest level) */
+  mutable int coarsening_level;
 };
 
 #endif // ACTION_HH

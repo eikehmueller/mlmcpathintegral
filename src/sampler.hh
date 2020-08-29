@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <vector>
 #include "mcmcstep.hh"
+#include "action.hh"
 #include "path.hh"
 
 /** @file sampler.hh
@@ -34,5 +35,12 @@ public:
    */
   virtual void draw(std::shared_ptr<Path> x_path) = 0;
 };
+
+class SamplerFactory {
+public:
+  /** @brief extract a sampler for a given action */
+  virtual std::shared_ptr<Sampler> get(std::shared_ptr<Action> action) = 0;
+};
+
 
 #endif // SAMPLER_HH

@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include "path.hh"
+#include "action.hh"
 #include "clusteraction.hh"
 #include "parameters.hh"
 #include "sampler.hh"
@@ -132,6 +133,28 @@ protected:
   mutable UniformInt uniform_int_dist;
   /** @brief cost per sample */
   double cost_per_sample_;
+};
+
+class ClusterSamplerFactory : public SamplerFactory {
+  public:
+  /** @brief Create new instance
+   *
+   * @param[in] param_cluster Custer sampler parameters
+   */
+  ClusterSamplerFactory(const ClusterParameters param_cluster_) :
+    param_cluster(param_cluster_) {}
+  
+  /** @brief Return sampler for a specific  action
+   *
+   * @param[in] action Action to sample from
+   */
+  virtual std::shared_ptr<Sampler> get(std::shared_ptr<Action> action) {
+    return std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(action),
+                                            param_cluster);
+  }
+private:
+  /** Cluster sampler parameters */
+  const ClusterParameters param_cluster;
 };
 
 #endif // CLUSTERSAMPLER_HH

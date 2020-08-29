@@ -115,13 +115,15 @@ public:
       mpi_parallel::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
       mpi_exit(EXIT_FAILURE);
     }
-    return std::make_shared<DoubleWellAction>(M_lat/2,
-                                              T_final,
-                                              renormalisation,
-                                              m0,
-                                              mu2,
-                                              lambda,
-                                              sigma);
+    std::shared_ptr<Action> new_action = std::make_shared<DoubleWellAction>(M_lat/2,
+                                                                            T_final,
+                                                                            renormalisation,
+                                                                            m0,
+                                                                            mu2,
+                                                                            lambda,
+                                                                            sigma);
+    new_action->set_coarsening_level(get_coarsening_level()+1);
+    return new_action;
   }
 
   

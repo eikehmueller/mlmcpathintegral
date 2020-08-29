@@ -82,9 +82,7 @@ public:
   /** @brief Create new instance
    *
    * @param[in] action_ Action to sample from
-   * @param[in] nt_hmc_ Number of HMC steps 
-   * @param[in] dt_hmc_ Step size \f$\Delta t_{HMC}\f$ of HMC trajectories 
-   * @param[in] n_burnin_ Number of burnin steps
+   * @param[in] hmc_param_ HMC parameters
    */
   HMCSampler(const std::shared_ptr<Action> action_,
              const HMCParameters hmc_param_) :
@@ -183,6 +181,27 @@ protected:
   Normal normal_dist;
   /** @brief Uniform distribution used for Metropolis accept/reject step */
   Uniform uniform_dist;
+};
+
+class HMCSamplerFactory : public SamplerFactory {
+  public:
+  /** @brief Create new instance
+   *
+   * @param[in] param_hmc HMC parameters
+   */
+  HMCSamplerFactory(const HMCParameters param_hmc_) :
+    param_hmc(param_hmc_) {}
+  
+  /** @brief Return sampler for a specific  action
+   *
+   * @param[in] action Action to sample from
+   */
+  virtual std::shared_ptr<Sampler> get(std::shared_ptr<Action> action) {
+    return std::make_shared<HMCSampler>(action,param_hmc);
+  }
+private:
+  /** HMC parameters */
+  const HMCParameters param_hmc;
 };
 
 #endif // HMCSAMPLER_HH

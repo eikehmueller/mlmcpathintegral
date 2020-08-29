@@ -122,11 +122,14 @@ public:
       mpi_exit(EXIT_FAILURE);
     }
     RenormalisedHOParameters c_param(M_lat,T_final,m0,mu2,renormalisation);
-    return std::make_shared<HarmonicOscillatorAction>(M_lat/2,
-                                                      T_final,
-                                                      renormalisation,
-                                                      c_param.m0_coarse(),
-                                                      c_param.mu2_coarse());
+    std::shared_ptr<Action> new_action;
+    new_action = std::make_shared<HarmonicOscillatorAction>(M_lat/2,
+                                                            T_final,
+                                                            renormalisation,
+                                                            c_param.m0_coarse(),
+                                                            c_param.mu2_coarse());
+    new_action->set_coarsening_level(get_coarsening_level()+1);
+    return new_action;
   };
 
 
@@ -268,5 +271,16 @@ private:
   /** @brief Scaling factor for calculation of mimimum of modified potential */
   const double Wminimum_scaling;
 };
+
+class HarmonicOscillatorSamplerFactory : public SamplerFactory {
+  /** @brief Return sampler for a specific  action
+   *
+   * @param[in] action Action to sample from
+   */
+  virtual std::shared_ptr<Sampler> get(std::shared_ptr<Action> action) {
+    return std::dynamic_pointer_cast<Sampler>(action);
+  }
+};
+
 
 #endif // HARMONICOSCILLATORACTION_HH

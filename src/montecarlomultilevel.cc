@@ -6,12 +6,10 @@
 
 MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
                                            std::shared_ptr<QoI> qoi_,
+                                           std::shared_ptr<SamplerFactory> sampler_factory,                                           
                                            const GeneralParameters param_general,
                                            const StatisticsParameters param_stats,
-                                           const HMCParameters param_hmc,
-                                           const ClusterParameters param_cluster,
-                                           const MultiLevelMCParameters param_multilevelmc,
-                                           const HierarchicalParameters param_hierarchical) :
+                                           const MultiLevelMCParameters param_multilevelmc) :
   MonteCarlo(param_multilevelmc.n_burnin()),
   fine_action(fine_action_),
   qoi(qoi_),
@@ -50,41 +48,8 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
                                                action_tmp,
                                                conditioned_fine_action);
     twolevel_step.push_back(twolevel_step_tmp);
-    HierarchicalParameters param_hierarchical_tmp = HierarchicalParameters(param_hierarchical.n_level()-ell,
-                               param_hierarchical.coarsesampler());
-    std::shared_ptr<Sampler> sampler_tmp;
-    if (param_multilevelmc.sampler() == SamplerMultilevel) {
-      sampler_tmp
-        = std::make_shared<MultilevelSampler>(coarse_action_tmp,
-                                              qoi,
-                                              param_general,
-                                              param_stats,
-                                              param_hmc,
-                                              param_cluster,
-                                              param_hierarchical_tmp);
-      sub_sample_coarse = false;
-    } else if (param_multilevelmc.sampler() == SamplerHierarchical) {
-      sampler_tmp
-        = std::make_shared<HierarchicalSampler>(coarse_action_tmp,
-                                                param_general,
-                                                param_stats,
-                                                param_hmc,
-                                                param_cluster,
-                                                param_hierarchical_tmp);
-      sub_sample_coarse = true;
-    } else if (param_multilevelmc.sampler() == SamplerCluster) {
-      if (param_general.action() != ActionRotor) {
-        mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
-        mpi_exit(EXIT_FAILURE);
-      }
-      sampler_tmp
-        = std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(coarse_action_tmp),
-                                           param_cluster);
-      sub_sample_coarse = true;
-    } else {
-      mpi_parallel::cerr << " ERROR: Unknown sampler." << std::endl;
-      mpi_exit(EXIT_FAILURE);
-    }
+    std::shared_ptr<Sampler> sampler_tmp=sampler_factory->get(coarse_action_tmp);
+    sub_sample_coarse = true;
     coarse_sampler.push_back(sampler_tmp);
     std::stringstream stats_sampler_label;
     stats_sampler_label << "   Q_{sampler}[" << ell << "]";

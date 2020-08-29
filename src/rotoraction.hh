@@ -123,10 +123,12 @@ public:
       mpi_exit(EXIT_FAILURE);
     }
     RenormalisedRotorParameters c_param(M_lat,T_final,m0,renormalisation);
-    return std::make_shared<RotorAction>(M_lat/2,
-                                         T_final,
-                                         renormalisation,
-                                         c_param.m0_coarse());
+    std::shared_ptr<Action> new_action = std::make_shared<RotorAction>(M_lat/2,
+                                                                       T_final,
+                                                                       renormalisation,
+                                                                       c_param.m0_coarse());
+    new_action->set_coarsening_level(get_coarsening_level()+1);
+    return new_action;
   };
   
   /** @brief Evaluate action for a specific path

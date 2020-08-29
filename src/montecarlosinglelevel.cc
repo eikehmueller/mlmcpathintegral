@@ -7,13 +7,13 @@
 /* Constructor */
 MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
                                              std::shared_ptr<QoI> qoi_,
-                                             std::shared_ptr<Sampler> sampler_,
+                                             std::shared_ptr<SamplerFactory> sampler_factory,
                                              const StatisticsParameters param_stats,
                                              const SingleLevelMCParameters param_singlelevelmc) :
   MonteCarlo(param_singlelevelmc.n_burnin()),
   action(action_), 
   qoi(qoi_),
-  sampler(sampler_),
+  sampler(sampler_factory->get(action_)),
   n_autocorr_window(param_stats.n_autocorr_window()),
   n_min_samples_qoi(param_stats.n_min_samples_qoi()),
   n_samples(param_singlelevelmc.n_samples()),

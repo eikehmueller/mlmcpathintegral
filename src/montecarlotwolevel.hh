@@ -30,10 +30,10 @@ public:
     Parameters("twolevelmc"),
     n_burnin_(100),
     n_samples_(100),
-    coarsesampler_(SamplerHMC) {
+    sampler_(SamplerHMC) {
     addKey("n_burnin",Integer,Positive);
     addKey("n_samples",Integer,Positive);
-    addKey("coarsesampler",String);
+    addKey("sampler",String);
   }
 
   /** @brief Read parameters from file
@@ -46,15 +46,15 @@ public:
     if (!readSuccess) {
       n_burnin_ = getContents("n_burnin")->getInt();
       n_samples_ = getContents("n_samples")->getInt();
-      std::string sampler_str = getContents("coarsesampler")->getString();
+      std::string sampler_str = getContents("sampler")->getString();
       if (sampler_str == "HMC") {
-        coarsesampler_ = SamplerHMC;
+        sampler_ = SamplerHMC;
       } else if (sampler_str == "cluster") {
-        coarsesampler_ = SamplerCluster;
+        sampler_ = SamplerCluster;
       } else if (sampler_str == "exact") {
-        coarsesampler_ = SamplerExact;
+        sampler_ = SamplerExact;
       } else  {
-        mpi_parallel::cerr << " ERROR: Unknown coarse sampler: " << sampler_str;
+        mpi_parallel::cerr << " ERROR: Unknown sampler: " << sampler_str;
         mpi_parallel::cerr << std::endl;
         mpi_parallel::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
         mpi_exit(EXIT_FAILURE);
@@ -68,14 +68,14 @@ public:
   /** @brief Return number of samples */
   unsigned int n_samples() const { return n_samples_; }
   /** @brief Return sampler type */
-  SamplerType coarsesampler() const { return coarsesampler_; }
+  SamplerType sampler() const { return sampler_; }
 private:
   /** @brief Number of burnin samples */
   unsigned int n_burnin_;
   /** @brief Number of samples */
   unsigned int n_samples_;
   /** @brief Sampler type */
-  SamplerType coarsesampler_;
+  SamplerType sampler_;
 };
 
 /** @class MonteCarloTwoLevel
@@ -90,16 +90,14 @@ public:
    *
    * @param[in] fine_action_ Action on fine level
    * @param[in] qoi_ Quantity of interest
+   * @param[in] sampler_factory Factory for constructing coarse level sampler
    * @param[in] param_general General parameters
-   * @param[in] param_hmc HMC sampler parameters
-   * @param[in] param_cluster Cluster sampler parameters
    * @param[in] param_twolevelmc Two level sampler parameters
    */
   MonteCarloTwoLevel(std::shared_ptr<Action> fine_action_,
                      std::shared_ptr<QoI> qoi_,
+                     std::shared_ptr<SamplerFactory> sampler_factory,
                      const GeneralParameters param_general,
-                     const HMCParameters param_hmc,
-                     const ClusterParameters param_cluster,
                      const TwoLevelMCParameters param_twolevelmc);
   
   /** @brief Calculate mean and variance of difference

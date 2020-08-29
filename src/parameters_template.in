@@ -74,7 +74,7 @@ singlelevelmc:
 twolevelmc:
   n_burnin = 100      # Number of burnin samples
   n_samples = 1000    # Number of samples
-  coarsesampler = 'HMC' # Sampler to use [HMC, cluster, exact]
+  sampler = 'HMC' # Sampler to use [HMC, cluster, exact]
 
 ###########################################
 # Multilevel Monte Carlo parameters
@@ -90,7 +90,7 @@ multilevelmc:
 # Hierarchical sampler parameters
 ###########################################
 hierarchical:
-  n_level = 2           # Number of levels
+  n_level = 3           # Maximal number of levels
   coarsesampler = 'HMC' # Sampler to use [HMC, cluster, exact]
 
 ###########################################
