@@ -33,6 +33,14 @@ To run, type
 
 All parameters are read from the file `PARAMETERFILE` given as a command line option, so edit this accordingly. You might want to copy the file `parameters_template.in` to `parameters.in` to make a start.
 
+### XCode setup ###
+Do the following to set up an XCode project for the source code.
+1) File -> New -> Project. Choose "Cross Platform - External Build System"
+2) Under "Info" Tab set the directory to the one that contains the Makefile
+3) Drag src directory to project
+4) File -> New -> Target.
+5) Chosse "Create groups" and add to all targets
+
 ### References ###
 [1]: [Creutz, M. and Freedman, B., 1981. A statistical approach to quantum mechanics. Annals of Physics, 132(2), pp.427-462.](https://www.sciencedirect.com/science/article/pii/0003491681900749)
 
