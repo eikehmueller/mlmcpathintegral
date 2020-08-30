@@ -9,7 +9,7 @@
 #include "sampler/sampler.hh"
 #include "action/action.hh"
 #include "action/qm/harmonicoscillatorrenormalisation.hh"
-#include "auxilliary/parameters.hh"
+#include "common/parameters.hh"
 #include "mpi/mpi_random.hh"
 
 /** @file harmonicoscillatoraction.hh

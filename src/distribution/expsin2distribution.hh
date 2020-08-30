@@ -6,7 +6,7 @@
 #include <iostream>
 #include <cmath>
 #include <gsl/gsl_sf_bessel.h>
-#include "auxilliary/auxilliary.hh"
+#include "common/auxilliary.hh"
 
 /** @file expsin2distribution.hh
  * @brief Header file for exponential sin-squared distribution 

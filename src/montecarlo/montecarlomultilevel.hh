@@ -7,9 +7,9 @@
 #include <sstream>
 #include <memory>
 #include <typeinfo>
-#include "auxilliary/timer.hh"
-#include "auxilliary/statistics.hh"
-#include "auxilliary/parameters.hh"
+#include "common/timer.hh"
+#include "common/statistics.hh"
+#include "common/parameters.hh"
 #include "mpi/mpi_wrapper.hh"
 #include "fields/path.hh"
 #include "sampler/sampler.hh"

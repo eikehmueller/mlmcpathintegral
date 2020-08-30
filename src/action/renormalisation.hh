@@ -1,8 +1,8 @@
 #ifndef RENORMALISATION_HH
 #define RENORMALISATION_HH RENORMALISATION_HH
 #include <math.h>
-#include "auxilliary/auxilliary.hh"
-#include "auxilliary/parameters.hh"
+#include "common/auxilliary.hh"
+#include "common/parameters.hh"
 #include "mpi/mpi_wrapper.hh"
 
 /** @file renormalisation.hh

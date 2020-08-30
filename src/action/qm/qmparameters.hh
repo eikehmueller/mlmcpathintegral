@@ -2,7 +2,7 @@
 #define QMPARAMETERS_HH QMPARAMETERS_HH
 
 #include <string>
-#include "auxilliary/parameters.hh"
+#include "common/parameters.hh"
 
 /** @file qmparameters.hh
  * 

@@ -6,8 +6,8 @@
 #include <iostream>
 #include <iomanip>
 #include "config.h"
-#include "auxilliary/statistics.hh"
-#include "auxilliary/parameters.hh"
+#include "common/statistics.hh"
+#include "common/parameters.hh"
 #include "mpi/mpi_wrapper.hh"
 #include "sampler/sampler.hh"
 #include "action/action.hh"

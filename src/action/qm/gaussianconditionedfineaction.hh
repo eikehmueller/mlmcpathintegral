@@ -3,7 +3,7 @@
 #include <random>
 #include <memory>
 #include <algorithm>
-#include "auxilliary/auxilliary.hh"
+#include "common/auxilliary.hh"
 #include "mpi/mpi_random.hh"
 #include "fields/path.hh"
 #include "action/action.hh"

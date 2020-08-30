@@ -5,7 +5,7 @@
 #include "action/action.hh"
 #include "montecarlo/mcmcstep.hh"
 #include "action/conditionedfineaction.hh"
-#include "auxilliary/timer.hh"
+#include "common/timer.hh"
 #include "mpi/mpi_random.hh"
 
 

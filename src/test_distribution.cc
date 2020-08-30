@@ -5,7 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
-#include "auxilliary/timer.hh"
+#include "common/timer.hh"
 #include "distribution/expsin2distribution.hh"
 
 /* Measure time for creating a single sample */

@@ -3,8 +3,8 @@
 #include <utility>
 #include <memory>
 
-#include "auxilliary/parameters.hh"
-#include "auxilliary/statistics.hh"
+#include "common/parameters.hh"
+#include "common/statistics.hh"
 #include "mpi/mpi_wrapper.hh"
 #include "action/renormalisation.hh"
 #include "action/qm/harmonicoscillatoraction.hh"

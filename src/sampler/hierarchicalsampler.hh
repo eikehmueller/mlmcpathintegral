@@ -4,9 +4,9 @@
 #include <memory>
 #include <string>
 #include <sstream>
-#include "auxilliary/parameters.hh"
-#include "auxilliary/statistics.hh"
-#include "auxilliary/timer.hh"
+#include "common/parameters.hh"
+#include "common/statistics.hh"
+#include "common/timer.hh"
 #include "mpi/mpi_wrapper.hh"
 #include "fields/path.hh"
 #include "action/action.hh"

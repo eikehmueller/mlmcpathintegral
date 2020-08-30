@@ -11,7 +11,7 @@
 #include <iostream>
 #include <string>
 #include <iomanip>
-#include "auxilliary/parameters.hh"
+#include "common/parameters.hh"
 #include "mpi/mpi_wrapper.hh"
 
 /** @class StatisticsParameters

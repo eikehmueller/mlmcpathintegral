@@ -3,7 +3,7 @@
 #include <memory>
 #include <random>
 #include <vector>
-#include "auxilliary/parameters.hh"
+#include "common/parameters.hh"
 #include "mpi/mpi_wrapper.hh"
 #include "mpi/mpi_random.hh"
 #include "fields/path.hh"

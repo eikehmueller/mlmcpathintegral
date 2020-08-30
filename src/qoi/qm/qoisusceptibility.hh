@@ -3,7 +3,7 @@
 #include <memory>
 #include <cmath>
 #include "fields/path.hh"
-#include "auxilliary/auxilliary.hh"
+#include "common/auxilliary.hh"
 #include "qoi/quantityofinterest.hh"
 
 /** @file qoisusceptibility.hh

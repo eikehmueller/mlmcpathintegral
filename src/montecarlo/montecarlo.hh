@@ -6,7 +6,7 @@
 #include "sampler/sampler.hh"
 #include "action/action.hh"
 #include "qoi/quantityofinterest.hh"
-#include "auxilliary/statistics.hh"
+#include "common/statistics.hh"
 
 /** @file montecarlo.hh
  * @brief Header file for Monte Carlo base class

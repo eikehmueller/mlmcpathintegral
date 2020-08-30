@@ -3,8 +3,8 @@
 #include <random>
 #include <vector>
 #include <memory>
-#include "auxilliary/parameters.hh"
-#include "auxilliary/timer.hh"
+#include "common/parameters.hh"
+#include "common/timer.hh"
 #include "mpi/mpi_random.hh"
 #include "fields/path.hh"
 #include "action/action.hh"

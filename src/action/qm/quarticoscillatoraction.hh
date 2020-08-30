@@ -4,7 +4,7 @@
 #include <vector>
 #include "fields/path.hh"
 #include "action/action.hh"
-#include "auxilliary/parameters.hh"
+#include "common/parameters.hh"
 #include "mpi/mpi_wrapper.hh"
 
 /** @file quarticoscillatoraction.hh

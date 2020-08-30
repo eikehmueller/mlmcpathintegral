@@ -5,8 +5,8 @@
 #include <cmath>
 #include <random>
 #include <algorithm>
-#include "auxilliary/auxilliary.hh"
-#include "auxilliary/parameters.hh"
+#include "common/auxilliary.hh"
+#include "common/parameters.hh"
 #include "mpi/mpi_wrapper.hh"
 #include "mpi/mpi_random.hh"
 #include "fields/path.hh"
