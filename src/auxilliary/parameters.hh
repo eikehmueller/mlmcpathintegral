@@ -28,19 +28,6 @@ enum MethodType {
   MethodMultiLevel = 2
 };
 
-/** @brief Enum for different actions
- *  - 0: Harmonic Oscillator
- *  - 1: Quartic Oscillator
- *  - 2: Double Well
- *  - 3: Quantum mechanical rotor
-*/
-enum ActionType {
-  ActionHarmonicOscillator = 0,
-  ActionQuarticOscillator = 1,
-  ActionDoubleWell = 2,
-  ActionRotor = 3
-};
-
 /** @brief Enum for sampler:
  *  - 0: HMC
  *  - 1: cluster algorithm (only some actions)
@@ -435,10 +422,8 @@ public:
   /** @brief Construct a new instance */
   GeneralParameters() :
     Parameters("general"),
-    method_(MethodSingleLevel),
-    action_(ActionHarmonicOscillator) {
+    method_(MethodSingleLevel) {
     addKey("method",String);
-    addKey("action",String);
   }
 
   /** @brief Read parameters from file
@@ -458,31 +443,16 @@ public:
         method_ = MethodMultiLevel;
       } else {
       }
-      std::string action_str = getContents("action")->getString();
-      if (action_str=="harmonicoscillator") {
-        action_ = ActionHarmonicOscillator;
-      } else if (action_str=="quarticoscillator") {
-        action_ = ActionQuarticOscillator;
-      } else if (action_str=="doublewell") {
-        action_ = ActionDoubleWell;
-      } else if (action_str=="rotor") {
-        action_ = ActionRotor;
-      } else {
-      }
     }
     return readSuccess;
   }
 
   /** @brief Method to use (single-, two-, or multi-level  */
   MethodType method() const { return method_; }
-  /** @brief Return the action type */
-  ActionType action() const { return action_; }
 
 private:
   /** @brief Method to use */
   MethodType method_;
-  /** @brief Type of action */
-  ActionType action_;
 };
 
 

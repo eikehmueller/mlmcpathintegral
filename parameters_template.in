@@ -4,10 +4,14 @@
 general:
   method = 'singlelevel' # Method to use. Allowed values are:
                          # [singlelevel,twolevel,multilevel]
-  action = 'harmonicoscillator' # action to use. Allowed values are:
+
+###########################################
+# Quantum mechanics parameters
+###########################################
+quantummechanics:
+  action = 'quarticoscillator' # action to use. Allowed values are:
                                 # [harmonicoscillator,
                                 #  quarticoscillator,
-                                #  doublewell,
                                 #  rotor]
 
 ###########################################
@@ -35,21 +39,13 @@ harmonicoscillator:
   renormalisation = 'none' # Renormalisation [none, perturbative, exact]
 
 ###########################################
-# Double well action parameters
-###########################################
-doublewell:
-  m0 = 1.0           # Unrenormalised mass
-  mu2 = 1.0          # Curvature of potential
-  lambda = 1.0       # Parameter lambda
-  sigma = 1.0        # Parameter sigma
-
-###########################################
 # Quartic oscillator action parameters
 ###########################################
 quarticoscillator:
   m0 = 1.0           # Unrenormalised mass
   mu2 = 1.0          # Curvature of potential
   lambda = 1.0       # Parameter lambda
+  x0 = 1.0
 
 ###########################################
 # Rotor action parameters
@@ -90,7 +86,7 @@ multilevelmc:
 # Hierarchical sampler parameters
 ###########################################
 hierarchical:
-  n_level = 3           # Maximal number of levels
+  n_max_level = 3           # Maximal number of levels
   coarsesampler = 'HMC' # Sampler to use [HMC, cluster, exact]
 
 ###########################################

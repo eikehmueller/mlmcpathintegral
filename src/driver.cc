@@ -9,10 +9,10 @@
 #include "action/renormalisation.hh"
 #include "action/qm/harmonicoscillatoraction.hh"
 #include "action/qm/quarticoscillatoraction.hh"
-#include "action/qm/doublewellaction.hh"
 #include "action/qm/rotoraction.hh"
 #include "action/qm/gaussianconditionedfineaction.hh"
 #include "action/qm/rotorconditionedfineaction.hh"
+#include "action/qm/qmparameters.hh"
 #include "qoi/qm/qoixsquared.hh"
 #include "qoi/qm/qoisusceptibility.hh"
 #include "montecarlo/montecarlosinglelevel.hh"
@@ -37,6 +37,7 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
                                                           const std::shared_ptr<SamplerFactory> coarse_sampler_factory,
                                                           const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                                                           const GeneralParameters param_general,
+                                                          const QMParameters param_qm,
                                                           const HMCParameters param_hmc,
                                                           const ClusterParameters param_cluster,
                                                           const StatisticsParameters param_stats,
@@ -47,14 +48,14 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
     sampler_factory = std::make_shared<HMCSamplerFactory>(param_hmc);
   } else if (samplerid == SamplerCluster) {
     /* --- CASE 2: cluster sampler ---- */
-    if (param_general.action() != ActionRotor) {
+    if (param_qm.action() != ActionRotor) {
       mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
       mpi_exit(EXIT_FAILURE);
     }
     sampler_factory = std::make_shared<ClusterSamplerFactory>(param_cluster);
   } else if (samplerid == SamplerExact) {
   /* --- CASE 3: exact sampler (for HO action) ---- */
-    if (param_general.action() != ActionHarmonicOscillator) {
+    if (param_qm.action() != ActionHarmonicOscillator) {
       mpi_parallel::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
       mpi_exit(EXIT_FAILURE);
     }
@@ -104,19 +105,21 @@ int main(int argc, char* argv[]) {
 
   /* ====== Read parameters ====== */
   GeneralParameters param_general;
+  QMParameters param_qm;
   LatticeParameters param_lattice;
   StatisticsParameters param_stats;
   HarmonicOscillatorParameters param_ho;
   QuarticOscillatorParameters param_qo;
-  DoubleWellParameters param_dw;
   RotorParameters param_rotor;
   if (param_general.readFile(filename)) return 1;
   mpi_parallel::cout << param_general << std::endl;
+  if (param_qm.readFile(filename)) return 1;
+  mpi_parallel::cout << param_qm << std::endl;
   if (param_lattice.readFile(filename)) return 1;
   mpi_parallel::cout << param_lattice << std::endl;
   if (param_stats.readFile(filename)) return 1;
   mpi_parallel::cout << param_stats << std::endl;
-  switch (param_general.action()) {
+  switch (param_qm.action()) {
   case (ActionHarmonicOscillator): {
     if (param_ho.readFile(filename)) return 1;
     mpi_parallel::cout << param_ho << std::endl;
@@ -125,11 +128,6 @@ int main(int argc, char* argv[]) {
   case (ActionQuarticOscillator): {
     if (param_qo.readFile(filename)) return 1;
     mpi_parallel::cout << param_qo << std::endl;
-    break;
-  }
-  case (ActionDoubleWell): {
-    if (param_dw.readFile(filename)) return 1;
-    mpi_parallel::cout << param_dw << std::endl;
     break;
   }
   case (ActionRotor): {
@@ -184,13 +182,12 @@ int main(int argc, char* argv[]) {
   /* ====== Select quantity of interest ====== */
   std::shared_ptr<QoI> qoi;
   mpi_parallel::cout << std::endl;
-  if ( (param_general.action() == ActionHarmonicOscillator) or
-       (param_general.action() == ActionQuarticOscillator) or
-       (param_general.action() == ActionDoubleWell) ) {
+  if ( (param_qm.action() == ActionHarmonicOscillator) or
+       (param_qm.action() == ActionQuarticOscillator) ) {
     qoi=std::make_shared<QoIXsquared>();
     mpi_parallel::cout << "QoI = X^2 " << std::endl;
   }
-  if ( (param_general.action() == ActionRotor) ) {
+  if ( (param_qm.action() == ActionRotor) ) {
     qoi=std::make_shared<QoISusceptibility>();
     mpi_parallel::cout << "QoI = Susceptibility Q[X]^2/T " << std::endl;
   }
@@ -198,7 +195,7 @@ int main(int argc, char* argv[]) {
   
   /* ====== Select action ====== */
   std::shared_ptr<Action> action;
-  switch (param_general.action()) {
+  switch (param_qm.action()) {
   case (ActionHarmonicOscillator): {
     action =
       std::make_shared<HarmonicOscillatorAction>(param_lattice.M_lat(),
@@ -217,18 +214,6 @@ int main(int argc, char* argv[]) {
                                                 param_qo.mu2(),
                                                 param_qo.lambda(),
                                                 param_qo.x0());
-    break;
-  }
-  case (ActionDoubleWell): {
-    action = 
-      std::make_shared<DoubleWellAction>(param_lattice.M_lat(),
-                                         param_lattice.T_final(),
-                                         RenormalisationNone,
-                                         param_dw.m0(),
-                                         param_dw.mu2(),
-                                         param_dw.lambda(),
-                                         param_dw.sigma());
-
     break;
   }
   case (ActionRotor): {
@@ -251,7 +236,7 @@ int main(int argc, char* argv[]) {
   if ( (param_general.method() == MethodSingleLevel) or
        (param_general.method() == MethodMultiLevel) ) {
     /* ====== Print out exact result for harmonic oscillator */
-    if (param_general.action() == ActionHarmonicOscillator) {
+    if (param_qm.action() == ActionHarmonicOscillator) {
       std::shared_ptr<HarmonicOscillatorAction> ho_action =
         std::dynamic_pointer_cast<HarmonicOscillatorAction>(action);
       exact_result = ho_action->Xsquared_exact();
@@ -262,7 +247,7 @@ int main(int argc, char* argv[]) {
       mpi_parallel::cout << " Continuum limit [a -> 0] <x^2> = " << exact_result_continuum << std::endl;
       mpi_parallel::cout << std::endl;
     }
-    if (param_general.action() == ActionRotor) {
+    if (param_qm.action() == ActionRotor) {
       std::shared_ptr<RotorAction> rotor_action =
         std::dynamic_pointer_cast<RotorAction>(action);
       double exact_result_continuum = rotor_action->chit_exact_continuum();
@@ -277,7 +262,7 @@ int main(int argc, char* argv[]) {
   
   /* Construction conditioned fine action factory */
   std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory;
-  if (param_general.action() == ActionRotor) {
+  if (param_qm.action() == ActionRotor) {
     conditioned_fine_action_factory = std::make_shared<RotorConditionedFineActionFactory>();
   } else {
     conditioned_fine_action_factory = std::make_shared<GaussianConditionedFineActionFactory>();
@@ -293,6 +278,7 @@ int main(int argc, char* argv[]) {
                                                      nullptr,
                                                      conditioned_fine_action_factory,
                                                      param_general,
+                                                     param_qm,
                                                      param_hmc,
                                                      param_cluster,
                                                      param_stats,
@@ -314,6 +300,7 @@ int main(int argc, char* argv[]) {
                                                 coarse_sampler_factory,
                                                 conditioned_fine_action_factory,
                                                 param_general,
+                                                param_qm,
                                                 param_hmc,
                                                 param_cluster,
                                                 param_stats,
@@ -350,6 +337,7 @@ int main(int argc, char* argv[]) {
                                                 coarse_sampler_factory,
                                                 conditioned_fine_action_factory,
                                                 param_general,
+                                                param_qm,
                                                 param_hmc,
                                                 param_cluster,
                                                 param_stats,
@@ -396,6 +384,7 @@ int main(int argc, char* argv[]) {
                                                 coarse_sampler_factory,
                                                 conditioned_fine_action_factory,
                                                 param_general,
+                                                param_qm,
                                                 param_hmc,
                                                 param_cluster,
                                                 param_stats,
@@ -418,8 +407,8 @@ int main(int argc, char* argv[]) {
   }
   
   // Compare numerical results to exact result (if possible)
-  if ( ( (param_general.action() == ActionHarmonicOscillator) or
-       (param_general.action() == ActionRotor) ) and
+  if ( ( (param_qm.action() == ActionHarmonicOscillator) or
+       (param_qm.action() == ActionRotor) ) and
        ( (param_general.method() == MethodSingleLevel) or
        ( (param_general.method() == MethodMultiLevel) ) ) ) {
     double diff = fabs(numerical_result-exact_result);
