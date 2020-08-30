@@ -3,7 +3,7 @@
 Repository for the implementation of **multilevel MCMC path integral methods in quantum physics**. So far, this is for one-dimensional quantum mechnanical systems. Monte Carlo methods for those systems are described in [1], and so far the following problems have been implemented:
 
  * Harmonic oscillator
- * Doublewell potential
+ * Quartic potential
  * Quantum mechanical rotor (see [2])
 
 The multilevel MCMC methods are described in [3].
@@ -23,12 +23,12 @@ The code requires the following two packages:
  * The [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/)
 
 #### Building the code ####
-Go to the code directory `src`. Copy the machine-specific Makefile `local_MACHINE.mk` to `local.mk` and edit if necessary, in particular set the paths to the Eigen library and the GSL. Edit compile time options (if you want to save some paths to disk) in `config.h`. `make all` will build the code, `make doc` will build the doxygen documentation in the subdirectory `doc`. 
+Copy the machine-specific Makefile `local_MACHINE.mk` to `local.mk` and edit if necessary, in particular set the paths to the Eigen library and the GSL. Edit compile time options (if you want to save some paths to disk) in `config.h`. `make all` will build the code, `make doc` will build the doxygen documentation in the subdirectory `doc`. 
 
 ### Running ##
 To run, type
 ```
-./driver PARAMETERFILE
+./build/driver PARAMETERFILE
 ```
 
 All parameters are read from the file `PARAMETERFILE` given as a command line option, so edit this accordingly. You might want to copy the file `parameters_template.in` to `parameters.in` to make a start.
