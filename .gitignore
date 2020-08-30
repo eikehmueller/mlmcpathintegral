@@ -1,9 +1,8 @@
 *~
 *.o
 *.x
-src/parameters.in
-src/doc
-src/.dependencies
-src/driver
+parameters.in
+doc
 local.mk
+build
 MLMC Pathintegral
