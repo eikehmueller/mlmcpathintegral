@@ -56,7 +56,7 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
 void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
   accept = true;
   for (int ell=1;ell<n_level;++ell) {
-    x_sampler_path[ell]->copy_strided(x_sampler_path[ell-1],2);
+    x_sampler_path[ell]->copy_from_fine(x_sampler_path[ell-1]);
   }
   for (int ell=n_level-1;ell>=0;--ell) {
     if (ell == (n_level-1)) {

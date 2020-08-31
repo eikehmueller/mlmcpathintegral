@@ -9,20 +9,19 @@ void Path::copy(const std::shared_ptr<Path> other) {
   std::copy_n(other->data,M_lat,data);
 }
 
-/* Copy data with stride */
-void Path::copy_strided(const std::shared_ptr<Path> other,
-                        const int stride) {
-  unsigned int s = abs(stride);
-  if (stride > 0) {
-    assert(other->M_lat == s*M_lat);
-    for (unsigned int j=0;j<M_lat;++j) {
-      data[j] = other->data[s*j];
-    }
-  } else {
-    assert(s*other->M_lat == M_lat);
-    for (unsigned int j=0;j<M_lat/s;++j) {
-      data[s*j] = other->data[j];
-    }
+/* Copy coarse data from path on coarser level */
+void Path::copy_from_coarse(const std::shared_ptr<Path> other) {
+  assert(2*other->M_lat == M_lat);
+  for (unsigned int j=0;j<M_lat/2;++j) {
+    data[2*j] = other->data[j];
+  }
+}
+
+/* Copy coarse data from path on finer level */
+void Path::copy_from_fine(const std::shared_ptr<Path> other) {
+  assert(other->M_lat == 2*M_lat);
+  for (unsigned int j=0;j<M_lat;++j) {
+    data[j] = other->data[2*j];
   }
 }
 

@@ -88,20 +88,17 @@ public:
    */
   void copy(const std::shared_ptr<Path> other);
 
-  /** @brief Copy data from other path with stride
-   *
-   * Let s = |stride| be the absolute value of the stride. Depending on whether
-   * stride is positive or negative, do the following:
-   * if stride>0: set data[j] = other->data[s*j] for j=0,...,M_lat
-   * if stride<0: set data[s*j] = other->data[j] for j=0,...,M_lat/s
-
-   *
-   * @param[in] other Path to copy from
-   * @param[in] stride Stride to use
+  /** @brief Copy coarse data points from path on coarser level
+    *
+   * @param[in] other Coarse path to copy from
    */
-  void copy_strided(const std::shared_ptr<Path> other,
-                    const int stride);
-
+  void copy_from_coarse(const std::shared_ptr<Path> other);
+  
+  /** @brief Copy coarse data points from path on finer level
+    *
+   * @param[in] other Fine path to copy from
+   */
+  void copy_from_fine(const std::shared_ptr<Path> other);
   
   /** @brief Number of time slices */
   const unsigned int M_lat;

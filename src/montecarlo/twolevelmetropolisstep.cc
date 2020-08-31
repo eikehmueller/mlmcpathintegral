@@ -39,7 +39,7 @@ void TwoLevelMetropolisStep::draw(const std::shared_ptr<Path> x_coarse_path,
                                   std::shared_ptr<Path> x_path) {
   // Populate the fine level trial state
   // Step 1: coarse level points
-  theta_prime->copy_strided(x_coarse_path,-2);
+  theta_prime->copy_from_coarse(x_coarse_path);
   // Step 2: fine level points from conditioned action
   conditioned_fine_action->fill_fine_points(theta_prime);
   /*
@@ -54,7 +54,7 @@ void TwoLevelMetropolisStep::draw(const std::shared_ptr<Path> x_coarse_path,
    * required to calculate the ratio   
    * \pi^{\ell-1}(\theta_{\ell,C}^{n})/\pi^{\ell-1}(\theta'_{\ell,C}) 
    */
-  theta_fine_C->copy_strided(theta_fine,2);
+  theta_fine_C->copy_from_fine(theta_fine);
   
   double deltaS_coarse = coarse_action->evaluate(theta_fine_C)
     - coarse_action->evaluate(x_coarse_path);
