@@ -8,12 +8,12 @@
 #include "mpi/mpi_wrapper.hh"
 #include "lattice/lattice1d.hh"
 #include "action/renormalisation.hh"
+#include "action/qm/qmaction.hh"
 #include "action/qm/harmonicoscillatoraction.hh"
 #include "action/qm/quarticoscillatoraction.hh"
 #include "action/qm/rotoraction.hh"
 #include "action/qm/gaussianconditionedfineaction.hh"
 #include "action/qm/rotorconditionedfineaction.hh"
-#include "action/qm/qmparameters.hh"
 #include "qoi/qm/qoixsquared.hh"
 #include "qoi/qm/qoisusceptibility.hh"
 #include "montecarlo/montecarlosinglelevel.hh"
@@ -197,10 +197,10 @@ int main(int argc, char* argv[]) {
   /* ====== Lattice ====== */
   std::shared_ptr<Lattice1D> lattice;
   lattice = std::make_shared<Lattice1D>(param_lattice.M_lat(),
-                                       param_lattice.T_final());
+                                        param_lattice.T_final());
   
   /* ====== Select action ====== */
-  std::shared_ptr<Action> action;
+  std::shared_ptr<QMAction> action;
   switch (param_qm.action()) {
   case (ActionHarmonicOscillator): {
     action =

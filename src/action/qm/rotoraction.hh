@@ -102,8 +102,6 @@ public:
               const RenormalisationType renormalisation_,
               const double m0_)
     : ClusterAction(lattice_,renormalisation_,m0_),
-      M_lat(lattice_->getM_lat()),
-      a_lat(lattice_->geta_lat()),
       uniform_dist(-M_PI,M_PI) {
     engine.seed(21172817);
   }
@@ -236,10 +234,6 @@ public:
   double chit_exact_continuum() const;
   
 protected:
-  /** @brief Number of lattice points */
-  const unsigned int M_lat;
-  /** @brief Lattice spacing */
-  const double a_lat;
   /** @brief reflection angle for current subgroup \f$H_{\overline{x}}\f$ */
   mutable double xbar;
   /** @brief Random number engine */

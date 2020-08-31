@@ -41,9 +41,7 @@ public:
   /** @brief Return lattice spacing \f$a\f$ */
   double geta_lat() const { return a_lat;}
 
-  std::shared_ptr<Lattice1D> virtual coarse_lattice() {
-    mpi_parallel::cout << "M_lat = " << M_lat << std::endl;
-    mpi_parallel::cout << "M_lat%2 = " << (M_lat%2) << std::endl;
+  std::shared_ptr<Lattice1D> coarse_lattice() {
     if (M_lat%2) {
       mpi_parallel::cerr << "ERROR: cannot coarsen 1d lattice with M = " << M_lat << " points." << std::endl;
       mpi_exit(EXIT_FAILURE);

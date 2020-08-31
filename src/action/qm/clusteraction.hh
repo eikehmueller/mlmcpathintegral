@@ -3,7 +3,7 @@
 
 #include "lattice/lattice1d.hh"
 #include "fields/path.hh"
-#include "action/action.hh"
+#include "action/qm/qmaction.hh"
 
 /** @file clusteraction.hh
  * @brief Header file for abstract cluster action class
@@ -24,7 +24,7 @@
  * This, of course, implies that \f$x^{(\ell)}_-=x_i\f$ and
  * \f$x^{(\ell)}_+=x_{i+1}\f$.
  */
-class ClusterAction : public Action {
+class ClusterAction : public QMAction {
 public:
   /** @brief Initialise class
    *
@@ -37,7 +37,7 @@ public:
   ClusterAction(const std::shared_ptr<Lattice1D> lattice_,
                 const RenormalisationType renormalisation_,
                 const double m0_)
-    : Action(lattice_, renormalisation_, m0_) {}
+    : QMAction(lattice_, renormalisation_, m0_) {}
 
   /** @brief Change \f$S_{\ell}\f$ in energy used in bonding probabilities
    *

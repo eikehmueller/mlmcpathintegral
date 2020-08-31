@@ -4,7 +4,7 @@
 #include <vector>
 #include "lattice/lattice1d.hh"
 #include "fields/path.hh"
-#include "action/action.hh"
+#include "action/qm/qmaction.hh"
 #include "common/parameters.hh"
 #include "mpi/mpi_wrapper.hh"
 
@@ -78,7 +78,7 @@ private:
  * Action class for potential
  * \f$V(x)=\frac{m_0}{2}\mu^2x^2+\frac{\lambda}{4}(x-x_0)^4\f$
  */
-class QuarticOscillatorAction : public Action {
+class QuarticOscillatorAction : public QMAction {
 public:
   /** @brief Initialise class
    *
@@ -96,9 +96,7 @@ public:
                           const double mu2_,
                           const double lambda_,
                           const double x0_)
-    : Action(lattice_,renormalisation_,m0_),
-      M_lat(lattice_->getM_lat()),
-      a_lat(lattice_->geta_lat()),
+    : QMAction(lattice_,renormalisation_,m0_),
       mu2(mu2_), lambda(lambda_), x0(x0_) {
   }
 
@@ -203,10 +201,6 @@ public:
   }
 
 private:
-  /** @brief Number of lattice points */
-  const unsigned int M_lat;
-  /** @brief Lattice spacing */
-  const double a_lat;
   /** @brief Oscillator frequency */
   const double mu2;
   /** @brief Coefficient of quartic term in potential */

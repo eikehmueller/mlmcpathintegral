@@ -8,7 +8,7 @@
 #include "lattice/lattice1d.hh"
 #include "fields/path.hh"
 #include "sampler/sampler.hh"
-#include "action/action.hh"
+#include "action/qm/qmaction.hh"
 #include "action/qm/harmonicoscillatorrenormalisation.hh"
 #include "common/parameters.hh"
 #include "mpi/mpi_random.hh"
@@ -81,7 +81,7 @@ private:
  *
  * Action class for potential \f$V(x)=\frac{m_0}{2}\mu^2x^2\f$
  */
-class HarmonicOscillatorAction : public Action, public Sampler {
+class HarmonicOscillatorAction : public QMAction, public Sampler {
 public:
   /** @brief Initialise class
    *
@@ -95,10 +95,8 @@ public:
                            const RenormalisationType renormalisation_,
                            const double m0_,
                            const double mu2_)
-    : Action(lattice_,renormalisation_,m0_),
+    : QMAction(lattice_,renormalisation_,m0_),
       Sampler(),
-      M_lat(lattice_->getM_lat()),
-      a_lat(lattice_->geta_lat()),
       mu2(mu2_),
       Wcurvature((2./a_lat + a_lat*mu2)*m0),
       Wminimum_scaling(0.5/(1.+0.5*a_lat*a_lat*mu2)) {
@@ -244,10 +242,6 @@ private:
   void build_covariance();
 
 private:
-  /** @brief Number of lattice points */
-  unsigned int M_lat;
-  /** @brief Lattice spacing */
-  const double a_lat;
   /** @brief Oscillator frequency */
   const double mu2;
   /** @brief Eigen matrix type */

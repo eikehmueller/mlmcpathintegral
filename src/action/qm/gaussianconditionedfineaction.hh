@@ -6,7 +6,7 @@
 #include "common/auxilliary.hh"
 #include "mpi/mpi_random.hh"
 #include "fields/path.hh"
-#include "action/action.hh"
+#include "action/qm/qmaction.hh"
 #include "action/conditionedfineaction.hh"
 
 /** @file gaussianconditionedfineaction.hh
@@ -33,7 +33,7 @@ public:
    *
    * @param[in] action_ Underlying action class
    */
-  GaussianConditionedFineAction (const std::shared_ptr<Action> action_) : action(action_) {
+  GaussianConditionedFineAction (const std::shared_ptr<QMAction> action_) : action(action_) {
     engine.seed(11897197);
   }
 
@@ -60,7 +60,7 @@ public:
   
 private:
   /** @brief Underlying action class */
-  const std::shared_ptr<Action> action;
+  const std::shared_ptr<QMAction> action;
   /** @brief Random number engine */
   typedef mpi_parallel::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */
@@ -77,7 +77,7 @@ struct GaussianConditionedFineActionFactory : public ConditionedFineActionFactor
    * @param[in] action Coarse level action
    */
   virtual std::shared_ptr<ConditionedFineAction> get(std::shared_ptr<Action> action) {
-    return std::make_shared<GaussianConditionedFineAction>(action);
+    return std::make_shared<GaussianConditionedFineAction>(std::dynamic_pointer_cast<QMAction>(action));
   }
 };
 

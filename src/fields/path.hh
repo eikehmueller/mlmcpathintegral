@@ -107,10 +107,10 @@ public:
   double* data;
 
 private:
-  /** @brief Number of time slices */
-  const unsigned int M_lat;
   /** @brief Underlying lattice */
   const std::shared_ptr<Lattice1D> lattice;
+  /** @brief Number of time slices */
+  const unsigned int M_lat;
 };
 
 #endif // PATH_HH
