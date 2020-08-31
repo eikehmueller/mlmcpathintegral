@@ -9,16 +9,16 @@ ClusterSampler::ClusterSampler(const std::shared_ptr<ClusterAction> action_,
                                const ClusterParameters cluster_param) :
   Sampler(),
   action(action_),
+  M_lat(action_->get_lattice()->getM_lat()),
   n_burnin(cluster_param.n_burnin()),
   n_updates(cluster_param.n_updates()),
   uniform_dist(0.0,1.0),
-  uniform_int_dist(0,action_->getM_lat()-1)
+  uniform_int_dist(0,M_lat-1)
 {
   engine.seed(2141517);
-  const unsigned int M_lat = action->getM_lat();
-  const double T_final = action->getT_final();
+  std::shared_ptr<Lattice1D> lattice = action->get_lattice();
   // Create temporary workspace
-  x_path_cur = std::make_shared<Path>(M_lat,T_final);
+  x_path_cur = std::make_shared<Path>(lattice);
   action->initialise_path(x_path_cur);
   // Measure cost per sample
   Timer timer_meas;
@@ -30,7 +30,7 @@ ClusterSampler::ClusterSampler(const std::shared_ptr<ClusterAction> action_,
   timer_meas.stop();
   cost_per_sample_ = 1.E6*timer_meas.elapsed()/n_meas;
   // Burn in
-  std::shared_ptr<Path> x_path_tmp = std::make_shared<Path>(M_lat,T_final);
+  std::shared_ptr<Path> x_path_tmp = std::make_shared<Path>(lattice);
   for (unsigned int i=0;i<n_burnin;++i) {
     draw(x_path_tmp);
   }
@@ -40,7 +40,7 @@ ClusterSampler::ClusterSampler(const std::shared_ptr<ClusterAction> action_,
 std::pair<bool,int> ClusterSampler::process_link(const int i,
                                                  const int direction) {
   // Neighbouring site
-  int i_neighbour = (i+direction)%x_path_cur->M_lat;
+  int i_neighbour = (i+direction) % M_lat;
   // Check if neighbouring site is bonded
   double Sell = action->S_ell(x_path_cur->data[i],
                              x_path_cur->data[i_neighbour]);

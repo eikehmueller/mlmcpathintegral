@@ -49,6 +49,7 @@ void RotorAction::initialise_path(std::shared_ptr<Path> x_path) const {
 
 /** Exact chi_t for finite a */
 double RotorAction::chit_exact_perturbative() const {
+  double T_final = lattice->getT_final();
   double xi = T_final/m0;
   double z = a_lat/m0;
   double S_hat2 = Sigma_hat(xi,2);
@@ -58,6 +59,7 @@ double RotorAction::chit_exact_perturbative() const {
 
 /** Exact chi_t in continuum limit */
 double RotorAction::chit_exact_continuum() const {
+  double T_final = lattice->getT_final();
   double xi = T_final/m0;
   return 1./(4.*M_PI*M_PI*m0)*(1.-xi*Sigma_hat(xi,2));
 }

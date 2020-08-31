@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "common/auxilliary.hh"
 #include "mpi/mpi_random.hh"
+#include "lattice/lattice1d.hh"
 #include "fields/path.hh"
 #include "action/action.hh"
 #include "action/conditionedfineaction.hh"

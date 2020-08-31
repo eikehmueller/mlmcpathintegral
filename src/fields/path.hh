@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <memory>
 #include <cassert>
+#include "lattice/lattice1d.hh"
 
 /** @file path.hh
  * @brief Header file for path class
@@ -21,12 +22,11 @@ public:
    *
    * Allocate memory
    * 
-   * @param[in] M_lat_ Number of lattice sites
-   * @param[in] T_final_ Final time
+   * @param[in] lattice_ Underlying lattice
    */
-  Path(const unsigned int M_lat_,
-       const double T_final_) : M_lat(M_lat_), 
-                                T_final(T_final_) {
+  Path(const std::shared_ptr<Lattice1D> lattice_) :
+    lattice(lattice_),
+    M_lat(lattice_->getM_lat()) {
     data = new double[M_lat];
     std::fill(data,data+M_lat,0.0);
   }
@@ -100,12 +100,17 @@ public:
    */
   void copy_from_fine(const std::shared_ptr<Path> other);
   
-  /** @brief Number of time slices */
-  const unsigned int M_lat;
-  /** @brief Final time */
-  const double T_final;
+  /** @brief Return underlying lattice */
+  std::shared_ptr<Lattice1D> get_lattice() { return lattice; }
+
   /** @brief Data array */
   double* data;
+
+private:
+  /** @brief Number of time slices */
+  const unsigned int M_lat;
+  /** @brief Underlying lattice */
+  const std::shared_ptr<Lattice1D> lattice;
 };
 
 #endif // PATH_HH

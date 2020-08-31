@@ -25,9 +25,7 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
 /** Calculate Monte Carlo estimate with single level method */
 void MonteCarloSingleLevel::evaluate() {
   std::ofstream qoi_file; // File to write QoI to
-  std::shared_ptr<Path> x_path =
-    std::make_shared<Path>(action->getM_lat(),
-                           action->getT_final());
+  std::shared_ptr<Path> x_path = std::make_shared<Path>(action->get_lattice());
   stats_Q->hard_reset();
   for (unsigned int i=0;i<n_burnin;++i) {
     sampler->draw(x_path);

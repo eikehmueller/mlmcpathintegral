@@ -2,6 +2,7 @@
 #define ROTORRENORMALISATION_HH ROTORRENORMALISATION_HH
 #include "config.h"
 #include <memory>
+#include "lattice/lattice1d.hh"
 #include "action/renormalisation.hh"
 
 /** @file rotoraction.hh
@@ -22,21 +23,21 @@ class RenormalisedRotorParameters : public RenormalisedParameters {
 public:
   /** @brief Create new instance
    *
-   * @param[in] M_lat_ Number of time slices
-   * @param[in] T_final_ Final time \f$T\f$
+   * @param[in] lattice_ Underlying lattice
    * @param[in] m0_ Mass (i.e. moment of inertia) \f$m_0\f$
    * @param[in] renormalisation_ Type of renormalisation to use 
    *              (0: none, 1: perturbative, 2: exact [not implemented])
    */
-  RenormalisedRotorParameters(const unsigned int M_lat_,
-                              const double T_final_,
+  RenormalisedRotorParameters(const std::shared_ptr<Lattice1D> lattice_,
                               const double m0_,
                               const RenormalisationType renormalisation_) :
-    RenormalisedParameters(M_lat_, T_final_, renormalisation_),
+    RenormalisedParameters(lattice_, renormalisation_),
     m0(m0_) {}
   
   /** @brief Renormalised coarse level mass \f$m_0^{(c)}\f$*/
   double m0_coarse() {
+    double a_lat = lattice->geta_lat();
+    double T_final = lattice->getT_final();
     double m0coarse;
     switch (renormalisation) {
     case RenormalisationNone:

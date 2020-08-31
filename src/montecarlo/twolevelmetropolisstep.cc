@@ -2,24 +2,22 @@
 /** @file twolevelmetropolissampler.cc
  * @brief Implementation of twolevelmetropolissampler.hh
  */
-TwoLevelMetropolisStep::TwoLevelMetropolisStep(const std::shared_ptr<Action> coarse_action_, const std::shared_ptr<Action> fine_action_, const std::shared_ptr<ConditionedFineAction> conditioned_fine_action_) :
+TwoLevelMetropolisStep::TwoLevelMetropolisStep(const std::shared_ptr<Action> coarse_action_,
+                                               const std::shared_ptr<Action> fine_action_,
+                                               const std::shared_ptr<ConditionedFineAction> conditioned_fine_action_) :
    MCMCStep(),
    coarse_action(coarse_action_),
    fine_action(fine_action_),
    conditioned_fine_action(conditioned_fine_action_),
    cost_per_sample_(0.0) {
-   assert(2*coarse_action->getM_lat()==fine_action->getM_lat());
-   theta_fine = std::make_shared<Path>(fine_action->getM_lat(),
-                                       coarse_action->getT_final());
-   theta_fine_C = std::make_shared<Path>(coarse_action->getM_lat(),
-                                         coarse_action->getT_final());
-   theta_prime = std::make_shared<Path>(fine_action->getM_lat(),
-                                        coarse_action->getT_final());
+   std::shared_ptr<Lattice1D> fine_lattice = fine_action->get_lattice();
+   std::shared_ptr<Lattice1D> coarse_lattice = coarse_action->get_lattice();
+   theta_fine = std::make_shared<Path>(fine_lattice);
+   theta_fine_C = std::make_shared<Path>(coarse_lattice);
+   theta_prime = std::make_shared<Path>(fine_lattice);
    engine.seed(89216491);
-   std::shared_ptr<Path> x_fine = std::make_shared<Path>(fine_action->getM_lat(),
-                                   coarse_action->getT_final());
-   std::shared_ptr<Path> x_coarse = std::make_shared<Path>(coarse_action->getM_lat(),
-                                     coarse_action->getT_final());
+   std::shared_ptr<Path> x_fine = std::make_shared<Path>(fine_lattice);
+   std::shared_ptr<Path> x_coarse = std::make_shared<Path>(coarse_lattice);
 
    fine_action_theta_fine = fine_action->evaluate(theta_fine);
    conditioned_fine_action_theta_fine = conditioned_fine_action->evaluate(theta_fine);

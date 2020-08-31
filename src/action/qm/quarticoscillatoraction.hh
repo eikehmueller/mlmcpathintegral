@@ -2,6 +2,7 @@
 #define QUARTICOSCILLATORACTION_HH QUARTICOSCILLATORACTION_HH
 #include <memory>
 #include <vector>
+#include "lattice/lattice1d.hh"
 #include "fields/path.hh"
 #include "action/action.hh"
 #include "common/parameters.hh"
@@ -82,22 +83,22 @@ public:
   /** @brief Initialise class
    *
    * 
-   * @param[in] M_lat_ Number of time slices \f$M\f$
-   * @param[in] T_final_ Final time \f$T\f$
+   * @param[in] lattice_ Underlying lattice
    * @param[in] renormalisation_ Type of renormalisation
    * @param[in] m0_ Mass of particle \f$m_0\f$
    * @param[in] mu2_ Frequency \f$\mu^2\f$
    * @param[in] lambda_ Coefficient of quartic term, \f$\lambda\f$
    * @param[in] x0_ Shift quartic term, \f$x_0\f$
    */
-  QuarticOscillatorAction(const unsigned int M_lat_,
-                          const double T_final_,
+  QuarticOscillatorAction(const std::shared_ptr<Lattice1D> lattice_,
                           const RenormalisationType renormalisation_,
                           const double m0_,
                           const double mu2_,
                           const double lambda_,
                           const double x0_)
-    : Action(M_lat_,T_final_,renormalisation_,m0_),
+    : Action(lattice_,renormalisation_,m0_),
+      M_lat(lattice_->getM_lat()),
+      a_lat(lattice_->geta_lat()),
       mu2(mu2_), lambda(lambda_), x0(x0_) {
   }
 
@@ -110,19 +111,13 @@ public:
    * of the multigrid hierarchy.
    */
   std::shared_ptr<Action> virtual coarse_action() {
-    if (M_lat%2) {
-      mpi_parallel::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
-      mpi_exit(EXIT_FAILURE);
-    }
     std::shared_ptr<Action> new_action;
-    new_action = std::make_shared<QuarticOscillatorAction>(M_lat/2,
-                                                           T_final,
+    new_action = std::make_shared<QuarticOscillatorAction>(lattice->coarse_lattice(),
                                                            renormalisation,
                                                            m0,
                                                            mu2,
                                                            lambda,
                                                            x0);
-    new_action->set_coarsening_level(get_coarsening_level()+1);
     return new_action;
   }
   
@@ -157,7 +152,7 @@ public:
    * @param[out] x_path Path \f$X\f$ to be set
    */
   void virtual initialise_path(std::shared_ptr<Path> x_path) const {
-    std::fill(x_path->data,x_path->data+M_lat,0.0);
+    x_path->fill([](){return 0.0;});
   }
 
   /** @brief Second derivative \f$W''_{\overline{x}}(x)\f$ of conditioned action
@@ -208,6 +203,10 @@ public:
   }
 
 private:
+  /** @brief Number of lattice points */
+  const unsigned int M_lat;
+  /** @brief Lattice spacing */
+  const double a_lat;
   /** @brief Oscillator frequency */
   const double mu2;
   /** @brief Coefficient of quartic term in potential */

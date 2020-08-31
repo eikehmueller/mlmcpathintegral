@@ -5,7 +5,7 @@
 
 /* Fill in fine points */
 void GaussianConditionedFineAction::fill_fine_points(std::shared_ptr<Path> x_path) const {
-  unsigned int M_lat = x_path->M_lat;
+  unsigned int M_lat = action->get_lattice()->getM_lat();
   // interior points
   for (unsigned int j=0; j<M_lat/2-1; ++j) {
     double x_m = x_path->data[2*j];
@@ -24,7 +24,7 @@ void GaussianConditionedFineAction::fill_fine_points(std::shared_ptr<Path> x_pat
 
 /* Evaluate conditioned action at fine points */
 double GaussianConditionedFineAction::evaluate(const std::shared_ptr<Path> x_path) const {
-  unsigned int M_lat = action->getM_lat();
+  unsigned int M_lat = action->get_lattice()->getM_lat();
   double x_m = x_path->data[M_lat-2];
   double x_p = x_path->data[0];
   double dx = x_path->data[M_lat-1] - action->getWminimum(x_m,x_p);

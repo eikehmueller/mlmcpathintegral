@@ -13,15 +13,15 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
                                      const HierarchicalParameters param_hierarchical) :
   Sampler(),
   qoi(qoi_),
-  n_level(param_hierarchical.n_max_level()-fine_action->get_coarsening_level()),
-  t_indep(param_hierarchical.n_max_level()-fine_action->get_coarsening_level(),0.0),
-  n_indep(param_hierarchical.n_max_level()-fine_action->get_coarsening_level(),0),
-  t_sampler(param_hierarchical.n_max_level()-fine_action->get_coarsening_level(),0),
+  n_level(param_hierarchical.n_max_level()-fine_action->get_lattice()->get_coarsening_level()),
+  t_indep(n_level,0.0),
+  n_indep(n_level,0),
+  t_sampler(n_level,0),
   n_autocorr_window(param_stats.n_autocorr_window()),
   cost_per_sample_(0.0){
   
   // Check that Number of lattice points permits number of levels
-  unsigned int M_lat = fine_action->getM_lat();
+  unsigned int M_lat = fine_action->get_lattice()->getM_lat();
   if ( (M_lat>>n_level)<<n_level == M_lat) {
     mpi_parallel::cout << " Multilevel sampler: M_lat = " << M_lat << " = 2^{" << n_level << "-1} * " << (M_lat>>(n_level-1)) << std::endl;
   } else {
@@ -42,10 +42,8 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
   }
   // Action on coarsest level
   std::shared_ptr<Action> coarse_action = action[n_level-1];
-  double T_final = fine_action->getT_final();
   for (unsigned int ell=0;ell<n_level;++ell) {
-    unsigned int M_lat = action[ell]->getM_lat();    
-    x_sampler_path.push_back(std::make_shared<Path>(M_lat,T_final));
+    x_sampler_path.push_back(std::make_shared<Path>(action[ell]->get_lattice()));
   }
   // Construct sampler on coarsest level
   coarse_sampler = coarse_sampler_factory->get(coarse_action);
@@ -55,7 +53,7 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
     stats_sampler_label << "   Q_{sampler}[" << level << "]";
     stats_sampler.push_back(std::make_shared<Statistics>(stats_sampler_label.str(),n_autocorr_window));
   }
-  std::shared_ptr<Path> meas_path=std::make_shared<Path>(fine_action->getM_lat(),fine_action->getT_final());
+  std::shared_ptr<Path> meas_path=std::make_shared<Path>(fine_action->get_lattice());
   Timer timer_meas;
   unsigned int n_meas = 10000;
     timer_meas.start();

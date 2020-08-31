@@ -26,11 +26,9 @@ void MonteCarloTwoLevel::evaluate_difference(Statistics& stats_fine,
                                              Statistics& stats_coarse,
                                              Statistics& stats_diff) {
   std::shared_ptr<Path> x_path =
-    std::make_shared<Path>(fine_action->getM_lat(),
-                           fine_action->getT_final());
+    std::make_shared<Path>(fine_action->get_lattice());
   std::shared_ptr<Path> x_coarse_path =
-    std::make_shared<Path>(coarse_action->getM_lat(),
-                           coarse_action->getT_final());
+    std::make_shared<Path>(coarse_action->get_lattice());
   stats_coarse.hard_reset();
   stats_fine.hard_reset();
   stats_diff.hard_reset();

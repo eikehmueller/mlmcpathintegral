@@ -6,6 +6,7 @@
 #include "common/parameters.hh"
 #include "common/timer.hh"
 #include "mpi/mpi_random.hh"
+#include "lattice/lattice1d.hh"
 #include "fields/path.hh"
 #include "action/action.hh"
 #include "action/qm/clusteraction.hh"
@@ -113,6 +114,8 @@ private:
 protected:
   /** @brief Action to sample from */
   const std::shared_ptr<ClusterAction> action;
+  /** @brief Number of points on lattice */
+  const unsigned int M_lat;
   /** @brief Number of burn-in steps */
   const unsigned int n_burnin;
   /** @brief Number of updates per step */

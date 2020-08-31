@@ -1,8 +1,8 @@
 #ifndef QOIXSQUARED_HH
 #define QOIXSQUARED_HH QOIXSQUARED_HH
 #include <memory>
-#include "fields/path.hh"
 #include "common/auxilliary.hh"
+#include "fields/path.hh"
 #include "qoi/quantityofinterest.hh"
 
 /** @file qoixsquared.hh
@@ -17,10 +17,7 @@
 
 class QoIXsquared : public QoI {
 public: 
-  /** @brief Create new instance 
-   *
-   * @param[in] M_lat_ Number of time slices \f$M\f$
-   */
+  /** @brief Create new instance  */
   QoIXsquared() {}
 
   /** @brief Destructor */

@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <Eigen/Dense>
+#include "lattice/lattice1d.hh"
 #include "fields/path.hh"
 #include "sampler/sampler.hh"
 #include "action/action.hh"
@@ -85,25 +86,25 @@ public:
   /** @brief Initialise class
    *
    * 
-   * @param[in] M_lat_ Number of time slices \f$M\f$
-   * @param[in] T_final_ Final time \f$T\f$
+   * @param[in] lattice_ Underlying lattice
    * @param[in] renormalisation_ Type of renormalisation
    * @param[in] m0_ Mass of particle \f$m_0\f$
    * @param[in] mu2_ Frequency \f$\mu^2\f$
    */
-  HarmonicOscillatorAction(const unsigned int M_lat_,
-                           const double T_final_,
+  HarmonicOscillatorAction(const std::shared_ptr<Lattice1D> lattice_,
                            const RenormalisationType renormalisation_,
                            const double m0_,
                            const double mu2_)
-    : Action(M_lat_,T_final_,renormalisation_,m0_),
+    : Action(lattice_,renormalisation_,m0_),
       Sampler(),
+      M_lat(lattice_->getM_lat()),
+      a_lat(lattice_->geta_lat()),
       mu2(mu2_),
       Wcurvature((2./a_lat + a_lat*mu2)*m0),
       Wminimum_scaling(0.5/(1.+0.5*a_lat*a_lat*mu2)) {
     build_covariance();
     engine.seed(124129017);
-    y_tmp = std::make_shared<Path>(M_lat_,T_final_);
+    y_tmp = std::make_shared<Path>(lattice_);
   }
 
   /** @brief Tidy up
@@ -118,18 +119,12 @@ public:
    * of the multigrid hierarchy.
    */
   std::shared_ptr<Action> virtual coarse_action() {
-    if (M_lat%2) {
-      mpi_parallel::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
-      mpi_exit(EXIT_FAILURE);
-    }
-    RenormalisedHOParameters c_param(M_lat,T_final,m0,mu2,renormalisation);
+    RenormalisedHOParameters c_param(lattice,m0,mu2,renormalisation);
     std::shared_ptr<Action> new_action;
-    new_action = std::make_shared<HarmonicOscillatorAction>(M_lat/2,
-                                                            T_final,
+    new_action = std::make_shared<HarmonicOscillatorAction>(lattice->coarse_lattice(),
                                                             renormalisation,
                                                             c_param.m0_coarse(),
                                                             c_param.mu2_coarse());
-    new_action->set_coarsening_level(get_coarsening_level()+1);
     return new_action;
   };
 
@@ -165,8 +160,8 @@ public:
    * @param[out] x_path Path \f$X\f$ to be set
    */
   void virtual initialise_path(std::shared_ptr<Path> x_path) const {
-    std::fill(x_path->data,x_path->data+M_lat,0.0);
-  }  
+    x_path->fill([](){return 0.0;});
+  }
   
   /** @brief Second derivative \f$W''_{x_-,x_+}(x)\f$ of conditioned action
    *
@@ -249,6 +244,10 @@ private:
   void build_covariance();
 
 private:
+  /** @brief Number of lattice points */
+  unsigned int M_lat;
+  /** @brief Lattice spacing */
+  const double a_lat;
   /** @brief Oscillator frequency */
   const double mu2;
   /** @brief Eigen matrix type */

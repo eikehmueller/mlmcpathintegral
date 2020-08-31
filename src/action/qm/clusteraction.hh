@@ -1,5 +1,7 @@
 #ifndef CLUSTERACTION_HH
 #define CLUSTERACTION_HH CLUSTERACTION_HH
+
+#include "lattice/lattice1d.hh"
 #include "fields/path.hh"
 #include "action/action.hh"
 
@@ -28,16 +30,14 @@ public:
    *
    * Create new instance of class.
    * 
-   * @param[in] M_lat_ Number of time slices \f$M\f$
-   * @param[in] renormalisation_ Renormalisation type
+   * @param[in] lattice_ Underlying lattice
    * @param[in] T_final_ Final time \f$T\f$
    * @param[in] m0_ Mass of particle \f$m_0\f$
    */
-  ClusterAction(const unsigned int M_lat_,
-                const double T_final_,
+  ClusterAction(const std::shared_ptr<Lattice1D> lattice_,
                 const RenormalisationType renormalisation_,
                 const double m0_)
-    : Action(M_lat_, T_final_, renormalisation_, m0_) {}
+    : Action(lattice_, renormalisation_, m0_) {}
 
   /** @brief Change \f$S_{\ell}\f$ in energy used in bonding probabilities
    *

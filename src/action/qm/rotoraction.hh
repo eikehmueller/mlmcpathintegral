@@ -9,6 +9,7 @@
 #include "common/parameters.hh"
 #include "mpi/mpi_wrapper.hh"
 #include "mpi/mpi_random.hh"
+#include "lattice/lattice1d.hh"
 #include "fields/path.hh"
 #include "action/qm/clusteraction.hh"
 #include "action/qm/rotorrenormalisation.hh"
@@ -93,16 +94,16 @@ public:
   /** @brief Initialise class
    *
    * 
-   * @param[in] M_lat_ Number of time slices \f$M\f$
-   * @param[in] T_final_ Final time \f$T\f$
+   * @param[in] lattice_ Underlying lattice
    * @param[in] renormalisation_ Type of renormalisation
    * @param[in] m0_ Moment of inertia (angular mass) \f$I\f$
    */
-  RotorAction(const unsigned int M_lat_,
-              const double T_final_,
+  RotorAction(const std::shared_ptr<Lattice1D> lattice_,
               const RenormalisationType renormalisation_,
               const double m0_)
-    : ClusterAction(M_lat_,T_final_,renormalisation_,m0_),
+    : ClusterAction(lattice_,renormalisation_,m0_),
+      M_lat(lattice_->getM_lat()),
+      a_lat(lattice_->geta_lat()),
       uniform_dist(-M_PI,M_PI) {
     engine.seed(21172817);
   }
@@ -119,16 +120,10 @@ public:
    * of the multigrid hierarchy.
    */
   std::shared_ptr<Action> virtual coarse_action() {
-    if (M_lat%2) {
-      mpi_parallel::cerr << "ERROR: cannot coarsen action, number of lattice sites is odd." << std::endl;
-      mpi_exit(EXIT_FAILURE);
-    }
-    RenormalisedRotorParameters c_param(M_lat,T_final,m0,renormalisation);
-    std::shared_ptr<Action> new_action = std::make_shared<RotorAction>(M_lat/2,
-                                                                       T_final,
+    RenormalisedRotorParameters c_param(lattice,m0,renormalisation);
+    std::shared_ptr<Action> new_action = std::make_shared<RotorAction>(lattice->coarse_lattice(),
                                                                        renormalisation,
                                                                        c_param.m0_coarse());
-    new_action->set_coarsening_level(get_coarsening_level()+1);
     return new_action;
   };
   
@@ -241,6 +236,10 @@ public:
   double chit_exact_continuum() const;
   
 protected:
+  /** @brief Number of lattice points */
+  const unsigned int M_lat;
+  /** @brief Lattice spacing */
+  const double a_lat;
   /** @brief reflection angle for current subgroup \f$H_{\overline{x}}\f$ */
   mutable double xbar;
   /** @brief Random number engine */

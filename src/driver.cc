@@ -6,6 +6,7 @@
 #include "common/parameters.hh"
 #include "common/statistics.hh"
 #include "mpi/mpi_wrapper.hh"
+#include "lattice/lattice1d.hh"
 #include "action/renormalisation.hh"
 #include "action/qm/harmonicoscillatoraction.hh"
 #include "action/qm/quarticoscillatoraction.hh"
@@ -193,13 +194,17 @@ int main(int argc, char* argv[]) {
   }
   mpi_parallel::cout << std::endl;
   
+  /* ====== Lattice ====== */
+  std::shared_ptr<Lattice1D> lattice;
+  lattice = std::make_shared<Lattice1D>(param_lattice.M_lat(),
+                                       param_lattice.T_final());
+  
   /* ====== Select action ====== */
   std::shared_ptr<Action> action;
   switch (param_qm.action()) {
   case (ActionHarmonicOscillator): {
     action =
-      std::make_shared<HarmonicOscillatorAction>(param_lattice.M_lat(),
-                                                 param_lattice.T_final(),
+      std::make_shared<HarmonicOscillatorAction>(lattice,
                                                  param_ho.renormalisation(),
                                                  param_ho.m0(),
                                                  param_ho.mu2());
@@ -207,8 +212,7 @@ int main(int argc, char* argv[]) {
   }
   case (ActionQuarticOscillator): {
     action =
-      std::make_shared<QuarticOscillatorAction>(param_lattice.M_lat(),
-                                                param_lattice.T_final(),
+      std::make_shared<QuarticOscillatorAction>(lattice,
                                                 RenormalisationNone,
                                                 param_qo.m0(),
                                                 param_qo.mu2(),
@@ -218,8 +222,7 @@ int main(int argc, char* argv[]) {
   }
   case (ActionRotor): {
     action = 
-      std::make_shared<RotorAction>(param_lattice.M_lat(),
-                                    param_lattice.T_final(),
+      std::make_shared<RotorAction>(lattice,
                                     param_rotor.renormalisation(),
                                     param_rotor.m0());
 
@@ -254,7 +257,7 @@ int main(int argc, char* argv[]) {
       exact_result = rotor_action->chit_exact_perturbative();
       mpi_parallel::cout << std::endl;
       mpi_parallel::cout << std::setprecision(6) << std::fixed;
-      mpi_parallel::cout << " Exact result             <chi_t> = " << exact_result << " + O((a/I)^2), a/I = " << action->geta_lat()/action->getm0() << std::endl;
+      mpi_parallel::cout << " Exact result             <chi_t> = " << exact_result << " + O((a/I)^2), a/I = " << lattice->geta_lat()/action->getm0() << std::endl;
       mpi_parallel::cout << " Continuum limit [a -> 0] <chi_t> = " << exact_result_continuum << std::endl;
       mpi_parallel::cout << std::endl;
     }

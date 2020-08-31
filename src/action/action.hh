@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 #include <Eigen/Dense>
+#include "lattice/lattice1d.hh"
 #include "fields/path.hh"
 #include "action/renormalisation.hh"
 #include "mpi/mpi_wrapper.hh"
@@ -29,44 +30,35 @@ public:
   /** @brief Initialise class
    *
    * 
-   * @param[in] M_lat_ Number of time slices \f$M\f$
-   * @param[in] T_final_ Final time \f$T\f$
+   * @param[in] lattice_ Underlying lattice
    * @param[in] renormalisation_ Type of renormalisation
   
    * @param[in] m0_ Mass of particle \f$m_0\f$
    */
-  Action(const unsigned int M_lat_,
-         const double T_final_,
+  Action(const std::shared_ptr<Lattice1D> lattice_,
          const RenormalisationType renormalisation_,
          const double m0_)
-    : M_lat(M_lat_), T_final(T_final_),
+    : lattice(lattice_),
       renormalisation(renormalisation_),
-      m0(m0_), a_lat(T_final_/M_lat_), coarsening_level(0) {
+      m0(m0_) {
     assert(m0>0.0);
-    assert(T_final>0.0);
   }
 
-  /** @brief Return number of timeslices \f$M\f$ */
-  unsigned int getM_lat() const { return M_lat; }
-
-  /** @return final time \f$T\f$ */
-  double getT_final() const { return T_final; }
+  /** @brief Return underlying lattice */
+  std::shared_ptr<Lattice1D> get_lattice() const { return lattice; }
 
   /** @brief Return mass \f$m_0\f$ */
   double getm0() const { return m0;}
 
-  /** @brief Return lattice spacing \f$a\f$ */
-  double geta_lat() const { return a_lat;}
-
   /** @brief Cost of one action evaluation */
-  virtual unsigned int evaluation_cost() const { return M_lat; }
+  virtual double evaluation_cost() const { return lattice->getM_lat(); }
 
   /** @brief Construct coarsened version of action
    *
    * This returns a coarsened version of the action on the next level
    * of the multigrid hierarchy.
    */
-  std::shared_ptr<Action> virtual coarse_action() {
+  virtual std::shared_ptr<Action> coarse_action() {
     mpi_parallel::cerr << "ERROR: cannot coarsen action" << std::endl;
     mpi_exit(EXIT_FAILURE);
     throw std::runtime_error("...");
@@ -78,7 +70,7 @@ public:
    *
    * @param[in] x_path Path, has to be an array of length \f$M\f$
    */
-  const double virtual evaluate(const std::shared_ptr<Path> x_path) const = 0;
+  virtual const double evaluate(const std::shared_ptr<Path> x_path) const = 0;
 
   /** @brief Calculate force for HMC integrator for a specific path
    *
@@ -89,7 +81,7 @@ public:
    * @param[out] p_path Resulting force \f$P\f$ at every point
    *
    */
-  void virtual force(const std::shared_ptr<Path> x_path,
+  virtual void force(const std::shared_ptr<Path> x_path,
                      std::shared_ptr<Path> p_path) const = 0;
 
   /** @brief Initialise path 
@@ -99,7 +91,7 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ to be set
    */
-  void virtual initialise_path(std::shared_ptr<Path> x_path) const = 0;
+  virtual void initialise_path(std::shared_ptr<Path> x_path) const = 0;
   
   /** @brief Second derivative \f$W''_{x_-,x_+}(x)\f$ of conditioned
    * action at its minimum.
@@ -130,30 +122,14 @@ public:
    */
   double virtual inline getWminimum(const double x_m,
                                     const double x_p) const = 0;
-  
-  /** @brief Return coarsening level of action */
-  const int get_coarsening_level() const { return coarsening_level; }
-  
-  /** @brief Set coarsening level of action
-   *
-   * @param[in] coarsening_level_ new value of coarsening level
-   */
-  void set_coarsening_level(const int coarsening_level_) { coarsening_level = coarsening_level_; }
-  
-  
+    
 protected:
-  /** @brief Number of time slices */
-  const unsigned int M_lat;
-  /** @brief Final time */
-  const double T_final;
+  /** @brief Underlying lattice */
+  const std::shared_ptr<Lattice1D> lattice;
   /** @brief Renormalisation */
   const RenormalisationType renormalisation;
   /** @brief Particle mass */
   const double m0;
-  /** @brief lattice spacing */
-  const double a_lat;
-  /** @brief coarsening level (0=finest level) */
-  mutable int coarsening_level;
 };
 
 #endif // ACTION_HH

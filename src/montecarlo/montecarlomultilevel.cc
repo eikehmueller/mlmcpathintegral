@@ -23,7 +23,7 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
   n_indep(param_multilevelmc.n_level(),0),
   t_sampler(param_multilevelmc.n_level(),0) {
   // Check that Number of lattice points permits number of levels
-  unsigned int M_lat = fine_action->getM_lat();
+  unsigned int M_lat = fine_action->get_lattice()->getM_lat();
   if ( (M_lat>>n_level)<<n_level == M_lat) {
     mpi_parallel::cout << " MultilevelMC: M_lat = " << M_lat << " = 2^{" << n_level << "-1} * " << (M_lat>>(n_level-1)) << std::endl << std::endl;
   } else {
@@ -51,11 +51,9 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
   }
   std::shared_ptr<Action> coarse_action = action[n_level-1];
   // Construct paths on all levels
-  double T_final = fine_action->getT_final();
   for (unsigned int ell=0;ell<n_level;++ell) {
-    unsigned int M_lat = action[ell]->getM_lat();    
-    x_path.push_back(std::make_shared<Path>(M_lat,T_final));
-    x_coarse_path.push_back(std::make_shared<Path>(M_lat,T_final));
+    x_path.push_back(std::make_shared<Path>(action[ell]->get_lattice()));
+    x_coarse_path.push_back(std::make_shared<Path>(action[ell]->get_lattice()));
   }
   // Construct statistics on all levels
   for (unsigned int level=0;level<n_level;++level) {

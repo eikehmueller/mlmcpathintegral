@@ -10,10 +10,10 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
                                          const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                                          const HierarchicalParameters param_hierarchical) :
   Sampler(),
-  n_level(param_hierarchical.n_max_level()-fine_action->get_coarsening_level()),
+  n_level(param_hierarchical.n_max_level()-fine_action->get_lattice()->get_coarsening_level()),
   cost_per_sample_(0.0) {
   // Check that Number of lattice points permits number of levels
-  unsigned int M_lat = fine_action->getM_lat();
+  unsigned int M_lat = fine_action->get_lattice()->getM_lat();
   if ( (M_lat>>n_level)<<n_level == M_lat) {
     mpi_parallel::cout << " Hierarchical sampler: M_lat = " << M_lat << " = 2^{" << n_level << "-1} * " << (M_lat>>(n_level-1)) << std::endl;
   } else {
@@ -35,14 +35,12 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
   }
   // Action on coarsest level
   std::shared_ptr<Action> coarse_action = action[n_level-1];
-  double T_final = fine_action->getT_final();
   for (unsigned int ell=0;ell<n_level;++ell) {
-    unsigned int M_lat = action[ell]->getM_lat();    
-    x_sampler_path.push_back(std::make_shared<Path>(M_lat,T_final));
+    x_sampler_path.push_back(std::make_shared<Path>(action[ell]->get_lattice()));
   }
   // Construct sampler on coarsest level
   coarse_sampler = coarse_sampler_factory->get(coarse_action);
-  std::shared_ptr<Path> meas_path=std::make_shared<Path>(fine_action->getM_lat(),fine_action->getT_final());
+  std::shared_ptr<Path> meas_path=std::make_shared<Path>(fine_action->get_lattice());
   Timer timer_meas;
   unsigned int n_meas = 10000;
     timer_meas.start();
@@ -81,7 +79,6 @@ void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
 
 /* Set current state */
 void HierarchicalSampler::set_state(std::shared_ptr<Path> x_path) {
-  const unsigned int M_lat = x_path->M_lat;
   x_sampler_path[0]->copy(x_path);
 }
 

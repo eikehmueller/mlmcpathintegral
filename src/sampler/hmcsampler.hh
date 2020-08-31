@@ -6,6 +6,7 @@
 #include "common/parameters.hh"
 #include "mpi/mpi_wrapper.hh"
 #include "mpi/mpi_random.hh"
+#include "lattice/lattice1d.hh"
 #include "fields/path.hh"
 #include "action/action.hh"
 #include "sampler/sampler.hh"
@@ -94,21 +95,20 @@ public:
     n_burnin(hmc_param_.n_burnin())
   {
     engine.seed(8923759);
-    const unsigned int M_lat = action->getM_lat();
-    const double T_final = action->getT_final();
+    std::shared_ptr<Lattice1D> lattice = action->get_lattice();
     // Create temporary workspace
     // current position
-    x_path_cur = std::make_shared<Path>(M_lat,T_final);
+    x_path_cur = std::make_shared<Path>(lattice);
     // current (conjugate) momentum
-    p_path_cur = std::make_shared<Path>(M_lat,T_final);
+    p_path_cur = std::make_shared<Path>(lattice);
     // Trial path
-    x_path_trial = std::make_shared<Path>(M_lat,T_final);
+    x_path_trial = std::make_shared<Path>(lattice);
     // Momentum change from force term
-    dp_path = std::make_shared<Path>(M_lat,T_final);
+    dp_path = std::make_shared<Path>(lattice);
     action->initialise_path(x_path_cur);
     // Burn in
     std::shared_ptr<Path> x_path_tmp =
-      std::make_shared<Path>(M_lat,T_final);
+      std::make_shared<Path>(lattice);
     for (unsigned int i=0;i<n_burnin;++i) {
       draw(x_path_tmp);
     }

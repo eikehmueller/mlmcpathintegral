@@ -30,7 +30,7 @@ void Path::copy_from_fine(const std::shared_ptr<Path> other) {
 void Path::save_to_disk(const std::string filename) {
   std::ofstream file;
   file.open(filename.c_str());
-  file << M_lat << " " << T_final << std::endl;
+  file << M_lat << " " << lattice->getT_final() << std::endl;
   for (unsigned int i=0; i<M_lat; ++i) {
     file << data[i] << " ";
   }
