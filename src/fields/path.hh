@@ -48,6 +48,41 @@ public:
    */
   void save_to_disk(const std::string filename);
 
+  /** @brief Axpy operation
+   *
+   * Add \f$\alpha x\f$ to path, i.e computer \f$y\mapsto y+\alpha x\f$
+   *
+   * @param[in] alpha Scaling factor \f$\alpha\f$
+   * @param[in] other Other path \f$x\f$
+   */
+  void axpy(const double alpha, const std::shared_ptr<Path> other) {
+    for(unsigned int j=0;j<M_lat;++j) {
+      data[j] += alpha*other->data[j];
+    }
+  }
+  
+  /** @brief Squared Euclidean norm
+   */
+  double norm2() const {
+    double nrm2 = 0.0;
+    for(unsigned int j=0;j<M_lat;++j) {
+      double tmp=data[j];
+      nrm2 += tmp*tmp;
+    }
+    return nrm2;
+  }
+  
+  /** @brief Fill with numbers drawn from lambda function
+   *
+   * @param[in] f Function to draw from
+   */
+  template <class Lambda>
+  void fill(Lambda&& f) {
+    for(unsigned int j=0;j<M_lat;++j) {
+      data[j] = f();
+    }
+  }
+  
   /** @brief Copy data from other path
    * @param[in] other Path to copy from
    */

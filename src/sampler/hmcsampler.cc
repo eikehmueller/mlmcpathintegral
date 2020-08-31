@@ -1,5 +1,4 @@
 #include "hmcsampler.hh"
-#include <iostream>
 
 /** @file hmcsampler.cc
  * @brief Implementation of hmcsampler.hh
@@ -7,7 +6,6 @@
 
 /** Draw next sample */
 void HMCSampler::draw(std::shared_ptr<Path> x_path) {
-  const unsigned int M_lat = action->getM_lat();
   accept = false;
   for (unsigned int r=0;r<n_rep;++r) {
     accept = accept or single_step();
@@ -22,15 +20,9 @@ void HMCSampler::draw(std::shared_ptr<Path> x_path) {
 
 /* Do a single HMC accept/reject step */
 bool HMCSampler::single_step() {
-  const unsigned int M_lat = action->getM_lat();
   // Initial kinetic energy
-  double T_kin_cur = 0.0;
-  // Draw random momentum from normal distribution
-  for (unsigned int j=0;j<M_lat;++j) {
-    double tmp = normal_dist(engine);
-    p_path_cur->data[j] = tmp;
-    T_kin_cur += 0.5*tmp*tmp;
-  }
+  p_path_cur->fill([&]() { return normal_dist(engine); });
+  double T_kin_cur = 0.5*p_path_cur->norm2();
   // STEP 1: Integrate deterministic trajectories with symplectic Euler method
   // Copy current state to trial state
   x_path_trial->copy(x_path_cur);
@@ -46,19 +38,11 @@ bool HMCSampler::single_step() {
     }
     // Calculate force
     action->force(x_path_trial,dp_path);
-    for(unsigned int j=0;j<M_lat;++j) {
-      // Momentum update P -> P - 0.5*dt_{hmc}*dS(X)/dX
-      p_path_cur->data[j] -= dt_p*dp_path->data[j];
-      // Position update X -> X + dt_{hmc}*P
-      x_path_trial->data[j] += dt_x*p_path_cur->data[j];
-    }
+    p_path_cur->axpy(-dt_p,dp_path);
+    x_path_trial->axpy(dt_x,p_path_cur);
   }
   // Calculate kinetic energy from trial state at end of trajectory
-  double T_kin_trial = 0.0;
-  for (unsigned int j=0;j<M_lat;++j) {
-    double tmp = p_path_cur->data[j];
-    T_kin_trial += 0.5*tmp*tmp;
-  }
+  double T_kin_trial = 0.5*p_path_cur->norm2();
   // STEP 2: Accept-reject step
   bool accept_step = false;
   // Change in action S(X)
