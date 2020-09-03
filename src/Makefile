@@ -43,7 +43,6 @@ ifeq ($(USE_MPI),True)
   CFLAGS:=$(CFLAGS) -DUSE_MPI
   $(info Compiling in MPI parallel mode. Compiler is $(CXX))
 else
-  CXX=g++
   $(info Compiling in sequential mode. Compiler is $(CXX))
 endif
 
