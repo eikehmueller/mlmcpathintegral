@@ -18,6 +18,7 @@ double time_sample(const ExpSin2Distribution& dist,
   timer.start();
   for (unsigned int j=0;j<n_samples;++j) {
     double x = dist.draw(engine,sigma);
+    (void) x;
   }
   timer.stop();
   return timer.elapsed()/n_samples;
@@ -35,12 +36,14 @@ double time_evaluation(const ExpSin2Distribution& dist,
   for (unsigned int j=0;j<n_samples;++j) {
     double x = uniform_dist(engine);
     double y = dist.evaluate(x,sigma);
+    (void) y;
   }
   timer.stop();
   Timer timer_uniform_dist;
   timer_uniform_dist.start();
   for (unsigned int j=0;j<n_samples;++j) {
     double x = uniform_dist(engine);
+    (void) x;
   }
   timer_uniform_dist.stop();
   return (timer.elapsed()-timer_uniform_dist.elapsed())/n_samples;
