@@ -15,5 +15,8 @@ DEBUG=False
 # Use MPI?
 USE_MPI=True
 
+# Sequential Compiler
+CXX=g++
+
 # MPI compiler
 MPICXX=mpicxx
