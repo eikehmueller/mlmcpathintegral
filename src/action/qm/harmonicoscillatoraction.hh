@@ -267,6 +267,10 @@ private:
 };
 
 class HarmonicOscillatorSamplerFactory : public SamplerFactory {
+public:
+  /** @brief Destructor */
+  virtual ~HarmonicOscillatorSamplerFactory() {}
+  
   /** @brief Return sampler for a specific  action
    *
    * @param[in] action Action to sample from

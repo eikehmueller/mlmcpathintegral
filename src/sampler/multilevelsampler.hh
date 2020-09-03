@@ -121,6 +121,9 @@ class MultilevelSamplerFactory : public SamplerFactory {
     param_stats(param_stats_),
     param_hierarchical(param_hierarchical_) {}
   
+  /** @brief Destructor */
+  virtual ~MultilevelSamplerFactory() {}
+  
   /** @brief Return sampler for a specific  action
    *
    * @param[in] action Action to sample from

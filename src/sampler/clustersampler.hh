@@ -147,6 +147,9 @@ class ClusterSamplerFactory : public SamplerFactory {
   ClusterSamplerFactory(const ClusterParameters param_cluster_) :
     param_cluster(param_cluster_) {}
   
+  /** @brief Destructor */
+  virtual ~ClusterSamplerFactory() {}
+  
   /** @brief Return sampler for a specific  action
    *
    * @param[in] action Action to sample from

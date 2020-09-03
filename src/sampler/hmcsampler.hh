@@ -192,6 +192,9 @@ class HMCSamplerFactory : public SamplerFactory {
   HMCSamplerFactory(const HMCParameters param_hmc_) :
     param_hmc(param_hmc_) {}
   
+  /** @brief Destructor */
+  virtual ~HMCSamplerFactory() {}
+  
   /** @brief Return sampler for a specific  action
    *
    * @param[in] action Action to sample from

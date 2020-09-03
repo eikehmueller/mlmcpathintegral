@@ -149,6 +149,9 @@ class HierarchicalSamplerFactory : public SamplerFactory {
     conditioned_fine_action_factory(conditioned_fine_action_factory_),
     param_hierarchical(param_hierarchical_) {}
   
+  /** @brief Destructor */
+  virtual ~HierarchicalSamplerFactory() {}
+  
   /** @brief Return sampler for a specific  action
    *
    * @param[in] action Action to sample from

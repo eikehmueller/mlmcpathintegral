@@ -74,7 +74,10 @@ private:
 };
 
 struct RotorConditionedFineActionFactory : public ConditionedFineActionFactory {
-  /** @brief Abstract method for constructing a conditioned fine action
+  /** @brief Destructor */
+  virtual ~RotorConditionedFineActionFactory() {}
+  
+  /** @brief Method for constructing a conditioned fine action
    * @param[in] action Coarse level action
    */
   virtual std::shared_ptr<ConditionedFineAction> get(std::shared_ptr<Action> action) {
