@@ -5,7 +5,7 @@
  */
 
 /** Draw next sample */
-void HMCSampler::draw(std::shared_ptr<Path> x_path) {
+void HMCSampler::draw(std::shared_ptr<SampleState> x_path) {
   accept = false;
   for (unsigned int r=0;r<n_rep;++r) {
     accept = accept or single_step();
@@ -14,18 +14,21 @@ void HMCSampler::draw(std::shared_ptr<Path> x_path) {
   n_accepted_samples += (int) accept;
   // Copy to output vector
   if (copy_if_rejected or accept) {
-    x_path->copy(x_path_cur);
+    x_path->data = x_path_cur->data;
   }
 }
 
 /* Do a single HMC accept/reject step */
 bool HMCSampler::single_step() {
   // Initial kinetic energy
-  p_path_cur->fill([&]() { return normal_dist(engine); });
-  double T_kin_cur = 0.5*p_path_cur->norm2();
+  std::generate(p_path_cur->data.data(),
+                p_path_cur->data.data()+p_path_cur->data.size(),
+                [this]() {return normal_dist(engine);});
+  
+  double T_kin_cur = 0.5*p_path_cur->data.squaredNorm();
   // STEP 1: Integrate deterministic trajectories with symplectic Euler method
   // Copy current state to trial state
-  x_path_trial->copy(x_path_cur);
+  x_path_trial->data = x_path_cur->data;
   for(unsigned int k =0;k<=nt_hmc;++k) {
     double dt_p = dt_hmc;
     double dt_x = dt_hmc;
@@ -38,11 +41,11 @@ bool HMCSampler::single_step() {
     }
     // Calculate force
     action->force(x_path_trial,dp_path);
-    p_path_cur->axpy(-dt_p,dp_path);
-    x_path_trial->axpy(dt_x,p_path_cur);
+    p_path_cur->data -= dt_p*dp_path->data;
+    x_path_trial->data += dt_x*p_path_cur->data;    
   }
   // Calculate kinetic energy from trial state at end of trajectory
-  double T_kin_trial = 0.5*p_path_cur->norm2();
+  double T_kin_trial = 0.5*p_path_cur->data.squaredNorm();
   // STEP 2: Accept-reject step
   bool accept_step = false;
   // Change in action S(X)
@@ -59,14 +62,14 @@ bool HMCSampler::single_step() {
   }
   // If accepted, copy state
   if (accept_step) {
-    x_path_cur->copy(x_path_trial);
+    x_path_cur->data = x_path_trial->data;
   }
   return accept_step;
 }
 
 /* Set current state */
-void HMCSampler::set_state(std::shared_ptr<Path> x_path) {
-  x_path_cur->copy(x_path);
+void HMCSampler::set_state(std::shared_ptr<SampleState> x_path) {
+  x_path_cur->data = x_path->data;
 }
 
 /* automatically tune stepsize */

@@ -25,10 +25,10 @@ MonteCarloTwoLevel::MonteCarloTwoLevel(const std::shared_ptr<Action> fine_action
 void MonteCarloTwoLevel::evaluate_difference(Statistics& stats_fine,
                                              Statistics& stats_coarse,
                                              Statistics& stats_diff) {
-  std::shared_ptr<Path> x_path =
-    std::make_shared<Path>(fine_action->get_lattice());
-  std::shared_ptr<Path> x_coarse_path =
-    std::make_shared<Path>(coarse_action->get_lattice());
+  std::shared_ptr<SampleState> x_path =
+    std::make_shared<SampleState>(fine_action->sample_size());
+  std::shared_ptr<SampleState> x_coarse_path =
+    std::make_shared<SampleState>(coarse_action->sample_size());
   stats_coarse.hard_reset();
   stats_fine.hard_reset();
   stats_diff.hard_reset();

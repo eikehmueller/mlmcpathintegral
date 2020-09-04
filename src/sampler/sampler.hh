@@ -4,9 +4,9 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include "common/samplestate.hh"
 #include "montecarlo/mcmcstep.hh"
 #include "action/action.hh"
-#include "fields/path.hh"
 
 /** @file sampler.hh
  * @brief Header file for sampler base class
@@ -33,7 +33,7 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ drawn from distribution
    */
-  virtual void draw(std::shared_ptr<Path> x_path) = 0;
+  virtual void draw(std::shared_ptr<SampleState> x_path) = 0;
 };
 
 class SamplerFactory {

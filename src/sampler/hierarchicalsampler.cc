@@ -36,11 +36,11 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
   // Action on coarsest level
   std::shared_ptr<Action> coarse_action = action[n_level-1];
   for (unsigned int ell=0;ell<n_level;++ell) {
-    x_sampler_path.push_back(std::make_shared<Path>(action[ell]->get_lattice()));
+    x_sampler_path.push_back(std::make_shared<SampleState>(action[ell]->sample_size()));
   }
   // Construct sampler on coarsest level
   coarse_sampler = coarse_sampler_factory->get(coarse_action);
-  std::shared_ptr<Path> meas_path=std::make_shared<Path>(fine_action->get_lattice());
+  std::shared_ptr<SampleState> meas_path=std::make_shared<SampleState>(fine_action->sample_size());
   Timer timer_meas;
   unsigned int n_meas = 10000;
     timer_meas.start();
@@ -51,10 +51,10 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
   cost_per_sample_ = 1.E6*timer_meas.elapsed()/n_meas;
 }
 
-void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
+void HierarchicalSampler::draw(std::shared_ptr<SampleState> x_path) {
   accept = true;
   for (int ell=1;ell<n_level;++ell) {
-    x_sampler_path[ell]->copy_from_fine(x_sampler_path[ell-1]);
+    action[ell]->copy_from_fine(x_sampler_path[ell-1],x_sampler_path[ell]);
   }
   for (int ell=n_level-1;ell>=0;--ell) {
     if (ell == (n_level-1)) {
@@ -73,13 +73,13 @@ void HierarchicalSampler::draw(std::shared_ptr<Path> x_path) {
   n_total_samples++;
   n_accepted_samples += (int) accept;
   if (accept or copy_if_rejected) {
-    x_path->copy(x_sampler_path[0]);
+    x_path->data = x_sampler_path[0]->data;
   }
 }
 
 /* Set current state */
-void HierarchicalSampler::set_state(std::shared_ptr<Path> x_path) {
-  x_sampler_path[0]->copy(x_path);
+void HierarchicalSampler::set_state(std::shared_ptr<SampleState> x_path) {
+  x_sampler_path[0]->data = x_path->data;
 }
 
 /* Show statistics on all levels */

@@ -50,10 +50,10 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
                                                                 n_autocorr_window));
   }
   std::shared_ptr<Action> coarse_action = action[n_level-1];
-  // Construct paths on all levels
+  // Construct samples on all levels
   for (unsigned int ell=0;ell<n_level;++ell) {
-    x_path.push_back(std::make_shared<Path>(action[ell]->get_lattice()));
-    x_coarse_path.push_back(std::make_shared<Path>(action[ell]->get_lattice()));
+    x_path.push_back(std::make_shared<SampleState>(action[ell]->sample_size()));
+    x_coarse_path.push_back(std::make_shared<SampleState>(action[ell]->sample_size()));
   }
   // Construct statistics on all levels
   for (unsigned int level=0;level<n_level;++level) {
@@ -158,7 +158,7 @@ void MonteCarloMultiLevel::evaluate() {
 
 /* Draw (independent) coarse level sample */
 void MonteCarloMultiLevel::draw_coarse_sample(const unsigned int level,
-                                              std::shared_ptr<Path> x_path) {
+                                              std::shared_ptr<SampleState> x_path) {
   // sub-sample if we are using the hierarchical sampler
   if (sub_sample_coarse) {
     while (t_sampler[level-1] < ceil(2.*stats_coarse_sampler[level-1]->tau_int())) {

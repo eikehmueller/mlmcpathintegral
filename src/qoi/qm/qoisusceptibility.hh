@@ -2,8 +2,9 @@
 #define QOISUSCEPTIBILITY_HH QOISUSCEPTIBILITY_HH
 #include <memory>
 #include <cmath>
-#include "fields/path.hh"
 #include "common/auxilliary.hh"
+#include "common/samplestate.hh"
+#include "lattice/lattice1d.hh"
 #include "qoi/quantityofinterest.hh"
 
 /** @file qoisusceptibility.hh
@@ -28,7 +29,10 @@ public:
    *
    * @param[in] M_lat_ Number of time slices \f$M\f$
    */
-  QoISusceptibility() : four_pi2_inv(0.25/(M_PI*M_PI)) {}
+  QoISusceptibility(const std::shared_ptr<Lattice1D> lattice) : 
+    four_pi2_inv(0.25/(M_PI*M_PI)),
+    T_final(lattice->getT_final()), 
+    M_lat(lattice->getM_lat()) {}
 
   /** @brief Destructor */
   virtual ~QoISusceptibility() {}
@@ -37,11 +41,15 @@ public:
    *
    * @param[in] x_path Path \f$X\f$ on which to evaluate the QoI
    */
-  const double virtual evaluate(const std::shared_ptr<Path> x_path);
+  const double virtual evaluate(const std::shared_ptr<SampleState> x_path);
   
 private:
   /** @brief Constant \f$1/(4\pi^2)\f$ */
   const double four_pi2_inv;
+  /** @brief Physical lattice size */
+  const double T_final;
+  /** @brief Number of lattice points */
+  const unsigned int M_lat;
 };
 
 #endif // QOISUSCEPTIBILITY_HH

@@ -5,7 +5,7 @@
  */
 
 /** Evaluate action */
-const double HarmonicOscillatorAction::evaluate(const std::shared_ptr<Path> x_path) const {
+const double HarmonicOscillatorAction::evaluate(const std::shared_ptr<SampleState> x_path) const {
   double ainv2 = 1./(a_lat*a_lat);
   double x_diff = x_path->data[0]-x_path->data[M_lat-1];
   double S = ainv2*x_diff*x_diff + mu2*x_path->data[0]*x_path->data[0];
@@ -17,8 +17,8 @@ const double HarmonicOscillatorAction::evaluate(const std::shared_ptr<Path> x_pa
 }
 
 /** Calculate force */
-void HarmonicOscillatorAction::force(const std::shared_ptr<Path> x_path,
-                                     std::shared_ptr<Path> p_path) const {
+void HarmonicOscillatorAction::force(const std::shared_ptr<SampleState> x_path,
+                                     std::shared_ptr<SampleState> p_path) const {
   double tmp_1 = m0/a_lat;
   double tmp_2 = 2.+a_lat*a_lat*mu2;
   p_path->data[0] = tmp_1*(tmp_2*x_path->data[0] - x_path->data[M_lat-1] - x_path->data[1]);
@@ -52,13 +52,11 @@ void HarmonicOscillatorAction::build_covariance() {
 }
 
 /** Draw sample from distribution */
-void HarmonicOscillatorAction::draw(std::shared_ptr<Path> x_path) {
-  Eigen::Map<Vector> x(x_path->data,M_lat);
-  for (unsigned int i=0; i<M_lat;++i) {
-    y_tmp->data[i] = normal_dist(engine);
-  }  
-  Eigen::Map<Vector> y(y_tmp->data,M_lat);
-  x = L_cov * y;
+void HarmonicOscillatorAction::draw(std::shared_ptr<SampleState> x_path) {
+  std::generate(y_tmp->data.data(),
+                y_tmp->data.data()+y_tmp->data.size(),
+                [this]() {return normal_dist(engine);});
+  x_path->data = L_cov * y_tmp->data;
   n_total_samples++;
   n_accepted_samples ++;
   accept = true;

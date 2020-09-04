@@ -4,8 +4,8 @@
 #include <memory>
 #include <algorithm>
 #include "common/auxilliary.hh"
+#include "common/samplestate.hh"
 #include "mpi/mpi_random.hh"
-#include "fields/path.hh"
 #include "action/action.hh"
 
 /** @file conditionedfineaction.hh
@@ -46,7 +46,7 @@ public:
    *
    * @param[inout] x_path Path \f$X\f$ to fill
    */
-  virtual void fill_fine_points(std::shared_ptr<Path> x_path) const = 0;
+  virtual void fill_fine_points(std::shared_ptr<SampleState> x_path) const = 0;
 
   /** @brief Evaluate conditioned action at fine points
    * 
@@ -55,7 +55,7 @@ public:
    *
    * @param[inout] x_path Path \f$X\f$ to fill
    */
-  virtual double evaluate(const std::shared_ptr<Path> x_path) const = 0;  
+  virtual double evaluate(const std::shared_ptr<SampleState> x_path) const = 0;  
 };
 
 struct ConditionedFineActionFactory {

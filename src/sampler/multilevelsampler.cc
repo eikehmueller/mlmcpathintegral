@@ -43,7 +43,7 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
   // Action on coarsest level
   std::shared_ptr<Action> coarse_action = action[n_level-1];
   for (unsigned int ell=0;ell<n_level;++ell) {
-    x_sampler_path.push_back(std::make_shared<Path>(action[ell]->get_lattice()));
+    x_sampler_path.push_back(std::make_shared<SampleState>(action[ell]->sample_size()));
   }
   // Construct sampler on coarsest level
   coarse_sampler = coarse_sampler_factory->get(coarse_action);
@@ -53,7 +53,7 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
     stats_sampler_label << "   Q_{sampler}[" << level << "]";
     stats_sampler.push_back(std::make_shared<Statistics>(stats_sampler_label.str(),n_autocorr_window));
   }
-  std::shared_ptr<Path> meas_path=std::make_shared<Path>(fine_action->get_lattice());
+  std::shared_ptr<SampleState> meas_path=std::make_shared<SampleState>(fine_action->sample_size());
   Timer timer_meas;
   unsigned int n_meas = 10000;
     timer_meas.start();
@@ -65,7 +65,7 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
 }
 
 /* Draw next sample */
-void MultilevelSampler::draw(std::shared_ptr<Path> x_path) {
+void MultilevelSampler::draw(std::shared_ptr<SampleState> x_path) {
   accept = true;
   int level = n_level-1;
   do {
@@ -105,12 +105,12 @@ void MultilevelSampler::draw(std::shared_ptr<Path> x_path) {
     }
   } while (level>=0);
   // Copy path
-  x_path->copy(x_sampler_path[0]);
+  x_path->data = x_sampler_path[0]->data;
 }
 
 /* Set current state */
-void MultilevelSampler::set_state(std::shared_ptr<Path> x_path) {
-  x_sampler_path[0]->copy(x_path);
+void MultilevelSampler::set_state(std::shared_ptr<SampleState> x_path) {
+  x_sampler_path[0]->data = x_path->data;
 }
 
 /* Show statistics on all levels */

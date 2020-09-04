@@ -179,25 +179,24 @@ int main(int argc, char* argv[]) {
   mpi_parallel::cout << FRED("CAUTION: logging QoI will impact performance!") << std::endl;
 #endif // LOG_QOI
 
+    /* ====== Lattice ====== */
+  std::shared_ptr<Lattice1D> lattice;
+  lattice = std::make_shared<Lattice1D>(param_lattice.M_lat(),
+                                        param_lattice.T_final());
   
   /* ====== Select quantity of interest ====== */
   std::shared_ptr<QoI> qoi;
   mpi_parallel::cout << std::endl;
   if ( (param_qm.action() == ActionHarmonicOscillator) or
        (param_qm.action() == ActionQuarticOscillator) ) {
-    qoi=std::make_shared<QoIXsquared>();
+    qoi=std::make_shared<QoIXsquared>(lattice);
     mpi_parallel::cout << "QoI = X^2 " << std::endl;
   }
   if ( (param_qm.action() == ActionRotor) ) {
-    qoi=std::make_shared<QoISusceptibility>();
+    qoi=std::make_shared<QoISusceptibility>(lattice);
     mpi_parallel::cout << "QoI = Susceptibility Q[X]^2/T " << std::endl;
   }
   mpi_parallel::cout << std::endl;
-  
-  /* ====== Lattice ====== */
-  std::shared_ptr<Lattice1D> lattice;
-  lattice = std::make_shared<Lattice1D>(param_lattice.M_lat(),
-                                        param_lattice.T_final());
   
   /* ====== Select action ====== */
   std::shared_ptr<QMAction> action;

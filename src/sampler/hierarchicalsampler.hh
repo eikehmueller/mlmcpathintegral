@@ -6,9 +6,9 @@
 #include <sstream>
 #include "common/parameters.hh"
 #include "common/statistics.hh"
+#include "common/samplestate.hh"
 #include "common/timer.hh"
 #include "mpi/mpi_wrapper.hh"
-#include "fields/path.hh"
 #include "action/action.hh"
 #include "sampler/sampler.hh"
 #include "action/conditionedfineaction.hh"
@@ -102,7 +102,7 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ drawn from distribution
    */
-  virtual void draw(std::shared_ptr<Path> x_path);
+  virtual void draw(std::shared_ptr<SampleState> x_path);
   
 /** @brief Show statistics
      *
@@ -114,7 +114,7 @@ public:
    *
    * @param[in] x_path
    */
-  virtual void set_state(std::shared_ptr<Path> x_path);
+  virtual void set_state(std::shared_ptr<SampleState> x_path);
   
   /** Return cost per sample */
   virtual double cost_per_sample() { return cost_per_sample_; }
@@ -129,7 +129,7 @@ private:
   /** @brief Sampler on coarsest level */
   std::shared_ptr<Sampler> coarse_sampler;
   /** @brief Sampler path on each level  */
-  std::vector<std::shared_ptr<Path> > x_sampler_path;
+  std::vector<std::shared_ptr<SampleState> > x_sampler_path;
   /** @brief cost per sample */
   double cost_per_sample_;
 };

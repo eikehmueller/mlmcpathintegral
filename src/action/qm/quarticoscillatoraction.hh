@@ -2,11 +2,11 @@
 #define QUARTICOSCILLATORACTION_HH QUARTICOSCILLATORACTION_HH
 #include <memory>
 #include <vector>
-#include "lattice/lattice1d.hh"
-#include "fields/path.hh"
-#include "action/qm/qmaction.hh"
 #include "common/parameters.hh"
+#include "common/samplestate.hh"
 #include "mpi/mpi_wrapper.hh"
+#include "lattice/lattice1d.hh"
+#include "action/qm/qmaction.hh"
 
 /** @file quarticoscillatoraction.hh
  * @brief Header file for quartic oscillator action class
@@ -125,7 +125,7 @@ public:
    *
    * @param[in] x_path path \f$X\f$, has to be am array of length \f$M\f$
    */
-  const double virtual evaluate(const std::shared_ptr<Path> x_path) const;
+  const double virtual evaluate(const std::shared_ptr<SampleState> x_path) const;
 
   /** @brief Calculate force for HMC integrator for a specific path
    *
@@ -140,8 +140,8 @@ public:
    * @param x_path Path \f$X\f$ on which to evaluate the force
    * @param p_path Resulting force \f$P\f$ at every point
    */
-  void virtual force(const std::shared_ptr<Path> x_path,
-                     std::shared_ptr<Path> p_path) const;
+  void virtual force(const std::shared_ptr<SampleState> x_path,
+                     std::shared_ptr<SampleState> p_path) const;
 
     /** @brief Initialise path 
    *
@@ -149,8 +149,8 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ to be set
    */
-  void virtual initialise_path(std::shared_ptr<Path> x_path) const {
-    x_path->fill([](){return 0.0;});
+  void virtual initialise_path(std::shared_ptr<SampleState> x_path) const {
+    std::fill(x_path->data.data(),x_path->data.data()+x_path->data.size(),0.0);
   }
 
   /** @brief Second derivative \f$W''_{\overline{x}}(x)\f$ of conditioned action

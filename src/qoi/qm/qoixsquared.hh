@@ -2,7 +2,8 @@
 #define QOIXSQUARED_HH QOIXSQUARED_HH
 #include <memory>
 #include "common/auxilliary.hh"
-#include "fields/path.hh"
+#include "common/samplestate.hh"
+#include "lattice/lattice1d.hh"
 #include "qoi/quantityofinterest.hh"
 
 /** @file qoixsquared.hh
@@ -18,7 +19,8 @@
 class QoIXsquared : public QoI {
 public: 
   /** @brief Create new instance  */
-  QoIXsquared() {}
+  QoIXsquared(const std::shared_ptr<Lattice1D> lattice) :
+  M_lat(lattice->getM_lat()) {}
 
   /** @brief Destructor */
   virtual ~QoIXsquared() {}
@@ -27,7 +29,10 @@ public:
    *
    * @param[in] x_path Path \f$X\f$ on which to evaluate the QoI
    */
-  const double virtual evaluate(const std::shared_ptr<Path> x_path);
+  const double virtual evaluate(const std::shared_ptr<SampleState> x_path);
+private:
+/** @brief Number of lattice points */
+  const unsigned int M_lat;
 };
 
 #endif // QOIXSQUARED_HH

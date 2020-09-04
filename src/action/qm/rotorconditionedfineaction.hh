@@ -4,9 +4,9 @@
 #include <memory>
 #include <algorithm>
 #include "common/auxilliary.hh"
+#include "common/samplestate.hh"
 #include "mpi/mpi_random.hh"
 #include "lattice/lattice1d.hh"
-#include "fields/path.hh"
 #include "action/action.hh"
 #include "action/conditionedfineaction.hh"
 #include "action/qm/rotoraction.hh"
@@ -50,7 +50,7 @@ public:
    *
    * @param[inout] x_path Path \f$X\f$ to fill
    */
-  virtual void fill_fine_points(std::shared_ptr<Path> x_path) const;
+  virtual void fill_fine_points(std::shared_ptr<SampleState> x_path) const;
 
   /** @brief Evaluate conditioned action at fine points
    * 
@@ -59,7 +59,7 @@ public:
    *
    * @param[inout] x_path Path \f$X\f$ to fill
    */
-  virtual double evaluate(const std::shared_ptr<Path> x_path) const;
+  virtual double evaluate(const std::shared_ptr<SampleState> x_path) const;
 
 
 private:

@@ -1,7 +1,7 @@
 #ifndef QUANTITYOFINTEREST_HH
 #define QUANTITYOFINTEREST_HH QUANTITYOFINTEREST_HH
 #include <memory>
-#include "fields/path.hh"
+#include "common/samplestate.hh"
 
 /** @file quantityofinterest.hh
  * @brief Header file for quantities of interest
@@ -23,7 +23,7 @@ public:
    *
    * @param[in] x_path Path \f$X\f$ on which to evaluate the QoI
    */
-  const double virtual evaluate(const std::shared_ptr<Path> x_path) = 0;
+  const double virtual evaluate(const std::shared_ptr<SampleState> x_path) = 0;
   
 };
 

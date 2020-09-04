@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "common/auxilliary.hh"
 #include "mpi/mpi_random.hh"
-#include "fields/path.hh"
+#include "common/samplestate.hh"
 #include "action/qm/qmaction.hh"
 #include "action/conditionedfineaction.hh"
 
@@ -45,18 +45,18 @@ public:
    * Given a path \f$X\f$ for which the coarse points have been set, fill in
    * the fine points by sampling from the conditioned action.
    *
-   * @param[inout] x_path Path \f$X\f$ to fill
+   * @param[inout] x_path SampleState \f$X\f$ to fill
    */
-  virtual void fill_fine_points(std::shared_ptr<Path> x_path) const;
+  virtual void fill_fine_points(std::shared_ptr<SampleState> x_path) const;
 
   /** @brief Evaluate conditioned action at fine points
    * 
    * Given a path \f$X\f$ for which all points have been set, evaluate the
    * conditioned action.
    *
-   * @param[inout] x_path Path \f$X\f$ to fill
+   * @param[inout] x_path SampleState \f$X\f$ to fill
    */
-  virtual double evaluate(const std::shared_ptr<Path> x_path) const;
+  virtual double evaluate(const std::shared_ptr<SampleState> x_path) const;
   
 private:
   /** @brief Underlying action class */

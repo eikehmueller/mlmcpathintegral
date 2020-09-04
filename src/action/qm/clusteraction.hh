@@ -2,7 +2,6 @@
 #define CLUSTERACTION_HH CLUSTERACTION_HH
 
 #include "lattice/lattice1d.hh"
-#include "fields/path.hh"
 #include "action/qm/qmaction.hh"
 
 /** @file clusteraction.hh

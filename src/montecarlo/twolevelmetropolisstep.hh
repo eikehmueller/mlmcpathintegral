@@ -2,11 +2,12 @@
 #define TWOLEVELMETROPOLISSTEP_HH TWOLEVELMETROPOLISSTEP_HH
 #include <memory>
 #include <random>
-#include "action/action.hh"
-#include "montecarlo/mcmcstep.hh"
-#include "action/conditionedfineaction.hh"
 #include "common/timer.hh"
+#include "common/samplestate.hh"
 #include "mpi/mpi_random.hh"
+#include "action/action.hh"
+#include "action/conditionedfineaction.hh"
+#include "montecarlo/mcmcstep.hh"
 
 
 /** @file twolevelmetropolisstep.hh
@@ -63,14 +64,14 @@ public:
    * @param[out] x_coarse_path Coarse path
    * @param[out] x_path Resulting fine path
    */
-  virtual void draw(const std::shared_ptr<Path> x_coarse_path,
-                    std::shared_ptr<Path> x_path);
+  virtual void draw(const std::shared_ptr<SampleState> x_coarse_path,
+                    std::shared_ptr<SampleState> x_path);
                
   /** @brief Set current state to particular value
    *
    * @param[in] x_path
    */
-  virtual void set_state(std::shared_ptr<Path> x_path);
+  virtual void set_state(std::shared_ptr<SampleState> x_path);
 
   /** Return cost per sample */
   virtual double cost_per_sample() { return cost_per_sample_; }
@@ -83,11 +84,11 @@ protected:
   /** @brief Conditioned fine action */
   const std::shared_ptr<ConditionedFineAction> conditioned_fine_action;
   /** @brief Temporary state vector on fine level \f$\theta^n_{\ell}\f$ */
-  mutable std::shared_ptr<Path> theta_fine;
+  mutable std::shared_ptr<SampleState> theta_fine;
   /** @brief Coarse part of state vector on fine level \f$\theta^n_{\ell,C}\f$ */
-  mutable std::shared_ptr<Path> theta_fine_C;
+  mutable std::shared_ptr<SampleState> theta_fine_C;
   /** @brief Trial state vector on fine level \f$\theta'_{\ell}\f$ */
-  mutable std::shared_ptr<Path> theta_prime;
+  mutable std::shared_ptr<SampleState> theta_prime;
   /** @brief Random number engine */
   typedef mpi_parallel::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */

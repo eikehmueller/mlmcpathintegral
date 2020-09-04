@@ -4,8 +4,8 @@
 #include <iomanip>
 #include <vector>
 #include <memory>
+#include "common/samplestate.hh"
 #include "mpi/mpi_wrapper.hh"
-#include "fields/path.hh"
 
 /** @file mcmcstep.hh
  * @brief Header file for MCMCStep class
@@ -52,9 +52,9 @@ public:
   
   /** @brief Set current state to particular value
    *
-   * @param[in] x_path
+   * @param[in] x_state
    */
-  virtual void set_state(std::shared_ptr<Path> x_path)=0;
+  virtual void set_state(std::shared_ptr<SampleState> x_state)=0;
   
   /** Return cost per sample */
   virtual double cost_per_sample() {
@@ -70,7 +70,7 @@ protected:
   mutable unsigned int n_total_samples;
   /** @brief Has last sample been accepted? */
   mutable bool accept;
-  /** @brief Copy path even if it has been rejected */
+  /** @brief Copy sample even if it has been rejected */
   mutable bool copy_if_rejected;
 };
 

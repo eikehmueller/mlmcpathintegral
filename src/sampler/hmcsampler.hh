@@ -4,10 +4,9 @@
 #include <random>
 #include <vector>
 #include "common/parameters.hh"
+#include "common/samplestate.hh"
 #include "mpi/mpi_wrapper.hh"
 #include "mpi/mpi_random.hh"
-#include "lattice/lattice1d.hh"
-#include "fields/path.hh"
 #include "action/action.hh"
 #include "sampler/sampler.hh"
 
@@ -95,20 +94,19 @@ public:
     n_burnin(hmc_param_.n_burnin())
   {
     engine.seed(8923759);
-    std::shared_ptr<Lattice1D> lattice = action->get_lattice();
     // Create temporary workspace
     // current position
-    x_path_cur = std::make_shared<Path>(lattice);
+    x_path_cur = std::make_shared<SampleState>(action->sample_size());
     // current (conjugate) momentum
-    p_path_cur = std::make_shared<Path>(lattice);
+    p_path_cur = std::make_shared<SampleState>(action->sample_size());
     // Trial path
-    x_path_trial = std::make_shared<Path>(lattice);
+    x_path_trial = std::make_shared<SampleState>(action->sample_size());
     // Momentum change from force term
-    dp_path = std::make_shared<Path>(lattice);
+    dp_path = std::make_shared<SampleState>(action->sample_size());
     action->initialise_path(x_path_cur);
     // Burn in
-    std::shared_ptr<Path> x_path_tmp =
-      std::make_shared<Path>(lattice);
+    std::shared_ptr<SampleState> x_path_tmp =
+      std::make_shared<SampleState>(action->sample_size());
     for (unsigned int i=0;i<n_burnin;++i) {
       draw(x_path_tmp);
     }
@@ -137,13 +135,13 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ drawn from distribution
    */
-  virtual void draw(std::shared_ptr<Path> x_path);
+  virtual void draw(std::shared_ptr<SampleState> x_path);
 
   /** @brief Set current state to particular value
    *
    * @param[in] x_path
    */
-  virtual void set_state(std::shared_ptr<Path> x_path);
+  virtual void set_state(std::shared_ptr<SampleState> x_path);
 
 private:
   
@@ -162,13 +160,13 @@ protected:
   /** @brief Number of burn-in steps */
   const unsigned int n_burnin;
   /** @brief Current state (path) */
-  mutable std::shared_ptr<Path> x_path_cur;
+  mutable std::shared_ptr<SampleState> x_path_cur;
   /** @brief temporary for momenta */
-  mutable std::shared_ptr<Path> p_path_cur;
+  mutable std::shared_ptr<SampleState> p_path_cur;
   /** @brief Trial state (path) */
-  mutable std::shared_ptr<Path> x_path_trial;
+  mutable std::shared_ptr<SampleState> x_path_trial;
   /** @brief temporary increment for momenta */
-  mutable std::shared_ptr<Path> dp_path;
+  mutable std::shared_ptr<SampleState> dp_path;
   /** @brief Random number engine */
   typedef mpi_parallel::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */

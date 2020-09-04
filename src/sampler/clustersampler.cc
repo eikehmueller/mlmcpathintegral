@@ -16,9 +16,8 @@ ClusterSampler::ClusterSampler(const std::shared_ptr<ClusterAction> action_,
   uniform_int_dist(0,M_lat-1)
 {
   engine.seed(2141517);
-  std::shared_ptr<Lattice1D> lattice = action->get_lattice();
   // Create temporary workspace
-  x_path_cur = std::make_shared<Path>(lattice);
+  x_path_cur = std::make_shared<SampleState>(M_lat);
   action->initialise_path(x_path_cur);
   // Measure cost per sample
   Timer timer_meas;
@@ -30,7 +29,7 @@ ClusterSampler::ClusterSampler(const std::shared_ptr<ClusterAction> action_,
   timer_meas.stop();
   cost_per_sample_ = 1.E6*timer_meas.elapsed()/n_meas;
   // Burn in
-  std::shared_ptr<Path> x_path_tmp = std::make_shared<Path>(lattice);
+  std::shared_ptr<SampleState> x_path_tmp = std::make_shared<SampleState>(M_lat);
   for (unsigned int i=0;i<n_burnin;++i) {
     draw(x_path_tmp);
   }
@@ -55,7 +54,7 @@ std::pair<bool,int> ClusterSampler::process_link(const int i,
 }
 
 /** Draw next sample */
-void ClusterSampler::draw(std::shared_ptr<Path> x_path) {
+void ClusterSampler::draw(std::shared_ptr<SampleState> x_path) {
   for (unsigned int i=0;i<n_updates;i++) {
     // Pick new subgroup
     action->new_angle();
@@ -83,6 +82,6 @@ void ClusterSampler::draw(std::shared_ptr<Path> x_path) {
     n_accepted_samples++;
   }
   // Copy to output vector
-  x_path->copy(x_path_cur);
+  x_path->data = x_path_cur->data;
   accept = true;
 }

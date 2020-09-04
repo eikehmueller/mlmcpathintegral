@@ -3,8 +3,8 @@
 
 #include <string>
 #include "common/parameters.hh"
+#include "common/samplestate.hh"
 #include "lattice/lattice1d.hh"
-#include "fields/path.hh"
 #include "action/action.hh"
 #include "action/renormalisation.hh"
 #include "mpi/mpi_wrapper.hh"
@@ -97,6 +97,9 @@ public:
       m0(m0_) {
     assert(m0>0.0);
   }
+  
+  /** @brief return size of samples */
+  virtual unsigned int sample_size() { return M_lat; }
 
   /** @brief Return underlying lattice */
   std::shared_ptr<Lattice1D> get_lattice() const { return lattice; }
@@ -124,7 +127,7 @@ public:
    *
    * @param[in] x_path Path, has to be an array of length \f$M\f$
    */
-  virtual const double evaluate(const std::shared_ptr<Path> x_path) const = 0;
+  virtual const double evaluate(const std::shared_ptr<SampleState> x_path) const = 0;
 
   /** @brief Calculate force for HMC integrator for a specific path
    *
@@ -135,8 +138,8 @@ public:
    * @param[out] p_path Resulting force \f$P\f$ at every point
    *
    */
-  virtual void force(const std::shared_ptr<Path> x_path,
-                     std::shared_ptr<Path> p_path) const = 0;
+  virtual void force(const std::shared_ptr<SampleState> x_path,
+                     std::shared_ptr<SampleState> p_path) const = 0;
 
   /** @brief Initialise path 
    *
@@ -145,7 +148,7 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ to be set
    */
-  virtual void initialise_path(std::shared_ptr<Path> x_path) const = 0;
+  virtual void initialise_path(std::shared_ptr<SampleState> x_path) const = 0;
   
   /** @brief Second derivative \f$W''_{x_-,x_+}(x)\f$ of conditioned
    * action at its minimum.
@@ -177,6 +180,22 @@ public:
   double virtual inline getWminimum(const double x_m,
                                     const double x_p) const = 0;
     
+  /** @brief Copy coarse data points from sample on coarser level
+   *
+   * @param[in] x_coarse Coarse sample to copy from
+   * @param[in] x_path Fine path to copy to (same level as action)
+   */
+  virtual void copy_from_coarse(const std::shared_ptr<SampleState> x_coarse,
+                                std::shared_ptr<SampleState> x_path);
+  
+  /** @brief Copy coarse data points from path on finer level
+   *
+   * @param[in] x_fine Fine path to copy from
+   * @param[in] x_path Coarse path to copy to (same level as action)
+   */
+  virtual void copy_from_fine(const std::shared_ptr<SampleState> x_fine,
+                              std::shared_ptr<SampleState> x_path);
+
 protected:
   /** @brief Number of lattice points */
   const unsigned int M_lat;

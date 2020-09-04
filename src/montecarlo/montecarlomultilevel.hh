@@ -10,8 +10,8 @@
 #include "common/timer.hh"
 #include "common/statistics.hh"
 #include "common/parameters.hh"
+#include "common/samplestate.hh"
 #include "mpi/mpi_wrapper.hh"
-#include "fields/path.hh"
 #include "sampler/sampler.hh"
 #include "action/action.hh"
 #include "action/conditionedfineaction.hh"
@@ -142,7 +142,7 @@ private:
    * @param[out] x_path Path which will contain the sample
    */
   void draw_coarse_sample(const unsigned int level,
-                          std::shared_ptr<Path> x_path);
+                          std::shared_ptr<SampleState> x_path);
   
   /** @brief Calculate effective cost \f$C_{\ell}^{eff}\f$ on a level
    * 
@@ -169,9 +169,9 @@ private:
   /** @brief Tolerance epsilon */
   const double epsilon;
   /** @brief Path on a particular level */
-  std::vector<std::shared_ptr<Path> > x_path;
+  std::vector<std::shared_ptr<SampleState> > x_path;
   /** @brief Coarse path on a particular level */
-  std::vector<std::shared_ptr<Path> > x_coarse_path;
+  std::vector<std::shared_ptr<SampleState> > x_coarse_path;
   /** @brief vector with statistics of uncorrelated Y's*/
   std::vector<std::shared_ptr<Statistics> > stats_qoi;
   /** @brief hierarchical sampler on each level */

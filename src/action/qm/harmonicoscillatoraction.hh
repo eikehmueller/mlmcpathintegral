@@ -5,13 +5,13 @@
 #include <vector>
 #include <memory>
 #include <Eigen/Dense>
+#include "common/parameters.hh"
+#include "common/samplestate.hh"
+#include "mpi/mpi_random.hh"
 #include "lattice/lattice1d.hh"
-#include "fields/path.hh"
 #include "sampler/sampler.hh"
 #include "action/qm/qmaction.hh"
 #include "action/qm/harmonicoscillatorrenormalisation.hh"
-#include "common/parameters.hh"
-#include "mpi/mpi_random.hh"
 
 /** @file harmonicoscillatoraction.hh
  * @brief Header file for harmonic oscillator action base class
@@ -102,7 +102,7 @@ public:
       Wminimum_scaling(0.5/(1.+0.5*a_lat*a_lat*mu2)) {
     build_covariance();
     engine.seed(124129017);
-    y_tmp = std::make_shared<Path>(lattice_);
+    y_tmp = std::make_shared<SampleState>(lattice_->getM_lat());
   }
 
   /** @brief Tidy up
@@ -133,7 +133,7 @@ public:
    *
    * @param[in] x_path path \f$X\f$, has to be am array of length \f$M\f$
    */
-  const double virtual evaluate(const std::shared_ptr<Path> x_path) const;
+  const double virtual evaluate(const std::shared_ptr<SampleState> x_path) const;
 
   /** @brief Calculate force for HMC integrator for a specific path
    *
@@ -145,20 +145,20 @@ public:
          P_j = \frac{m_0}{a}\left(2X_j-X_{j-1}-X_{j+1}\right) + \frac{1}{2}am_0\mu^2 X_j
      \f]
    *
-   * @param x_path Path \f$X\f$ on which to evaluate the force
+   * @param x_path SampleState \f$X\f$ on which to evaluate the force
    * @param p_path Resulting force \f$P\f$ at every point
    */
-  void virtual force(const std::shared_ptr<Path> x_path,
-                     std::shared_ptr<Path> p_path) const;
+  void virtual force(const std::shared_ptr<SampleState> x_path,
+                     std::shared_ptr<SampleState> p_path) const;
 
   /** @brief Initialise path 
    *
    * Set initial values of path to zero
    *
-   * @param[out] x_path Path \f$X\f$ to be set
+   * @param[out] x_path SampleState \f$X\f$ to be set
    */
-  void virtual initialise_path(std::shared_ptr<Path> x_path) const {
-    x_path->fill([](){return 0.0;});
+  void virtual initialise_path(std::shared_ptr<SampleState> x_path) const {
+    std::fill(x_path->data.data(),x_path->data.data()+x_path->data.size(),0.0);
   }
   
   /** @brief Second derivative \f$W''_{x_-,x_+}(x)\f$ of conditioned action
@@ -200,7 +200,7 @@ public:
    *
    * @param[out] x_path: path to populate
    */
-  virtual void draw(std::shared_ptr<Path> x_path);
+  virtual void draw(std::shared_ptr<SampleState> x_path);
 
   /** @brief Exact expression for expectation value of \f$X^2\f$
    *
@@ -235,7 +235,7 @@ public:
    *
    *  @param[in] x_path
    */
-  virtual void set_state(std::shared_ptr<Path> x_path) {};
+  virtual void set_state(std::shared_ptr<SampleState> x_path) {};
   
 private:
   /** @brief Construct Cholesky factor of covariance matrix */
@@ -259,7 +259,7 @@ private:
   /** @brief Normal distribution */
   mutable Normal normal_dist;
   /** @brief temporary array used for direct sampling */
-  std::shared_ptr<Path> y_tmp;
+  std::shared_ptr<SampleState> y_tmp;
   /** @brief Curvature of modified potential */
   const double Wcurvature;
   /** @brief Scaling factor for calculation of mimimum of modified potential */
