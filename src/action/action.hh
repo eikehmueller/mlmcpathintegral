@@ -102,6 +102,10 @@ public:
   virtual void copy_from_fine(const std::shared_ptr<SampleState> x_fine,
                               std::shared_ptr<SampleState> x_path) = 0;
 
+  /** @brief Get coarsening level
+   * 
+   * This will return the coarsening level of the underlying lattice */
+   int get_coarsening_level() { return lattice->get_coarsening_level(); }
       
 protected:
   /** @brief Underlying lattice */

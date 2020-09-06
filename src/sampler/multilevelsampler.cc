@@ -13,7 +13,7 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
                                      const HierarchicalParameters param_hierarchical) :
   Sampler(),
   qoi(qoi_),
-  n_level(param_hierarchical.n_max_level()-fine_action->get_lattice()->get_coarsening_level()),
+  n_level(param_hierarchical.n_max_level()-fine_action->get_coarsening_level()),
   t_indep(n_level,0.0),
   n_indep(n_level,0),
   t_sampler(n_level,0),

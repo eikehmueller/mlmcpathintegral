@@ -10,7 +10,7 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
                                          const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                                          const HierarchicalParameters param_hierarchical) :
   Sampler(),
-  n_level(param_hierarchical.n_max_level()-fine_action->get_lattice()->get_coarsening_level()),
+  n_level(param_hierarchical.n_max_level()-fine_action->get_coarsening_level()),
   cost_per_sample_(0.0) {
   // Check that Number of lattice points permits number of levels
   unsigned int M_lat = fine_action->get_lattice()->getM_lat();
