@@ -10,8 +10,6 @@ TwoLevelMetropolisStep::TwoLevelMetropolisStep(const std::shared_ptr<Action> coa
    fine_action(fine_action_),
    conditioned_fine_action(conditioned_fine_action_),
    cost_per_sample_(0.0) {
-   std::shared_ptr<Lattice1D> fine_lattice = fine_action->get_lattice();
-   std::shared_ptr<Lattice1D> coarse_lattice = coarse_action->get_lattice();
    theta_fine = std::make_shared<SampleState>(fine_action->sample_size());
    theta_fine_C = std::make_shared<SampleState>(coarse_action->sample_size());
    theta_prime = std::make_shared<SampleState>(fine_action->sample_size());

@@ -12,13 +12,8 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
   Sampler(),
   n_level(param_hierarchical.n_max_level()-fine_action->get_coarsening_level()),
   cost_per_sample_(0.0) {
-  // Check that Number of lattice points permits number of levels
-  unsigned int M_lat = fine_action->get_lattice()->getM_lat();
-  if ( (M_lat>>n_level)<<n_level == M_lat) {
-    mpi_parallel::cout << " Hierarchical sampler: M_lat = " << M_lat << " = 2^{" << n_level << "-1} * " << (M_lat>>(n_level-1)) << std::endl;
-  } else {
-    mpi_parallel::cout << "ERROR: M_lat = " << M_lat << " is not a multiple of 2^{n_level} = 2^{"<<n_level << "}" << std::endl;
-  }
+  mpi_parallel::cout << " Hierarchical sampler: ";
+  fine_action->check_coarsening_is_permitted(n_level);    
   action.push_back(fine_action);
   // Construct action and two-level MCMC step on all levels
   for (unsigned int ell=0;ell<n_level-1;++ell) {

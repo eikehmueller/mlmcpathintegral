@@ -196,6 +196,12 @@ public:
   virtual void copy_from_fine(const std::shared_ptr<SampleState> x_fine,
                               std::shared_ptr<SampleState> x_path);
 
+/** @brief Check whether action supports number of coarsening steps 
+   * 
+   * @param[in] n_level Number of additional coarsening steps (can be zero)
+   */
+   virtual void check_coarsening_is_permitted(const unsigned int n_level);
+   
 protected:
   /** @brief Number of lattice points */
   const unsigned int M_lat;

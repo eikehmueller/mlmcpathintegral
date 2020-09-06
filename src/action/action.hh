@@ -107,6 +107,13 @@ public:
    * This will return the coarsening level of the underlying lattice */
    int get_coarsening_level() { return lattice->get_coarsening_level(); }
       
+      
+  /** @brief Check whether action supports number of coarsening steps 
+   * 
+   * @param[in] n_level Number of additional coarsening steps (can be zero)
+   */
+   virtual void check_coarsening_is_permitted(const unsigned int n_level) = 0;
+   
 protected:
   /** @brief Underlying lattice */
   const std::shared_ptr<Lattice1D> lattice;
