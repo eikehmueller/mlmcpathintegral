@@ -9,7 +9,7 @@
 
 /** @class QoI
  *
- * @brief Abstract base class for path-dependent quantity of interest
+ * @brief Abstract base class for state-dependent quantity of interest
  *
  */
 class QoI {
@@ -19,11 +19,11 @@ public:
    */
   QoI() {}
 
-  /** @brief Evaluate on a path
+  /** @brief Evaluate on a state
    *
-   * @param[in] x_path Path \f$X\f$ on which to evaluate the QoI
+   * @param[in] phi_state State \f$\phi\f$ on which to evaluate the QoI
    */
-  const double virtual evaluate(const std::shared_ptr<SampleState> x_path) = 0;
+  const double virtual evaluate(const std::shared_ptr<SampleState> phi_state) = 0;
   
 };
 

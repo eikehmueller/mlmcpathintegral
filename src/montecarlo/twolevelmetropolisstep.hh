@@ -29,10 +29,10 @@
  * To construct a new trial state, take the even modes from the next level
  * \f$\ell\f$ sample, \f$\theta'_{\ell,C}=\theta_{\ell}^{n+1}\f$. The 
  * odd modes are drawn from the free action, conditioned on the two
- * neighbouring odd modes \f$x_-\f$ and \f$x_+\f$, i.e. 
+ * neighbouring odd modes \f$phi_-\f$ and \f$phi_+\f$, i.e. 
  *
  * \f[
-   p(x) \sim \exp\left[-\frac{m_0}{a} \left(x-\frac{x_-+x_+}{2}\right)^2\right].
+   p(x) \sim \exp\left[-\frac{m_0}{a} \left(x-\frac{phi_-+phi_+}{2}\right)^2\right].
    \f]
  *
  * Finally, accept and reject according to \f$\min\left\{1,\beta\right\}\f$ with
@@ -59,19 +59,19 @@ public:
   /** @brief Destructor */
   virtual ~TwoLevelMetropolisStep() {}
 
-  /** @brief draw new fine path given a coarse path
+  /** @brief draw new fine state given a coarse state
    *
-   * @param[out] x_coarse_path Coarse path
-   * @param[out] x_path Resulting fine path
+   * @param[out] phi_coarse_state Coarse state
+   * @param[out] phi_state Resulting fine state
    */
-  virtual void draw(const std::shared_ptr<SampleState> x_coarse_path,
-                    std::shared_ptr<SampleState> x_path);
+  virtual void draw(const std::shared_ptr<SampleState> phi_coarse_state,
+                    std::shared_ptr<SampleState> phi_state);
                
   /** @brief Set current state to particular value
    *
-   * @param[in] x_path
+   * @param[in] phi_state
    */
-  virtual void set_state(std::shared_ptr<SampleState> x_path);
+  virtual void set_state(std::shared_ptr<SampleState> phi_state);
 
   /** Return cost per sample */
   virtual double cost_per_sample() { return cost_per_sample_; }

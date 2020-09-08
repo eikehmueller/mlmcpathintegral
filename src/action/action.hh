@@ -49,50 +49,50 @@ public:
     throw std::runtime_error("...");
   };
      
-  /** @brief Evaluate action for a specific path
+  /** @brief Evaluate action for a specific state
    * 
-   * Calculate \f$S[X]\f$ for a specific path
+   * Calculate \f$S[\phi]\f$ for a specific state
    *
-   * @param[in] x_path Path, has to be an array of length \f$M\f$
+   * @param[in] phi_state Sample state \f$\phi\f$
    */
-  virtual const double evaluate(const std::shared_ptr<SampleState> x_path) const = 0;
+  virtual const double evaluate(const std::shared_ptr<SampleState> phi_state) const = 0;
 
-  /** @brief Calculate force for HMC integrator for a specific path
+  /** @brief Calculate force for HMC integrator for a specific state
    *
-   * Calculate \f$P = \frac{\partial S[X]}{\partial X}\f$ for a specific
-   * path and return the resulting force as a path.
+   * Calculate \f$P = \frac{\partial S[\phi]}{\partial \phi}\f$ for a specific
+   * state and return the resulting force as a state.
    *
-   * @param[in] x_path Path \f$X\f$ on which to evaluate the force
-   * @param[out] p_path Resulting force \f$P\f$ at every point
+   * @param[in] phi_state State \f$\phi\f$ on which to evaluate the force
+   * @param[out] p_state Resulting force \f$P\f$ at every point
    *
    */
-  virtual void force(const std::shared_ptr<SampleState> x_path,
-                     std::shared_ptr<SampleState> p_path) const = 0;
+  virtual void force(const std::shared_ptr<SampleState> phi_state,
+                     std::shared_ptr<SampleState> p_state) const = 0;
 
-  /** @brief Initialise path 
+  /** @brief Initialise state 
    *
-   * Set initial values of path, those values will be used to start the 
+   * Set initial values of state, those values will be used to start the 
    * sampling process
    *
-   * @param[out] x_path Path \f$X\f$ to be set
+   * @param[out] phi_state State \f$\phi\f$ to be set
    */
-  virtual void initialise_path(std::shared_ptr<SampleState> x_path) const = 0;
+  virtual void initialise_state(std::shared_ptr<SampleState> phi_state) const = 0;
       
   /** @brief Copy coarse data points from sample on coarser level
    *
-   * @param[in] x_coarse Coarse sample to copy from
-   * @param[in] x_path Fine path to copy to (sample level as action)
+   * @param[in] phi_coarse Coarse sample to copy from
+   * @param[in] phi_state Fine state to copy to (sample level as action)
    */
-  virtual void copy_from_coarse(const std::shared_ptr<SampleState> x_coarse,
-                                std::shared_ptr<SampleState> x_path) = 0;
+  virtual void copy_from_coarse(const std::shared_ptr<SampleState> phi_coarse,
+                                std::shared_ptr<SampleState> phi_state) = 0;
   
-  /** @brief Copy coarse data points from path on finer level
+  /** @brief Copy coarse data points from state on finer level
    *
-   * @param[in] x_fine Fine path to copy from
-   * @param[in] x_coarse Coarse sample to copy to (same level as action)
+   * @param[in] phi_fine Fine state to copy from
+   * @param[in] phi_coarse Coarse state to copy to (same level as action)
    */
-  virtual void copy_from_fine(const std::shared_ptr<SampleState> x_fine,
-                              std::shared_ptr<SampleState> x_path) = 0;
+  virtual void copy_from_fine(const std::shared_ptr<SampleState> phi_fine,
+                              std::shared_ptr<SampleState> phi_state) = 0;
 
   /** @brief Get coarsening level
    * 

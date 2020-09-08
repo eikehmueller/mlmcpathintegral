@@ -25,11 +25,11 @@ MonteCarloSingleLevel::MonteCarloSingleLevel(std::shared_ptr<Action> action_,
 /** Calculate Monte Carlo estimate with single level method */
 void MonteCarloSingleLevel::evaluate() {
   std::ofstream qoi_file; // File to write QoI to
-  std::shared_ptr<SampleState> x_path = std::make_shared<SampleState>(action->sample_size());
+  std::shared_ptr<SampleState> phi_state = std::make_shared<SampleState>(action->sample_size());
   stats_Q->hard_reset();
   for (unsigned int i=0;i<n_burnin;++i) {
-    sampler->draw(x_path);
-    double qoi_Q = qoi->evaluate(x_path);
+    sampler->draw(phi_state);
+    double qoi_Q = qoi->evaluate(phi_state);
     stats_Q->record_sample(qoi_Q);
   }
 
@@ -58,18 +58,18 @@ void MonteCarloSingleLevel::evaluate() {
   do {
     unsigned int k_start = stats_Q->local_samples();
     for (unsigned int k=k_start;k<n_local_target;++k) {
-      sampler->draw(x_path);
+      sampler->draw(phi_state);
 #ifdef SAVE_PATHS
       if ( (SAVE_FIRST_PATH<=k) and (k<=SAVE_LAST_PATH) and (mpi_master())) {
         std::stringstream filename;      
-        filename << "path_";
+        filename << "state_";
         filename << std::setw(8) << std::setfill('0');
         filename << k << ".dat";
-        x_path->save_to_disk(filename.str());
+        phi_state->save_to_disk(filename.str());
       }
 #endif // SAVE_PATHS
       // Quantity of interest
-      double qoi_Q = qoi->evaluate(x_path);
+      double qoi_Q = qoi->evaluate(phi_state);
       stats_Q->record_sample(qoi_Q);
 #ifdef LOG_QOI
       qoi_file.write( reinterpret_cast<char*>( &qoi_Q ), sizeof(double));

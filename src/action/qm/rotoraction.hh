@@ -155,7 +155,7 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ to be set
    */
-  void virtual initialise_path(std::shared_ptr<SampleState> x_path) const;
+  void virtual initialise_state(std::shared_ptr<SampleState> x_path) const;
   
   /** @brief Second derivative \f$W''_{x_-,x_+}(x)\f$ of conditioned action
    *

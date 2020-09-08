@@ -139,10 +139,10 @@ private:
 
   /** Draw (independent) coarse level sample
    * @param[in] level Level on which to draw sample (i.e. the coarse level)
-   * @param[out] x_path Path which will contain the sample
+   * @param[out] phi_state Path which will contain the sample
    */
   void draw_coarse_sample(const unsigned int level,
-                          std::shared_ptr<SampleState> x_path);
+                          std::shared_ptr<SampleState> phi_state);
   
   /** @brief Calculate effective cost \f$C_{\ell}^{eff}\f$ on a level
    * 
@@ -169,9 +169,9 @@ private:
   /** @brief Tolerance epsilon */
   const double epsilon;
   /** @brief Path on a particular level */
-  std::vector<std::shared_ptr<SampleState> > x_path;
-  /** @brief Coarse path on a particular level */
-  std::vector<std::shared_ptr<SampleState> > x_coarse_path;
+  std::vector<std::shared_ptr<SampleState> > phi_state;
+  /** @brief Coarse state on a particular level */
+  std::vector<std::shared_ptr<SampleState> > phi_coarse_state;
   /** @brief vector with statistics of uncorrelated Y's*/
   std::vector<std::shared_ptr<Statistics> > stats_qoi;
   /** @brief hierarchical sampler on each level */
@@ -190,7 +190,7 @@ private:
   std::vector<int> n_indep;
   /** @brief number of samples generated since last independent coarse sample */
   std::vector<int> t_sampler;
-  /** @brief vector with statistics of coarse sampler paths */
+  /** @brief vector with statistics of coarse sampler states */
   std::vector<std::shared_ptr<Statistics> > stats_coarse_sampler;
   /** @brief Sub-sample coarse level sampler? */
   bool sub_sample_coarse;

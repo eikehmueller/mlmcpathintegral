@@ -5,7 +5,7 @@
  */
 
 /** Draw next sample */
-void HMCSampler::draw(std::shared_ptr<SampleState> x_path) {
+void HMCSampler::draw(std::shared_ptr<SampleState> phi_state) {
   accept = false;
   for (unsigned int r=0;r<n_rep;++r) {
     accept = accept or single_step();
@@ -14,21 +14,21 @@ void HMCSampler::draw(std::shared_ptr<SampleState> x_path) {
   n_accepted_samples += (int) accept;
   // Copy to output vector
   if (copy_if_rejected or accept) {
-    x_path->data = x_path_cur->data;
+    phi_state->data = phi_state_cur->data;
   }
 }
 
 /* Do a single HMC accept/reject step */
 bool HMCSampler::single_step() {
   // Initial kinetic energy
-  std::generate(p_path_cur->data.data(),
-                p_path_cur->data.data()+p_path_cur->data.size(),
+  std::generate(p_state_cur->data.data(),
+                p_state_cur->data.data()+p_state_cur->data.size(),
                 [this]() {return normal_dist(engine);});
   
-  double T_kin_cur = 0.5*p_path_cur->data.squaredNorm();
+  double T_kin_cur = 0.5*p_state_cur->data.squaredNorm();
   // STEP 1: Integrate deterministic trajectories with symplectic Euler method
   // Copy current state to trial state
-  x_path_trial->data = x_path_cur->data;
+  phi_state_trial->data = phi_state_cur->data;
   for(unsigned int k =0;k<=nt_hmc;++k) {
     double dt_p = dt_hmc;
     double dt_x = dt_hmc;
@@ -40,16 +40,16 @@ bool HMCSampler::single_step() {
       dt_x = 0.0;
     }
     // Calculate force
-    action->force(x_path_trial,dp_path);
-    p_path_cur->data -= dt_p*dp_path->data;
-    x_path_trial->data += dt_x*p_path_cur->data;    
+    action->force(phi_state_trial,dp_state);
+    p_state_cur->data -= dt_p*dp_state->data;
+    phi_state_trial->data += dt_x*p_state_cur->data;    
   }
   // Calculate kinetic energy from trial state at end of trajectory
-  double T_kin_trial = 0.5*p_path_cur->data.squaredNorm();
+  double T_kin_trial = 0.5*p_state_cur->data.squaredNorm();
   // STEP 2: Accept-reject step
   bool accept_step = false;
   // Change in action S(X)
-  double deltaS = action->evaluate(x_path_trial) - action->evaluate(x_path_cur);
+  double deltaS = action->evaluate(phi_state_trial) - action->evaluate(phi_state_cur);
   // Change in kinetic energy T(P)
   double deltaT = T_kin_trial - T_kin_cur;
   // Change in H(X,P) = T(P) + S(X)
@@ -62,14 +62,14 @@ bool HMCSampler::single_step() {
   }
   // If accepted, copy state
   if (accept_step) {
-    x_path_cur->data = x_path_trial->data;
+    phi_state_cur->data = phi_state_trial->data;
   }
   return accept_step;
 }
 
 /* Set current state */
-void HMCSampler::set_state(std::shared_ptr<SampleState> x_path) {
-  x_path_cur->data = x_path->data;
+void HMCSampler::set_state(std::shared_ptr<SampleState> phi_state) {
+  phi_state_cur->data = phi_state->data;
 }
 
 /* automatically tune stepsize */

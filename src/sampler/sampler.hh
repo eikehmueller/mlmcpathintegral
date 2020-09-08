@@ -15,7 +15,7 @@
 /** @class Sampler
  * @brief Base class for sampler
  *
- * Abstract base class for sampler from distribution over paths
+ * Abstract base class for sampler from distribution over states
  */
 class Sampler : public MCMCStep {
 public:
@@ -29,11 +29,11 @@ public:
 
   /** @brief Draw a sample 
    *
-   * returns a sample path \f$X\f$
+   * returns a sample state \f$\phi\f$
    *
-   * @param[out] x_path Path \f$X\f$ drawn from distribution
+   * @param[out] phi_state State \f$\phi\f$ drawn from distribution
    */
-  virtual void draw(std::shared_ptr<SampleState> x_path) = 0;
+  virtual void draw(std::shared_ptr<SampleState> phi_state) = 0;
 };
 
 class SamplerFactory {

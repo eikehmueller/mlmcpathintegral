@@ -37,7 +37,7 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
   // Action on coarsest level
   std::shared_ptr<Action> coarse_action = action[n_level-1];
   for (unsigned int ell=0;ell<n_level;++ell) {
-    x_sampler_path.push_back(std::make_shared<SampleState>(action[ell]->sample_size()));
+    phi_sampler_state.push_back(std::make_shared<SampleState>(action[ell]->sample_size()));
   }
   // Construct sampler on coarsest level
   coarse_sampler = coarse_sampler_factory->get(coarse_action);
@@ -47,25 +47,25 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
     stats_sampler_label << "   Q_{sampler}[" << level << "]";
     stats_sampler.push_back(std::make_shared<Statistics>(stats_sampler_label.str(),n_autocorr_window));
   }
-  std::shared_ptr<SampleState> meas_path=std::make_shared<SampleState>(fine_action->sample_size());
+  std::shared_ptr<SampleState> meas_state=std::make_shared<SampleState>(fine_action->sample_size());
   Timer timer_meas;
   unsigned int n_meas = 10000;
     timer_meas.start();
   for (unsigned int k=0;k<n_meas;++k) {
-    draw(meas_path);
+    draw(meas_state);
   }
   timer_meas.stop();
   cost_per_sample_ = 1.E6*timer_meas.elapsed()/n_meas;
 }
 
 /* Draw next sample */
-void MultilevelSampler::draw(std::shared_ptr<SampleState> x_path) {
+void MultilevelSampler::draw(std::shared_ptr<SampleState> phi_state) {
   accept = true;
   int level = n_level-1;
   do {
     if (level == (n_level-1)) {
       /* Sample directly on coarsest level */
-      coarse_sampler->draw(x_sampler_path[level]);
+      coarse_sampler->draw(phi_sampler_state[level]);
     } else {
       /*
        * On all other levels, sample by using the two level MCMC process
@@ -73,21 +73,21 @@ void MultilevelSampler::draw(std::shared_ptr<SampleState> x_path) {
        * algorithm only ever proceeds to the next finer level if this is the
        * case.
        */
-      twolevel_step[level]->draw(x_sampler_path[level+1],
-                                 x_sampler_path[level]);
+      twolevel_step[level]->draw(phi_sampler_state[level+1],
+                                 phi_sampler_state[level]);
     }
     // The QoI of the independent sampler, Q_{ell}
-    double qoi_sampler = qoi->evaluate(x_sampler_path[level]);
+    double qoi_sampler = qoi->evaluate(phi_sampler_state[level]);
     stats_sampler[level]->record_sample(qoi_sampler);
     t_sampler[level]++;
     if (t_sampler[level] >= ceil(stats_sampler[level]->tau_int())) {
-      // t_sampler[level] is the number of x_sampler_path samples
+      // t_sampler[level] is the number of phi_sampler_state samples
       // generated on this level since the last independent sample was used
       t_indep[level] = (n_indep[level]*t_indep[level]+t_sampler[level])/(1.0+n_indep[level]);
       // t_indep[level] is the average number of samples between indpendent
       // samples
       n_indep[level]++;
-      // n_indep is the number of independent samples of x_sampler_path on
+      // n_indep is the number of independent samples of phi_sampler_state on
       // this level
       t_sampler[level] = 0; // Reset number of independent samples
       // Move to next-finer level since we have obtained a new independent
@@ -98,13 +98,13 @@ void MultilevelSampler::draw(std::shared_ptr<SampleState> x_path) {
       level = n_level-1;
     }
   } while (level>=0);
-  // Copy path
-  x_path->data = x_sampler_path[0]->data;
+  // Copy state
+  phi_state->data = phi_sampler_state[0]->data;
 }
 
 /* Set current state */
-void MultilevelSampler::set_state(std::shared_ptr<SampleState> x_path) {
-  x_sampler_path[0]->data = x_path->data;
+void MultilevelSampler::set_state(std::shared_ptr<SampleState> phi_state) {
+  phi_sampler_state[0]->data = phi_state->data;
 }
 
 /* Show statistics on all levels */

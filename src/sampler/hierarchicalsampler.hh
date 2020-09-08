@@ -23,9 +23,9 @@ public:
   /** @brief Construct a new instance */
   HierarchicalParameters() :
     Parameters("hierarchical"),
-    n_max_level_(2),
+    n_maphi_level_(2),
   coarsesampler_(SamplerHMC) {
-    addKey("n_max_level",Integer,Positive);
+    addKey("n_maphi_level",Integer,Positive);
     addKey("coarsesampler",String);
   }
   
@@ -37,7 +37,7 @@ public:
 
     int readSuccess = Parameters::readFile(filename);
     if (!readSuccess) {
-      n_max_level_ = getContents("n_max_level")->getInt();
+      n_maphi_level_ = getContents("n_maphi_level")->getInt();
       std::string sampler_str = getContents("coarsesampler")->getString();
       if (sampler_str == "HMC") {
         coarsesampler_ = SamplerHMC;
@@ -56,12 +56,12 @@ public:
   }
 
   /** @brief Return maximal number of levels */
-  unsigned int n_max_level() const { return n_max_level_; }
+  unsigned int n_max_level() const { return n_maphi_level_; }
   /** @brief Return sampler type */
   SamplerType coarsesampler() const { return coarsesampler_; }
 private:
   /** @brief Number of levels */
-  unsigned int n_max_level_;
+  unsigned int n_maphi_level_;
   /** @brief tolerance epsilon */
   SamplerType coarsesampler_;
 };
@@ -98,11 +98,11 @@ public:
 
   /** @brief Draw a sample 
    *
-   * returns a sample path \f$X\f$
+   * returns a sample state \f$\phi\f$
    *
-   * @param[out] x_path Path \f$X\f$ drawn from distribution
+   * @param[out] phi_state State \f$\phi\f$ drawn from distribution
    */
-  virtual void draw(std::shared_ptr<SampleState> x_path);
+  virtual void draw(std::shared_ptr<SampleState> phi_state);
   
 /** @brief Show statistics
      *
@@ -112,9 +112,9 @@ public:
   
   /** @brief Set current state to particular value
    *
-   * @param[in] x_path
+   * @param[in] phi_state
    */
-  virtual void set_state(std::shared_ptr<SampleState> x_path);
+  virtual void set_state(std::shared_ptr<SampleState> phi_state);
   
   /** Return cost per sample */
   virtual double cost_per_sample() { return cost_per_sample_; }
@@ -128,8 +128,8 @@ private:
   std::vector<std::shared_ptr<TwoLevelMetropolisStep> > twolevel_step;
   /** @brief Sampler on coarsest level */
   std::shared_ptr<Sampler> coarse_sampler;
-  /** @brief Sampler path on each level  */
-  std::vector<std::shared_ptr<SampleState> > x_sampler_path;
+  /** @brief Sampler state on each level  */
+  std::vector<std::shared_ptr<SampleState> > phi_sampler_state;
   /** @brief cost per sample */
   double cost_per_sample_;
 };

@@ -96,19 +96,19 @@ public:
     engine.seed(8923759);
     // Create temporary workspace
     // current position
-    x_path_cur = std::make_shared<SampleState>(action->sample_size());
+    phi_state_cur = std::make_shared<SampleState>(action->sample_size());
     // current (conjugate) momentum
-    p_path_cur = std::make_shared<SampleState>(action->sample_size());
-    // Trial path
-    x_path_trial = std::make_shared<SampleState>(action->sample_size());
+    p_state_cur = std::make_shared<SampleState>(action->sample_size());
+    // Trial state
+    phi_state_trial = std::make_shared<SampleState>(action->sample_size());
     // Momentum change from force term
-    dp_path = std::make_shared<SampleState>(action->sample_size());
-    action->initialise_path(x_path_cur);
+    dp_state = std::make_shared<SampleState>(action->sample_size());
+    action->initialise_state(phi_state_cur);
     // Burn in
-    std::shared_ptr<SampleState> x_path_tmp =
+    std::shared_ptr<SampleState> phi_state_tmp =
       std::make_shared<SampleState>(action->sample_size());
     for (unsigned int i=0;i<n_burnin;++i) {
-      draw(x_path_tmp);
+      draw(phi_state_tmp);
     }
     autotune_stepsize(0.8);
     // Reset counters
@@ -131,17 +131,17 @@ public:
   
   /** @brief Draw a sample 
    *
-   * returns a sample path \f$X\f$
+   * returns a sample state \f$\phi\f$
    *
-   * @param[out] x_path Path \f$X\f$ drawn from distribution
+   * @param[out] phi_state Path \f$\phi\f$ drawn from distribution
    */
-  virtual void draw(std::shared_ptr<SampleState> x_path);
+  virtual void draw(std::shared_ptr<SampleState> phi_state);
 
   /** @brief Set current state to particular value
    *
-   * @param[in] x_path
+   * @param[in] phi_state
    */
-  virtual void set_state(std::shared_ptr<SampleState> x_path);
+  virtual void set_state(std::shared_ptr<SampleState> phi_state);
 
 private:
   
@@ -159,14 +159,14 @@ protected:
   const unsigned int n_rep;
   /** @brief Number of burn-in steps */
   const unsigned int n_burnin;
-  /** @brief Current state (path) */
-  mutable std::shared_ptr<SampleState> x_path_cur;
+  /** @brief Current state */
+  mutable std::shared_ptr<SampleState> phi_state_cur;
   /** @brief temporary for momenta */
-  mutable std::shared_ptr<SampleState> p_path_cur;
-  /** @brief Trial state (path) */
-  mutable std::shared_ptr<SampleState> x_path_trial;
+  mutable std::shared_ptr<SampleState> p_state_cur;
+  /** @brief Trial state */
+  mutable std::shared_ptr<SampleState> phi_state_trial;
   /** @brief temporary increment for momenta */
-  mutable std::shared_ptr<SampleState> dp_path;
+  mutable std::shared_ptr<SampleState> dp_state;
   /** @brief Random number engine */
   typedef mpi_parallel::mt19937_64 Engine;
   /** @brief Type of Mersenne twister engine */

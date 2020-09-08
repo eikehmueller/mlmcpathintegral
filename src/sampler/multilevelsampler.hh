@@ -52,11 +52,11 @@ public:
 
   /** @brief Draw a sample 
    *
-   * returns a sample path \f$X\f$
+   * returns a sample state \f$\phi\f$
    *
-   * @param[out] x_path Path \f$X\f$ drawn from distribution
+   * @param[out] phi_state State \f$\phi\f$ drawn from distribution
    */
-  virtual void draw(std::shared_ptr<SampleState> x_path);
+  virtual void draw(std::shared_ptr<SampleState> phi_state);
   
 /** @brief Show statistics
      *
@@ -66,9 +66,9 @@ public:
     
   /** @brief Set current state to particular value
    *
-   * @param[in] x_path
+   * @param[in] phi_state
    */
-  virtual void set_state(std::shared_ptr<SampleState> x_path);
+  virtual void set_state(std::shared_ptr<SampleState> phi_state);
 
   /** Return cost per sample */
   virtual double cost_per_sample() { return cost_per_sample_; }
@@ -84,15 +84,15 @@ private:
   std::vector<std::shared_ptr<TwoLevelMetropolisStep> > twolevel_step;
   /** @brief Sampler on coarsest level */
   std::shared_ptr<Sampler> coarse_sampler;
-  /** @brief Sampler path on each level  */
-  std::vector<std::shared_ptr<SampleState> > x_sampler_path;
+  /** @brief Sampler state on each level  */
+  std::vector<std::shared_ptr<SampleState> > phi_sampler_state;
   /** @brief number of skipped samples between independent samples on all levels */
   std::vector<double> t_indep;
   /** @brief number of independent samples on all levels */
   std::vector<int> n_indep;
   /** @brief number of samples generated since last independent sample */
   std::vector<int> t_sampler;
-  /** @brief vector with statistics of sampler paths */
+  /** @brief vector with statistics of sampler states */
   std::vector<std::shared_ptr<Statistics> > stats_sampler;
   /** @brief size of window for computing autocorrleations */
   unsigned int n_autocorr_window;

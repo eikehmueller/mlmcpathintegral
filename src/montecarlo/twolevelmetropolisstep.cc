@@ -14,8 +14,8 @@ TwoLevelMetropolisStep::TwoLevelMetropolisStep(const std::shared_ptr<Action> coa
    theta_fine_C = std::make_shared<SampleState>(coarse_action->sample_size());
    theta_prime = std::make_shared<SampleState>(fine_action->sample_size());
    engine.seed(89216491);
-   std::shared_ptr<SampleState> x_fine = std::make_shared<SampleState>(fine_action->sample_size());
-   std::shared_ptr<SampleState> x_coarse = std::make_shared<SampleState>(coarse_action->sample_size());
+   std::shared_ptr<SampleState> phi_fine = std::make_shared<SampleState>(fine_action->sample_size());
+   std::shared_ptr<SampleState> phi_coarse = std::make_shared<SampleState>(coarse_action->sample_size());
 
    fine_action_theta_fine = fine_action->evaluate(theta_fine);
    conditioned_fine_action_theta_fine = conditioned_fine_action->evaluate(theta_fine);
@@ -23,7 +23,7 @@ TwoLevelMetropolisStep::TwoLevelMetropolisStep(const std::shared_ptr<Action> coa
    unsigned int n_meas = 10000;
    timer_meas.start();
    for (unsigned int k=0;k<n_meas;++k) {
-       draw(x_coarse,x_fine);
+       draw(phi_coarse,phi_fine);
    }
    timer_meas.stop();
    cost_per_sample_ = 1.E6*timer_meas.elapsed()/n_meas;
@@ -31,11 +31,11 @@ TwoLevelMetropolisStep::TwoLevelMetropolisStep(const std::shared_ptr<Action> coa
  }
 
 /** Draw new sample pair */
-void TwoLevelMetropolisStep::draw(const std::shared_ptr<SampleState> x_coarse_path,
-                                  std::shared_ptr<SampleState> x_path) {
+void TwoLevelMetropolisStep::draw(const std::shared_ptr<SampleState> phi_coarse_state,
+                                  std::shared_ptr<SampleState> phi_state) {
   // Populate the fine level trial state
   // Step 1: coarse level points
-  fine_action->copy_from_coarse(x_coarse_path,theta_prime);
+  fine_action->copy_from_coarse(phi_coarse_state,theta_prime);
   // Step 2: fine level points from conditioned action
   conditioned_fine_action->fill_fine_points(theta_prime);
   /*
@@ -53,7 +53,7 @@ void TwoLevelMetropolisStep::draw(const std::shared_ptr<SampleState> x_coarse_pa
   coarse_action->copy_from_fine(theta_fine,theta_fine_C);
   
   double deltaS_coarse = coarse_action->evaluate(theta_fine_C)
-    - coarse_action->evaluate(x_coarse_path);
+    - coarse_action->evaluate(phi_coarse_state);
   /*
    * Calculate the difference in free level-\ell actions,
    * required to calculate the ratio                                       
@@ -78,15 +78,15 @@ void TwoLevelMetropolisStep::draw(const std::shared_ptr<SampleState> x_coarse_pa
   }
   n_total_samples++;
   n_accepted_samples += (int) accept;
-  // Copy back to path
+  // Copy back to state
   if (copy_if_rejected or accept) {
-    x_path->data = theta_fine->data;
+    phi_state->data = theta_fine->data;
   }
 }
 
 /* Set current state */
-void TwoLevelMetropolisStep::set_state(std::shared_ptr<SampleState> x_path) {
-  theta_fine->data = x_path->data;
+void TwoLevelMetropolisStep::set_state(std::shared_ptr<SampleState> phi_state) {
+  theta_fine->data = phi_state->data;
   fine_action_theta_fine = fine_action->evaluate(theta_fine);
   conditioned_fine_action_theta_fine = conditioned_fine_action->evaluate(theta_fine);
 }

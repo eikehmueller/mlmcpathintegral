@@ -149,7 +149,7 @@ public:
    *
    * @param[out] x_path Path \f$X\f$ to be set
    */
-  void virtual initialise_path(std::shared_ptr<SampleState> x_path) const {
+  void virtual initialise_state(std::shared_ptr<SampleState> x_path) const {
     std::fill(x_path->data.data(),x_path->data.data()+x_path->data.size(),0.0);
   }
 

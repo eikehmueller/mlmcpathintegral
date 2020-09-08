@@ -39,7 +39,7 @@ void RotorAction::force(const std::shared_ptr<SampleState> x_path,
 }
 
 /** Initialise path */
-void RotorAction::initialise_path(std::shared_ptr<SampleState> x_path) const {
+void RotorAction::initialise_state(std::shared_ptr<SampleState> x_path) const {
   std::uniform_real_distribution<double> uniform(-M_PI,M_PI);
   std::generate(x_path->data.data(),
                 x_path->data.data()+x_path->data.size(),
