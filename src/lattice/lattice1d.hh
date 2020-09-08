@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <cassert>
 #include "mpi/mpi_wrapper.hh"
+#include "lattice/lattice.hh"
 
 /** @file lattice1d.hh
  * @brief Header file for one-dimensional lattice class
@@ -14,7 +15,7 @@
  * @brief Class for 1d lattice
  *
  */
-class Lattice1D {
+class Lattice1D : public Lattice {
 public:
   /** @brief Initialise class
    *
@@ -25,10 +26,10 @@ public:
   Lattice1D(const unsigned int M_lat_,
             const double T_final_,
             const int coarsening_level_=0) :
+  Lattice(coarsening_level_),
   M_lat(M_lat_),
   T_final(T_final_),
-  a_lat(T_final_/M_lat_),
-  coarsening_level(coarsening_level_) {
+  a_lat(T_final_/M_lat_) {
     assert(T_final>0.0);
   }
 
@@ -41,7 +42,7 @@ public:
   /** @brief Return lattice spacing \f$a\f$ */
   double geta_lat() const { return a_lat;}
 
-  std::shared_ptr<Lattice1D> coarse_lattice() {
+  virtual std::shared_ptr<Lattice1D> coarse_lattice() {
     if (M_lat%2) {
       mpi_parallel::cerr << "ERROR: cannot coarsen 1d lattice with M = " << M_lat << " points." << std::endl;
       mpi_exit(EXIT_FAILURE);
@@ -49,9 +50,6 @@ public:
     }
     return std::make_shared<Lattice1D>(M_lat/2,T_final,coarsening_level+1);
   };
-
-  /** @brief Return coarsening level of action */
-  const int get_coarsening_level() const { return coarsening_level; }
   
 protected:
   /** @brief Number of time slices */
@@ -60,8 +58,6 @@ protected:
   const double T_final;
   /** @brief lattice spacing */
   const double a_lat;
-  /** @brief coarsening level (0=finest level) */
-  mutable int coarsening_level;
 };
 
 #endif // LATTICE1D_HH

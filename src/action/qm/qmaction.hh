@@ -85,15 +85,16 @@ public:
    * 
    * @param[in] lattice_ Underlying lattice
    * @param[in] renormalisation_ Type of renormalisation
-  
    * @param[in] m0_ Mass of particle \f$m_0\f$
    */
   QMAction(const std::shared_ptr<Lattice1D> lattice_,
            const RenormalisationType renormalisation_,
            const double m0_)
-    : Action(lattice_,renormalisation_),
-      M_lat(lattice_->getM_lat()),
-      a_lat(lattice_->geta_lat()),
+    : Action(renormalisation_),
+      lattice(lattice_),
+      M_lat(std::dynamic_pointer_cast<Lattice1D>(lattice_)->getM_lat()),
+      a_lat(std::dynamic_pointer_cast<Lattice1D>(lattice_)->geta_lat()),
+      T_final(std::dynamic_pointer_cast<Lattice1D>(lattice_)->getT_final()),
       m0(m0_) {
     assert(m0>0.0);
   }
@@ -101,26 +102,22 @@ public:
   /** @brief return size of samples */
   virtual unsigned int sample_size() { return M_lat; }
 
-  /** @brief Return underlying lattice */
-  std::shared_ptr<Lattice1D> get_lattice() const { return lattice; }
-
   /** @brief Return mass \f$m_0\f$ */
   double getm0() const { return m0;}
 
   /** @brief Cost of one action evaluation */
-  virtual double evaluation_cost() const { return lattice->getM_lat(); }
+  virtual double evaluation_cost() const { return std::dynamic_pointer_cast<Lattice1D>(lattice)->getM_lat(); }
+  
+  /** @brief Get coarsening level
+   * 
+   * This will return the coarsening level of the underlying lattice */
+   virtual int get_coarsening_level() {
+     return lattice->get_coarsening_level();
+   }
 
-  /** @brief Construct coarsened version of action
-   *
-   * This returns a coarsened version of the action on the next level
-   * of the multigrid hierarchy.
-   */
-  virtual std::shared_ptr<Action> coarse_action() {
-    mpi_parallel::cerr << "ERROR: cannot coarsen action" << std::endl;
-    mpi_exit(EXIT_FAILURE);
-    throw std::runtime_error("...");
-  };
-    
+ /** @brief Get underlying lattice */
+  std::shared_ptr<Lattice1D> get_lattice() { return lattice; }    
+   
   /** @brief Evaluate action for a specific path
    * 
    * Calculate \f$S[X]\f$ for a specific path
@@ -196,17 +193,28 @@ public:
   virtual void copy_from_fine(const std::shared_ptr<SampleState> x_fine,
                               std::shared_ptr<SampleState> x_path);
 
-/** @brief Check whether action supports number of coarsening steps 
+  /** @brief Check whether action supports number of coarsening steps 
    * 
    * @param[in] n_level Number of additional coarsening steps (can be zero)
    */
    virtual void check_coarsening_is_permitted(const unsigned int n_level);
    
+   /** @brief Get coarsening level
+   * 
+   * This will return the coarsening level of the underlying lattice */
+   virtual int get_coarsening_level() const {
+       return lattice->get_coarsening_level();
+   }
+   
 protected:
+  /** @brief Underlying lattice */
+  const std::shared_ptr<Lattice1D> lattice;
   /** @brief Number of lattice points */
   const unsigned int M_lat;
   /** @brief Lattice spacing */
   const double a_lat;
+  /** @brief Physical lattice size */
+  const double T_final;
   /** @brief Particle mass */
   const double m0;
 };

@@ -70,6 +70,5 @@ const double HarmonicOscillatorAction::Xsquared_exact() {
 
 /** Continuum limit of expectation value of \f$X^2\f$ */
 const double HarmonicOscillatorAction::Xsquared_exact_continuum() {
-  double T_final = lattice->getT_final();
   return 1./(2.*m0*sqrt(mu2))*(1.+exp(-sqrt(mu2)*T_final))/(1.-exp(-sqrt(mu2)*T_final));
   }

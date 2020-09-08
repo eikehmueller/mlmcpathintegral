@@ -6,7 +6,6 @@
 #include <vector>
 #include <iostream>
 #include "common/samplestate.hh"
-#include "lattice/lattice1d.hh"
 #include "action/renormalisation.hh"
 #include "mpi/mpi_wrapper.hh"
 
@@ -28,20 +27,13 @@ class Action {
 public:
   /** @brief Initialise class
    *
-   * 
-   * @param[in] lattice_ Underlying lattice
    * @param[in] renormalisation_ Type of renormalisation
-    */
-  Action(const std::shared_ptr<Lattice1D> lattice_,
-         const RenormalisationType renormalisation_)
-    : lattice(lattice_),
+   */
+  Action(const RenormalisationType renormalisation_) :
       renormalisation(renormalisation_) {}
 
   /** @brief return size of samples */
   virtual unsigned int sample_size() = 0;
-
-  /** @brief Return underlying lattice */
-  std::shared_ptr<Lattice1D> get_lattice() const { return lattice; }
 
   /** @brief Cost of one action evaluation */
   virtual double evaluation_cost() const = 0;
@@ -105,7 +97,7 @@ public:
   /** @brief Get coarsening level
    * 
    * This will return the coarsening level of the underlying lattice */
-   int get_coarsening_level() { return lattice->get_coarsening_level(); }
+   virtual int get_coarsening_level() const = 0;
       
       
   /** @brief Check whether action supports number of coarsening steps 
@@ -115,8 +107,6 @@ public:
    virtual void check_coarsening_is_permitted(const unsigned int n_level) = 0;
    
 protected:
-  /** @brief Underlying lattice */
-  const std::shared_ptr<Lattice1D> lattice;
   /** @brief Renormalisation */
   const RenormalisationType renormalisation;
 };
