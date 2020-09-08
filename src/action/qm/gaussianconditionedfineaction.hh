@@ -27,61 +27,61 @@
  */
 class GaussianConditionedFineAction : public ConditionedFineAction {
 public:
-  /** @brief Constructor
-   * 
-   * Construct new instance
-   *
-   * @param[in] action_ Underlying action class
-   */
-  GaussianConditionedFineAction (const std::shared_ptr<QMAction> action_) : action(action_) {
-    engine.seed(11897197);
-  }
+    /** @brief Constructor
+     *
+     * Construct new instance
+     *
+     * @param[in] action_ Underlying action class
+     */
+    GaussianConditionedFineAction (const std::shared_ptr<QMAction> action_) : action(action_) {
+        engine.seed(11897197);
+    }
 
-  /** @brief Destructor */
-  virtual ~GaussianConditionedFineAction() {}
-  
-  /** @brief Fill in fine points
-   * 
-   * Given a path \f$X\f$ for which the coarse points have been set, fill in
-   * the fine points by sampling from the conditioned action.
-   *
-   * @param[inout] x_path SampleState \f$X\f$ to fill
-   */
-  virtual void fill_fine_points(std::shared_ptr<SampleState> x_path) const;
+    /** @brief Destructor */
+    virtual ~GaussianConditionedFineAction() {}
 
-  /** @brief Evaluate conditioned action at fine points
-   * 
-   * Given a path \f$X\f$ for which all points have been set, evaluate the
-   * conditioned action.
-   *
-   * @param[inout] x_path SampleState \f$X\f$ to fill
-   */
-  virtual double evaluate(const std::shared_ptr<SampleState> x_path) const;
-  
+    /** @brief Fill in fine points
+     *
+     * Given a path \f$X\f$ for which the coarse points have been set, fill in
+     * the fine points by sampling from the conditioned action.
+     *
+     * @param[inout] x_path SampleState \f$X\f$ to fill
+     */
+    virtual void fill_fine_points(std::shared_ptr<SampleState> x_path) const;
+
+    /** @brief Evaluate conditioned action at fine points
+     *
+     * Given a path \f$X\f$ for which all points have been set, evaluate the
+     * conditioned action.
+     *
+     * @param[inout] x_path SampleState \f$X\f$ to fill
+     */
+    virtual double evaluate(const std::shared_ptr<SampleState> x_path) const;
+
 private:
-  /** @brief Underlying action class */
-  const std::shared_ptr<QMAction> action;
-  /** @brief Random number engine */
-  typedef mpi_parallel::mt19937_64 Engine;
-  /** @brief Type of Mersenne twister engine */
-  mutable Engine engine;
-  /** @brief Type of normal distribution */
-  typedef std::normal_distribution<double> Normal;
-  /** @brief Normal distribution for drawing from distribution */
-  mutable Normal normal_dist;
+    /** @brief Underlying action class */
+    const std::shared_ptr<QMAction> action;
+    /** @brief Random number engine */
+    typedef mpi_parallel::mt19937_64 Engine;
+    /** @brief Type of Mersenne twister engine */
+    mutable Engine engine;
+    /** @brief Type of normal distribution */
+    typedef std::normal_distribution<double> Normal;
+    /** @brief Normal distribution for drawing from distribution */
+    mutable Normal normal_dist;
 
 };
 
 struct GaussianConditionedFineActionFactory : public ConditionedFineActionFactory {
-  /** @brief Destructor */
-  virtual ~GaussianConditionedFineActionFactory() {}
-    
-  /** @brief Method for constructing a conditioned fine action
-   * @param[in] action Coarse level action
-   */
-  virtual std::shared_ptr<ConditionedFineAction> get(std::shared_ptr<Action> action) {
-    return std::make_shared<GaussianConditionedFineAction>(std::dynamic_pointer_cast<QMAction>(action));
-  }
+    /** @brief Destructor */
+    virtual ~GaussianConditionedFineActionFactory() {}
+
+    /** @brief Method for constructing a conditioned fine action
+     * @param[in] action Coarse level action
+     */
+    virtual std::shared_ptr<ConditionedFineAction> get(std::shared_ptr<Action> action) {
+        return std::make_shared<GaussianConditionedFineAction>(std::dynamic_pointer_cast<QMAction>(action));
+    }
 };
 
 

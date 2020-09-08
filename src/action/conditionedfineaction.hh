@@ -17,7 +17,7 @@
  * @brief Base class for conditioned fine actions
  *
  * Derived classes of this type provide the following functionality:
- * 
+ *
  * - Given a state \f$\phi\f$ of length \f$M\f$, for which only the
  *   coarse points have been set, fill in all fine points by sampling from
  *   a suitable conditioned probability distribution
@@ -26,7 +26,7 @@
  *   \f]
  *   Note that \f$Z(\phi_{coarse})\f$ is a normalisation constant which guarantees
  *   that this is indeed a probability density.
- * 
+ *
  * - Given a state \f$\phi\f$ for which the fine points have been set
  *   (for example with the above method), calculate the value of the
  *   conditioned action (including the normalisation constant) as
@@ -37,30 +37,30 @@
 
 class ConditionedFineAction {
 public:
-  /** @brief Fill in fine points
-   * 
-   * Given a phi \f$\phi\f$ for which the coarse points have been set,
-   * fill in the fine points by sampling from the conditioned action.
-   *
-   * @param[inout] phi_state State \f$\phi\f$ to fill
-   */
-  virtual void fill_fine_points(std::shared_ptr<SampleState> phi_state) const = 0;
+    /** @brief Fill in fine points
+     *
+     * Given a phi \f$\phi\f$ for which the coarse points have been set,
+     * fill in the fine points by sampling from the conditioned action.
+     *
+     * @param[inout] phi_state State \f$\phi\f$ to fill
+     */
+    virtual void fill_fine_points(std::shared_ptr<SampleState> phi_state) const = 0;
 
-  /** @brief Evaluate conditioned action at fine points
-   * 
-   * Given a state \f$\phi\f$ for which all points have been set,
-   * evaluate the conditioned action.
-   *
-   * @param[inout] phi_state State \f$\phi\f$ to fill
-   */
-  virtual double evaluate(const std::shared_ptr<SampleState> phi_state) const = 0;  
+    /** @brief Evaluate conditioned action at fine points
+     *
+     * Given a state \f$\phi\f$ for which all points have been set,
+     * evaluate the conditioned action.
+     *
+     * @param[inout] phi_state State \f$\phi\f$ to fill
+     */
+    virtual double evaluate(const std::shared_ptr<SampleState> phi_state) const = 0;
 };
 
 struct ConditionedFineActionFactory {
-  /** @brief Abstract method for constructing a conditioned fine action
-   * @param[in] action Coarse level action
-   */
-  virtual std::shared_ptr<ConditionedFineAction> get(std::shared_ptr<Action> action) = 0;
+    /** @brief Abstract method for constructing a conditioned fine action
+     * @param[in] action Coarse level action
+     */
+    virtual std::shared_ptr<ConditionedFineAction> get(std::shared_ptr<Action> action) = 0;
 };
 
 #endif // CONDITIONEDFINEACTION_HH

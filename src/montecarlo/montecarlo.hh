@@ -13,21 +13,21 @@
  */
 
 /** @class MonteCarlo
- * 
+ *
  * @brief Monte Carlo base class
  */
 
 class MonteCarlo {
 public:
-  /** @brief Create new instance
-   *
-   * @param[in] n_burnin_ Number of burn-in steps
-   */
-  MonteCarlo(const unsigned int n_burnin_) :
-    n_burnin(n_burnin_) {}
+    /** @brief Create new instance
+     *
+     * @param[in] n_burnin_ Number of burn-in steps
+     */
+    MonteCarlo(const unsigned int n_burnin_) :
+        n_burnin(n_burnin_) {}
 protected:
-  /** @brief Number of burn-in steps */
-  const unsigned int n_burnin;
+    /** @brief Number of burn-in steps */
+    const unsigned int n_burnin;
 };
 
 #endif // MONTECARLO_HH

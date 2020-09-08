@@ -16,20 +16,22 @@
  */
 class Lattice {
 public:
-  /** @brief Initialise class
-   *
-   * 
-   * @param[in] coarsening_level_ Coarsening level (0=finest)
-   * @param[in] T_final_ Final time \f$T\f$
-   */
-  Lattice(const int coarsening_level_=0) : coarsening_level(coarsening_level_) {}
+    /** @brief Initialise class
+     *
+     *
+     * @param[in] coarsening_level_ Coarsening level (0=finest)
+     * @param[in] T_final_ Final time \f$T\f$
+     */
+    Lattice(const int coarsening_level_=0) : coarsening_level(coarsening_level_) {}
 
-  /** @brief Return coarsening level of action */
-  const int get_coarsening_level() const { return coarsening_level; }
-  
+    /** @brief Return coarsening level of action */
+    const int get_coarsening_level() const {
+        return coarsening_level;
+    }
+
 protected:
-  /** @brief coarsening level (0=finest level) */
-  mutable int coarsening_level;
+    /** @brief coarsening level (0=finest level) */
+    mutable int coarsening_level;
 };
 
 #endif // LATTICE_HH

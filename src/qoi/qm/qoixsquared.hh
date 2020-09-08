@@ -17,22 +17,22 @@
  */
 
 class QoIXsquared : public QoI {
-public: 
-  /** @brief Create new instance  */
-  QoIXsquared(const std::shared_ptr<Lattice1D> lattice) :
-  M_lat(lattice->getM_lat()) {}
+public:
+    /** @brief Create new instance  */
+    QoIXsquared(const std::shared_ptr<Lattice1D> lattice) :
+        M_lat(lattice->getM_lat()) {}
 
-  /** @brief Destructor */
-  virtual ~QoIXsquared() {}
-  
-  /** @brief Evaluate on a path
-   *
-   * @param[in] x_path Path \f$X\f$ on which to evaluate the QoI
-   */
-  const double virtual evaluate(const std::shared_ptr<SampleState> x_path);
+    /** @brief Destructor */
+    virtual ~QoIXsquared() {}
+
+    /** @brief Evaluate on a path
+     *
+     * @param[in] x_path Path \f$X\f$ on which to evaluate the QoI
+     */
+    const double virtual evaluate(const std::shared_ptr<SampleState> x_path);
 private:
-/** @brief Number of lattice points */
-  const unsigned int M_lat;
+    /** @brief Number of lattice points */
+    const unsigned int M_lat;
 };
 
 #endif // QOIXSQUARED_HH

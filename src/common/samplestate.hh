@@ -18,37 +18,37 @@
  */
 class SampleState {
 public:
-  /** @brief Create new instance
-   *
-   * Allocate memory
-   * 
-   * @param[in] M_ number of unknowns
-   */
-  SampleState(const unsigned int M_) : M(M_), data(M_) {
-    for (unsigned int j=0;j<M;++j) data[j] = 0.0;
-  }
+    /** @brief Create new instance
+     *
+     * Allocate memory
+     *
+     * @param[in] M_ number of unknowns
+     */
+    SampleState(const unsigned int M_) : M(M_), data(M_) {
+        for (unsigned int j=0; j<M; ++j) data[j] = 0.0;
+    }
 
-  /** @brief Destroy instance
-   */
-  ~SampleState() {}
+    /** @brief Destroy instance
+     */
+    ~SampleState() {}
 
-  /** @brief Save path to disk
-   *
-   * Save path to disk by writing a file which contains the position at
-   * different times.
-   * First line contains \f$M\f$, the second line contains the
-   * positions separated by spaces.
-   *
-   * @param[in] filename Name of file to save to
-   */
-  void save_to_disk(const std::string filename);
-    
-  /** @brief Data array */
-  Eigen::VectorXd data;
+    /** @brief Save path to disk
+     *
+     * Save path to disk by writing a file which contains the position at
+     * different times.
+     * First line contains \f$M\f$, the second line contains the
+     * positions separated by spaces.
+     *
+     * @param[in] filename Name of file to save to
+     */
+    void save_to_disk(const std::string filename);
+
+    /** @brief Data array */
+    Eigen::VectorXd data;
 
 private:
-  /** @brief Size of vector */
-  const unsigned int M;
+    /** @brief Size of vector */
+    const unsigned int M;
 };
 
 #endif // SAMPLEPATH_HH

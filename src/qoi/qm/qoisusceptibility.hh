@@ -24,32 +24,32 @@
  */
 
 class QoISusceptibility : public QoI {
-public: 
-  /** @brief Create new instance 
-   *
-   * @param[in] M_lat_ Number of time slices \f$M\f$
-   */
-  QoISusceptibility(const std::shared_ptr<Lattice1D> lattice) : 
-    four_pi2_inv(0.25/(M_PI*M_PI)),
-    T_final(lattice->getT_final()), 
-    M_lat(lattice->getM_lat()) {}
+public:
+    /** @brief Create new instance
+     *
+     * @param[in] M_lat_ Number of time slices \f$M\f$
+     */
+    QoISusceptibility(const std::shared_ptr<Lattice1D> lattice) :
+        four_pi2_inv(0.25/(M_PI*M_PI)),
+        T_final(lattice->getT_final()),
+        M_lat(lattice->getM_lat()) {}
 
-  /** @brief Destructor */
-  virtual ~QoISusceptibility() {}
+    /** @brief Destructor */
+    virtual ~QoISusceptibility() {}
 
-  /** @brief Evaluate on a path
-   *
-   * @param[in] x_path Path \f$X\f$ on which to evaluate the QoI
-   */
-  const double virtual evaluate(const std::shared_ptr<SampleState> x_path);
-  
+    /** @brief Evaluate on a path
+     *
+     * @param[in] x_path Path \f$X\f$ on which to evaluate the QoI
+     */
+    const double virtual evaluate(const std::shared_ptr<SampleState> x_path);
+
 private:
-  /** @brief Constant \f$1/(4\pi^2)\f$ */
-  const double four_pi2_inv;
-  /** @brief Physical lattice size */
-  const double T_final;
-  /** @brief Number of lattice points */
-  const unsigned int M_lat;
+    /** @brief Constant \f$1/(4\pi^2)\f$ */
+    const double four_pi2_inv;
+    /** @brief Physical lattice size */
+    const double T_final;
+    /** @brief Number of lattice points */
+    const unsigned int M_lat;
 };
 
 #endif // QOISUSCEPTIBILITY_HH

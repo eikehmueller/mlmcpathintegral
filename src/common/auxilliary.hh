@@ -36,7 +36,7 @@
  * @param[in] x Value of \f$x\f$
  */
 double inline mod_2pi(const double x) {
-  return x - 2.*M_PI*floor(0.5*(x+M_PI)/M_PI);
+    return x - 2.*M_PI*floor(0.5*(x+M_PI)/M_PI);
 }
 
 /** @brief Calculate Sum \f$\hat{\Sigma_p(\xi)}\f$
