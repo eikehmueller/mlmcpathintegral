@@ -11,7 +11,7 @@ const double QuarticOscillatorAction::evaluate(const std::shared_ptr<Path> x_pat
   double x_j_shifted = x_j - x0;
   double x_j_shifted_squared = x_j_shifted*x_j_shifted;
   double x_diff = x_path->data[0]-x_path->data[M_lat-1];
-  double S = m0*(ainv2*x_diff*x_diff + mu2*x_j_squared) + 0.5*lambda*x_j_squared*x_j_squared;
+  double S = m0*(ainv2*x_diff*x_diff + mu2*x_j_squared) + 0.5*lambda*x_j_shifted_squared*x_j_shifted_squared;
   for (unsigned int j=1;j<M_lat;++j) {
     x_j = x_path->data[j];
     x_j_squared = x_j*x_j;
