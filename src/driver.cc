@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
     /* ====== Read parameters ====== */
     GeneralParameters param_general;
     QMParameters param_qm;
-    LatticeParameters param_lattice;
+    Lattice1DParameters param_lattice;
     StatisticsParameters param_stats;
     HarmonicOscillatorParameters param_ho;
     QuarticOscillatorParameters param_qo;

@@ -4,11 +4,60 @@
 #include <stdexcept>
 #include <cassert>
 #include "mpi/mpi_wrapper.hh"
+#include "common/parameters.hh"
 #include "lattice/lattice.hh"
 
 /** @file lattice1d.hh
  * @brief Header file for one-dimensional lattice class
  */
+
+/** @class Lattice1DParameters
+ *
+ * @brief Class for storing parameters of lattice
+ *
+ * This stores the number \f$M_{lat}\f$ of lattice sites and the
+ * final time \f$T_{final}\f$
+ */
+class Lattice1DParameters : public Parameters {
+public:
+    /** @brief Construct a new instance */
+    Lattice1DParameters() :
+        Parameters("lattice"),
+        M_lat_(8),
+        T_final_(1.0) {
+        addKey("M_lat",Integer,Positive);
+        addKey("T_final",Double,Positive);
+    }
+
+    /** @brief Read parameters from file
+     *
+     * @param[in] filename Name of file to read
+     */
+    int readFile(const std::string filename) {
+
+        int readSuccess = Parameters::readFile(filename);
+        if (!readSuccess) {
+            M_lat_ = getContents("M_lat")->getInt();
+            T_final_ = getContents("T_final")->getDouble();
+        }
+        return readSuccess;
+    }
+
+    /** @brief Return number of lattice sites */
+    unsigned int M_lat() const {
+        return M_lat_;
+    }
+    /** @brief Return final time */
+    double T_final() const {
+        return T_final_;
+    }
+
+private:
+    /** @brief Number of lattice sites */
+    unsigned int M_lat_;
+    /** @brief Final time */
+    double T_final_;
+};
 
 /** @class Lattice1D
  *
