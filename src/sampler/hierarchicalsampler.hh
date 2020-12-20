@@ -23,9 +23,9 @@ public:
     /** @brief Construct a new instance */
     HierarchicalParameters() :
         Parameters("hierarchical"),
-        n_maphi_level_(2),
+        n_max_level_(2),
         coarsesampler_(SamplerHMC) {
-        addKey("n_maphi_level",Integer,Positive);
+        addKey("n_max_level",Integer,Positive);
         addKey("coarsesampler",String);
     }
 
@@ -37,7 +37,7 @@ public:
 
         int readSuccess = Parameters::readFile(filename);
         if (!readSuccess) {
-            n_maphi_level_ = getContents("n_maphi_level")->getInt();
+            n_max_level_ = getContents("n_max_level")->getInt();
             std::string sampler_str = getContents("coarsesampler")->getString();
             if (sampler_str == "HMC") {
                 coarsesampler_ = SamplerHMC;
@@ -57,7 +57,7 @@ public:
 
     /** @brief Return maximal number of levels */
     unsigned int n_max_level() const {
-        return n_maphi_level_;
+        return n_max_level_;
     }
     /** @brief Return sampler type */
     SamplerType coarsesampler() const {
@@ -65,7 +65,7 @@ public:
     }
 private:
     /** @brief Number of levels */
-    unsigned int n_maphi_level_;
+    unsigned int n_max_level_;
     /** @brief tolerance epsilon */
     SamplerType coarsesampler_;
 };
