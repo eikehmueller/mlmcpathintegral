@@ -5,5 +5,5 @@ parameters.in
 doc
 local.mk
 build
-MLMC Pathintegral
+MLMCPathintegral
 qoi.dat
