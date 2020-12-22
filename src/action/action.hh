@@ -57,6 +57,31 @@ public:
      */
     virtual const double evaluate(const std::shared_ptr<SampleState> phi_state) const = 0;
 
+    /** @brief Draw local value of state from heat bath
+     *
+     * Update the local entry at position j of the state using a heat bath defined by the neighbouring sites
+     *
+     *  @param[inout] phi_state State to update
+     *  @param[in] j index of dof to update
+     */
+    virtual void heatbath_update(std::shared_ptr<SampleState> phi_state, const unsigned int j) {
+      mpi_parallel::cerr << "ERROR: heat bath update not implemented for this action " << std::endl;
+      mpi_exit(EXIT_FAILURE);
+    }
+
+    /** @brief Perform local overrelaxation update
+     *
+     * Update the local entry at position j of the state using overrelaxation
+     *
+     *  @param[inout] phi_state State to update
+     *  @param[in] j index of dof to update
+     */
+    virtual void overrelaxation_update(std::shared_ptr<SampleState> phi_state, const unsigned int j) {
+      mpi_parallel::cerr << "ERROR: overrelaxation update not implemented for this action " << std::endl;
+      mpi_exit(EXIT_FAILURE);
+    }
+  
+
     /** @brief Calculate force for HMC integrator for a specific state
      *
      * Calculate \f$P = \frac{\partial S[\phi]}{\partial \phi}\f$ for a specific

@@ -20,6 +20,7 @@
 #include "montecarlo/montecarlotwolevel.hh"
 #include "montecarlo/montecarlomultilevel.hh"
 #include "sampler/hmcsampler.hh"
+#include "sampler/overrelaxedheatbathsampler.hh"
 #include "sampler/clustersampler.hh"
 #include "sampler/multilevelsampler.hh"
 #include "config.h"
@@ -40,6 +41,7 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
         const GeneralParameters param_general,
         const QMParameters param_qm,
         const HMCParameters param_hmc,
+        const OverrelaxedHeatBathParameters param_heatbath,
         const ClusterParameters param_cluster,
         const StatisticsParameters param_stats,
         const HierarchicalParameters param_hierarchical) {
@@ -47,27 +49,34 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
     if (samplerid == SamplerHMC) {
         /* --- CASE 1: HMC sampler ---- */
         sampler_factory = std::make_shared<HMCSamplerFactory>(param_hmc);
+    } else if (samplerid == SamplerOverrelaxedHeatBath) {
+        /* --- CASE 2: heat bath sampler ---- */
+        if (param_qm.action() != ActionRotor) {
+            mpi_parallel::cerr << " ERROR: can only use heat bath sampler for QM rotor action." << std::endl;
+            mpi_exit(EXIT_FAILURE);
+        }
+        sampler_factory = std::make_shared<OverrelaxedHeatBathSamplerFactory>(param_heatbath);
     } else if (samplerid == SamplerCluster) {
-        /* --- CASE 2: cluster sampler ---- */
+        /* --- CASE 3: cluster sampler ---- */
         if (param_qm.action() != ActionRotor) {
             mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
             mpi_exit(EXIT_FAILURE);
         }
         sampler_factory = std::make_shared<ClusterSamplerFactory>(param_cluster);
     } else if (samplerid == SamplerExact) {
-        /* --- CASE 3: exact sampler (for HO action) ---- */
+        /* --- CASE 4: exact sampler (for HO action) ---- */
         if (param_qm.action() != ActionHarmonicOscillator) {
             mpi_parallel::cerr << " ERROR: can only sample exactly from harmonic oscillator action." << std::endl;
             mpi_exit(EXIT_FAILURE);
         }
         sampler_factory = std::make_shared<HarmonicOscillatorSamplerFactory>();
     } else if (samplerid == SamplerHierarchical) {
-        /* ---- CASE 4: Hierarchical sampler */
+        /* ---- CASE 5: Hierarchical sampler */
         sampler_factory = std::make_shared<HierarchicalSamplerFactory>(coarse_sampler_factory,
                           conditioned_fine_action_factory,
                           param_hierarchical);
     } else if (samplerid == SamplerMultilevel) {
-        /* ---- CASE 5: Multilevel sampler */
+        /* ---- CASE 6: Multilevel sampler */
         sampler_factory = std::make_shared<MultilevelSamplerFactory>(qoi,
                           coarse_sampler_factory,
                           conditioned_fine_action_factory,
@@ -142,6 +151,10 @@ int main(int argc, char* argv[]) {
     HMCParameters param_hmc;
     if (param_hmc.readFile(filename)) return 1;
     mpi_parallel::cout << param_hmc << std::endl;
+  
+    OverrelaxedHeatBathParameters param_heatbath;
+    if (param_heatbath.readFile(filename)) return 1;
+    mpi_parallel::cout << param_heatbath << std::endl;
 
     ClusterParameters param_cluster;
     if (param_cluster.readFile(filename)) return 1;
@@ -283,6 +296,7 @@ int main(int argc, char* argv[]) {
                              param_general,
                              param_qm,
                              param_hmc,
+                             param_heatbath,
                              param_cluster,
                              param_stats,
                              param_hierarchical);
@@ -305,6 +319,7 @@ int main(int argc, char* argv[]) {
                           param_general,
                           param_qm,
                           param_hmc,
+                          param_heatbath,
                           param_cluster,
                           param_stats,
                           param_hierarchical);
@@ -342,6 +357,7 @@ int main(int argc, char* argv[]) {
                           param_general,
                           param_qm,
                           param_hmc,
+                          param_heatbath,
                           param_cluster,
                           param_stats,
                           param_hierarchical);
@@ -389,6 +405,7 @@ int main(int argc, char* argv[]) {
                           param_general,
                           param_qm,
                           param_hmc,
+                          param_heatbath,
                           param_cluster,
                           param_stats,
                           param_hierarchical);

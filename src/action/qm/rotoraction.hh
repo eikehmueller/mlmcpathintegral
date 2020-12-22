@@ -8,6 +8,7 @@
 #include "common/auxilliary.hh"
 #include "common/parameters.hh"
 #include "common/samplestate.hh"
+#include "distribution/expsin2distribution.hh"
 #include "mpi/mpi_wrapper.hh"
 #include "mpi/mpi_random.hh"
 #include "lattice/lattice1d.hh"
@@ -137,6 +138,26 @@ public:
      */
     const double virtual evaluate(const std::shared_ptr<SampleState> x_path) const;
 
+    /** @brief Draw local value of state from heat bath
+     *
+     * Update the local entry at position j of the path using a heat bath defined by the neighbouring sites
+     *
+     *  @param[inout] phi_state Path to update
+     *  @param[in] j index of dof to update
+     */
+     virtual void heatbath_update(std::shared_ptr<SampleState> x_path, const unsigned int j);
+  
+    /** @brief Perform local overrelaxation update
+     *
+     * Update the local entry at position j of the state using overrelaxation
+     *
+     *  @param[inout] phi_state State to update
+     *  @param[in] j index of dof to update
+     */
+     virtual void overrelaxation_update(std::shared_ptr<SampleState> x_path, const unsigned int j);
+      
+
+    
     /** @brief Calculate force for HMC integrator for a specific path
      *
      * Calculate \f$P = \frac{\partial S[X]}{\partial X}\f$ for a specific
@@ -248,6 +269,8 @@ protected:
     typedef std::uniform_real_distribution<double> Uniform;
     /** @brief Uniform distribution used for selecting subgroup (elements) */
     mutable Uniform uniform_dist;
+    /** @brief distribution for drawing from heat bath */
+    const ExpSin2Distribution exp_sin2_dist;
 };
 
 #endif // ROTORACTION_HH

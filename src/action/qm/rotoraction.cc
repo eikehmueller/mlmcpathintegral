@@ -15,6 +15,44 @@ const double RotorAction::evaluate(const std::shared_ptr<SampleState> x_path) co
     return m0/a_lat*S;
 }
 
+/** Local heat bath update */
+void RotorAction::heatbath_update(std::shared_ptr<SampleState> x_path,
+                                  const unsigned int j) {
+  double x_m;
+  double x_p;
+  if (j==0) {
+    x_m = x_path->data[M_lat-1];
+  } else {
+    x_m = x_path->data[j-1];
+  }
+  if (j==M_lat-1) {
+    x_p = x_path->data[0];
+  } else {
+    x_p = x_path->data[j+1];
+  }
+  double x0 = getWminimum(x_m,x_p);
+  double sigma = 2.*getWcurvature(x_m,x_p);
+  x_path->data[j] = mod_2pi(x0 + exp_sin2_dist.draw(engine,sigma));
+}
+
+/** Local overrelaxation update */
+void RotorAction::overrelaxation_update(std::shared_ptr<SampleState> x_path, const unsigned int j) {
+    double x_m;
+    double x_p;
+    if (j==0) {
+      x_m = x_path->data[M_lat-1];
+    } else {
+      x_m = x_path->data[j-1];
+    }
+    if (j==M_lat-1) {
+      x_p = x_path->data[0];
+    } else {
+      x_p = x_path->data[j+1];
+    }
+    double x0 = getWminimum(x_m,x_p);
+    x_path->data[j] = mod_2pi(2.0*x0 - x_path->data[j]);
+}
+
 /** Calculate force */
 void RotorAction::force(const std::shared_ptr<SampleState> x_path,
                         std::shared_ptr<SampleState> p_path) const {

@@ -49,6 +49,8 @@ public:
             std::string sampler_str = getContents("sampler")->getString();
             if (sampler_str == "HMC") {
                 sampler_ = SamplerHMC;
+            } else if (sampler_str == "heatbath") {
+                sampler_ = SamplerOverrelaxedHeatBath;
             } else if (sampler_str == "cluster") {
                 sampler_ = SamplerCluster;
             } else if (sampler_str == "exact") {
@@ -59,7 +61,7 @@ public:
                 sampler_ = SamplerMultilevel;
             } else  {
                 mpi_parallel::cerr << " ERROR: Unknown sampler: " << sampler_str << std::endl;
-                mpi_parallel::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
+                mpi_parallel::cerr << "        allowed values are \'HMC\', \'heatbath\', \'cluster\', \'exact\'" << std::endl;
                 mpi_exit(EXIT_FAILURE);
             }
         }

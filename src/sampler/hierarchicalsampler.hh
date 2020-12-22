@@ -43,12 +43,14 @@ public:
                 coarsesampler_ = SamplerHMC;
             } else if (sampler_str == "cluster") {
                 coarsesampler_ = SamplerCluster;
+            } else if (sampler_str == "heatbath") {
+                coarsesampler_ = SamplerOverrelaxedHeatBath;
             } else if (sampler_str == "exact") {
                 coarsesampler_ = SamplerExact;
             } else  {
                 mpi_parallel::cerr << " ERROR: Unknown coarse sampler: " << sampler_str;
                 mpi_parallel::cerr << std::endl;
-                mpi_parallel::cerr << "        allowed values are \'HMC\', \'cluster\', \'exact\'" << std::endl;
+                mpi_parallel::cerr << "        allowed values are \'HMC\', \'heatbath\', \'cluster\', \'exact\'" << std::endl;
                 mpi_exit(EXIT_FAILURE);
             }
         }

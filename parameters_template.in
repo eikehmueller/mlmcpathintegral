@@ -9,7 +9,7 @@ general:
 # Quantum mechanics parameters
 ###########################################
 quantummechanics:
-  action = 'quarticoscillator' # action to use. Allowed values are:
+  action = 'rotor' # action to use. Allowed values are:
                                 # [harmonicoscillator,
                                 #  quarticoscillator,
                                 #  rotor]
@@ -18,7 +18,7 @@ quantummechanics:
 # Lattice parameters
 ###########################################
 lattice:
-  M_lat = 64        # Number of lattice sites
+  M_lat = 32        # Number of lattice sites
   T_final = 1.0     # Final time
 
 ###########################################
@@ -58,10 +58,10 @@ rotor:
 # Single level Monte Carlo parameters
 ###########################################
 singlelevelmc:
-  n_burnin = 100     # Number of burnin samples
-  n_samples = 0      # Number of samples, set to 0 to use epsilon instead 
+  n_burnin = 1000     # Number of burnin samples
+  n_samples = 100000      # Number of samples, set to 0 to use epsilon instead 
   epsilon = 1.0E-2   # Tolerance epsilon
-  sampler = 'hierarchical'  # Sampler to use [HMC, cluster, exact, hierarchical, multilevel]
+  sampler = 'heatbath'  # Sampler to use [HMC, heatbath, cluster, exact, hierarchical, multilevel]
 
 
 ###########################################
@@ -70,7 +70,7 @@ singlelevelmc:
 twolevelmc:
   n_burnin = 100      # Number of burnin samples
   n_samples = 1000    # Number of samples
-  sampler = 'HMC' # Sampler to use [HMC, cluster, exact]
+  sampler = 'heatbath' # Sampler to use [HMC, heatbath, cluster, exact]
 
 ###########################################
 # Multilevel Monte Carlo parameters
@@ -87,16 +87,25 @@ multilevelmc:
 ###########################################
 hierarchical:
   n_max_level = 3           # Maximal number of levels
-  coarsesampler = 'HMC' # Sampler to use [HMC, cluster, exact]
+  coarsesampler = 'HMC' # Sampler to use [HMC, heatbath, cluster, exact]
 
 ###########################################
 # HMC sampler parameters
 ###########################################
 hmc:
   nt = 100        # Number of HMC steps
-  dt = 0.05       # HMC time step
+  dt = 0.10       # HMC time step
   n_burnin = 100  # Number of burnin samples
   n_rep = 1     # Number of repetitions
+
+###########################################
+# Overrelaxed heat bath sampler parameters
+###########################################
+heatbath:
+  n_sweep_overrelax = 10  # Number of overrelaxaton sweeps over unknowns
+  n_sweep_heatbath = 1    # Number of heatbath sweeps over unknowns
+  random_order = true     # Traverse unknowns in random order?
+  n_burnin = 100          # Number of burnin samples
 
 ###########################################
 # Cluster sampler parameters
@@ -104,5 +113,3 @@ hmc:
 clusteralgorithm:
   n_burnin = 100  # Number of burnin samples
   n_updates = 10  # Number of cluster updates between steps
-
-#

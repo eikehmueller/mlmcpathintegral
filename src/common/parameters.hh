@@ -30,17 +30,19 @@ enum MethodType {
 
 /** @brief Enum for sampler:
  *  - 0: HMC
- *  - 1: cluster algorithm (only some actions)
- *  - 2: exact (only some actions)
- *  - 3: hierarchical
- *  -4: multilevel
+ *  - 1: overrelaxed heat bath (only some actions)
+ *  - 2: cluster algorithm (only some actions)
+ *  - 3: exact (only some actions)
+ *  - 4: hierarchical
+ *  - 5: multilevel
 */
 enum SamplerType {
     SamplerHMC = 0,
-    SamplerCluster = 1,
-    SamplerExact = 2,
-    SamplerHierarchical = 3,
-    SamplerMultilevel = 4
+    SamplerOverrelaxedHeatBath = 1,
+    SamplerCluster = 2,
+    SamplerExact = 3,
+    SamplerHierarchical = 4,
+    SamplerMultilevel = 5
 };
 
 /** @brief Flags with constraint on numbers
