@@ -19,7 +19,7 @@ quantummechanics:
 ###########################################
 lattice:
   M_lat = 32        # Number of lattice sites
-  T_final = 1.0     # Final time
+  T_final = 4.0     # Final time
 
 ###########################################
 # Statistics parameters
