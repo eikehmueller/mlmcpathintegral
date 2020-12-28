@@ -10,6 +10,7 @@
 #include "action/renormalisation.hh"
 #include "action/qft/quenchedschwingeraction.hh"
 #include "qoi/qft/qoiavgplaquette.hh"
+#include "qoi/qft/qoi2dsusceptibility.hh"
 #include "montecarlo/montecarlosinglelevel.hh"
 #include "sampler/hmcsampler.hh"
 #include "sampler/overrelaxedheatbathsampler.hh"
@@ -119,8 +120,12 @@ int main(int argc, char* argv[]) {
                                           param_lattice.L_lat());
 
     /* ====== Select quantity of interest ====== */
+    /*
     std::shared_ptr<QoIAvgPlaquette> qoi;
     qoi = std::make_shared<QoIAvgPlaquette>(lattice);
+     */
+    std::shared_ptr<QoI2DSusceptibility> qoi;
+    qoi = std::make_shared<QoI2DSusceptibility>(lattice);
     mpi_parallel::cout << std::endl;
 
     /* ====== Select action ====== */
