@@ -16,5 +16,5 @@ const double QoI2DSusceptibility::evaluate(const std::shared_ptr<SampleState> ph
             Q += mod_2pi(theta);
         }
     }
-    return Q*Q/vol_lat;
+    return four_pi2_inv/vol_lat*Q*Q;
 }
