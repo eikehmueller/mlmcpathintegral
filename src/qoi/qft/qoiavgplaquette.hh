@@ -7,7 +7,7 @@
 #include "lattice/lattice2d.hh"
 #include "qoi/quantityofinterest.hh"
 
-/** @file qoiqvgplaquette.hh
+/** @file qoiavgplaquette.hh
  * @brief Header file for average plaquette in the 2D Schwinger model
  */
 
