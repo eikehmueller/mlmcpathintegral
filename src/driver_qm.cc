@@ -25,8 +25,8 @@
 #include "sampler/multilevelsampler.hh"
 #include "config.h"
 
-/** @file driver.cc
- * @brief File with main program
+/** @file driver_qm.cc
+ * @brief File with main program for quantum mechanics
  *
  * @mainpage
  * Several classes for implementating Multilevel MCMC for the path-integral
@@ -96,6 +96,7 @@ int main(int argc, char* argv[]) {
     total_time.start();
     mpi_parallel::cout << "++===================================++" << std::endl;
     mpi_parallel::cout << "!!   Path integral multilevel MCMC   !!" << std::endl;
+    mpi_parallel::cout << "!!   for quantum mechanics           !!" << std::endl;
     mpi_parallel::cout << "++===================================++" << std::endl;
     mpi_parallel::cout << std::endl;
 #ifdef USE_MPI

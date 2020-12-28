@@ -102,7 +102,7 @@ public:
     }
 
     /** @brief return size of samples */
-    virtual unsigned int sample_size() {
+    virtual unsigned int sample_size() const {
         return M_lat;
     }
 
@@ -113,7 +113,7 @@ public:
 
     /** @brief Cost of one action evaluation */
     virtual double evaluation_cost() const {
-        return std::dynamic_pointer_cast<Lattice1D>(lattice)->getM_lat();
+        return lattice->getM_lat();
     }
 
     /** @brief Get coarsening level

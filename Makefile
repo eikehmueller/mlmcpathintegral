@@ -28,13 +28,18 @@ LLIBS=-lgsl -lgslcblas
 HEADERS=$(shell find $(SOURCE_DIR) -name "*.hh")
 SOURCES=$(shell find $(SOURCE_DIR) -name "*.cc")
 
-ifeq ($(MAIN),)
-  MAIN=driver
+ifeq ($(MAIN_QM),)
+  MAIN_QM=driver_qm
 endif
+
+MAIN_SCHWINGER=driver_schwinger
 
 MAIN_TESTDIST=test_distribution
 
-MAINS=driver.o test_distribution.o
+MAINS=\
+	driver_qm.o \
+	driver_schwinger.o \
+	test_distribution.o
 OBJS:=$(filter-out $(patsubst %,$(SOURCE_DIR)/%,$(MAINS)),$(patsubst %.cc,%.o,$(SOURCES)))
 OBJS:=$(patsubst %,$(BUILD_DIR)/%,$(OBJS))
 
@@ -52,7 +57,7 @@ else
   $(info Compiling in sequential mode. Compiler is $(CXX))
 endif
 
-all: $(MAIN) $(MAIN_TESTDIST)
+all: $(MAIN_QM) $(MAIN_SCHWINGER) $(MAIN_TESTDIST)
 
 # Sort out dependencies, see
 # http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
@@ -79,10 +84,16 @@ $(DEPDIR)/%.d: ;
 
 include $(wildcard $(patsubst %,$(DEPDIR)/%.d,$(basename $(HEADERS))))
 
-# main programme
-$(MAIN): $(BUILD_DIR)/driver.o $(OBJS) $(SOURCE_DIR)/config.h
+# main programmes
+# --- QM ---
+$(MAIN_QM): $(BUILD_DIR)/driver_qm.o $(OBJS) $(SOURCE_DIR)/config.h
 	@printf "%b" "$(COM_COLOR)$(LINK_MESSAGE) $(OBJ_COLOR)$(@)$(NO_COLOR)\n";
-	@$(CXX) $(LFLAGS) -o $(BUILD_DIR)/$(MAIN) $(OBJS) $(BUILD_DIR)/driver.o $(LLIBS)
+	@$(CXX) $(LFLAGS) -o $(BUILD_DIR)/$(MAIN_QM) $(OBJS) $(BUILD_DIR)/driver_qm.o $(LLIBS)
+
+# --- Schwinger model ---
+$(MAIN_SCHWINGER): $(BUILD_DIR)/driver_schwinger.o $(OBJS) $(SOURCE_DIR)/config.h
+	@printf "%b" "$(COM_COLOR)$(LINK_MESSAGE) $(OBJ_COLOR)$(@)$(NO_COLOR)\n";
+	@$(CXX) $(LFLAGS) -o $(BUILD_DIR)/$(MAIN_SCHWINGER) $(OBJS) $(BUILD_DIR)/driver_schwinger.o $(LLIBS)
 
 # test expsin2 distribution
 $(MAIN_TESTDIST): $(BUILD_DIR)/test_distribution.o $(OBJS) $(SOURCE_DIR)/config.h

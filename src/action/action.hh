@@ -33,7 +33,7 @@ public:
         renormalisation(renormalisation_) {}
 
     /** @brief return size of samples */
-    virtual unsigned int sample_size() = 0;
+    virtual unsigned int sample_size() const = 0;
 
     /** @brief Cost of one action evaluation */
     virtual double evaluation_cost() const = 0;
