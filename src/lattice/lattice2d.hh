@@ -108,8 +108,8 @@ public:
         Mx_lat(Mx_lat_),
         T_lat(T_lat_),
         L_lat(L_lat_),
-        at_lat(Mt_lat_/T_lat_),
-        ax_lat(Mx_lat_/L_lat_) {}
+        at_lat(T_lat_/Mt_lat_),
+        ax_lat(L_lat_/Mx_lat_) {}
 
     /** @brief Return number of timeslices \f$M_{t,lat}\f$ */
     unsigned int getMt_lat() const {
@@ -159,8 +159,8 @@ public:
     /** @brief Convert cartesian lattice index of link to linear index
      *
      * Given a lattice site \f$n=(i,j)\f$ and a direction \f$\mu\f$, work out the
-     * corresponding linear index \f$\ell\f$ in the sample state vector.
-     * The unknowns are arranged such that
+     * corresponding linear index \f$\ell\f$ of the link starting at \f$n\f$
+     * and pointing in direction \f$\mu\f$. The links are arranged such that
      * \f[
      *   \ell = 2M_{t,lat}j + 2i + \mu
      * \f]
