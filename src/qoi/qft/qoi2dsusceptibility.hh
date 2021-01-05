@@ -13,7 +13,15 @@
 
 /** @class QoI2DSusceptibility
  *
- * @brief class for calculating the topological susceptibility in the 2D Schwinger model
+ * @brief class for calculating the (dimensionless) topological susceptibility in the 2D Schwinger model
+ *
+ * The definition used here is
+ *
+ * \f[
+ *    \chi_t = \frac{a^2}{LT} \langle Q^2\rangle = \frac{\langle Q^2 \rangle}{M_t M_x}
+ * \f]
+ *
+ * where \f$Q\f$ is the topological charge.
  *
  */
 
@@ -27,8 +35,7 @@ public:
         lattice(lattice_),
         four_pi2_inv(0.25/(M_PI*M_PI)),
         Mt_lat(lattice_->getMt_lat()),
-        Mx_lat(lattice_->getMx_lat()),
-        vol_lat(lattice_->getT_lat()*lattice_->getL_lat()) {}
+        Mx_lat(lattice_->getMx_lat()) {}
 
     /** @brief Destructor */
     virtual ~QoI2DSusceptibility() {}
@@ -48,8 +55,6 @@ private:
     const unsigned int Mt_lat;
     /** @brief Number of lattice points in spatial direction */
     const unsigned int Mx_lat;
-    /** @brief Lattice volume */
-    const double vol_lat;
 };
 
 #endif // QOI2DSUSCEPTIBILITY_HH
