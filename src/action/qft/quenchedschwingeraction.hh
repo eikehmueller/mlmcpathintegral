@@ -22,7 +22,7 @@
  *
  * @brief Class for storing parameters of Schwinger action
  *
- * This stores the coupling parameter \f$\beta\f$ of the 2D Schwinger model
+ * This stores the (physical) coupling parameter \f$\beta\f$ of the 2D Schwinger model
  */
 class SchwingerParameters : public Parameters {
 public:
@@ -82,6 +82,7 @@ private:
  * \f]
  * where \f$P = U_{n,0} U_{n+\hat{0},1} U^\dagger_{n+\hat{1},0}U^\dagger_{0,1}\f$
  * is the plaquette at the site (or lattice point) \f$n=(i,j)\f$.
+ * \f$beta=\frac{1}{a_t a_x g^2}\f$ is the dimensionless coupling constant.
  *
  * As the link at site \f$n\f$ in direction \f$\mu\f$ is defined as
  * \f[
@@ -107,11 +108,11 @@ public:
                             const RenormalisationType renormalisation_,
                             const double beta_)
         : Action(renormalisation_),
-          lattice(lattice_),
+        lattice(lattice_),
           beta(beta_),
           engine(2481317),
           Mt_lat(lattice->getMt_lat()),
-          Mx_lat(lattice->getMx_lat()) {}
+    Mx_lat(lattice->getMx_lat()) { }
 
     /** @brief Return coupling constant \f$beta\f$ */
     double getbeta() const {
@@ -252,7 +253,7 @@ private:
 protected:
     /** @brief Underlying lattice */
     const std::shared_ptr<Lattice2D> lattice;
-    /** @brief Non-dimensionalised coupling constant \f$\beta\f$*/
+    /** @brief Dimensionless coupling constant \f$\beta=1/(a_t a_x g^2)\f$*/
     const double beta;
     /** @brief Random number engine */
     typedef mpi_parallel::mt19937_64 Engine;
