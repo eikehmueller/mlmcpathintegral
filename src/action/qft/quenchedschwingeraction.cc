@@ -45,7 +45,6 @@ void QuenchedSchwingerAction::compute_staple_angles(std::shared_ptr<SampleState>
 /* local heat bath update */
 void QuenchedSchwingerAction::heatbath_update(std::shared_ptr<SampleState> phi_state,
                                               const unsigned int ell) {
-    /* === IMPLEMENT THIS === */
     int i, j, mu;
     double theta_p;
     double theta_m;
