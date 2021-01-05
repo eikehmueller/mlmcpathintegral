@@ -73,7 +73,7 @@ $(BUILD_DIR)/%.o: %.cc %.hh
 	$(CXX) $(DEPFLAGS) $(CFLAGS) -c -o $@ $<
 	@$(POSTCOMPILE)
 
-$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.cc
+$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.cc $(OBJS)
 	@printf "%b" "$(COM_COLOR)$(COM_MESSAGE) $(OBJ_COLOR)$(@)$(NO_COLOR)\n";
 	@$(PRECOMPILE)
 	$(CXX) $(DEPFLAGS) $(CFLAGS) -c -o $@ $<
