@@ -1,6 +1,6 @@
 #include "qoi2dsusceptibility.hh"
-/** @file qoisusceptibility.cc
- * @brief Implementation of qoisusceptibility.hh
+/** @file qoi2dsusceptibility.cc
+ * @brief Implementation of qoi2dsusceptibility.hh
  */
 
 /* Evaluate QoI */
@@ -16,5 +16,5 @@ const double QoI2DSusceptibility::evaluate(const std::shared_ptr<SampleState> ph
             Q += mod_2pi(theta);
         }
     }
-    return four_pi2_inv*Q*Q/(Mt_lat*Mx_lat);
+    return four_pi2_P_inv*Q*Q;
 }

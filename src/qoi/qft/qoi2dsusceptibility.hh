@@ -33,7 +33,7 @@ public:
      */
     QoI2DSusceptibility(const std::shared_ptr<Lattice2D> lattice_) :
         lattice(lattice_),
-        four_pi2_inv(0.25/(M_PI*M_PI)),
+        four_pi2_P_inv(0.25/(M_PI*M_PI*lattice_->getNcells())),
         Mt_lat(lattice_->getMt_lat()),
         Mx_lat(lattice_->getMx_lat()) {}
 
@@ -49,8 +49,8 @@ public:
 private:
     /** @brief Temporal extent of lattice */
     const std::shared_ptr<Lattice2D> lattice;
-    /** @brief Scaling factor \f$1/(4\pi^2)\f$ */
-    const double four_pi2_inv;
+    /** @brief Scaling factor \f$1/(4\pi^2 P)\f$ */
+    const double four_pi2_P_inv;
     /** @brief Number of time slices */
     const unsigned int Mt_lat;
     /** @brief Number of lattice points in spatial direction */
