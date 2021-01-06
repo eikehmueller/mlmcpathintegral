@@ -169,6 +169,9 @@ int main(int argc, char* argv[]) {
         mpi_parallel::cout << "=== Sampler statistics === " << std::endl;
         montecarlo_singlelevel.get_sampler()->show_stats();
         mpi_parallel::cout << std::endl;
+        double exact_result = std::dynamic_pointer_cast<QuenchedSchwingerAction>(action)->chit_exact();
+        mpi_parallel::cout << "Exact result = " << exact_result << std::endl;
+        mpi_parallel::cout << std::endl;
     } else {
         mpi_parallel::cout << "ERROR: only single level method implemented for Schwinger model." << std::endl;
         mpi_exit(EXIT_FAILURE);
