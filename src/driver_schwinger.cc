@@ -120,10 +120,6 @@ int main(int argc, char* argv[]) {
                                           param_lattice.L_lat());
 
     /* ====== Select quantity of interest ====== */
-    /*
-    std::shared_ptr<QoIAvgPlaquette> qoi;
-    qoi = std::make_shared<QoIAvgPlaquette>(lattice);
-     */
     std::shared_ptr<QoI2DSusceptibility> qoi;
     qoi = std::make_shared<QoI2DSusceptibility>(lattice);
     mpi_parallel::cout << std::endl;
@@ -137,7 +133,13 @@ int main(int argc, char* argv[]) {
     // numerical result and statistical error
     double numerical_result;
     double statistical_error;
+    double exact_result = std::dynamic_pointer_cast<QuenchedSchwingerAction>(action)->chit_exact();
+    mpi_parallel::cout << std::endl;
+    mpi_parallel::cout << std::setprecision(8) << std::fixed;
+    mpi_parallel::cout << " Exact result <chi_t> = " << exact_result << std::endl;
+    mpi_parallel::cout << std::endl;
 
+    
     /* **************************************** *
      * Single level method                      *
      * **************************************** */
@@ -169,13 +171,18 @@ int main(int argc, char* argv[]) {
         mpi_parallel::cout << "=== Sampler statistics === " << std::endl;
         montecarlo_singlelevel.get_sampler()->show_stats();
         mpi_parallel::cout << std::endl;
-        double exact_result = std::dynamic_pointer_cast<QuenchedSchwingerAction>(action)->chit_exact();
-        mpi_parallel::cout << "Exact result = " << exact_result << std::endl;
-        mpi_parallel::cout << std::endl;
     } else {
         mpi_parallel::cout << "ERROR: only single level method implemented for Schwinger model." << std::endl;
         mpi_exit(EXIT_FAILURE);
     }
+    
+    double diff = fabs(numerical_result-exact_result);
+    double ratio = diff/statistical_error;
+    mpi_parallel::cout << std::setprecision(8) << std::fixed;
+    mpi_parallel::cout << "Comparison to exact result " << std::endl;
+    mpi_parallel::cout << "  (exact - numerical) = " << diff;
+    mpi_parallel::cout << std::setprecision(3) << std::fixed;
+    mpi_parallel::cout << " = " << ratio << " * (statistical error) " << std::endl << std::endl;
 
     total_time.stop();
     mpi_parallel::cout << total_time << std::endl;
