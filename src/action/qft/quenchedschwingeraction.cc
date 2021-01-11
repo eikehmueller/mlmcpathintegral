@@ -50,9 +50,10 @@ void QuenchedSchwingerAction::heatbath_update(std::shared_ptr<SampleState> phi_s
     double theta_m;
     lattice->link_lin2cart(ell,i,j,mu);
     compute_staple_angles(phi_state,i,j,mu,theta_p,theta_m);
-    double theta_0 = mod_2pi(0.5*(theta_p+theta_m)+(fabs((theta_p-theta_m))>M_PI)*M_PI);
-    double sigma = 4.*beta*fabs(cos(0.5*(theta_p-theta_m)));
-    phi_state->data[ell] = mod_2pi(theta_0 + exp_sin2_dist.draw(engine,sigma));
+    double theta0 = theta0_expsin2(theta_p,theta_m);
+    double sigma = sigma_expsin2(theta_p,theta_m);
+    double dtheta = exp_sin2_dist.draw(engine,beta*sigma);
+    phi_state->data[ell] = mod_2pi(theta0 + dtheta);
 }
 
 /* local overrelaxation update */
@@ -63,8 +64,8 @@ void QuenchedSchwingerAction::overrelaxation_update(std::shared_ptr<SampleState>
     double theta_m;
     lattice->link_lin2cart(ell,i,j,mu);
     compute_staple_angles(phi_state,i,j,mu,theta_p,theta_m);
-    double theta_0 = mod_2pi(0.5*(theta_p+theta_m)+(fabs((theta_p-theta_m))>M_PI)*M_PI);
-    phi_state->data[ell] = mod_2pi(2.0*theta_0 - phi_state->data[ell]);
+    double theta0 = theta0_expsin2(theta_p,theta_m);
+    phi_state->data[ell] = mod_2pi(2.0*theta0 - phi_state->data[ell]);
 }
 
 /* Force for HMC integrator */

@@ -259,6 +259,41 @@ public:
 
 private:
         
+    /** @brief Compute width-parameter of exponential distribution
+     *
+     * Given \f$\theta_+,\theta_-\f$ compute \f$\sigma\f$ such that
+     * \f[
+     *   \cos(\theta-\theta_+) + \cos(\theta-\theta_-) = -\sigma \sin^2\left(\frac{\theta-\theta_0}{2}\right) + const.
+     * \f]
+     *
+     * Explicitly this is given as
+     * \f[
+     *   \sigma=4|\cos\left(\frac{\theta_+-\theta_-}{2}\right)|
+     * \f]
+     */
+    inline double sigma_expsin2(const double theta_p, const double theta_m) const {
+        return 4.*fabs(cos(0.5*(theta_p-theta_m)));
+    }
+
+    /** @brief Compute shift-parameter of exponential distribution
+     *
+     * Given \f$\theta_+,\theta_-\f$ compute \f$\theta_0\f$ such that
+     * \f[
+     *   \cos(\theta-\theta_+) + \cos(\theta-\theta_-) = -\sigma \sin^2\left(\frac{\theta-\theta_0}{2}\right) + const.
+     * \f]
+     *
+     * Explicitly this is given as
+     * \f[
+     *    \theta_0=\begin{cases}
+     *    \frac{1}{2} (\theta_+ + \theta_-) & \text{for $\theta_+-\theta_- \in [-\pi,+\pi]$}\\
+     *    \frac{1}{2} (\theta_+ + \theta_-)+\pi \mod [-\pi,+pi) & \text{otherwise$}
+     *    \end{cases}
+     * \f]
+     */
+    inline double theta0_expsin2(const double theta_p, const double theta_m) const {
+        return mod_2pi(0.5*(theta_p+theta_m)+(fabs((theta_p-theta_m))>M_PI)*M_PI);
+    }
+    
     /** @brief Compute staple angles \f$\theta_{n,\mu}^{(+)}\f$ and \f$\theta_{n,\mu}^{(-)}\f$
      *
      * Let \f$\nu=1-mu\f$. Then the staple angles are defined as
