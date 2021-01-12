@@ -154,8 +154,7 @@ double QuenchedSchwingerAction::chit_exact() const {
     }
     double chit=0.0;
     for (int n=0;n<nmax;++n) {
-        chit += weight[n]/weight_sum * ( (n_plaq-1)*(dIn[n]*dIn[n])/(In[n]*In[n])
-                                         - ddIn[n]/In[n]);
+        chit += weight[n]/weight_sum * (ddIn[n]/In[n] -(n_plaq-1)*(dIn[n]*dIn[n])/(In[n]*In[n]));
     }
     return chit;
 }
@@ -172,10 +171,10 @@ void QuenchedSchwingerAction::compute_In(const double x,
         return  -1./(4.*M_PI*M_PI)*phi*exp(x*cos(phi));
     };
 
-    /* Integrand -1/(8*pi^3)*phi^2*exp(-x*cos(phi)) */
+    /* Integrand 1/(8*pi^3)*phi^2*exp(-x*cos(phi)) */
     auto integrand_phi2 = [](double phi, void * p) -> double {
         double x = *((double*) p);
-        return  -1./(8.*M_PI*M_PI*M_PI)*phi*phi*exp(x*cos(phi));
+        return  1./(8.*M_PI*M_PI*M_PI)*phi*phi*exp(x*cos(phi));
     };
 
     /* GSL function required for integration */
