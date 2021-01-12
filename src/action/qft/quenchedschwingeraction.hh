@@ -270,6 +270,11 @@ private:
      * \f[
      *   \sigma=4|\cos\left(\frac{\theta_+-\theta_-}{2}\right)|
      * \f]
+     *
+     * NOTE THAT THE GIVEN FORMULAE ARE ONLY CORRECT IF \f$\theta_+,\theta_-\in[-\pi,+\pi]\f$
+     *
+     * @param[in] theta_p Angle \f$\theta_+\in[-\pi,+\pi]\f$
+     * @param[in] theta_m Angle \f$\theta_-\in[-\pi,+\pi]\f$
      */
     inline double sigma_expsin2(const double theta_p, const double theta_m) const {
         return 4.*fabs(cos(0.5*(theta_p-theta_m)));
@@ -289,6 +294,11 @@ private:
      *    \frac{1}{2} (\theta_+ + \theta_-)+\pi \mod [-\pi,+pi) & \text{otherwise$}
      *    \end{cases}
      * \f]
+     *
+     * NOTE THAT THE GIVEN FORMULAE ARE ONLY CORRECT IF \f$\theta_+,\theta_-\in[-\pi,+\pi]\f$
+     *
+     * @param[in] theta_p Angle \f$\theta_+\in[-\pi,+\pi]\f$
+     * @param[in] theta_m Angle \f$\theta_-\in[-\pi,+\pi]\f$
      */
     inline double theta0_expsin2(const double theta_p, const double theta_m) const {
         return mod_2pi(0.5*(theta_p+theta_m)+(fabs((theta_p-theta_m))>M_PI)*M_PI);
