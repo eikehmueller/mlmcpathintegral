@@ -26,19 +26,19 @@ void QuenchedSchwingerAction::compute_staple_angles(std::shared_ptr<SampleState>
                                                     double& theta_p,
                                                     double& theta_m) {
     if (mu==0) {
-        theta_p = phi_state->data[lattice->link_cart2lin(i,  j+1,0)]
-                + phi_state->data[lattice->link_cart2lin(i,  j  ,1)]
-                - phi_state->data[lattice->link_cart2lin(i+1,j  ,1)];
-        theta_m = phi_state->data[lattice->link_cart2lin(i,  j-1,0)]
-                + phi_state->data[lattice->link_cart2lin(i+1,j-1,1)]
-                - phi_state->data[lattice->link_cart2lin(i,  j-1,1)];
+        theta_p = mod_2pi(phi_state->data[lattice->link_cart2lin(i,  j+1,0)]
+                        + phi_state->data[lattice->link_cart2lin(i,  j  ,1)]
+                        - phi_state->data[lattice->link_cart2lin(i+1,j  ,1)]);
+        theta_m = mod_2pi(phi_state->data[lattice->link_cart2lin(i,  j-1,0)]
+                        + phi_state->data[lattice->link_cart2lin(i+1,j-1,1)]
+                        - phi_state->data[lattice->link_cart2lin(i,  j-1,1)]);
     } else {
-        theta_p = phi_state->data[lattice->link_cart2lin(i,  j,  0)]
-                + phi_state->data[lattice->link_cart2lin(i+1,j,  1)]
-                - phi_state->data[lattice->link_cart2lin(i,  j+1,0)];
-        theta_m = phi_state->data[lattice->link_cart2lin(i-1,j+1,0)]
-                + phi_state->data[lattice->link_cart2lin(i-1,j  ,1)]
-                - phi_state->data[lattice->link_cart2lin(i-1,j,  0)];
+        theta_p = mod_2pi(phi_state->data[lattice->link_cart2lin(i,  j,  0)]
+                        + phi_state->data[lattice->link_cart2lin(i+1,j,  1)]
+                        - phi_state->data[lattice->link_cart2lin(i,  j+1,0)]);
+        theta_m = mod_2pi(phi_state->data[lattice->link_cart2lin(i-1,j+1,0)]
+                        + phi_state->data[lattice->link_cart2lin(i-1,j  ,1)]
+                        - phi_state->data[lattice->link_cart2lin(i-1,j,  0)]);
     }
 }
 
