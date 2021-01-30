@@ -26,3 +26,17 @@ double Sigma_hat(const double xi,
         return 0.0;
     }
 }
+
+/* Implementation of log_factorial */
+double log_factorial(unsigned int n) {
+  double s=0.0;
+  for (unsigned int k=2;k<=n;++k) {
+    s += log(k);
+  }
+  return s;
+}
+
+/* Implementation of log_nCk */
+double log_nCk(unsigned int n, unsigned int k) {
+ return log_factorial(n)-log_factorial(k)-log_factorial(n-k);
+}

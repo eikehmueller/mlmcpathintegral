@@ -53,4 +53,21 @@ double inline mod_2pi(const double x) {
 double Sigma_hat(const double xi,
                  const unsigned int p);
 
+/** @brief Compute logarithm of factorial
+ *
+ * Returns \f$\log(n!)\f$
+ *
+ * @param[in] n Parameter \f$n\f$
+ */
+double log_factorial(unsigned int n);
+
+/** @brief Compute logarithm of n choose k
+ *
+ * Returns \f$\log(n!)-\log(k!)-\log((n-k)!)\f$
+ *
+ * @param[in] n Parameter \f$n\f$
+ * @param[in] k Parameter \f$k\f$
+ */
+double log_nCk(unsigned int n, unsigned int k);
+
 #endif // AUXILLIARY_HH
