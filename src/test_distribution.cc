@@ -15,14 +15,14 @@ public:
     DistributionWrapper() : uniform_dist(0.,1.) {}
     
     /* Draw single sample */
-    virtual double draw(std::mt19937_64 engine) = 0;
+    virtual double draw(std::mt19937_64& engine) = 0;
     
     /* Draw n_samples samples */
-    virtual void draw(std::mt19937_64 engine,
+    virtual void draw(std::mt19937_64& engine,
                              const unsigned int n_samples) = 0;
 
     /* Evaluate n_samples samples */
-    virtual void evaluate(std::mt19937_64 engine,
+    virtual void evaluate(std::mt19937_64& engine,
                                  const unsigned int n_samples) = 0;
 
 protected:
@@ -36,12 +36,12 @@ public:
     dist(dist_), sigma(sigma_) {}
     
     /* Draw single sample */
-    virtual double draw(std::mt19937_64 engine) {
+    virtual double draw(std::mt19937_64& engine) {
         return dist.draw(engine,sigma);
     }
     
     /* Draw n_samples samples */
-    virtual void draw(std::mt19937_64 engine,
+    virtual void draw(std::mt19937_64& engine,
                              const unsigned int n_samples) {
         for (unsigned int n=0;n<n_samples;++n) {
             double x = dist.draw(engine,sigma);
@@ -50,7 +50,7 @@ public:
     }
 
     /* Evaluate n_samples samples */
-    virtual void evaluate(std::mt19937_64 engine,
+    virtual void evaluate(std::mt19937_64& engine,
                                  const unsigned int n_samples) {
         for (unsigned int j=0; j<n_samples; ++j) {
             double x = uniform_dist(engine);
@@ -72,12 +72,12 @@ public:
     dist(dist_), x_p(x_p_), x_m(x_m_) {}
     
     /* Draw single sample */
-    virtual double draw(std::mt19937_64 engine) {
+    virtual double draw(std::mt19937_64& engine) {
         return dist.draw(engine,x_p,x_m);
     }
     
     /* Draw n_samples samples */
-    virtual void draw(std::mt19937_64 engine,
+    virtual void draw(std::mt19937_64& engine,
                              const unsigned int n_samples) {
         for (unsigned int n=0;n<n_samples;++n) {
             double x = dist.draw(engine,x_p,x_m);
@@ -86,7 +86,7 @@ public:
     }
 
     /* Evaluate n_samples samples */
-    virtual void evaluate(std::mt19937_64 engine,
+    virtual void evaluate(std::mt19937_64& engine,
                                  const unsigned int n_samples) {
         for (unsigned int j=0; j<n_samples; ++j) {
             double x = uniform_dist(engine);
