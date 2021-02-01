@@ -50,10 +50,7 @@ void QuenchedSchwingerAction::heatbath_update(std::shared_ptr<SampleState> phi_s
     double theta_m;
     lattice->link_lin2cart(ell,i,j,mu);
     compute_staple_angles(phi_state,i,j,mu,theta_p,theta_m);
-    double theta0 = theta0_expsin2(theta_p,theta_m);
-    double sigma = sigma_expsin2(theta_p,theta_m);
-    double dtheta = exp_sin2_dist.draw(engine,beta*sigma);
-    phi_state->data[ell] = mod_2pi(theta0 + dtheta);
+    phi_state->data[ell] = exp_cos_dist.draw(engine,theta_p,theta_m);
 }
 
 /* local overrelaxation update */
@@ -64,7 +61,7 @@ void QuenchedSchwingerAction::overrelaxation_update(std::shared_ptr<SampleState>
     double theta_m;
     lattice->link_lin2cart(ell,i,j,mu);
     compute_staple_angles(phi_state,i,j,mu,theta_p,theta_m);
-    double theta0 = theta0_expsin2(theta_p,theta_m);
+    double theta0 = mod_2pi(0.5*(theta_p+theta_m)+(fabs((theta_p-theta_m))>M_PI)*M_PI);
     phi_state->data[ell] = mod_2pi(2.0*theta0 - phi_state->data[ell]);
 }
 

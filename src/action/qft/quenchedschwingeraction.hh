@@ -12,7 +12,7 @@
 #include "common/samplestate.hh"
 #include "mpi/mpi_wrapper.hh"
 #include "mpi/mpi_random.hh"
-#include "distribution/expsin2distribution.hh"
+#include "distribution/expcosdistribution.hh"
 #include "lattice/lattice2d.hh"
 #include "action/action.hh"
 
@@ -114,7 +114,8 @@ public:
           beta(beta_),
           engine(2481317),
           Mt_lat(lattice->getMt_lat()),
-    Mx_lat(lattice->getMx_lat()) { }
+          Mx_lat(lattice->getMx_lat()),
+          exp_cos_dist(beta) { }
 
     /** @brief Return coupling constant \f$beta\f$ */
     double getbeta() const {
@@ -279,30 +280,6 @@ private:
     inline double sigma_expsin2(const double theta_p, const double theta_m) const {
         return 4.*fabs(cos(0.5*(theta_p-theta_m)));
     }
-
-    /** @brief Compute shift-parameter of exponential distribution
-     *
-     * Given \f$\theta_+,\theta_-\f$ compute \f$\theta_0\f$ such that
-     * \f[
-     *   \cos(\theta-\theta_+) + \cos(\theta-\theta_-) = -\sigma \sin^2\left(\frac{\theta-\theta_0}{2}\right) + const.
-     * \f]
-     *
-     * Explicitly this is given as
-     * \f[
-     *    \theta_0=\begin{cases}
-     *    \frac{1}{2} (\theta_+ + \theta_-) & \text{for $\theta_+-\theta_- \in [-\pi,+\pi]$}\\
-     *    \frac{1}{2} (\theta_+ + \theta_-)+\pi \mod [-\pi,+pi) & \text{otherwise$}
-     *    \end{cases}
-     * \f]
-     *
-     * NOTE THAT THE GIVEN FORMULAE ARE ONLY CORRECT IF \f$\theta_+,\theta_-\in[-\pi,+\pi]\f$
-     *
-     * @param[in] theta_p Angle \f$\theta_+\in[-\pi,+\pi]\f$
-     * @param[in] theta_m Angle \f$\theta_-\in[-\pi,+\pi]\f$
-     */
-    inline double theta0_expsin2(const double theta_p, const double theta_m) const {
-        return mod_2pi(0.5*(theta_p+theta_m)+(fabs((theta_p-theta_m))>M_PI)*M_PI);
-    }
     
     /** @brief Compute staple angles \f$\theta_{n,\mu}^{(+)}\f$ and \f$\theta_{n,\mu}^{(-)}\f$
      *
@@ -363,7 +340,7 @@ protected:
     /** @brief Number of points in spatial direction */
     const unsigned int Mx_lat;
     /** @brief distribution for drawing from heat bath */
-    const ExpSin2Distribution exp_sin2_dist;
+    const ExpCosDistribution exp_cos_dist;
 
 };
 
