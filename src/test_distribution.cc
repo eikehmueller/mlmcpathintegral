@@ -7,6 +7,7 @@
 #include <cmath>
 #include "common/timer.hh"
 #include "distribution/expsin2distribution.hh"
+#include "distribution/cosproductdistribution.hh"
 #include "distribution/besselproductdistribution.hh"
 
 /** @file test_distribution.hh
@@ -241,10 +242,91 @@ public:
         out << "  x_p  = " << x_p << std::endl;
         out << "  x_m  = " << x_m << std::endl;
     }
-    
+
 private:
     /** @brief Distribution to wrap */
     const BesselProductDistribution& dist;
+    /** @brief Parameter \f$x_+\f$*/
+    const double x_p;
+    /** @brief Parameter \f$x_-\f$*/
+    const double x_m;
+};
+
+class CosProductDistributionWrapper : public DistributionWrapper {
+public:
+    CosProductDistributionWrapper(const CosProductDistribution& dist_,
+                                  const double x_p_,
+                                  const double x_m_) :
+    dist(dist_), x_p(x_p_), x_m(x_m_) {}
+    
+    /** @brief Draw single sample
+     *
+     * @param[inout] engine Random number engibe to use
+     */
+    virtual double draw(std::mt19937_64& engine) {
+        return dist.draw(engine,x_p,x_m);
+    }
+    
+    /** @brief Draw multiple samples
+     *
+     * Use this method for time measurements to avoid overheads from
+     * repeated calls.
+     *
+     * @param[inout] engine Random number engine to use
+     * @param[in] n_samples Number of samples to draw
+     */
+    virtual void draw(std::mt19937_64& engine,
+                      const unsigned int n_samples) {
+        for (unsigned int n=0;n<n_samples;++n) {
+            double x = dist.draw(engine,x_p,x_m);
+            (void) x;
+        }
+    }
+
+    /** @brief Evaluate at a single point
+     *
+     * @param[in] x Point at which the distribution is evaluated
+     */
+    virtual double evaluate(const double x) {
+        return dist.evaluate(x,x_p,x_m);
+    }
+    
+    /** @brief Evaluate at multiple points
+     *
+     * Evaluates the function a several randomly chosen points.
+     * Use this function for time measurements to avoid overheads from
+     * repeated calls.
+     *
+     * @param[inout] engine Random number engine to use
+     * @param[in] n_samples Number of points to evaluate
+     */
+    virtual void evaluate(std::mt19937_64& engine,
+                          const unsigned int n_samples) {
+        for (unsigned int j=0; j<n_samples; ++j) {
+            double x = uniform_dist(engine);
+            double y = dist.evaluate(x,x_p,x_m);
+            (void) y;
+        }
+    }
+
+    /** @brief Write parameters to stream
+     *
+     * Write the name of the distribution and its parameters to an
+     * output stream. This will be used when saving the distribution to a
+     * file.
+     *
+     * @param[inout] out Output stream
+     */
+    virtual void write_header(std::ostream& out) {
+        out << "CosProductDistribution" << std::endl;
+        out << "  beta = " << dist.get_beta() << std::endl;
+        out << "  x_p  = " << x_p << std::endl;
+        out << "  x_m  = " << x_m << std::endl;
+    }
+
+private:
+    /** @brief Distribution to wrap */
+    const CosProductDistribution& dist;
     /** @brief Parameter \f$x_+\f$*/
     const double x_p;
     /** @brief Parameter \f$x_-\f$*/
@@ -404,13 +486,28 @@ int main(int argc, char* argv[]) {
                         n_samples,
                         n_intervals,
                         "distribution_expsin2.txt");
-    /* === ExpSin2Distribution === */
     std::cout << std::endl;
-    
-    std::cout << "Testing BesselProductDistribution ..." << std::endl;
+
     double beta = 4.0;
     double x_p = 0.9*M_PI;
     double x_m = 0;
+    
+    /* === CosProductDistribution === */
+    std::cout << "Testing CosProductDistribution ..." << std::endl;
+    std::cout << "beta = " << beta << std::endl;
+    std::cout << "x_p  = " << x_p << std::endl;
+    std::cout << "x_m  = " << x_m << std::endl;
+    CosProductDistribution cosproduct_dist(beta);
+    /* Lambda expression for drawing from distribution */
+    CosProductDistributionWrapper cosproduct_wrapper(cosproduct_dist,x_p,x_m);
+    assess_distribution(cosproduct_wrapper,
+                        n_samples,
+                        n_intervals,
+                        "distribution_cosproduct.txt");
+    std::cout << std::endl;
+    
+    /* === BesselProductDistribution === */
+    std::cout << "Testing BesselProductDistribution ..." << std::endl;
     std::cout << "beta = " << beta << std::endl;
     std::cout << "x_p  = " << x_p << std::endl;
     std::cout << "x_m  = " << x_m << std::endl;

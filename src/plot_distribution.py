@@ -107,6 +107,22 @@ class ExpSin2Distribution(Distribution):
     def f_exact(self,x):
         return self.Znorm_inv*np.exp(-self.sigma*np.sin(0.5*x)**2)
 
+class CosProductDistribution(Distribution):
+    def __init__(self,samples,X,Y,beta,x_p,x_m):
+        super().__init__(samples,X,Y)
+        self.label = 'CosProductDistribution'
+        self.beta = beta
+        self.x_p = x_p
+        self.x_m = x_m
+        self.Znorm = 2.*np.pi*np.i0(2.*beta*np.cos(0.5*(self.x_p-self.x_m)))
+
+    '''Exact value of distribution at a given point
+    
+    :arg x: Point at which the distribution is evaluated
+    '''
+    def f_exact(self,x):
+        return 1./self.Znorm*np.exp(self.beta*(np.cos(x-self.x_p)+np.cos(x-self.x_m)))
+    
 class BesselProductDistribution(Distribution):
     def __init__(self,samples,X,Y,beta,x_p,x_m):
         super().__init__(samples,X,Y)
@@ -201,6 +217,11 @@ def read_data(filename):
             print ('  ',key,' = ',value)
     if (distribution == 'ExpSin2Distribution'):
         return ExpSin2Distribution(samples,X,Y,float(param['sigma']))
+    elif (distribution == 'CosProductDistribution'):
+        return CosProductDistribution(samples,X,Y,
+                                             float(param['beta']),
+                                             float(param['x_p']),
+                                             float(param['x_m']))
     elif (distribution == 'BesselProductDistribution'):
         return BesselProductDistribution(samples,X,Y,
                                              float(param['beta']),
