@@ -20,17 +20,8 @@
  * The normalisation constant is
  * \f$Z_{\sigma}=2\pi e^{-\frac{\sigma}{2}}I_0\left(\frac{\sigma}{2}\right)\f$
  * where \f$I_0\f$ is the modified Bessel function of the first kind.
- * 
- * To sample from this distribution we use rejection sampling.
- * For this, consider the distribution on \f$[0,\pi]\f$ defined by
- * \f$\hat{p}(x) = 2p(x)\f$. Construct a piecewise constant distribution
- * \f$q(x)=\left(Z'_{\sigma}\right)^{-1} \exp\left[-\sigma f(x)\right]\f$ where the function
- * \f$f(x)\le \sin^2\left(\frac{x}{2}\right)\f$ is piecewise constant on
- * the intervals \f$[x_i,x_{i+1}]\f$ with \f$x_0=0\f$, \f$x_n=\pi\f$. Draw
- * a point \f$X\f$ from \f$q(x)\f$ using the cumulative distribution function,
- * and then accept with probability \f$r(x) = C\hat{p}(X)/p(X)=\exp\left[-\sigma\left(\sin^2\left(\frac{X}{2}\right)-f(x)\right)\right]\f$. Note that the 
- * constant \f$C\f$ is chosen such that the ratio \f$r\f$ does not exceed
- * \f$1\f$.
+ *
+ * To sample from this distribution we use rejection sampling with a Gaussian envelope.
  */
 
 class ExpSin2Distribution {
