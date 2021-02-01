@@ -7,7 +7,7 @@
 #include <cmath>
 #include "common/timer.hh"
 #include "distribution/expsin2distribution.hh"
-#include "distribution/cosproductdistribution.hh"
+#include "distribution/expcosdistribution.hh"
 #include "distribution/besselproductdistribution.hh"
 
 /** @file test_distribution.hh
@@ -252,11 +252,11 @@ private:
     const double x_m;
 };
 
-class CosProductDistributionWrapper : public DistributionWrapper {
+class ExpCosDistributionWrapper : public DistributionWrapper {
 public:
-    CosProductDistributionWrapper(const CosProductDistribution& dist_,
-                                  const double x_p_,
-                                  const double x_m_) :
+    ExpCosDistributionWrapper(const ExpCosDistribution& dist_,
+                              const double x_p_,
+                              const double x_m_) :
     dist(dist_), x_p(x_p_), x_m(x_m_) {}
     
     /** @brief Draw single sample
@@ -318,7 +318,7 @@ public:
      * @param[inout] out Output stream
      */
     virtual void write_header(std::ostream& out) {
-        out << "CosProductDistribution" << std::endl;
+        out << "ExpCosDistribution" << std::endl;
         out << "  beta = " << dist.get_beta() << std::endl;
         out << "  x_p  = " << x_p << std::endl;
         out << "  x_m  = " << x_m << std::endl;
@@ -326,7 +326,7 @@ public:
 
 private:
     /** @brief Distribution to wrap */
-    const CosProductDistribution& dist;
+    const ExpCosDistribution& dist;
     /** @brief Parameter \f$x_+\f$*/
     const double x_p;
     /** @brief Parameter \f$x_-\f$*/
@@ -492,18 +492,18 @@ int main(int argc, char* argv[]) {
     double x_p = 0.9*M_PI;
     double x_m = 0;
     
-    /* === CosProductDistribution === */
-    std::cout << "Testing CosProductDistribution ..." << std::endl;
+    /* === ExpCosDistribution === */
+    std::cout << "Testing ExpCosDistribution ..." << std::endl;
     std::cout << "beta = " << beta << std::endl;
     std::cout << "x_p  = " << x_p << std::endl;
     std::cout << "x_m  = " << x_m << std::endl;
-    CosProductDistribution cosproduct_dist(beta);
+    ExpCosDistribution expcos_dist(beta);
     /* Lambda expression for drawing from distribution */
-    CosProductDistributionWrapper cosproduct_wrapper(cosproduct_dist,x_p,x_m);
-    assess_distribution(cosproduct_wrapper,
+    ExpCosDistributionWrapper expcos_wrapper(expcos_dist,x_p,x_m);
+    assess_distribution(expcos_wrapper,
                         n_samples,
                         n_intervals,
-                        "distribution_cosproduct.txt");
+                        "distribution_expcos.txt");
     std::cout << std::endl;
     
     /* === BesselProductDistribution === */

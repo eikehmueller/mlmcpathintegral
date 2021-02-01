@@ -1,5 +1,5 @@
-#ifndef COSPRODUCTDISTRIBUTION_HH
-#define COSPRODUCTDISTRIBUTION_HH COSPRODUCTDISTRIBUTIONHH
+#ifndef EXPCOSDISTRIBUTION_HH
+#define EXPCOSDISTRIBUTION_HH EXPCOSDISTRIBUTIONHH
 #include <algorithm>
 #include <random>
 #include <vector>
@@ -8,12 +8,12 @@
 #include <gsl/gsl_sf_bessel.h>
 #include "common/auxilliary.hh"
 
-/** @file cosproductdistribution.hh
+/** @file expcosdistribution.hh
  *
  * @brief Header file for distribution given by the product of the exponentials of two cosines
  */
 
-/** @class CosProductDistribution
+/** @class ExpCosDistribution
  *
  * @brief Class for sampling from the distribution \f$p(x|x_+,x_-) = Z_^{-1}\exp\left[\beta(\cos(x-x_+)+\cos(x-x_-))\right]\f$
  *
@@ -26,7 +26,7 @@
  * Note that this distribution can be reduced to a ExpSin2Distribution.
  */
 
-class CosProductDistribution {
+class ExpCosDistribution {
 public:
   /** @brief Constructor
    * 
@@ -34,7 +34,7 @@ public:
    *
    * @param[in] beta_ Parameter \f$\beta\f$
    */
-  CosProductDistribution(double beta_) :
+  ExpCosDistribution(double beta_) :
     beta(beta_),
     distribution(0.0,1.0),
     normal_distribution(0.0,1.0),
@@ -88,4 +88,4 @@ private:
   const double fourpi2_inv;
 };
 
-#endif // COSPRODUCTDISTRIBUTION
+#endif // EXPCOSDISTRIBUTION
