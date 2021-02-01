@@ -15,7 +15,7 @@
  */
 
 
-/** @class BesselProductDistribution 
+/** @class BesselProductDistribution
  *
  * @brief Class for sampling from the distribution \f$p(x|x_+,x_-) = Z_^{-1}I_0(2\beta \cos((x-x_+)/2))I_0(2\beta \cos((x-x_-)/2))\f$
  *
@@ -51,8 +51,8 @@ public:
     kmax(20), nmax(40),
     I0_twobeta(gsl_sf_bessel_I0(2*beta)),
     sigma_beta(M_PI/sqrt(2*log(I0_twobeta))) {
-        if (beta > 8.0) {
-            mpi_parallel::cerr << "ERROR beta must not exceed 8.0" << std::endl;
+        if (beta > 16.0) {
+            mpi_parallel::cerr << "ERROR beta must not exceed 16.0" << std::endl;
             exit(-1);
         }
         /* Compute expansion coefficients for normalisation constant */
