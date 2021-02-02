@@ -203,14 +203,33 @@ public:
         mu = r & 1; // mu = r % 2
     }
 
-    virtual std::shared_ptr<Lattice2D> coarse_lattice() {
+    /** @brief Construct coarsened lattice
+     *
+     * Returns lattice with half the lattice spacing
+     */
+    virtual std::shared_ptr<Lattice2D> fine_lattice() {
+        return std::make_shared<Lattice2D>(2*Mt_lat,2*Mx_lat,T_lat,L_lat,coarsening_level-1);
+    };
+
+    /** @brief Construct coarsened lattice
+     *
+     * @param[in] exit_on_failure Abort with an error message if construction is not possible?
+     *
+     * Returns lattice with twice the lattice spacing
+     */
+    virtual std::shared_ptr<Lattice2D> coarse_lattice(const bool exit_on_failure=true) {
         if ( (Mt_lat%2) or (Mx_lat%2) ) {
-            mpi_parallel::cerr << "ERROR: cannot coarsen 2d lattice with M_{t,lat} = " << Mt_lat;
-            mpi_parallel::cerr << " , M_{x,lat} = " << Mx_lat << std::endl;
-            mpi_exit(EXIT_FAILURE);
-            throw std::runtime_error("...");
+            if (exit_on_failure ) {
+                mpi_parallel::cerr << "ERROR: cannot coarsen 2d lattice with M_{t,lat} = " << Mt_lat;
+                mpi_parallel::cerr << " , M_{x,lat} = " << Mx_lat << std::endl;
+                mpi_exit(EXIT_FAILURE);
+                throw std::runtime_error("...");
+            } else {
+                return nullptr;
+            }
+        } else {
+            return std::make_shared<Lattice2D>(Mt_lat/2,Mx_lat/2,T_lat,L_lat,coarsening_level+1);
         }
-        return std::make_shared<Lattice2D>(Mt_lat/2,Mx_lat/2,T_lat,L_lat,coarsening_level+1);
     };
 
 protected:

@@ -9,10 +9,12 @@
 #include "lattice/lattice2d.hh"
 #include "action/renormalisation.hh"
 #include "action/qft/quenchedschwingeraction.hh"
+#include "action/qft/quenchedschwingerconditionedfineaction.hh"
 #include "qoi/qft/qoiavgplaquette.hh"
 #include "qoi/qft/qoi2dsusceptibility.hh"
 #include "montecarlo/montecarlosinglelevel.hh"
 #include "sampler/hmcsampler.hh"
+#include "sampler/hierarchicalsampler.hh"
 #include "sampler/overrelaxedheatbathsampler.hh"
 #include "config.h"
 
@@ -26,9 +28,12 @@
 
 /** Helper function to construct suitable sampler factory for given samplerid */
 std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
+                                                          const std::shared_ptr<SamplerFactory> coarse_sampler_factory,
+                                                          const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                                                           const GeneralParameters param_general,
                                                           const HMCParameters param_hmc,
-                                                          const OverrelaxedHeatBathParameters param_heatbath) {
+                                                          const OverrelaxedHeatBathParameters param_heatbath,
+                                                          const HierarchicalParameters param_hierarchical) {
     std::shared_ptr<SamplerFactory> sampler_factory;
     if (samplerid == SamplerHMC) {
         /* --- CASE 1: HMC sampler ---- */
@@ -36,6 +41,11 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
     } else if (samplerid == SamplerOverrelaxedHeatBath) {
         /* --- CASE 2: heat bath sampler ---- */
         sampler_factory = std::make_shared<OverrelaxedHeatBathSamplerFactory>(param_heatbath);
+    } else if (samplerid == SamplerHierarchical) {
+        /* --- CASE 3: Hierarchical sampler */
+        sampler_factory = std::make_shared<HierarchicalSamplerFactory>(coarse_sampler_factory,
+                                                                       conditioned_fine_action_factory,
+                                                                       param_hierarchical);
     } else {
         mpi_parallel::cerr << " ERROR: Unsupported sampler." << std::endl;
         mpi_exit(EXIT_FAILURE);
@@ -95,6 +105,10 @@ int main(int argc, char* argv[]) {
     SingleLevelMCParameters param_singlelevelmc;
     if (param_singlelevelmc.readFile(filename)) return 1;
     mpi_parallel::cout << param_singlelevelmc << std::endl;
+    
+    HierarchicalParameters param_hierarchical;
+    if (param_hierarchical.readFile(filename)) return 1;
+    mpi_parallel::cout << param_hierarchical << std::endl;
 
 #ifdef DEBUG_BUILD
     mpi_parallel::cout << FRED("CAUTION: built in debug mode.") << std::endl;
@@ -139,6 +153,22 @@ int main(int argc, char* argv[]) {
     mpi_parallel::cout << " Exact result <chi_t> = " << exact_result << std::endl;
     mpi_parallel::cout << std::endl;
 
+    /* Construction conditioned fine action factory */
+    std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory
+        = std::make_shared<QuenchedSchwingerConditionedFineActionFactory>();
+
+    /* Construct coarse level sampler factory, which might be used by the hierarchical samplers */
+    std::shared_ptr<SamplerFactory> coarse_sampler_factory;
+    /* Note that here it does not make sense to use the hierarchical- or multilevel-sampler,
+     * so we can pass null pointers for the QoI and coarse level sampler factory
+     */
+    coarse_sampler_factory = construct_sampler_factory(param_hierarchical.coarsesampler(),
+                                                       nullptr,
+                                                       nullptr,
+                                                       param_general,
+                                                       param_hmc,
+                                                       param_heatbath,
+                                                       param_hierarchical);
     
     /* **************************************** *
      * Single level method                      *
@@ -152,9 +182,12 @@ int main(int argc, char* argv[]) {
 
         std::shared_ptr<SamplerFactory> sampler_factory;
         sampler_factory = construct_sampler_factory(param_singlelevelmc.sampler(),
+                                                    coarse_sampler_factory,
+                                                    conditioned_fine_action_factory,
                                                     param_general,
                                                     param_hmc,
-                                                    param_heatbath);
+                                                    param_heatbath,
+                                                    param_hierarchical);
 
         /* ====== Construct single level MC ====== */
         MonteCarloSingleLevel montecarlo_singlelevel(action,

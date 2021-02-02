@@ -110,7 +110,9 @@ public:
                             const RenormalisationType renormalisation_,
                             const double beta_)
         : Action(renormalisation_),
-        lattice(lattice_),
+          lattice(lattice_),
+          fine_lattice(lattice->fine_lattice()),
+          coarse_lattice(lattice->coarse_lattice()),
           beta(beta_),
           engine(2481317),
           Mt_lat(lattice->getMt_lat()),
@@ -208,6 +210,11 @@ public:
      */
     virtual void initialise_state(std::shared_ptr<SampleState> phi_state) const;
     
+    /** @brief Get underlying lattice */
+    std::shared_ptr<Lattice2D> get_lattice() {
+        return lattice;
+    }
+    
     /** @brief Get coarsening level
      *
      * This will return the coarsening level of the underlying lattice */
@@ -259,28 +266,7 @@ public:
     double chit_exact() const;
 
 private:
-        
-    /** @brief Compute width-parameter of exponential distribution
-     *
-     * Given \f$\theta_+,\theta_-\f$ compute \f$\sigma\f$ such that
-     * \f[
-     *   \cos(\theta-\theta_+) + \cos(\theta-\theta_-) = -\sigma \sin^2\left(\frac{\theta-\theta_0}{2}\right) + const.
-     * \f]
-     *
-     * Explicitly this is given as
-     * \f[
-     *   \sigma=4|\cos\left(\frac{\theta_+-\theta_-}{2}\right)|
-     * \f]
-     *
-     * NOTE THAT THE GIVEN FORMULAE ARE ONLY CORRECT IF \f$\theta_+,\theta_-\in[-\pi,+\pi]\f$
-     *
-     * @param[in] theta_p Angle \f$\theta_+\in[-\pi,+\pi]\f$
-     * @param[in] theta_m Angle \f$\theta_-\in[-\pi,+\pi]\f$
-     */
-    inline double sigma_expsin2(const double theta_p, const double theta_m) const {
-        return 4.*fabs(cos(0.5*(theta_p-theta_m)));
-    }
-    
+            
     /** @brief Compute staple angles \f$\theta_{n,\mu}^{(+)}\f$ and \f$\theta_{n,\mu}^{(-)}\f$
      *
      * Let \f$\nu=1-mu\f$. Then the staple angles are defined as
@@ -329,6 +315,10 @@ private:
 protected:
     /** @brief Underlying lattice */
     const std::shared_ptr<Lattice2D> lattice;
+    /** @brief Underlying refined lattice */
+    const std::shared_ptr<Lattice2D> fine_lattice;
+    /** @brief Underlying coarsened lattice */
+    const std::shared_ptr<Lattice2D> coarse_lattice;
     /** @brief Dimensionless coupling constant \f$\beta=1/(a_t a_x g^2)\f$*/
     const double beta;
     /** @brief Random number engine */

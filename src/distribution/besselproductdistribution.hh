@@ -139,16 +139,17 @@ public:
   
     /** @brief Return parameter \f$\beta\f$ */
   double get_beta() const { return beta; }
-private:
-    
-/** @brief Inverse of normalisation constant
- *
- * Returns \f$Z^{-1}\f$
- *
- * @param[in] phi angle \f$\phi\f$
- */
+
+  /** @brief Inverse of normalisation constant
+   *
+   * Returns \f$Z^{-1}\f$
+   *
+   * @param[in] phi angle \f$\phi\f$
+   */
    const double Znorm_inv(double phi) const;
 
+private:
+    
   /** @brief parameter \f$\beta\f$*/
   const double beta;
   /** @brief Uniform distribution for sampling */

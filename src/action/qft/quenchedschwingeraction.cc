@@ -86,18 +86,39 @@ void QuenchedSchwingerAction::force(const std::shared_ptr<SampleState> phi_state
     }
 }
 
-/* Copy coarse data from path on coarser level */
-void QuenchedSchwingerAction::copy_from_coarse(const std::shared_ptr<SampleState> x_coarse,
-                                               std::shared_ptr<SampleState> x_path) {
-    mpi_parallel::cerr << "ERROR: QuenchedSchwingerAction::copy_from_coarse not implemented yet" << std::endl;
-    mpi_exit(EXIT_FAILURE);
+/* Copy coarse links from state on coarser level */
+void QuenchedSchwingerAction::copy_from_coarse(const std::shared_ptr<SampleState> phi_coarse,
+                                               std::shared_ptr<SampleState> phi_state) {
+    const unsigned int Mt_c_lat = coarse_lattice->getMt_lat();
+    const unsigned int Mx_c_lat = coarse_lattice->getMx_lat();
+    double theta_c;
+    for (unsigned int i=0;i<Mt_c_lat;++i) {
+        for (unsigned int j=0;j<Mx_c_lat;++j) {
+            theta_c = phi_coarse->data[coarse_lattice->link_cart2lin(i  ,j  ,0)];
+            phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)] = 0.5*theta_c;
+            phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,0)] = 0.5*theta_c;
+            theta_c = phi_coarse->data[coarse_lattice->link_cart2lin(i  ,j  ,1)];
+            phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,1)] = 0.5*theta_c;
+            phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,1)] = 0.5*theta_c;
+        }
+    }
 }
 
-/* Copy coarse data from path on finer level */
-void QuenchedSchwingerAction::copy_from_fine(const std::shared_ptr<SampleState> x_fine,
-                                             std::shared_ptr<SampleState> x_path) {
-    mpi_parallel::cerr << "ERROR: QuenchedSchwingerAction::copy_from_fine not implemented yet" << std::endl;
-    mpi_exit(EXIT_FAILURE);
+/* Copy coarse links from state on finer level */
+void QuenchedSchwingerAction::copy_from_fine(const std::shared_ptr<SampleState> phi_fine,
+                                             std::shared_ptr<SampleState> phi_state) {
+    const unsigned int Mt_lat = lattice->getMt_lat();
+    const unsigned int Mx_lat = lattice->getMx_lat();
+    for (unsigned int i=0;i<Mt_lat;++i) {
+        for (unsigned int j=0;j<Mx_lat;++j) {
+            phi_state->data[lattice->link_cart2lin(i  ,j  ,0)]
+                = phi_fine->data[fine_lattice->link_cart2lin(2*i  ,2*j  ,0)]
+                + phi_fine->data[fine_lattice->link_cart2lin(2*i+1,2*j  ,0)];
+            phi_state->data[lattice->link_cart2lin(i  ,j  ,1)]
+                = phi_fine->data[fine_lattice->link_cart2lin(2*i  ,2*j  ,1)]
+                + phi_fine->data[fine_lattice->link_cart2lin(2*i  ,2*j+1,1)];
+        }
+    }
 }
 
 /* Initialise state with random entries */
