@@ -6,6 +6,7 @@
 #include <sstream>
 #include <cmath>
 #include "common/timer.hh"
+#include "common/commandlineparser.hh"
 #include "distribution/expsin2distribution.hh"
 #include "distribution/expcosdistribution.hh"
 #include "distribution/besselproductdistribution.hh"
@@ -51,7 +52,7 @@ public:
      * @param[in] n_samples Number of samples to draw
      */
     virtual void draw(std::mt19937_64& engine,
-                             const unsigned int n_samples) = 0;
+                             const unsigned long n_samples) = 0;
 
     /** @brief Evaluate at a single point
      *
@@ -69,7 +70,7 @@ public:
      * @param[in] n_samples Number of points to evaluate
      */
     virtual void evaluate(std::mt19937_64& engine,
-                          const unsigned int n_samples) = 0;
+                          const unsigned long n_samples) = 0;
 
     /** @brief Write parameters to stream
      *
@@ -118,8 +119,8 @@ public:
      * @param[in] n_samples Number of samples to draw
      */
     virtual void draw(std::mt19937_64& engine,
-                      const unsigned int n_samples) {
-        for (unsigned int n=0;n<n_samples;++n) {
+                      const unsigned long n_samples) {
+        for (unsigned long n=0;n<n_samples;++n) {
             double x = dist.draw(engine,sigma);
             (void) x;
         }
@@ -143,8 +144,8 @@ public:
      * @param[in] n_samples Number of points to evaluate
      */
     virtual void evaluate(std::mt19937_64& engine,
-                          const unsigned int n_samples) {
-        for (unsigned int j=0; j<n_samples; ++j) {
+                          const unsigned long n_samples) {
+        for (unsigned long j=0; j<n_samples; ++j) {
             double x = uniform_dist(engine);
             double y = dist.evaluate(x,sigma);
             (void) y;
@@ -195,8 +196,8 @@ public:
      * @param[in] n_samples Number of samples to draw
      */
     virtual void draw(std::mt19937_64& engine,
-                             const unsigned int n_samples) {
-        for (unsigned int n=0;n<n_samples;++n) {
+                             const unsigned long n_samples) {
+        for (unsigned long n=0;n<n_samples;++n) {
             double x = dist.draw(engine,x_p,x_m);
             (void) x;
         }
@@ -220,8 +221,8 @@ public:
      * @param[in] n_samples Number of points to evaluate
      */
     virtual void evaluate(std::mt19937_64& engine,
-                                 const unsigned int n_samples) {
-        for (unsigned int j=0; j<n_samples; ++j) {
+                                 const unsigned long n_samples) {
+        for (unsigned long j=0; j<n_samples; ++j) {
             double x = uniform_dist(engine);
             double y = dist.evaluate(x,x_p,x_m);
             (void) y;
@@ -276,8 +277,8 @@ public:
      * @param[in] n_samples Number of samples to draw
      */
     virtual void draw(std::mt19937_64& engine,
-                      const unsigned int n_samples) {
-        for (unsigned int n=0;n<n_samples;++n) {
+                      const unsigned long n_samples) {
+        for (unsigned long n=0;n<n_samples;++n) {
             double x = dist.draw(engine,x_p,x_m);
             (void) x;
         }
@@ -301,8 +302,8 @@ public:
      * @param[in] n_samples Number of points to evaluate
      */
     virtual void evaluate(std::mt19937_64& engine,
-                          const unsigned int n_samples) {
-        for (unsigned int j=0; j<n_samples; ++j) {
+                          const unsigned long n_samples) {
+        for (unsigned long j=0; j<n_samples; ++j) {
             double x = uniform_dist(engine);
             double y = dist.evaluate(x,x_p,x_m);
             (void) y;
@@ -340,7 +341,7 @@ private:
  * @param[in] wrapper Distribution wrapper
  */
 double time_sample(DistributionWrapper& wrapper) {
-    unsigned int n_samples = 1000000;
+    unsigned long n_samples = 1000000;
     std::mt19937_64 engine;
     engine.seed(241857);
     Timer timer;
@@ -357,7 +358,7 @@ double time_sample(DistributionWrapper& wrapper) {
  * @param[in] wrapper Distribution wrapper
  */
 double time_evaluation(DistributionWrapper& wrapper) {
-    unsigned int n_samples = 1000000;
+    unsigned long n_samples = 1000000;
     std::mt19937_64 engine;
     engine.seed(241857);
     std::uniform_real_distribution<double> uniform_dist(-M_PI,+M_PI);
@@ -415,7 +416,7 @@ double time_evaluation(DistributionWrapper& wrapper) {
  * @param[in] filename Name of file to write data to
  */
 void save_distribution(DistributionWrapper& wrapper,
-                         const unsigned int n_samples,
+                         const unsigned long n_samples,
                          const unsigned int n_intervals,
                          const std::string filename) {
     // Open file and write header
@@ -425,7 +426,7 @@ void save_distribution(DistributionWrapper& wrapper,
     std::mt19937_64 engine;
     engine.seed(241857);
     std::vector<double> data(n_samples);
-    for (unsigned int n=0; n<n_samples; ++n) {
+    for (unsigned long n=0; n<n_samples; ++n) {
         double x = wrapper.draw(engine);
         data[n] = x;
     }
@@ -433,7 +434,7 @@ void save_distribution(DistributionWrapper& wrapper,
     outfile << "  n_samples = " << n_samples << std::endl;
     outfile << "  n_points = " << (n_intervals+1) << std::endl << std::endl;
     outfile << "==== samples ====" << std::endl;
-    for (int n=0; n<n_samples; ++n) {
+    for (unsigned long n=0; n<n_samples; ++n) {
         outfile << data[n] << std::endl;
     }
     outfile << std::endl;
@@ -458,7 +459,7 @@ void save_distribution(DistributionWrapper& wrapper,
  * @param[in] filename Name of file to write data to
  */
 void assess_distribution(DistributionWrapper& wrapper,
-                         const unsigned int n_samples,
+                         const unsigned long n_samples,
                          const unsigned int n_intervals,
                          const std::string filename) {
     double time_per_sample = time_sample(wrapper);
@@ -471,51 +472,66 @@ void assess_distribution(DistributionWrapper& wrapper,
 /* *************************** M A I N ***************************** */
 int main(int argc, char* argv[]) {
     // Number of samples
-    unsigned int n_samples = 1000000;
+    unsigned long n_samples = 1000000;
     // Number of intervals for plotting the distribution
     unsigned int n_intervals = 128;
+    // Distribution to evaluate
+    std::string distribution = "ExpSin2Distribution";
     
-    /* === ExpSin2Distribution === */
-    std::cout << "Testing ExpSin2Distribution ..." << std::endl;
-    double sigma = 16.0;
-    std::cout << "sigma = " << sigma << std::endl;
-    ExpSin2Distribution expsin2_dist;
-    /* Lambda expression for drawing from distribution */
-    ExpSin2DistributionWrapper expsin2_wrapper(expsin2_dist,sigma);
-    assess_distribution(expsin2_wrapper,
-                        n_samples,
-                        n_intervals,
-                        "distribution_expsin2.txt");
-    std::cout << std::endl;
-
-    double beta = 4.0;
-    double x_p = 0.9*M_PI;
-    double x_m = 0;
+    // Parse command line arguments
+    CommandLineParser commandlineparser(argc, argv);
+    commandlineparser.getopt_string("distribution",distribution);
+    std::cout << "Distribution = " << distribution << std::endl;
+    commandlineparser.getopt_ulong("samples", n_samples);
     
-    /* === ExpCosDistribution === */
-    std::cout << "Testing ExpCosDistribution ..." << std::endl;
-    std::cout << "beta = " << beta << std::endl;
-    std::cout << "x_p  = " << x_p << std::endl;
-    std::cout << "x_m  = " << x_m << std::endl;
-    ExpCosDistribution expcos_dist(beta);
-    /* Lambda expression for drawing from distribution */
-    ExpCosDistributionWrapper expcos_wrapper(expcos_dist,x_p,x_m);
-    assess_distribution(expcos_wrapper,
-                        n_samples,
-                        n_intervals,
-                        "distribution_expcos.txt");
-    std::cout << std::endl;
+    std::cout << "Number of samples = " << n_samples << std::endl;
     
-    /* === BesselProductDistribution === */
-    std::cout << "Testing BesselProductDistribution ..." << std::endl;
-    std::cout << "beta = " << beta << std::endl;
-    std::cout << "x_p  = " << x_p << std::endl;
-    std::cout << "x_m  = " << x_m << std::endl;
-    BesselProductDistribution besselproduct_dist(beta);
-    /* Lambda expression for drawing from distribution */
-    BesselProductDistributionWrapper besselproduct_wrapper(besselproduct_dist,x_p,x_m);
-    assess_distribution(besselproduct_wrapper,
-                        n_samples,
-                        n_intervals,
-                        "distribution_besselproduct.txt");
+    if (distribution == "ExpSin2Distribution") {
+        /* === ExpSin2Distribution === */
+        double sigma = 16.0;
+        commandlineparser.getopt_double("sigma",sigma);
+        std::cout << "sigma = " << sigma << std::endl;
+        ExpSin2Distribution expsin2_dist;
+        ExpSin2DistributionWrapper expsin2_wrapper(expsin2_dist,sigma);
+        assess_distribution(expsin2_wrapper,
+                            n_samples,
+                            n_intervals,
+                            "distribution.txt");
+    } else if (distribution == "ExpCosDistribution") {
+        /* === ExpCosDistribution === */
+        double beta = 4.0;
+        double x_p = 0.9;
+        double x_m = 0.2;
+        commandlineparser.getopt_double("beta",beta);
+        commandlineparser.getopt_double("x_p",x_p);
+        commandlineparser.getopt_double("x_m",x_m);
+        std::cout << "beta = " << beta << std::endl;
+        std::cout << "x_p  = " << x_p << std::endl;
+        std::cout << "x_m  = " << x_m << std::endl;
+        ExpCosDistribution expcos_dist(beta);
+        ExpCosDistributionWrapper expcos_wrapper(expcos_dist,x_p,x_m);
+        assess_distribution(expcos_wrapper,
+                            n_samples,
+                            n_intervals,
+                            "distribution.txt");
+    } else if (distribution == "BesselProductDistribution") {
+        /* === BesselProductDistribution === */
+        double beta = 4.0;
+        double x_p = 0.9;
+        double x_m = 0.2;
+        commandlineparser.getopt_double("beta",beta);
+        commandlineparser.getopt_double("x_p",x_p);
+        commandlineparser.getopt_double("x_m",x_m);
+        std::cout << "beta = " << beta << std::endl;
+        std::cout << "x_p  = " << x_p << std::endl;
+        std::cout << "x_m  = " << x_m << std::endl;
+        BesselProductDistribution besselproduct_dist(beta);
+        BesselProductDistributionWrapper besselproduct_wrapper(besselproduct_dist,x_p,x_m);
+        assess_distribution(besselproduct_wrapper,
+                            n_samples,
+                            n_intervals,
+                            "distribution.txt");
+    } else {
+        std::cout << "ERROR: unknown distribution \'" << distribution << "\'" << std::endl;
+    }
 }
