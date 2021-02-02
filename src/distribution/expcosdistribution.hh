@@ -48,7 +48,7 @@ public:
    */
   template <class URNG>
     const double draw(URNG& engine, const double x_p, const double x_m) const {
-        double dx = x_m-x_p;
+        double dx = mod_2pi(x_m-x_p);
         double tau = 2.*beta*fabs(cos(0.5*dx));
         double sigma = M_PI*sqrt(2./tau);
         bool accepted = false;
