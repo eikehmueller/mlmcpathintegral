@@ -3,7 +3,6 @@
 #include <math.h>
 #include "common/auxilliary.hh"
 #include "common/parameters.hh"
-#include "lattice/lattice1d.hh"
 #include "mpi/mpi_wrapper.hh"
 
 /** @file renormalisation.hh
@@ -30,17 +29,13 @@ class RenormalisedParameters {
 public:
     /** @brief Create new instance
      *
-     * @param[in] lattice_ Underlying lattice
      * @param[in] renormalisation_ Type of renormalisation to use
      *              (0: none, 1: perturbative, 2: exact)
      */
-    RenormalisedParameters(const std::shared_ptr<Lattice1D> lattice_,
-                           const RenormalisationType renormalisation_) :
-        lattice(lattice_), renormalisation(renormalisation_) {}
+    RenormalisedParameters(const RenormalisationType renormalisation_) :
+        renormalisation(renormalisation_) {}
 
 protected:
-    /** @brief Number of time slices */
-    const std::shared_ptr<Lattice1D> lattice;
     /** @brief Type of renormalisation */
     const RenormalisationType renormalisation;
 };

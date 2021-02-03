@@ -5,7 +5,7 @@
 #include "lattice/lattice1d.hh"
 #include "action/renormalisation.hh"
 
-/** @file rotoraction.hh
+/** @file rotorrenormalisation.hh
  * @brief Header file for renormalisation of quantum mechanical rotor class
  */
 
@@ -31,8 +31,8 @@ public:
     RenormalisedRotorParameters(const std::shared_ptr<Lattice1D> lattice_,
                                 const double m0_,
                                 const RenormalisationType renormalisation_) :
-        RenormalisedParameters(lattice_, renormalisation_),
-        m0(m0_) {}
+        RenormalisedParameters(renormalisation_),
+        lattice(lattice_), m0(m0_) {}
 
     /** @brief Renormalised coarse level mass \f$m_0^{(c)}\f$*/
     double m0_coarse() {
@@ -62,6 +62,8 @@ public:
     double deltaI(const double xi);
 
 private:
+    /** @brief Underlying lattice */
+    const std::shared_ptr<Lattice1D> lattice;
     /** @brief Mass (moment of inertia) \f$m_0\f$ */
     const double m0;
 };

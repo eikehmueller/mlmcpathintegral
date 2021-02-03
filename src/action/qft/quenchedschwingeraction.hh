@@ -15,6 +15,7 @@
 #include "distribution/expcosdistribution.hh"
 #include "lattice/lattice2d.hh"
 #include "action/action.hh"
+#include "action/qft/quenchedschwingerrenormalisation.hh"
 
 /** @file quenchedschwingeraction.hh
  * @brief Header file for action of the quenched 2D Schwinger model
@@ -140,10 +141,11 @@ public:
      * of the lattice hierarchy.
      */
     virtual std::shared_ptr<Action> coarse_action() {
+        RenormalisedQuenchedSchwingerParameters c_param(lattice,beta,renormalisation);
         std::shared_ptr<Action> new_action;
         new_action = std::make_shared<QuenchedSchwingerAction>(lattice->coarse_lattice(),
                                                                renormalisation,
-                                                               beta);
+                                                               c_param.beta_coarse());
         return new_action;
     };
 

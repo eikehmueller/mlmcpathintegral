@@ -39,8 +39,8 @@ public:
                              const double m0_,
                              const double mu2_,
                              const RenormalisationType renormalisation_) :
-        RenormalisedParameters(lattice_, renormalisation_),
-        m0(m0_), mu2(mu2_) {}
+        RenormalisedParameters(renormalisation_),
+        lattice(lattice_), m0(m0_), mu2(mu2_) {}
 
     /** @brief Renormalised coarse level mass \f$m_0^{(c)}\f$*/
     double m0_coarse() {
@@ -83,6 +83,8 @@ private:
     const double m0;
     /** @brief Harmonic oscillator potential parameter \f$\mu^2\f$*/
     const double mu2;
+    /** @brief Underlying lattice */
+    const std::shared_ptr<Lattice1D> lattice;
 };
 
 #endif // HARMONICOSCILLATORRENORMALISATION_HH
