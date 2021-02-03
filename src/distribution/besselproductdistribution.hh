@@ -77,7 +77,7 @@ public:
   template <class URNG>
     const double draw(URNG& engine, const double x_p, const double x_m) const {
         double a_min, a_max, mu;
-        double dx = mod_2pi(x_m-x_p);
+        double dx = x_m-x_p;
         // Flip sign if necessary to ensure dx is always non-negative
         // (this will be compensated for later)
         double sign_flip = (dx<0)?-1:+1; // Flip sign if difference is negative
