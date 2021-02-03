@@ -77,11 +77,11 @@ double QuenchedSchwingerConditionedFineAction::evaluate(const std::shared_ptr<Sa
             double theta_3 = -phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,0)];
             double theta_4 = +phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,1)];
             double Phi = phi_12+phi_23+phi_34+phi_41;
-            S += beta * (  cos(theta_1-theta_2-phi_12)
+            S -= beta * (  cos(theta_1-theta_2-phi_12)
                          + cos(theta_2-theta_3-phi_23)
                          + cos(theta_3-theta_4-phi_34)
                          + cos(theta_4-theta_1-phi_41) );
-            S += log(bessel_product_dist.Znorm_inv(Phi));
+            S -= log(bessel_product_dist.Znorm_inv(Phi));
         }
     }
     return S;
