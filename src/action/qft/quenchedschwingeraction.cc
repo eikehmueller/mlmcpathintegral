@@ -112,11 +112,11 @@ void QuenchedSchwingerAction::copy_from_fine(const std::shared_ptr<SampleState> 
     for (unsigned int i=0;i<Mt_lat;++i) {
         for (unsigned int j=0;j<Mx_lat;++j) {
             phi_state->data[lattice->link_cart2lin(i  ,j  ,0)]
-                = phi_fine->data[fine_lattice->link_cart2lin(2*i  ,2*j  ,0)]
-                + phi_fine->data[fine_lattice->link_cart2lin(2*i+1,2*j  ,0)];
+                = mod_2pi(phi_fine->data[fine_lattice->link_cart2lin(2*i  ,2*j  ,0)]
+                        + phi_fine->data[fine_lattice->link_cart2lin(2*i+1,2*j  ,0)]);
             phi_state->data[lattice->link_cart2lin(i  ,j  ,1)]
-                = phi_fine->data[fine_lattice->link_cart2lin(2*i  ,2*j  ,1)]
-                + phi_fine->data[fine_lattice->link_cart2lin(2*i  ,2*j+1,1)];
+                = mod_2pi(phi_fine->data[fine_lattice->link_cart2lin(2*i  ,2*j  ,1)]
+                        + phi_fine->data[fine_lattice->link_cart2lin(2*i  ,2*j+1,1)]);
         }
     }
 }

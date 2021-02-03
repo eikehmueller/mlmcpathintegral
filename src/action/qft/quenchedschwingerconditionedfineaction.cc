@@ -14,42 +14,46 @@ void QuenchedSchwingerConditionedFineAction::fill_fine_points(std::shared_ptr<Sa
         for (unsigned int j=0;j<Mx_lat/2;++j) {
             // Links pointing in temporal direction
             dtheta = uniform_dist(engine);
-            phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)]+=dtheta;
-            phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,0)]-=dtheta;
+            phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)]
+                = mod_2pi(phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)]+dtheta);
+            phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,0)]
+                = mod_2pi(phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,0)]-dtheta);
             // Links pointing in spatial direction
             dtheta = uniform_dist(engine);
-            phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,1)]+=dtheta;
-            phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,1)]-=dtheta;
+            phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,1)]
+                = mod_2pi(phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,1)]+dtheta);
+            phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,1)]
+                = mod_2pi(phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,1)]-dtheta);
         }
     }
     /* STEP 2: Fill interior links in spatial direction */
     for (unsigned int i=0;i<Mt_lat/2;++i) {
         for (unsigned int j=0;j<Mx_lat/2;++j) {
             // Links pointing in temporal direction
-            double theta_p  = phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,0)]
-                            + phi_state->data[lattice->link_cart2lin(2*i+2,2*j  ,1)]
-                            + phi_state->data[lattice->link_cart2lin(2*i+2,2*j+1,1)]
-                            - phi_state->data[lattice->link_cart2lin(2*i+1,2*j+2,0)];
-            double theta_m  = phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,1)]
-                            + phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,1)]
-                            + phi_state->data[lattice->link_cart2lin(2*i  ,2*j+2,0)]
-                            - phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)];
+            double theta_p = mod_2pi(phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,0)]
+                                   + phi_state->data[lattice->link_cart2lin(2*i+2,2*j  ,1)]
+                                   + phi_state->data[lattice->link_cart2lin(2*i+2,2*j+1,1)]
+                                   - phi_state->data[lattice->link_cart2lin(2*i+1,2*j+2,0)]);
+            double theta_m = mod_2pi(phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,1)]
+                                   + phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,1)]
+                                   + phi_state->data[lattice->link_cart2lin(2*i  ,2*j+2,0)]
+                                   - phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)]);
             double theta_tilde = bessel_product_dist.draw(engine,theta_p,theta_m);
             dtheta = uniform_dist(engine);
-            phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,1)] = theta_tilde+dtheta;
-            phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,1)] = theta_tilde-dtheta;
+            phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,1)] = mod_2pi(theta_tilde+dtheta);
+            phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,1)] = mod_2pi(theta_tilde-dtheta);
         }
     }
     /* STEP 3: Fill interior links in temporal direction */
     for (unsigned int i=0;i<Mt_lat;++i) {
         for (unsigned int j=0;j<Mx_lat/2;++j) {
             // Links pointing in temporal direction
-            double theta_p  = phi_state->data[lattice->link_cart2lin(i  ,2*j  ,0)]
-                            + phi_state->data[lattice->link_cart2lin(i+1,2*j  ,1)]
-                            - phi_state->data[lattice->link_cart2lin(i  ,2*j  ,1)];
-            double theta_m  = phi_state->data[lattice->link_cart2lin(i  ,2*j+1,1)]
-                            + phi_state->data[lattice->link_cart2lin(i  ,2*j+2,0)]
-                            - phi_state->data[lattice->link_cart2lin(i+1,2*j+1,1)];
+            double theta_p  = mod_2pi(phi_state->data[lattice->link_cart2lin(i  ,2*j  ,0)]
+                                    + phi_state->data[lattice->link_cart2lin(i+1,2*j  ,1)]
+                                    - phi_state->data[lattice->link_cart2lin(i  ,2*j  ,1)]);
+            double theta_m  = mod_2pi(phi_state->data[lattice->link_cart2lin(i  ,2*j+1,1)]
+                                    + phi_state->data[lattice->link_cart2lin(i  ,2*j+2,0)]
+                                    - phi_state->data[lattice->link_cart2lin(i+1,2*j+1,1)]);
             double theta_tilde = exp_cos_dist.draw(engine,theta_p,theta_m);
             phi_state->data[lattice->link_cart2lin(i,2*j+1,0)] = theta_tilde;
         }
