@@ -230,14 +230,14 @@ public:
      */
     virtual void check_coarsening_is_permitted(const unsigned int n_level);
     
-    /** @brief Exact result for topological susceptibility
+    /** @brief Exact result for topological susceptibility scaled
      *
      * Computes the exact value of the topological susceptibility. If the number of plaquettes is \f$P\f$,
      * then this is given by
      *
      * \f[
-     *   \chi_t(\beta,P) = \frac{\langle Q^2 \rangle}{P}
-     *   = \sum_{n=-\infty}^{\infty} w_n(\beta,P)\left[
+     *   \chi_t(\beta,P) = \langle Q^2 \rangle
+     *   = P\sum_{n=-\infty}^{\infty} w_n(\beta,P)\left[
      *      (P-1) \left(\frac{I'_n(\beta)}{I_n(\beta)}\right)^2 - \frac{I''_n(\beta)}{I_n(\beta)}
      *   \right]
      * \f]

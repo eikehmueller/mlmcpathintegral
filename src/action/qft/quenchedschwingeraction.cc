@@ -173,7 +173,7 @@ double QuenchedSchwingerAction::chit_exact() const {
     }
     double chit=0.0;
     for (int n=0;n<nmax;++n) {
-        chit += weight[n]/weight_sum * (ddIn[n]/In[n] -(n_plaq-1)*(dIn[n]*dIn[n])/(In[n]*In[n]));
+        chit += n_plaq*weight[n]/weight_sum * (ddIn[n]/In[n] -(n_plaq-1)*(dIn[n]*dIn[n])/(In[n]*In[n]));
     }
     return chit;
 }
