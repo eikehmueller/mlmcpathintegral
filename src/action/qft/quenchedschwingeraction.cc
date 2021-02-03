@@ -167,7 +167,8 @@ double QuenchedSchwingerAction::chit_exact() const {
         /* Terms with n>0 are counted twice to account for
            corresponding negative entries in original sum */
         double duplicity = (1 + (n > 0));
-        weight[n] = duplicity*pow(In[n],n_plaq);
+        double rho = In[n]/In[0];
+        weight[n] = duplicity*pow(rho,n_plaq);
         weight_sum += weight[n];
     }
     double chit=0.0;
