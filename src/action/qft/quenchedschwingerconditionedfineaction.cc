@@ -40,8 +40,8 @@ void QuenchedSchwingerConditionedFineAction::fill_fine_points(std::shared_ptr<Sa
                                    - phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)]);
             double theta_tilde = bessel_product_dist.draw(engine,theta_p,theta_m);
             dtheta = uniform_dist(engine);
-            phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,1)] = mod_2pi(theta_tilde+dtheta);
-            phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,1)] = mod_2pi(theta_tilde-dtheta);
+            phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,1)] = mod_2pi(0.5*theta_tilde+dtheta);
+            phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,1)] = mod_2pi(0.5*theta_tilde-dtheta);
         }
     }
     /* STEP 3: Fill interior links in temporal direction */
