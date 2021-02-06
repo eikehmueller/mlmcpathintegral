@@ -147,7 +147,8 @@ int main(int argc, char* argv[]) {
     // numerical result and statistical error
     double numerical_result;
     double statistical_error;
-    double exact_result = std::dynamic_pointer_cast<QuenchedSchwingerAction>(action)->chit_exact();
+    double exact_result = quenchedschwinger_chit_exact(param_schwinger.beta(),
+                                                       lattice->getNcells());
     mpi_parallel::cout << std::endl;
     mpi_parallel::cout << std::setprecision(8) << std::fixed;
     mpi_parallel::cout << " Exact result <chi_t> = " << exact_result << std::endl;
