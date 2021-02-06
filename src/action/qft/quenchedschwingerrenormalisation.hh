@@ -43,7 +43,7 @@ public:
         double betacoarse;
         switch (renormalisation) {
         case RenormalisationNone:
-            betacoarse = 0.3225*beta;
+            betacoarse = 0.25*beta;
             break;
         case RenormalisationPerturbative:
             betacoarse = 1.0;
