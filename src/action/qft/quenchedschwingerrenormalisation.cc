@@ -32,26 +32,32 @@ double RenormalisedQuenchedSchwingerParameters::betacoarse_nonperturbative() {
     double x;
     
     // Initialise root finder
-    gsl_root_fsolver_set (solver, &f_gsl, x_lo, x_hi);
+    double f_lo = f_root (x_lo, &params);
+    double f_hi = f_root (x_hi, &params);
+    if ( ( (f_lo>0) and (f_hi>0) ) or ( (f_lo<0) and (f_hi<0) )) {
+        // Use fallback value if there is no root in the interval [x_lo,x_hi]
+        x = 0.25;
+    } else {
+        gsl_root_fsolver_set (solver, &f_gsl, x_lo, x_hi);
     
-    // Set this to true to print output for debugging
-    bool verbose = false;
-    
-    for (unsigned int k=0;k<max_iter;++k) {
-        status = gsl_root_fsolver_iterate (solver);
-        x = gsl_root_fsolver_root (solver);
-        x_lo = gsl_root_fsolver_x_lower (solver);
-        x_hi = gsl_root_fsolver_x_upper (solver);
-        // Check for convergence
-        status = gsl_root_test_interval (x_lo, x_hi, 0, rel_tol);
-        if (verbose) {
-            if (status == GSL_SUCCESS)
-                printf ("Converged:\n");
+        // Set this to true to print output for debugging
+        bool verbose = false;
+        for (unsigned int k=0;k<max_iter;++k) {
+            status = gsl_root_fsolver_iterate (solver);
+            x = gsl_root_fsolver_root (solver);
+            x_lo = gsl_root_fsolver_x_lower (solver);
+            x_hi = gsl_root_fsolver_x_upper (solver);
+            // Check for convergence
+            status = gsl_root_test_interval (x_lo, x_hi, 0, rel_tol);
+            if (verbose) {
+                if (status == GSL_SUCCESS)
+                    printf ("Converged:\n");
 
-            printf ("%5d [%.7f, %.7f] %.7f %.7f\n",
-                    k, x_lo, x_hi,x, x_hi - x_lo);
+                printf ("%5d [%.7f, %.7f] %.7f %.7f\n",
+                        k, x_lo, x_hi,x, x_hi - x_lo);
+            }
+            if (status != GSL_CONTINUE) break;
         }
-        if (status != GSL_CONTINUE) break;
     }
     gsl_root_fsolver_free(solver);
     return x*beta;
