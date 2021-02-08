@@ -51,11 +51,12 @@ public:
     kmax(20), nmax(40),
     I0_twobeta(gsl_sf_bessel_I0(2*beta)),
     sigma_beta(M_PI/sqrt(2*log(I0_twobeta))) {
-        if (beta > 16.0) {
-            mpi_parallel::cerr << "ERROR beta must not exceed 16.0" << std::endl;
+        if (beta > 64.0) {
+            mpi_parallel::cerr << "ERROR beta must not exceed 64.0" << std::endl;
             exit(-1);
         }
         /* Compute expansion coefficients for normalisation constant */
+        double alpha0;
         for (unsigned int k=0;k<=kmax;++k) {
             double s = 0.0;
             for (unsigned int n=k;n<=nmax;++n) {
@@ -64,7 +65,13 @@ public:
                     s += pow(0.5*beta,2*(n+m))*exp(log_comb);
                 }
             }
-            alphaZ.push_back(((k==0)?2:4)*M_PI*s);
+            double alpha = ((k==0)?2:4)*M_PI*s;
+            if (k==0) {
+                alpha0 = alpha;
+            } else {
+                alpha /= alpha0;
+            }
+            alphaZ.push_back(alpha);
         }
     }
 
@@ -145,8 +152,9 @@ public:
    * Returns \f$Z^{-1}\f$
    *
    * @param[in] phi angle \f$\phi\f$
+   * @param[in] rescaled Rescale by \f$alpha_0\f$?
    */
-   const double Znorm_inv(double phi) const;
+   const double Znorm_inv(double phi,const bool rescaled=false) const;
 
 private:
     

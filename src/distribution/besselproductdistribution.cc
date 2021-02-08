@@ -13,10 +13,14 @@ double BesselProductDistribution::evaluate(const double x,
 }
 
 /* Compute inverse normalisation constant */
-const double BesselProductDistribution::Znorm_inv(double phi) const {
-    double s=0.0;
-    for (unsigned int k=0;k<=kmax;++k) {
+const double BesselProductDistribution::Znorm_inv(double phi,
+                                                  const bool rescaled) const {
+    double s=1.0;
+    for (unsigned int k=1;k<=kmax;++k) {
         s += alphaZ[k]*cos(k*phi);
+    }
+    if (not rescaled) {
+        s*=alphaZ[0];
     }
     return 1.0/s;
 }

@@ -85,7 +85,7 @@ double QuenchedSchwingerConditionedFineAction::evaluate(const std::shared_ptr<Sa
                          + cos(theta_2-theta_3-phi_23)
                          + cos(theta_3-theta_4-phi_34)
                          + cos(theta_4-theta_1-phi_41) );
-            S -= log(bessel_product_dist.Znorm_inv(Phi));
+            S -= log(bessel_product_dist.Znorm_inv(Phi,true));
         }
     }
     return S;
