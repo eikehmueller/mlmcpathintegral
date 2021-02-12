@@ -35,9 +35,13 @@ public:
         beta(action->getbeta()),
         uniform_dist(-M_PI,+M_PI),
         exp_cos_dist(action->getbeta()),
-        bessel_product_dist(action->getbeta()),
-        approximate_bessel_product_dist(action->getbeta()),
-        approximate_bessel(action->getbeta()>8.0) {
+        bessel_product_dist(NULL),
+        approximate_bessel_product_dist(NULL) {
+            if (beta>8.0) {
+                approximate_bessel_product_dist = std::make_shared<ApproximateBesselProductDistribution>(beta);
+            } else {
+                bessel_product_dist = std::make_shared<BesselProductDistribution>(beta);
+            }
         engine.seed(71814151);
     }
 
@@ -76,11 +80,9 @@ private:
     /** @brief Probability distribution for drawing horizontal interior links */
     mutable ExpCosDistribution exp_cos_dist;
     /** @brief Probability distribution for drawing vertical interior links */
-    mutable BesselProductDistribution bessel_product_dist;
+    mutable std::shared_ptr<BesselProductDistribution> bessel_product_dist;
     /** @brief Approximate probability distribution for drawing vertical interior links */
-    mutable ApproximateBesselProductDistribution approximate_bessel_product_dist;
-    /** @brief Use approximate Bessel product distribution for sampling? */
-    const bool approximate_bessel;
+    mutable std::shared_ptr<ApproximateBesselProductDistribution> approximate_bessel_product_dist;
 };
 
 struct QuenchedSchwingerConditionedFineActionFactory : public ConditionedFineActionFactory {

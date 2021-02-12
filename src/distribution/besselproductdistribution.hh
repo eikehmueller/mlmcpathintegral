@@ -48,11 +48,11 @@ public:
     beta(beta_),
     distribution(0.0,1.0),
     normal_distribution(0.0,1.0),
-    kmax(20), nmax(40),
+    kmax(16), nmax(32),
     I0_twobeta(gsl_sf_bessel_I0(2*beta)),
     sigma_beta(M_PI/sqrt(2*log(I0_twobeta))) {
-        if (beta > 64.0) {
-            mpi_parallel::cerr << "ERROR beta must not exceed 64.0" << std::endl;
+        if (beta > 8.0) {
+            mpi_parallel::cerr << "ERROR beta must not exceed 8.0" << std::endl;
             exit(-1);
         }
         /* Compute expansion coefficients for normalisation constant */

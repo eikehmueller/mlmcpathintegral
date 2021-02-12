@@ -39,10 +39,10 @@ void QuenchedSchwingerConditionedFineAction::fill_fine_points(std::shared_ptr<Sa
                                    + phi_state->data[lattice->link_cart2lin(2*i  ,2*j+2,0)]
                                    - phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)]);
             double theta_tilde;
-            if (approximate_bessel) {
-                theta_tilde = bessel_product_dist.draw(engine,theta_p,theta_m);
+            if (bessel_product_dist == NULL) {
+                theta_tilde = approximate_bessel_product_dist->draw(engine,theta_p,theta_m);
             } else {
-                theta_tilde = approximate_bessel_product_dist.draw(engine,theta_p,theta_m);
+                theta_tilde = bessel_product_dist->draw(engine,theta_p,theta_m);
             }
             dtheta = uniform_dist(engine);
             phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,1)] = mod_2pi(0.5*theta_tilde+dtheta);
@@ -71,7 +71,7 @@ double QuenchedSchwingerConditionedFineAction::evaluate(const std::shared_ptr<Sa
     const unsigned int Mt_lat = lattice->getMt_lat();
     const unsigned int Mx_lat = lattice->getMx_lat();
     double S = 0.0;
-    if (approximate_bessel) {
+    if (bessel_product_dist == NULL) {
         // Contribution from drawing vertical links
         for (unsigned int i=0;i<Mt_lat/2;++i) {
             for (unsigned int j=0;j<Mx_lat/2;++j) {
@@ -85,7 +85,7 @@ double QuenchedSchwingerConditionedFineAction::evaluate(const std::shared_ptr<Sa
                                        + phi_state->data[lattice->link_cart2lin(2*i  ,2*j+2,0)]);
                 double theta = mod_2pi(+ phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,1)]
                                        + phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,1)]);
-                S -= log(approximate_bessel_product_dist.evaluate(theta,phi_p,phi_m));
+                S -= log(approximate_bessel_product_dist->evaluate(theta,phi_p,phi_m));
             }
         }
         // Contribution from drawing horizontal links
@@ -121,7 +121,7 @@ double QuenchedSchwingerConditionedFineAction::evaluate(const std::shared_ptr<Sa
                              + cos(theta_2-theta_3-phi_23)
                              + cos(theta_3-theta_4-phi_34)
                              + cos(theta_4-theta_1-phi_41) );
-                S -= log(bessel_product_dist.Znorm_inv(Phi,true));
+                S -= log(bessel_product_dist->Znorm_inv(Phi,true));
             }
         }
     }
