@@ -79,15 +79,17 @@ private:
  *  and the functions
  *  \f[
  *  \begin{aligned}
- *    I_n(x) &= \frac{1}{2\pi} \int_{-\pi}^{+\pi} e^{i n\phi + x\cos(\phi)} \; d\phi \\
- *        &= \frac{1}{2\pi} \int_{-\pi}^{+\pi} e^{x\cos(\phi)} \cos(n\phi) \; d\phi \\
- *    I'_n(x) &= \frac{i}{2\pi} \int_{-\pi}^{+\pi} \frac{\phi}{2\pi }e^{i n\phi + x\cos(\phi)} \; d\phi \\
- *        &= -\frac{1}{4\pi^2} \int_{-\pi}^{+\pi} \phi e^{x\cos(\phi)} \sin(n\phi) \; d\phi \\
- *    I''_n(x) &= \frac{i}{2\pi} \int_{-\pi}^{+\pi} \left(\frac{\phi}{2\pi }\right)^2 e^{i n\phi + x\cos(\phi)} \; d\phi \\
- *        &= -\frac{1}{8\pi^3} \int_{-\pi}^{+\pi} \phi^2 e^{x\cos(\phi)} \cos(n\phi) \; d\phi
+ *    I_n(x) &= \frac{1}{2\pi} \int_{-\pi}^{+\pi} e^{i n\phi + x(\cos(\phi)-1)} \; d\phi \\
+ *        &= \frac{1}{2\pi} \int_{-\pi}^{+\pi} e^{x(\cos(\phi)-1)} \cos(n\phi) \; d\phi \\
+ *    I'_n(x) &= \frac{i}{2\pi} \int_{-\pi}^{+\pi} \frac{\phi}{2\pi }e^{i n\phi + x(\cos(\phi)-1)} \; d\phi \\
+ *        &= -\frac{1}{4\pi^2} \int_{-\pi}^{+\pi} \phi e^{x(\cos(\phi)-1)} \sin(n\phi) \; d\phi \\
+ *    I''_n(x) &= \frac{i}{2\pi} \int_{-\pi}^{+\pi} \left(\frac{\phi}{2\pi }\right)^2 e^{i n\phi + x(\cos(\phi)-1)} \; d\phi \\
+ *        &= -\frac{1}{8\pi^3} \int_{-\pi}^{+\pi} \phi^2 e^{x(\cos(\phi)-1)} \cos(n\phi) \; d\phi
  *  \end{aligned}
  *  \f]
- *  Note that \f$I_n(x)\f$ is the modified Bessel function of the first kind. For more details see the following two papers:
+ *  All functions are scaled by a factor \f$e^{-x}\f$ for numerical stability (this factor will cancel out, since we
+ *  only every compute ratios of the above functions). Note that \f$I_n(x)\f$ is the (rescaled) modified Bessel
+ *  function of the first kind. For more details see the following two papers:
  *
  *  - Bonati, C. and Rossi, P., 2019. "Topological susceptibility of two-dimensional U (N) gauge theories."
  *   Physical Review D, 99(5), p.054503 https://doi.org/10.1103/PhysRevD.99.054503

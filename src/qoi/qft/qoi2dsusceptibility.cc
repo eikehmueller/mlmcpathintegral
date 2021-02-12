@@ -58,13 +58,13 @@ void compute_In(const double x,
     /* Integrand -1/(4*pi^2)*phi*exp(-x*cos(phi)) */
     auto integrand_phi1 = [](double phi, void * p) -> double {
         double x = *((double*) p);
-        return  -1./(4.*M_PI*M_PI)*phi*exp(x*cos(phi));
+        return  -1./(4.*M_PI*M_PI)*phi*exp(x*(cos(phi)-1.0));
     };
 
     /* Integrand 1/(8*pi^3)*phi^2*exp(-x*cos(phi)) */
     auto integrand_phi2 = [](double phi, void * p) -> double {
         double x = *((double*) p);
-        return  1./(8.*M_PI*M_PI*M_PI)*phi*phi*exp(x*cos(phi));
+        return  1./(8.*M_PI*M_PI*M_PI)*phi*phi*exp(x*(cos(phi)-1.0));
     };
 
     /* GSL function required for integration */
@@ -72,8 +72,8 @@ void compute_In(const double x,
     integrand.params = (void*) &x;
     
     /* GSL workspace required for numerical integration with QAWO routine */
-    const size_t n_workspace = 1024;
     const size_t n_level = 10; // 2^{n_level} must not exceed n_workspace
+    const size_t n_workspace = 1<<n_level;
     gsl_integration_workspace* workspace;
     workspace = gsl_integration_workspace_alloc(n_workspace);
     gsl_integration_qawo_table* qawo_table;
@@ -86,7 +86,7 @@ void compute_In(const double x,
     /* Evaluate all functions*/
     for (int n=0;n<In.size();++n) {
         /* --- I_n(x) --- */
-        In[n] = gsl_sf_bessel_In(n,x);
+        In[n] = gsl_sf_bessel_In_scaled(n,x);
         /* Evaluate the integrals */
         double abserr; // Absolute error of numerical integration
         /* --- I'_n(x), weight function is sin(n*phi) --- */
