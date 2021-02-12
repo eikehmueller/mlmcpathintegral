@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 
   This script processes text files in the format given below. It plots
   a binned distribution and compares the evaluated distribution to the
-  exact analytical expression. The file header depends on the considered 
+  analytical expression. The file header depends on the considered 
   distribution and is parsed to extract the relevant parameters.
 
   -------------------------------------------------
@@ -59,8 +59,6 @@ class Distribution(object):
     '''
     def plot(self,filename,bins=64):
         plt.clf()
-        X_exact = np.arange(-np.pi,np.pi,1.E-3)
-        Y_exact = np.vectorize(self.f_exact)(X_exact)
         plt.hist(self.samples,
                      histtype='stepfilled',
                      alpha=0.5,
@@ -72,11 +70,7 @@ class Distribution(object):
                      linestyle='-',
                      color='black',
                      label='distribution')
-        plt.plot(X_exact,Y_exact,
-                     linewidth=2,
-                     linestyle='--',
-                     color='red',
-                     label='exact')
+        self._plot_analytical()
         ax = plt.gca()
         ax.set_xlim(-1.05*np.pi,1.05*np.pi)
         ax.set_xticks((-np.pi,-0.5*np.pi,0,0.5*np.pi,np.pi))
@@ -85,6 +79,15 @@ class Distribution(object):
         plt.title(self.label)
         plt.savefig(filename,bbox_inches='tight')
 
+    def _plot_analytical(self):
+        '''Plot analytical expression for distribution'''
+        X_analytical = np.arange(-np.pi,np.pi,1.E-3)
+        Y_analytical = np.vectorize(self.f_analytical)(X_analytical)
+        plt.plot(X_analytical,Y_analytical,
+                 linewidth=2,
+                 linestyle='--',
+                 color='red',
+                 label='analytical')
 
 class ExpSin2Distribution(Distribution):
     '''Wrapper for ExpSin2Distribution
@@ -100,11 +103,11 @@ class ExpSin2Distribution(Distribution):
         self.sigma = sigma
         self.Znorm_inv = np.exp(0.5*self.sigma)/(2.*np.pi*np.i0(0.5*self.sigma))
 
-    '''Exact value of distribution at a given point
+    '''Analytical value of distribution at a given point
     
     :arg x: Point at which the distribution is evaluated
     '''
-    def f_exact(self,x):
+    def f_analytical(self,x):
         return self.Znorm_inv*np.exp(-self.sigma*np.sin(0.5*x)**2)
 
 class ExpCosDistribution(Distribution):
@@ -116,11 +119,11 @@ class ExpCosDistribution(Distribution):
         self.x_m = x_m
         self.Znorm = 2.*np.pi*np.i0(2.*beta*np.cos(0.5*(self.x_p-self.x_m)))
 
-    '''Exact value of distribution at a given point
+    '''Analytical value of distribution at a given point
     
     :arg x: Point at which the distribution is evaluated
     '''
-    def f_exact(self,x):
+    def f_analytical(self,x):
         return 1./self.Znorm*np.exp(self.beta*(np.cos(x-self.x_p)+np.cos(x-self.x_m)))
     
 class BesselProductDistribution(Distribution):
@@ -151,12 +154,73 @@ class BesselProductDistribution(Distribution):
                 A_k = 4*math.pi*s
             self.Znorm += A_k*math.cos(k*(self.x_p-self.x_m))
 
-    '''Exact value of distribution at a given point
+    '''Analytical value of distribution at a given point
     
     :arg x: Point at which the distribution is evaluated
     '''
-    def f_exact(self,x):
+    def f_analytical(self,x):
         return 1./self.Znorm*np.i0(2*self.beta*np.cos(0.5*(x-self.x_p)))*np.i0(2*self.beta*np.cos(0.5*(x-self.x_m)))
+
+class ApproximateBesselProductDistribution(Distribution):
+    def __init__(self,samples,X,Y,beta,x_p,x_m):
+        super().__init__(samples,X,Y)
+        self.label = 'ApproximateBesselProductDistribution'
+        self.beta = beta
+        self.x_p = x_p
+        self.x_m = x_m
+        # Number of terms included in the sum
+        self.kmax = 16
+
+        self.x0 = self.x_p-self.x_m
+        self.sign_flip = -1 if (self.x0<0) else +1
+        self.x0 *= self.sign_flip
+        if (self.x0 > np.pi):
+            self.x0 = 2.*np.pi - self.x0
+            self.sign_flip *= -1
+        self.sigma2_inv = self.beta*np.cos(0.25*self.x0)
+        sigma2_inv_tilde = self.beta*np.sin(0.25*self.x0)
+        rho_r = np.i0(2.*sigma2_inv_tilde)/np.i0(2.*self.sigma2_inv)
+        self.N_p = 1./(1.+rho_r*rho_r)
+        self.N_m = 1.-self.N_p
+
+    def _plot_analytical(self):
+        '''Plot analytical expression for distribution together
+        with original Bessel distribution'''
+        X_analytical = np.arange(-np.pi,np.pi,1.E-3)
+        Y_analytical = np.vectorize(self.f_analytical)(X_analytical)
+        plt.plot(X_analytical,Y_analytical,
+                 linewidth=2,
+                 linestyle='--',
+                 color='red',
+                 label='analytical')
+        bessel_prod_dist = BesselProductDistribution(self.samples,
+                                                     self.X,
+                                                     self.Y,
+                                                     self.beta,
+                                                     self.x_p,
+                                                     self.x_m)
+        Y_analytical_bessel = np.vectorize(bessel_prod_dist.f_analytical)(X_analytical)
+        plt.plot(X_analytical,Y_analytical_bessel,
+                 linewidth=2,
+                 linestyle='--',
+                 color='green',
+                 label='BesselProductDistribution')
+
+        
+    '''Analytical value of distribution at a given point
+    
+    :arg x: Point at which the distribution is evaluated
+    '''
+    def f_analytical(self,x):
+        z = (x-self.x_m)*self.sign_flip
+        s_p = 0.0
+        s_m = 0.0
+        for k in range(-self.kmax,self.kmax+1):
+            z_shifted = z-0.5*self.x0+2*k*np.pi
+            s_p += np.exp(-0.5*self.sigma2_inv*z_shifted**2)
+            z_shifted += np.pi
+            s_m += np.exp(-0.5*self.sigma2_inv*z_shifted**2);
+        return np.sqrt(0.5*self.sigma2_inv/np.pi)*(self.N_p*s_p + self.N_m*s_m);
 
 '''Read data in the format given above from a text file
    Returns a distribution wrapper of the type saved in the file
@@ -227,6 +291,10 @@ def read_data(filename):
                                              float(param['beta']),
                                              float(param['x_p']),
                                              float(param['x_m']))
+    elif (distribution == 'ApproximateBesselProductDistribution'):
+        return ApproximateBesselProductDistribution(samples,X,Y,
+                                                    float(param['beta']),
+                                                    float(param['x_p']),                                                 float(param['x_m']))
     else:
         print ('ERROR: Unknown distribution: ',distribution)
         

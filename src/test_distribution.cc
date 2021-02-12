@@ -10,6 +10,7 @@
 #include "distribution/expsin2distribution.hh"
 #include "distribution/expcosdistribution.hh"
 #include "distribution/besselproductdistribution.hh"
+#include "distribution/approximatebesselproductdistribution.hh"
 
 /** @file test_distribution.hh
  *
@@ -247,6 +248,87 @@ public:
 private:
     /** @brief Distribution to wrap */
     const BesselProductDistribution& dist;
+    /** @brief Parameter \f$x_+\f$*/
+    const double x_p;
+    /** @brief Parameter \f$x_-\f$*/
+    const double x_m;
+};
+
+class ApproximateBesselProductDistributionWrapper : public DistributionWrapper {
+public:
+    ApproximateBesselProductDistributionWrapper(const ApproximateBesselProductDistribution& dist_,
+                                                const double x_p_,
+                                                const double x_m_) :
+    dist(dist_), x_p(x_p_), x_m(x_m_) {}
+    
+    /** @brief Draw single sample
+     *
+     * @param[inout] engine Random number engibe to use
+     */
+    virtual double draw(std::mt19937_64& engine) {
+        return dist.draw(engine,x_p,x_m);
+    }
+    
+    /** @brief Draw multiple samples
+     *
+     * Use this method for time measurements to avoid overheads from
+     * repeated calls.
+     *
+     * @param[inout] engine Random number engine to use
+     * @param[in] n_samples Number of samples to draw
+     */
+    virtual void draw(std::mt19937_64& engine,
+                      const unsigned long n_samples) {
+        for (unsigned long n=0;n<n_samples;++n) {
+            double x = dist.draw(engine,x_p,x_m);
+            (void) x;
+        }
+    }
+
+    /** @brief Evaluate at a single point
+     *
+     * @param[in] x Point at which the distribution is evaluated
+     */
+    virtual double evaluate(const double x) {
+        return dist.evaluate(x,x_p,x_m);
+    }
+    
+    /** @brief Evaluate at multiple points
+     *
+     * Evaluates the function a several randomly chosen points.
+     * Use this function for time measurements to avoid overheads from
+     * repeated calls.
+     *
+     * @param[inout] engine Random number engine to use
+     * @param[in] n_samples Number of points to evaluate
+     */
+    virtual void evaluate(std::mt19937_64& engine,
+                                 const unsigned long n_samples) {
+        for (unsigned long j=0; j<n_samples; ++j) {
+            double x = uniform_dist(engine);
+            double y = dist.evaluate(x,x_p,x_m);
+            (void) y;
+        }
+    }
+
+    /** @brief Write parameters to stream
+     *
+     * Write the name of the distribution and its parameters to an
+     * output stream. This will be used when saving the distribution to a
+     * file.
+     *
+     * @param[inout] out Output stream
+     */
+    virtual void write_header(std::ostream& out) {
+        out << "ApproximateBesselProductDistribution" << std::endl;
+        out << "  beta = " << dist.get_beta() << std::endl;
+        out << "  x_p  = " << x_p << std::endl;
+        out << "  x_m  = " << x_m << std::endl;
+    }
+
+private:
+    /** @brief Distribution to wrap */
+    const ApproximateBesselProductDistribution& dist;
     /** @brief Parameter \f$x_+\f$*/
     const double x_p;
     /** @brief Parameter \f$x_-\f$*/
@@ -528,6 +610,23 @@ int main(int argc, char* argv[]) {
         BesselProductDistribution besselproduct_dist(beta);
         BesselProductDistributionWrapper besselproduct_wrapper(besselproduct_dist,x_p,x_m);
         assess_distribution(besselproduct_wrapper,
+                            n_samples,
+                            n_intervals,
+                            "distribution.txt");
+    } else if (distribution == "ApproximateBesselProductDistribution") {
+        /* === ApproximateBesselProductDistribution === */
+        double beta = 4.0;
+        double x_p = 0.9;
+        double x_m = 0.2;
+        commandlineparser.getopt_double("beta",beta);
+        commandlineparser.getopt_double("x_p",x_p);
+        commandlineparser.getopt_double("x_m",x_m);
+        std::cout << "beta = " << beta << std::endl;
+        std::cout << "x_p  = " << x_p << std::endl;
+        std::cout << "x_m  = " << x_m << std::endl;
+        ApproximateBesselProductDistribution approximate_besselproduct_dist(beta);
+        ApproximateBesselProductDistributionWrapper approximate_besselproduct_wrapper(approximate_besselproduct_dist,x_p,x_m);
+        assess_distribution(approximate_besselproduct_wrapper,
                             n_samples,
                             n_intervals,
                             "distribution.txt");
