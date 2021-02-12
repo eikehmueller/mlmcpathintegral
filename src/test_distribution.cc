@@ -173,94 +173,18 @@ private:
     const double sigma;
 };
 
-class BesselProductDistributionWrapper : public DistributionWrapper {
+/** Common base class for BesselProductDistributionWrapper, ApproximateBesselProductDistributionWrapper and
+ ExpCosDistributionWrapper */
+template <class DistT>
+class DoubleAngleDistributionWrapper : public DistributionWrapper {
 public:
-    BesselProductDistributionWrapper(const BesselProductDistribution& dist_,
-                                     const double x_p_,
-                                     const double x_m_) :
-    dist(dist_), x_p(x_p_), x_m(x_m_) {}
-    
-    /** @brief Draw single sample
-     *
-     * @param[inout] engine Random number engibe to use
-     */
-    virtual double draw(std::mt19937_64& engine) {
-        return dist.draw(engine,x_p,x_m);
-    }
-    
-    /** @brief Draw multiple samples
-     *
-     * Use this method for time measurements to avoid overheads from
-     * repeated calls.
-     *
-     * @param[inout] engine Random number engine to use
-     * @param[in] n_samples Number of samples to draw
-     */
-    virtual void draw(std::mt19937_64& engine,
-                             const unsigned long n_samples) {
-        for (unsigned long n=0;n<n_samples;++n) {
-            double x = dist.draw(engine,x_p,x_m);
-            (void) x;
-        }
-    }
+    typedef DoubleAngleDistributionWrapper<DistT> BaseT;
+    DoubleAngleDistributionWrapper(const DistT& dist_,
+                                   const double x_p_,
+                                   const double x_m_,
+                                   const std::string label_) :
+    dist(dist_), x_p(x_p_), x_m(x_m_), label(label_) {}
 
-    /** @brief Evaluate at a single point
-     *
-     * @param[in] x Point at which the distribution is evaluated
-     */
-    virtual double evaluate(const double x) {
-        return dist.evaluate(x,x_p,x_m);
-    }
-    
-    /** @brief Evaluate at multiple points
-     *
-     * Evaluates the function a several randomly chosen points.
-     * Use this function for time measurements to avoid overheads from
-     * repeated calls.
-     *
-     * @param[inout] engine Random number engine to use
-     * @param[in] n_samples Number of points to evaluate
-     */
-    virtual void evaluate(std::mt19937_64& engine,
-                                 const unsigned long n_samples) {
-        for (unsigned long j=0; j<n_samples; ++j) {
-            double x = uniform_dist(engine);
-            double y = dist.evaluate(x,x_p,x_m);
-            (void) y;
-        }
-    }
-
-    /** @brief Write parameters to stream
-     *
-     * Write the name of the distribution and its parameters to an
-     * output stream. This will be used when saving the distribution to a
-     * file.
-     *
-     * @param[inout] out Output stream
-     */
-    virtual void write_header(std::ostream& out) {
-        out << "BesselProductDistribution" << std::endl;
-        out << "  beta = " << dist.get_beta() << std::endl;
-        out << "  x_p  = " << x_p << std::endl;
-        out << "  x_m  = " << x_m << std::endl;
-    }
-
-private:
-    /** @brief Distribution to wrap */
-    const BesselProductDistribution& dist;
-    /** @brief Parameter \f$x_+\f$*/
-    const double x_p;
-    /** @brief Parameter \f$x_-\f$*/
-    const double x_m;
-};
-
-class ApproximateBesselProductDistributionWrapper : public DistributionWrapper {
-public:
-    ApproximateBesselProductDistributionWrapper(const ApproximateBesselProductDistribution& dist_,
-                                                const double x_p_,
-                                                const double x_m_) :
-    dist(dist_), x_p(x_p_), x_m(x_m_) {}
-    
     /** @brief Draw single sample
      *
      * @param[inout] engine Random number engibe to use
@@ -320,100 +244,56 @@ public:
      * @param[inout] out Output stream
      */
     virtual void write_header(std::ostream& out) {
-        out << "ApproximateBesselProductDistribution" << std::endl;
+        out << label << std::endl;
         out << "  beta = " << dist.get_beta() << std::endl;
         out << "  x_p  = " << x_p << std::endl;
         out << "  x_m  = " << x_m << std::endl;
     }
 
-private:
+protected:
     /** @brief Distribution to wrap */
-    const ApproximateBesselProductDistribution& dist;
+    const DistT& dist;
     /** @brief Parameter \f$x_+\f$*/
     const double x_p;
     /** @brief Parameter \f$x_-\f$*/
     const double x_m;
+    /** @brief Name of distribution */
+    const std::string label;
 };
 
-class ExpCosDistributionWrapper : public DistributionWrapper {
+/** @brief Wrapper for ExpCosDistribution */
+class ExpCosDistributionWrapper
+: public DoubleAngleDistributionWrapper<ExpCosDistribution> {
 public:
+    using DoubleAngleDistributionWrapper::BaseT;
     ExpCosDistributionWrapper(const ExpCosDistribution& dist_,
                               const double x_p_,
                               const double x_m_) :
-    dist(dist_), x_p(x_p_), x_m(x_m_) {}
-    
-    /** @brief Draw single sample
-     *
-     * @param[inout] engine Random number engibe to use
-     */
-    virtual double draw(std::mt19937_64& engine) {
-        return dist.draw(engine,x_p,x_m);
-    }
-    
-    /** @brief Draw multiple samples
-     *
-     * Use this method for time measurements to avoid overheads from
-     * repeated calls.
-     *
-     * @param[inout] engine Random number engine to use
-     * @param[in] n_samples Number of samples to draw
-     */
-    virtual void draw(std::mt19937_64& engine,
-                      const unsigned long n_samples) {
-        for (unsigned long n=0;n<n_samples;++n) {
-            double x = dist.draw(engine,x_p,x_m);
-            (void) x;
-        }
-    }
+    BaseT(dist_,x_p_,x_m_,"ExpCosDistribution") {}
+};
 
-    /** @brief Evaluate at a single point
-     *
-     * @param[in] x Point at which the distribution is evaluated
-     */
-    virtual double evaluate(const double x) {
-        return dist.evaluate(x,x_p,x_m);
-    }
+/** @brief Wrapper for BesselproductDistribution */
+class BesselProductDistributionWrapper
+: public DoubleAngleDistributionWrapper<BesselProductDistribution> {
+public:
+    using DoubleAngleDistributionWrapper::BaseT;
+    BesselProductDistributionWrapper(const BesselProductDistribution& dist_,
+                                                const double x_p_,
+                                                const double x_m_) :
+    BaseT(dist_,x_p_,x_m_,"BesselProductDistribution") {}
     
-    /** @brief Evaluate at multiple points
-     *
-     * Evaluates the function a several randomly chosen points.
-     * Use this function for time measurements to avoid overheads from
-     * repeated calls.
-     *
-     * @param[inout] engine Random number engine to use
-     * @param[in] n_samples Number of points to evaluate
-     */
-    virtual void evaluate(std::mt19937_64& engine,
-                          const unsigned long n_samples) {
-        for (unsigned long j=0; j<n_samples; ++j) {
-            double x = uniform_dist(engine);
-            double y = dist.evaluate(x,x_p,x_m);
-            (void) y;
-        }
-    }
+};
 
-    /** @brief Write parameters to stream
-     *
-     * Write the name of the distribution and its parameters to an
-     * output stream. This will be used when saving the distribution to a
-     * file.
-     *
-     * @param[inout] out Output stream
-     */
-    virtual void write_header(std::ostream& out) {
-        out << "ExpCosDistribution" << std::endl;
-        out << "  beta = " << dist.get_beta() << std::endl;
-        out << "  x_p  = " << x_p << std::endl;
-        out << "  x_m  = " << x_m << std::endl;
-    }
-
-private:
-    /** @brief Distribution to wrap */
-    const ExpCosDistribution& dist;
-    /** @brief Parameter \f$x_+\f$*/
-    const double x_p;
-    /** @brief Parameter \f$x_-\f$*/
-    const double x_m;
+/** @brief Wrapper for ApproximateBesselproductDistribution */
+class ApproximateBesselProductDistributionWrapper
+: public DoubleAngleDistributionWrapper<ApproximateBesselProductDistribution> {
+public:
+    using DoubleAngleDistributionWrapper::BaseT;
+    ApproximateBesselProductDistributionWrapper(const ApproximateBesselProductDistribution& dist_,
+                                                const double x_p_,
+                                                const double x_m_) :
+    BaseT(dist_,x_p_,x_m_,"ApproximateBesselProductDistribution") {}
+    
 };
 
 /** @brief Measure time for creating a single sample
