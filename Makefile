@@ -100,7 +100,7 @@ $(MAIN_TESTDIST): $(BUILD_DIR)/test_distribution.o $(OBJS) $(SOURCE_DIR)/config.
 	@printf "%b" "$(COM_COLOR)$(LINK_MESSAGE) $(OBJ_COLOR)$(@)$(NO_COLOR)\n";
 	@$(CXX) $(LFLAGS) -o $(BUILD_DIR)/test_distribution $(OBJS) $(BUILD_DIR)/test_distribution.o $(LLIBS)
 
-doc: $(SOURCES) config.h
+doc: $(SOURCES) ./src/config.h
 	doxygen doxygen.cfg
 
 .phony: clean

@@ -15,7 +15,7 @@
 
 /** @class ExpCosDistribution
  *
- * @brief Class for sampling from the distribution \f$p(x|x_+,x_-) = Z_^{-1}\exp\left[\beta(\cos(x-x_+)+\cos(x-x_-))\right]\f$
+ * @brief Class for sampling from the distribution \f$p(x|x_+,x_-) = Z_{x_+,x_-}^{-1}\exp\left[\beta(\cos(x-x_+)+\cos(x-x_-))\right]\f$
  *
  * where \f$Z=2\pi I_0(2\beta\cos((x_+-x_-)/2))\f$ is the normalisation constant and \f$I_0\f$ the
  * modified Bessel function of first kind.

@@ -17,7 +17,7 @@
 
 /** @class BesselProductDistribution
  *
- * @brief Class for sampling from the distribution \f$p(x|x_+,x_-) = Z_^{-1}I_0(2\beta \cos((x-x_+)/2))I_0(2\beta \cos((x-x_-)/2))\f$
+ * @brief Class for sampling from the distribution \f$p(x|x_+,x_-) = Z_{x_+,x_-}^{-1}I_0(2\beta \cos((x-x_+)/2))I_0(2\beta \cos((x-x_-)/2))\f$
  *
  * where \f$I_0\f$ is the modified Bessel function of the first kind and \f$Z\f$
  * is a normalisation constant.

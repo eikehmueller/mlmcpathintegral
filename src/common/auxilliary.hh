@@ -44,7 +44,7 @@ double inline mod_2pi(const double x) {
  * Return value of sum
  *
  \f[
- \hat{\Sigma}_p(\xi) = \frac{\sum_{m\in\mathbb{Z}}m^p \exp\left[-\frac{1}{2}\xi m^2}\right]}{\sum_{m\in\mathbb{Z}}\exp\left[-\frac{1}{2}\xi m^2}\right]}
+ \hat{\Sigma}_p(\xi) = \frac{\sum_{m\in\mathbb{Z}}m^p \exp\left[-\frac{1}{2}\xi m^2\right]}{\sum_{m\in\mathbb{Z}}\exp\left[-\frac{1}{2}\xi m^2\right]}
  \f]
  *
  * @param[in] xi value of \f$\xi\f$
