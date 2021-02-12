@@ -12,6 +12,7 @@
 #include "action/qft/quenchedschwingeraction.hh"
 #include "distribution/expcosdistribution.hh"
 #include "distribution/besselproductdistribution.hh"
+#include "distribution/approximatebesselproductdistribution.hh"
 
 /** @file quenchedschwingerconditionedfineaction.hh
  * @brief Header file for quenched Schwinger model conditioned fine action class
@@ -34,7 +35,9 @@ public:
         beta(action->getbeta()),
         uniform_dist(-M_PI,+M_PI),
         exp_cos_dist(action->getbeta()),
-        bessel_product_dist(action->getbeta()) {
+        bessel_product_dist(action->getbeta()),
+        approximate_bessel_product_dist(action->getbeta()),
+        approximate_bessel(action->getbeta()>8.0) {
         engine.seed(71814151);
     }
 
@@ -74,6 +77,10 @@ private:
     mutable ExpCosDistribution exp_cos_dist;
     /** @brief Probability distribution for drawing vertical interior links */
     mutable BesselProductDistribution bessel_product_dist;
+    /** @brief Approximate probability distribution for drawing vertical interior links */
+    mutable ApproximateBesselProductDistribution approximate_bessel_product_dist;
+    /** @brief Use approximate Bessel product distribution for sampling? */
+    const bool approximate_bessel;
 };
 
 struct QuenchedSchwingerConditionedFineActionFactory : public ConditionedFineActionFactory {
