@@ -29,7 +29,7 @@ public:
      * @param[in] lattice_ Underlying lattice
      * @param[in] beta_ Coupling constant \f$\beta\f$
      * @param[in] renormalisation_ Type of renormalisation to use
-     *              (0: none, 1: perturbative, 2: exact [not implemented])
+     *              (0: none, 1: perturbative [not implemented], 2: nonperturbative
      */
     RenormalisedQuenchedSchwingerParameters(const std::shared_ptr<Lattice2D> lattice_,
                                             const double beta_,
@@ -50,7 +50,7 @@ public:
             mpi_parallel::cerr << "ERROR: perturbative renormalisation not implemented for quenched Schwinger action " << std::endl;
             mpi_exit(EXIT_FAILURE);
             break;
-        case RenormalisationExact:
+        case RenormalisationNonperturbative:
             betacoarse = betacoarse_nonperturbative();
             break;
         }
@@ -86,7 +86,7 @@ private:
         struct ParamType *params = (struct ParamType *) p;
         double beta = params->beta;
         unsigned int n_plaq = params->n_plaq;
-        return  quenchedschwinger_chit_exact(x*beta,n_plaq/4)-quenchedschwinger_chit_exact(beta,n_plaq);
+        return  quenchedschwinger_chit_analytical(x*beta,n_plaq/4)-quenchedschwinger_chit_analytical(beta,n_plaq);
     };
     
     /** @brief Underlying lattice */

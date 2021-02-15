@@ -244,35 +244,35 @@ int main(int argc, char* argv[]) {
     }
     }
 
-    // Exact result (if known)
-    double exact_result;
+    // Analytical result (if known)
+    double analytical_result;
     // numerical result and statistical error
     double numerical_result;
     double statistical_error;
 
     if ( (param_general.method() == MethodSingleLevel) or
             (param_general.method() == MethodMultiLevel) ) {
-        /* ====== Print out exact result for harmonic oscillator */
+        /* ====== Print out analytical result for harmonic oscillator */
         if (param_qm.action() == ActionHarmonicOscillator) {
             std::shared_ptr<HarmonicOscillatorAction> ho_action =
                 std::dynamic_pointer_cast<HarmonicOscillatorAction>(action);
-            exact_result = ho_action->Xsquared_exact();
-            double exact_result_continuum = ho_action->Xsquared_exact_continuum();
+            analytical_result = ho_action->Xsquared_analytical();
+            double analytical_result_continuum = ho_action->Xsquared_analytical_continuum();
             mpi_parallel::cout << std::endl;
             mpi_parallel::cout << std::setprecision(6) << std::fixed;
-            mpi_parallel::cout << " Exact result             <x^2> = " << exact_result << std::endl;
-            mpi_parallel::cout << " Continuum limit [a -> 0] <x^2> = " << exact_result_continuum << std::endl;
+            mpi_parallel::cout << " Analytical result        <x^2> = " << analytical_result << std::endl;
+            mpi_parallel::cout << " Continuum limit [a -> 0] <x^2> = " << analytical_result_continuum << std::endl;
             mpi_parallel::cout << std::endl;
         }
         if (param_qm.action() == ActionRotor) {
             std::shared_ptr<RotorAction> rotor_action =
                 std::dynamic_pointer_cast<RotorAction>(action);
-            double exact_result_continuum = rotor_action->chit_exact_continuum();
-            exact_result = rotor_action->chit_exact_perturbative();
+            double analytical_result_continuum = rotor_action->chit_continuum();
+            analytical_result = rotor_action->chit_perturbative();
             mpi_parallel::cout << std::endl;
             mpi_parallel::cout << std::setprecision(6) << std::fixed;
-            mpi_parallel::cout << " Exact result             <chi_t> = " << exact_result << " + O((a/I)^2), a/I = " << lattice->geta_lat()/action->getm0() << std::endl;
-            mpi_parallel::cout << " Continuum limit [a -> 0] <chi_t> = " << exact_result_continuum << std::endl;
+            mpi_parallel::cout << " Analytical result        <chi_t> = " << analytical_result << " + O((a/I)^2), a/I = " << lattice->geta_lat()/action->getm0() << std::endl;
+            mpi_parallel::cout << " Continuum limit [a -> 0] <chi_t> = " << analytical_result_continuum << std::endl;
             mpi_parallel::cout << std::endl;
         }
     }
@@ -427,16 +427,16 @@ int main(int argc, char* argv[]) {
         statistical_error = montecarlo_multilevel.statistical_error();
     }
 
-    // Compare numerical results to exact result (if possible)
+    // Compare numerical results to analytical result (if possible)
     if ( ( (param_qm.action() == ActionHarmonicOscillator) or
             (param_qm.action() == ActionRotor) ) and
             ( (param_general.method() == MethodSingleLevel) or
               ( (param_general.method() == MethodMultiLevel) ) ) ) {
-        double diff = fabs(numerical_result-exact_result);
+        double diff = fabs(numerical_result-analytical_result);
         double ratio = diff/statistical_error;
         mpi_parallel::cout << std::setprecision(8) << std::fixed;
-        mpi_parallel::cout << "Comparison to exact result " << std::endl;
-        mpi_parallel::cout << "  (exact - numerical) = " << diff;
+        mpi_parallel::cout << "Comparison to analytical result " << std::endl;
+        mpi_parallel::cout << "  (analytical - numerical) = " << diff;
         mpi_parallel::cout << std::setprecision(3) << std::fixed;
         mpi_parallel::cout << " = " << ratio << " * (statistical error) " << std::endl << std::endl;
     }

@@ -33,7 +33,7 @@ public:
      * @param[in] m0_ Mass \f$m_0\f$
      * @param[in] mu2_ Harmonic oscillator potential parameter \f$\mu^2\f$
      * @param[in] renormalisation_ Type of renormalisation to use
-     *              (0: none, 1: perturbative, 2: exact)
+     *              (0: none, 1: perturbative, 2: nonperturbative)
      */
     RenormalisedHOParameters(const std::shared_ptr<Lattice1D> lattice_,
                              const double m0_,
@@ -53,7 +53,7 @@ public:
         case RenormalisationPerturbative:
             m0coarse = m0*(1.-0.5*a_lat*a_lat*mu2);
             break;
-        case RenormalisationExact:
+        case RenormalisationNonperturbative:
             m0coarse = m0/(1.+0.5*a_lat*a_lat*mu2);
             break;
         }
@@ -71,7 +71,7 @@ public:
         case RenormalisationPerturbative:
             mu2coarse = mu2*(1.+0.25*a_lat*a_lat*mu2);
             break;
-        case RenormalisationExact:
+        case RenormalisationNonperturbative:
             mu2coarse = mu2*(1.+0.25*a_lat*a_lat*mu2);
             break;
         }

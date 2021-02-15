@@ -19,9 +19,9 @@ const double QoI2DSusceptibility::evaluate(const std::shared_ptr<SampleState> ph
     return four_pi2_inv*Q*Q;
 }
 
-/* Exact result for topological susceptibility */
-double quenchedschwinger_chit_exact(const double beta,
-                                    const unsigned int n_plaq) {
+/* Analytical expression for topological susceptibility */
+double quenchedschwinger_chit_analytical(const double beta,
+                                         const unsigned int n_plaq) {
     /* Truncation index of sums */
     const int nmax = 10;
     /* Compute functions I_n(\beta), I'_n(\beta), I''_n(\beta) */

@@ -12,12 +12,12 @@
 /** @brief Enum for renormalisations:
  *  - 0: No renormalisation
  *  - 1: Perturbative renormalisation
- *  - 2: Exact renormalisation
+ *  - 2: Nonperturbative renormalisation
 */
 enum RenormalisationType {
     RenormalisationNone = 0,
     RenormalisationPerturbative = 1,
-    RenormalisationExact = 2
+    RenormalisationNonperturbative = 2
 };
 
 /** @class RenormalisedParameters
@@ -30,7 +30,7 @@ public:
     /** @brief Create new instance
      *
      * @param[in] renormalisation_ Type of renormalisation to use
-     *              (0: none, 1: perturbative, 2: exact)
+     *              (0: none, 1: perturbative, 2: nonperturbative)
      */
     RenormalisedParameters(const RenormalisationType renormalisation_) :
         renormalisation(renormalisation_) {}

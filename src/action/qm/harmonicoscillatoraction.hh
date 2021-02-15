@@ -52,8 +52,8 @@ public:
                 renormalisation_ = RenormalisationNone;
             } else if (renormalisation_str == "perturbative") {
                 renormalisation_ = RenormalisationPerturbative;
-            } else if (renormalisation_str == "exact") {
-                renormalisation_ = RenormalisationExact;
+            } else if (renormalisation_str == "nonperturbative") {
+                renormalisation_ = RenormalisationNonperturbative;
             }
         }
         return readSuccess;
@@ -208,9 +208,9 @@ public:
      */
     virtual void draw(std::shared_ptr<SampleState> x_path);
 
-    /** @brief Exact expression for expectation value of \f$X^2\f$
+    /** @brief Perturbative expression for expectation value of \f$X^2\f$
      *
-     * Return the exact expression from Creutz and Freedman:
+     * Return the analytical expression from Creutz and Freedman:
      *
      \f[
      \langle X^2 \rangle = \frac{1}{2m_0\mu\sqrt{1+\frac{a^2\mu^2}{4}}}\cdot \frac{1+R^M}{1-R^M}
@@ -220,7 +220,7 @@ public:
      R = 1 + \frac{a^2\mu^2}{2}-a\mu\sqrt{1+\frac{a^2\mu^2}{4}}
      \f]
      */
-    const double Xsquared_exact();
+    const double Xsquared_analytical();
 
     /** @brief Continuum limitof expectation value of \f$X^2\f$
      *
@@ -235,7 +235,7 @@ public:
      R = 1 + \frac{a^2\mu^2}{2}-a\mu\sqrt{1+\frac{a^2\mu^2}{4}}
      \f]
      */
-    const double Xsquared_exact_continuum();
+    const double Xsquared_analytical_continuum();
 
     /** @brief Set current state to particular value
      *

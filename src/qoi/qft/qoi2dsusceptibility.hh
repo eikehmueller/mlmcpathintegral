@@ -61,9 +61,9 @@ private:
     const unsigned int Mx_lat;
 };
 
-/** @brief Exact result for topological susceptibility scaled
+/** @brief Analytical result for topological susceptibility scaled
  *
- * Computes the exact value of the topological susceptibility. If the number of plaquettes is \f$P\f$,
+ * Computes the analytical value of the topological susceptibility. If the number of plaquettes is \f$P\f$,
  * then this is given by
  *
  * \f[
@@ -101,8 +101,8 @@ private:
  *   @param[in] beta Coupling constant \f$beta\f$
  *   @param[in] n_plaq Number of plaquettes \f$P\f$
  */
-double quenchedschwinger_chit_exact(const double beta,
-                                    const unsigned int n_plaq);
+double quenchedschwinger_chit_analytical(const double beta,
+                                         const unsigned int n_plaq);
 
 /** @brief Compute functions required in calculation of topological susceptibility
  *

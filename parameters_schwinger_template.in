@@ -28,7 +28,7 @@ statistics:
 ###########################################
 schwinger:
   beta = 1.0               # Coupling constant beta
-  renormalisation = 'none' # Renormalisation [none, perturbative, exact]
+  renormalisation = 'none' # Renormalisation [none, perturbative, nonperturbative]
   
 ###########################################
 # Single level Monte Carlo parameters

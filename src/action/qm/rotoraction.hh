@@ -50,8 +50,8 @@ public:
                 renormalisation_ = RenormalisationNone;
             } else if (renormalisation_str == "perturbative") {
                 renormalisation_ = RenormalisationPerturbative;
-            } else if (renormalisation_str == "exact") {
-                renormalisation_ = RenormalisationExact;
+            } else if (renormalisation_str == "nonperturbative") {
+                renormalisation_ = RenormalisationNonperturbative;
             }
         }
         return readSuccess;
@@ -244,19 +244,19 @@ public:
         return mod_2pi(M_PI+2.*xbar-x);
     }
 
-    /** @brief Exact topological susceptibility
+    /** @brief Perturbative expression for topological susceptibility
      *
-     * Return exact value (up to corrections of \f$O((a/I)^2\f$) for finite
+     * Return analytical value (up to corrections of \f$O((a/I)^2\f$) for finite
      * values of \f$a\f$
      */
-    double chit_exact_perturbative() const;
+    double chit_perturbative() const;
 
-    /** @brief Exact topological susceptibility in the continuum limit
+    /** @brief Analytical expression for topological susceptibility in the continuum limit
      *
-     * Return exact value of \f$\chi_t\f$ in the continuum limit
+     * Return analytical expression of \f$\chi_t\f$ in the continuum limit
      * \f$a\rightarrow0\f$.
      */
-    double chit_exact_continuum() const;
+    double chit_continuum() const;
 
 protected:
     /** @brief reflection angle for current subgroup \f$H_{\overline{x}}\f$ */

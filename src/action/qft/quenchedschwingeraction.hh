@@ -50,8 +50,8 @@ public:
                 renormalisation_ = RenormalisationNone;
             } else if (renormalisation_str == "perturbative") {
                 renormalisation_ = RenormalisationPerturbative;
-            } else if (renormalisation_str == "exact") {
-                renormalisation_ = RenormalisationExact;
+            } else if (renormalisation_str == "nonperturbative") {
+                renormalisation_ = RenormalisationNonperturbative;
             }
         }
         return readSuccess;

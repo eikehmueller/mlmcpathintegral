@@ -147,11 +147,11 @@ int main(int argc, char* argv[]) {
     // numerical result and statistical error
     double numerical_result;
     double statistical_error;
-    double exact_result = quenchedschwinger_chit_exact(param_schwinger.beta(),
-                                                       lattice->getNcells());
+    double analytical_result = quenchedschwinger_chit_analytical(param_schwinger.beta(),
+                                                                 lattice->getNcells());
     mpi_parallel::cout << std::endl;
     mpi_parallel::cout << std::setprecision(8) << std::fixed;
-    mpi_parallel::cout << " Exact result <chi_t> = " << exact_result << std::endl;
+    mpi_parallel::cout << " Analytical result <chi_t> = " << analytical_result << std::endl;
     mpi_parallel::cout << std::endl;
 
     /* Construction conditioned fine action factory */
@@ -210,11 +210,11 @@ int main(int argc, char* argv[]) {
         mpi_exit(EXIT_FAILURE);
     }
     
-    double diff = fabs(numerical_result-exact_result);
+    double diff = fabs(numerical_result-analytical_result);
     double ratio = diff/statistical_error;
     mpi_parallel::cout << std::setprecision(8) << std::fixed;
-    mpi_parallel::cout << "Comparison to exact result " << std::endl;
-    mpi_parallel::cout << "  (exact - numerical) = " << diff;
+    mpi_parallel::cout << "Comparison to analytical result " << std::endl;
+    mpi_parallel::cout << "  (analytical - numerical) = " << diff;
     mpi_parallel::cout << std::setprecision(3) << std::fixed;
     mpi_parallel::cout << " = " << ratio << " * (statistical error) " << std::endl << std::endl;
 

@@ -89,8 +89,8 @@ void RotorAction::initialise_state(std::shared_ptr<SampleState> x_path) const {
 #endif // SAVE_PATHS
 }
 
-/** Exact chi_t for finite a */
-double RotorAction::chit_exact_perturbative() const {
+/** Perturbative expression for chi_t for finite a */
+double RotorAction::chit_perturbative() const {
     double T_final = lattice->getT_final();
     double xi = T_final/m0;
     double z = a_lat/m0;
@@ -99,8 +99,8 @@ double RotorAction::chit_exact_perturbative() const {
     return 1./(4.*M_PI*M_PI*m0)*(1.-xi*S_hat2+(0.5-xi*S_hat2+0.25*xi*xi*(S_hat4-S_hat2*S_hat2))*z);
 }
 
-/** Exact chi_t in continuum limit */
-double RotorAction::chit_exact_continuum() const {
+/** Analytical expression for chi_t in continuum limit */
+double RotorAction::chit_continuum() const {
     double T_final = lattice->getT_final();
     double xi = T_final/m0;
     return 1./(4.*M_PI*M_PI*m0)*(1.-xi*Sigma_hat(xi,2));

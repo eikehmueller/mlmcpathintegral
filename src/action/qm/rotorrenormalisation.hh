@@ -26,7 +26,7 @@ public:
      * @param[in] lattice_ Underlying lattice
      * @param[in] m0_ Mass (i.e. moment of inertia) \f$m_0\f$
      * @param[in] renormalisation_ Type of renormalisation to use
-     *              (0: none, 1: perturbative, 2: exact [not implemented])
+     *              (0: none, 1: perturbative, 2: nonperturbative [not implemented])
      */
     RenormalisedRotorParameters(const std::shared_ptr<Lattice1D> lattice_,
                                 const double m0_,
@@ -46,9 +46,9 @@ public:
         case RenormalisationPerturbative:
             m0coarse = (1.+deltaI(T_final/m0)*a_lat/m0)*m0;
             break;
-        case RenormalisationExact:
+        case RenormalisationNonperturbative:
             m0coarse = 1.0;
-            mpi_parallel::cerr << "ERROR: exact renormalisation not implemented for rotor action " << std::endl;
+            mpi_parallel::cerr << "ERROR: nonperturbative renormalisation not implemented for rotor action " << std::endl;
             mpi_exit(EXIT_FAILURE);
             break;
         }

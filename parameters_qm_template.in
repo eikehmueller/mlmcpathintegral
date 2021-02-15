@@ -36,7 +36,7 @@ statistics:
 harmonicoscillator:
   m0 = 1.0           # Unrenormalised mass
   mu2 = 1.0          # Curvature of potential
-  renormalisation = 'none' # Renormalisation [none, perturbative, exact]
+  renormalisation = 'none' # Renormalisation [none, perturbative, nonperturbative]
 
 ###########################################
 # Quartic oscillator action parameters
@@ -61,7 +61,7 @@ singlelevelmc:
   n_burnin = 1000     # Number of burnin samples
   n_samples = 100000      # Number of samples, set to 0 to use epsilon instead 
   epsilon = 1.0E-2   # Tolerance epsilon
-  sampler = 'heatbath'  # Sampler to use [HMC, heatbath, cluster, exact, hierarchical, multilevel]
+  sampler = 'heatbath'  # Sampler to use [HMC, heatbath, cluster, nonperturbative, hierarchical, multilevel]
 
 
 ###########################################
