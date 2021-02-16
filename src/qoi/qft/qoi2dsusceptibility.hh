@@ -61,14 +61,14 @@ private:
     const unsigned int Mx_lat;
 };
 
-/** @brief Analytical result for topological susceptibility scaled
+/** @brief Analytical result for topological susceptibility scaled by the volume
  *
- * Computes the analytical value of the topological susceptibility. If the number of plaquettes is \f$P\f$,
- * then this is given by
+ * Computes the analytical value of the topological susceptibility times the lattice volume, i.e. \f$V\chi_t\f$.
+ * If the number of plaquettes is \f$P\f$, then this is given by
  *
  * \f[
- *   \chi_t(\beta,P) = \langle Q^2 \rangle
- *   = P\sum_{n=-\infty}^{\infty} w_n(\beta,P)\left[
+ *   V \chi_t(\beta,P) = \langle Q^2 \rangle
+ *    = P\sum_{n=-\infty}^{\infty} w_n(\beta,P)\left[
  *      (P-1) \left(\frac{I'_n(\beta)}{I_n(\beta)}\right)^2 - \frac{I''_n(\beta)}{I_n(\beta)}
  *   \right]
  * \f]

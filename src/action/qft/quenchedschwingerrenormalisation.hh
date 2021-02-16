@@ -15,10 +15,11 @@
 /** @class RenormalisedQuenchedSchwingerParameters
  * @brief Renormalised coarse grid parameters for the quenched Schwinger action
  *
- * Calculate the renormalised coarse grid coupling constant \f$\beta\f$
+ * Calculate the renormalised coarse grid coupling constant \f$\beta\f$ either perturbatively
+ * or through non-perturbative matching. Up to \f$\mathcal{O}(\beta^{-1})\f$ we have:
  *
  * \f[
- *    \beta_0^{(c)} = \frac{1}{4}\beta
+ *    \beta{(c)} = \frac{1}{4}\left(1+\frac{3}{2\beta}\right)\beta
  * \f]
  *
  */
@@ -46,9 +47,7 @@ public:
             betacoarse = 0.25*beta;
             break;
         case RenormalisationPerturbative:
-            betacoarse = 1.0;
-            mpi_parallel::cerr << "ERROR: perturbative renormalisation not implemented for quenched Schwinger action " << std::endl;
-            mpi_exit(EXIT_FAILURE);
+            betacoarse = betacoarse_perturbative();
             break;
         case RenormalisationNonperturbative:
             betacoarse = betacoarse_nonperturbative();
@@ -59,11 +58,22 @@ public:
 
 private:
     
+    /** @brief Perturbative value of coarse level coupling
+     *
+     * The perturbative value of the coarse level coupling \f$\beta^{(c)}\f$ is found by
+     * matching the topological susceptibility on the fine and coarse level, i.e.
+     * \f$V\chi_t(\beta^{(c)},P/4)=\chi_t(\beta,P)\f$ where \f$P\f$ is the number of plaquettes
+     * on the current level, only including terms of up to \f$\mathcal{O}(\beta^{-1})\f$
+     */
+    double betacoarse_perturbative() const {
+        return 0.25*(1.+1.5/beta)*beta;
+    }
+    
     /** @brief Non-perturbative value of coarse level coupling
      *
      * The non-perturbative value of the coarse level coupling \f$\beta^{(c)}\f$ is found by
      * matching the topological susceptibility on the fine and coarse level, i.e.
-     * \f$\chi_t(\beta^{(c)},P/4)=\chi_t(\beta,P)\f$ where \f$P\f$ is the number of plaquettes
+     * \f$V\chi_t(\beta^{(c)},P/4)=V\chi_t(\beta,P)\f$ where \f$P\f$ is the number of plaquettes
      * on the current level
      */
     double betacoarse_nonperturbative();
