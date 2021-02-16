@@ -31,7 +31,7 @@ public:
     /** @brief Create new instance
      *
      * @param[in] fine_action_ Fine level Action to sample from
-     * @param[in] qoi_ Quantiy of interest
+     * @param[in] qoi_factory_ Quantiy of interest factory
      * @param[in] coarse_sampler_factory Factory for sampler on coarsest level
      * @param[in] conditioned_fine_action_factory Factory for conditioned fine actions
      * @param[in] param_general General parameters
@@ -39,7 +39,7 @@ public:
      * @param[in] param_hierarchical Hierarchical sampler parameters
      */
     MultilevelSampler(const std::shared_ptr<Action> fine_action,
-                      const std::shared_ptr<QoI> qoi_,
+                      const std::shared_ptr<QoIFactory> qoi_factory_,
                       const std::shared_ptr<SamplerFactory> coarse_sampler_factory,
                       const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                       const StatisticsParameters param_stats,
@@ -79,7 +79,7 @@ private:
     /** @brief Action to sample from */
     std::vector<std::shared_ptr<Action>> action;
     /** @brief Quantity of interest */
-    const std::shared_ptr<QoI> qoi;
+    std::vector<std::shared_ptr<QoI>> qoi;
     /** @brief Number of levels in hierarchy */
     const unsigned int n_level;
     /** @brief Two level step on all levels of the multigrid hierarchy */
@@ -106,18 +106,18 @@ class MultilevelSamplerFactory : public SamplerFactory {
 public:
     /** @brief Create new instance
      *
-     * @param[in] qoi_ Quantity of interest
+     * @param[in] qoi_factory_ Factory for quantity of interest
      * @param[in] coarse_sampler_factory_ Factory for coarse level sampler
      * @param[in] conditioned_fine_action_factory_ Factory for conditioned fine action
      * @param[in] param_stats Statistics parameters
      * @param[in] param_hierarchical Hierarchical sampler parameters
      */
-    MultilevelSamplerFactory(const std::shared_ptr<QoI> qoi_,
+    MultilevelSamplerFactory(const std::shared_ptr<QoIFactory> qoi_factory_,
                              const std::shared_ptr<SamplerFactory> coarse_sampler_factory_,
                              const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory_,
                              const StatisticsParameters param_stats_,
                              const HierarchicalParameters param_hierarchical_) :
-        qoi(qoi_),
+        qoi_factory(qoi_factory_),
         coarse_sampler_factory(coarse_sampler_factory_),
         conditioned_fine_action_factory(conditioned_fine_action_factory_),
         param_stats(param_stats_),
@@ -132,7 +132,7 @@ public:
      */
     virtual std::shared_ptr<Sampler> get(std::shared_ptr<Action> action) {
         return std::make_shared<MultilevelSampler>(action,
-                qoi,
+                qoi_factory,
                 coarse_sampler_factory,
                 conditioned_fine_action_factory,
                 param_stats,
@@ -140,7 +140,7 @@ public:
     }
 private:
     /** Quantity of interest */
-    const std::shared_ptr<QoI> qoi;
+    const std::shared_ptr<QoIFactory> qoi_factory;
     /** Factory for coarsest level sampler*/
     const std::shared_ptr<SamplerFactory> coarse_sampler_factory;
     /** Factory for conditioned fine action */

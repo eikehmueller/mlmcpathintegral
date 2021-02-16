@@ -6,7 +6,9 @@
 #include <gsl/gsl_integration.h>
 #include "common/auxilliary.hh"
 #include "common/samplestate.hh"
+#include "mpi/mpi_wrapper.hh"
 #include "lattice/lattice2d.hh"
+#include "action/qft/qftaction.hh"
 #include "qoi/quantityofinterest.hh"
 
 /** @file qoi2dsusceptibility.hh
@@ -59,6 +61,22 @@ private:
     const unsigned int Mt_lat;
     /** @brief Number of lattice points in spatial direction */
     const unsigned int Mx_lat;
+};
+
+/** @class QoI2DSusceptibilityFactory
+ *
+ * @brief Factory for constructing the QoI for a particular action
+ */
+class QoI2DSusceptibilityFactory : public QoIFactory {
+public:
+    /** @brief Return QoI for a specific  action
+     *
+     * @param[in] action Action to use
+     */
+    virtual std::shared_ptr<QoI> get(std::shared_ptr<Action> action) {
+        std::shared_ptr<Lattice2D> lattice = std::dynamic_pointer_cast<QFTAction>(action)->get_lattice();
+        return std::make_shared<QoI2DSusceptibility>(lattice);
+    }
 };
 
 /** @brief Analytical result for topological susceptibility scaled by the volume

@@ -6,13 +6,12 @@
 
 /* Construct new instance */
 MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
-                                     const std::shared_ptr<QoI> qoi_,
+                                     const std::shared_ptr<QoIFactory> qoi_factory_,
                                      const std::shared_ptr<SamplerFactory> coarse_sampler_factory,
                                      const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                                      const StatisticsParameters param_stats,
                                      const HierarchicalParameters param_hierarchical) :
     Sampler(),
-    qoi(qoi_),
     n_level(param_hierarchical.n_max_level()-fine_action->get_coarsening_level()),
     t_indep(n_level,0.0),
     n_indep(n_level,0),
@@ -33,6 +32,10 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
                     action_tmp,
                     conditioned_fine_action);
         twolevel_step.push_back(twolevel_step_tmp);
+    }
+    // Construct QoI sampler factory
+    for (unsigned int ell=0; ell<n_level; ++ell) {
+        qoi.push_back(qoi_factory_->get(action[ell]));
     }
     // Action on coarsest level
     std::shared_ptr<Action> coarse_action = action[n_level-1];
@@ -77,7 +80,7 @@ void MultilevelSampler::draw(std::shared_ptr<SampleState> phi_state) {
                                        phi_sampler_state[level]);
         }
         // The QoI of the independent sampler, Q_{ell}
-        double qoi_sampler = qoi->evaluate(phi_sampler_state[level]);
+        double qoi_sampler = qoi[level]->evaluate(phi_sampler_state[level]);
         stats_sampler[level]->record_sample(qoi_sampler);
         t_sampler[level]++;
         if (t_sampler[level] >= ceil(stats_sampler[level]->tau_int())) {

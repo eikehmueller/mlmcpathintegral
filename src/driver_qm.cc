@@ -35,7 +35,7 @@
 
 /** Helper function to construct suitable sampler factory for given samplerid */
 std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
-        const std::shared_ptr<QoI> qoi,
+        const std::shared_ptr<QoIFactory> qoi_factory,
         const std::shared_ptr<SamplerFactory> coarse_sampler_factory,
         const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
         const GeneralParameters param_general,
@@ -77,11 +77,11 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
                           param_hierarchical);
     } else if (samplerid == SamplerMultilevel) {
         /* ---- CASE 6: Multilevel sampler */
-        sampler_factory = std::make_shared<MultilevelSamplerFactory>(qoi,
-                          coarse_sampler_factory,
-                          conditioned_fine_action_factory,
-                          param_stats,
-                          param_hierarchical);
+        sampler_factory = std::make_shared<MultilevelSamplerFactory>(qoi_factory,
+                                                                     coarse_sampler_factory,
+                                                                     conditioned_fine_action_factory,
+                                                                     param_stats,
+                                                                     param_hierarchical);
     } else {
         mpi_parallel::cerr << " ERROR: Unknown sampler." << std::endl;
         mpi_exit(EXIT_FAILURE);
@@ -199,16 +199,19 @@ int main(int argc, char* argv[]) {
     lattice = std::make_shared<Lattice1D>(param_lattice.M_lat(),
                                           param_lattice.T_final());
 
-    /* ====== Select quantity of interest ====== */
+    /* ====== Select quantity of interest and QoI factory ====== */
     std::shared_ptr<QoI> qoi;
+    std::shared_ptr<QoIFactory> qoi_factory;
     mpi_parallel::cout << std::endl;
     if ( (param_qm.action() == ActionHarmonicOscillator) or
             (param_qm.action() == ActionQuarticOscillator) ) {
         qoi=std::make_shared<QoIXsquared>(lattice);
+        qoi_factory=std::make_shared<QoIXsquaredFactory>();
         mpi_parallel::cout << "QoI = X^2 " << std::endl;
     }
     if ( (param_qm.action() == ActionRotor) ) {
         qoi=std::make_shared<QoISusceptibility>(lattice);
+        qoi_factory=std::make_shared<QoISusceptibilityFactory>();
         mpi_parallel::cout << "QoI = Susceptibility Q[X]^2/T " << std::endl;
     }
     mpi_parallel::cout << std::endl;
@@ -314,16 +317,16 @@ int main(int argc, char* argv[]) {
 
         std::shared_ptr<SamplerFactory> sampler_factory;
         sampler_factory = construct_sampler_factory(param_singlelevelmc.sampler(),
-                          qoi,
-                          coarse_sampler_factory,
-                          conditioned_fine_action_factory,
-                          param_general,
-                          param_qm,
-                          param_hmc,
-                          param_heatbath,
-                          param_cluster,
-                          param_stats,
-                          param_hierarchical);
+                                                    qoi_factory,
+                                                    coarse_sampler_factory,
+                                                    conditioned_fine_action_factory,
+                                                    param_general,
+                                                    param_qm,
+                                                    param_hmc,
+                                                    param_heatbath,
+                                                    param_cluster,
+                                                    param_stats,
+                                                    param_hierarchical);
         /* ====== Construct single level MC ====== */
         MonteCarloSingleLevel montecarlo_singlelevel(action,
                 qoi,
@@ -352,18 +355,18 @@ int main(int argc, char* argv[]) {
 
         std::shared_ptr<SamplerFactory> sampler_factory;
         sampler_factory = construct_sampler_factory(param_twolevelmc.sampler(),
-                          qoi,
-                          coarse_sampler_factory,
-                          conditioned_fine_action_factory,
-                          param_general,
-                          param_qm,
-                          param_hmc,
-                          param_heatbath,
-                          param_cluster,
-                          param_stats,
-                          param_hierarchical);
+                                                    qoi_factory,
+                                                    coarse_sampler_factory,
+                                                    conditioned_fine_action_factory,
+                                                    param_general,
+                                                    param_qm,
+                                                    param_hmc,
+                                                    param_heatbath,
+                                                    param_cluster,
+                                                    param_stats,
+                                                    param_hierarchical);
         MonteCarloTwoLevel montecarlo_twolevel(action,
-                                               qoi,
+                                               qoi_factory,
                                                sampler_factory,
                                                conditioned_fine_action_factory,
                                                param_twolevelmc);
@@ -400,23 +403,23 @@ int main(int argc, char* argv[]) {
 
         std::shared_ptr<SamplerFactory> sampler_factory;
         sampler_factory = construct_sampler_factory(param_multilevelmc.sampler(),
-                          qoi,
-                          coarse_sampler_factory,
-                          conditioned_fine_action_factory,
-                          param_general,
-                          param_qm,
-                          param_hmc,
-                          param_heatbath,
-                          param_cluster,
-                          param_stats,
-                          param_hierarchical);
+                                                    qoi_factory,
+                                                    coarse_sampler_factory,
+                                                    conditioned_fine_action_factory,
+                                                    param_general,
+                                                    param_qm,
+                                                    param_hmc,
+                                                    param_heatbath,
+                                                    param_cluster,
+                                                    param_stats,
+                                                    param_hierarchical);
 
         MonteCarloMultiLevel montecarlo_multilevel(action,
-                qoi,
-                sampler_factory,
-                conditioned_fine_action_factory,
-                param_stats,
-                param_multilevelmc);
+                                                   qoi_factory,
+                                                   sampler_factory,
+                                                   conditioned_fine_action_factory,
+                                                   param_stats,
+                                                   param_multilevelmc);
 
         montecarlo_multilevel.evaluate();
         montecarlo_multilevel.show_statistics();

@@ -13,6 +13,7 @@
 #include "distribution/expcosdistribution.hh"
 #include "lattice/lattice2d.hh"
 #include "action/action.hh"
+#include "action/qft/qftaction.hh"
 #include "action/qft/quenchedschwingerrenormalisation.hh"
 
 /** @file quenchedschwingeraction.hh
@@ -97,7 +98,7 @@ private:
  *  Here if \f$n=(i,j)\f$ then \f$n+\hat{0}=(i+1,j)\f$, \f$n+\hat{1}=(i,j+1)\f$ etc.
  */
 
-class QuenchedSchwingerAction : public Action {
+class QuenchedSchwingerAction : public QFTAction {
 public:
     /** @brief Initialise class
      *
@@ -108,14 +109,9 @@ public:
     QuenchedSchwingerAction(const std::shared_ptr<Lattice2D> lattice_,
                             const RenormalisationType renormalisation_,
                             const double beta_)
-        : Action(renormalisation_),
-          lattice(lattice_),
-          fine_lattice(lattice->fine_lattice()),
-          coarse_lattice(lattice->coarse_lattice()),
+        : QFTAction(lattice_,renormalisation_),
           beta(beta_),
           engine(2481317),
-          Mt_lat(lattice->getMt_lat()),
-          Mx_lat(lattice->getMx_lat()),
           exp_cos_dist(beta) { }
 
     /** @brief Return coupling constant \f$beta\f$ */
@@ -210,24 +206,6 @@ public:
      */
     virtual void initialise_state(std::shared_ptr<SampleState> phi_state) const;
     
-    /** @brief Get underlying lattice */
-    std::shared_ptr<Lattice2D> get_lattice() {
-        return lattice;
-    }
-    
-    /** @brief Get coarsening level
-     *
-     * This will return the coarsening level of the underlying lattice */
-    virtual int get_coarsening_level() const {
-        return lattice->get_coarsening_level();
-    }
-
-    /** @brief Check whether action supports number of coarsening steps
-     *
-     * @param[in] n_level Number of additional coarsening steps (can be zero)
-     */
-    virtual void check_coarsening_is_permitted(const unsigned int n_level);
-
 private:
             
     /** @brief Compute staple angles \f$\theta_{n,\mu}^{(+)}\f$ and \f$\theta_{n,\mu}^{(-)}\f$
@@ -261,22 +239,12 @@ private:
                                double& theta_m);
 
 protected:
-    /** @brief Underlying lattice */
-    const std::shared_ptr<Lattice2D> lattice;
-    /** @brief Underlying refined lattice */
-    const std::shared_ptr<Lattice2D> fine_lattice;
-    /** @brief Underlying coarsened lattice */
-    const std::shared_ptr<Lattice2D> coarse_lattice;
     /** @brief Dimensionless coupling constant \f$\beta=1/(a_t a_x g^2)\f$*/
     const double beta;
     /** @brief Random number engine */
     typedef mpi_parallel::mt19937_64 Engine;
     /** @brief Type of Mersenne twister engine */
     mutable Engine engine;
-    /** @brief Number of time slices */
-    const unsigned int Mt_lat;
-    /** @brief Number of points in spatial direction */
-    const unsigned int Mx_lat;
     /** @brief distribution for drawing from heat bath */
     const ExpCosDistribution exp_cos_dist;
 

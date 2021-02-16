@@ -5,6 +5,10 @@
 
 /* Evaluate QoI */
 const double QoI2DSusceptibility::evaluate(const std::shared_ptr<SampleState> phi_state) {
+    if (phi_state->data.size() != 2*Mt_lat*Mx_lat) {
+        mpi_parallel::cout << "ERROR: Evaluating QoI2DSusceptibility on state of wrong size." << std::endl;
+        mpi_exit(EXIT_FAILURE);
+    }
     // lambda function for working out linear index of link
     double Q = 0.0;
     for (int i=0;i<Mt_lat;++i) {

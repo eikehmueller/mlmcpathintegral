@@ -5,14 +5,13 @@
  */
 
 MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
-        std::shared_ptr<QoI> qoi_,
+        std::shared_ptr<QoIFactory> qoi_factory_,
         std::shared_ptr<SamplerFactory> sampler_factory,
         std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
         const StatisticsParameters param_stats,
         const MultiLevelMCParameters param_multilevelmc) :
     MonteCarlo(param_multilevelmc.n_burnin()),
     fine_action(fine_action_),
-    qoi(qoi_),
     n_level(param_multilevelmc.n_level()),
     epsilon(param_multilevelmc.epsilon()),
     n_target(param_multilevelmc.n_level(),0),
@@ -43,6 +42,10 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
         stats_sampler_label << "   Q_{sampler}[" << ell << "]";
         stats_coarse_sampler.push_back(std::make_shared<Statistics>(stats_sampler_label.str(),
                                        n_autocorr_window));
+    }
+        // Construct QoI on all levels
+    for (unsigned int ell=0; ell<n_level; ++ell) {
+        qoi.push_back(qoi_factory_->get(action[ell]));
     }
     std::shared_ptr<Action> coarse_action = action[n_level-1];
     // Construct samples on all levels
@@ -75,12 +78,12 @@ void MonteCarloMultiLevel::evaluate() {
         for (unsigned int j=0; j<n_burnin; ++j) {
             if (level==n_level-1) {
                 coarse_sampler[level-1]->draw(phi_state[level]);
-                qoi_Y = qoi->evaluate(phi_state[level]);
+                qoi_Y = qoi[level]->evaluate(phi_state[level]);
             } else {
                 coarse_sampler[level]->draw(phi_coarse_state[level+1]);
                 twolevel_step[level]->draw(phi_coarse_state[level+1],phi_state[level]);
-                double qoi_fine = qoi->evaluate(phi_state[level]);
-                double qoi_coarse = qoi->evaluate(phi_coarse_state[level+1]);
+                double qoi_fine = qoi[level]->evaluate(phi_state[level]);
+                double qoi_coarse = qoi[level+1]->evaluate(phi_coarse_state[level+1]);
                 qoi_Y = qoi_fine-qoi_coarse;
             }
             stats_qoi[level]->record_sample(qoi_Y);
@@ -108,12 +111,12 @@ void MonteCarloMultiLevel::evaluate() {
             for (int j=j_start; j<n_target[level]; ++j) {
                 if (level==n_level-1) {
                     draw_coarse_sample(level,phi_state[level]);
-                    qoi_Y = qoi->evaluate(phi_state[level]);
+                    qoi_Y = qoi[level]->evaluate(phi_state[level]);
                 } else {
                     draw_coarse_sample(level+1,phi_coarse_state[level+1]);
                     twolevel_step[level]->draw(phi_coarse_state[level+1],phi_state[level]);
-                    double qoi_fine = qoi->evaluate(phi_state[level]);
-                    double qoi_coarse = qoi->evaluate(phi_coarse_state[level+1]);
+                    double qoi_fine = qoi[level]->evaluate(phi_state[level]);
+                    double qoi_coarse = qoi[level+1]->evaluate(phi_coarse_state[level+1]);
                     qoi_Y = qoi_fine-qoi_coarse;
                 }
                 stats_qoi[level]->record_sample(qoi_Y);
@@ -158,7 +161,7 @@ void MonteCarloMultiLevel::draw_coarse_sample(const unsigned int level,
     if (sub_sample_coarse) {
         while (t_sampler[level-1] < ceil(2.*stats_coarse_sampler[level-1]->tau_int())) {
             coarse_sampler[level-1]->draw(phi_state);
-            double qoi_sampler = qoi->evaluate(phi_state);
+            double qoi_sampler = qoi[level]->evaluate(phi_state);
             stats_coarse_sampler[level-1]->record_sample(qoi_sampler);
             t_sampler[level-1]++;
         }

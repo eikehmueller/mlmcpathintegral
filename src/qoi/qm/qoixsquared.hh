@@ -3,8 +3,10 @@
 #include <memory>
 #include "common/auxilliary.hh"
 #include "common/samplestate.hh"
+#include "mpi/mpi_wrapper.hh"
 #include "lattice/lattice1d.hh"
 #include "qoi/quantityofinterest.hh"
+#include "action/qm/qmaction.hh"
 
 /** @file qoixsquared.hh
  * @brief Header file for QoI X^2
@@ -34,5 +36,23 @@ private:
     /** @brief Number of lattice points */
     const unsigned int M_lat;
 };
+
+/** @class QoIXsquaredFactory
+ *
+ * @brief Factory for constructing the QoI for a particular action
+ */
+class QoIXsquaredFactory : public QoIFactory {
+public:
+    /** @brief Return QoI for a specific  action
+     *
+     * @param[in] action Action to use
+     */
+    virtual std::shared_ptr<QoI> get(std::shared_ptr<Action> action) {
+        std::shared_ptr<QMAction> qmaction = std::dynamic_pointer_cast<QMAction>(action);
+        std::shared_ptr<Lattice1D> lattice = qmaction->get_lattice();
+        return std::make_shared<QoIXsquared>(lattice);
+    }
+};
+
 
 #endif // QOIXSQUARED_HH

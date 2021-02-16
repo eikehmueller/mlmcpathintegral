@@ -106,7 +106,7 @@ public:
      * @param[in] param_twolevelmc Two level sampler parameters
      */
     MonteCarloTwoLevel(const std::shared_ptr<Action> fine_action_,
-                       const std::shared_ptr<QoI> qoi_,
+                       const std::shared_ptr<QoIFactory> qoi_factory_,
                        const std::shared_ptr<SamplerFactory> sampler_factory,
                        const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                        const TwoLevelMCParameters param_twolevelmc);
@@ -146,8 +146,10 @@ private:
     std::shared_ptr<Action> fine_action;
     /** @brief Conditioned fine action */
     std::shared_ptr<ConditionedFineAction> conditioned_fine_action;
-    /** @brief Quantity of interest */
-    std::shared_ptr<QoI> qoi;
+    /** @brief Quantity of interest on fine level */
+    std::shared_ptr<QoI> qoi_fine;
+    /** @brief Quantity of interest on coarse level */
+    std::shared_ptr<QoI> qoi_coarse;
     /** Two-level sampler */
     std::shared_ptr<TwoLevelMetropolisStep> twolevel_step;
 };

@@ -4,7 +4,9 @@
 #include <cmath>
 #include "common/auxilliary.hh"
 #include "common/samplestate.hh"
+#include "mpi/mpi_wrapper.hh"
 #include "lattice/lattice1d.hh"
+#include "action/qm/qmaction.hh"
 #include "qoi/quantityofinterest.hh"
 
 /** @file qoisusceptibility.hh
@@ -50,6 +52,22 @@ private:
     const double T_final;
     /** @brief Number of lattice points */
     const unsigned int M_lat;
+};
+
+/** @class QoISusceptibilityFactory
+ *
+ * @brief Factory for constructing the QoI for a particular action
+ */
+class QoISusceptibilityFactory : public QoIFactory {
+public:
+    /** @brief Return QoI for a specific  action
+     *
+     * @param[in] action Action to use
+     */
+    virtual std::shared_ptr<QoI> get(std::shared_ptr<Action> action) {
+        std::shared_ptr<Lattice1D> lattice = std::dynamic_pointer_cast<QMAction>(action)->get_lattice();
+        return std::make_shared<QoISusceptibility>(lattice);
+    }
 };
 
 #endif // QOISUSCEPTIBILITY_HH

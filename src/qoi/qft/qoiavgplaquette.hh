@@ -4,7 +4,9 @@
 #include <cmath>
 #include "common/auxilliary.hh"
 #include "common/samplestate.hh"
+#include "mpi/mpi_wrapper.hh"
 #include "lattice/lattice2d.hh"
+#include "action/qft/qftaction.hh"
 #include "qoi/quantityofinterest.hh"
 
 /** @file qoiavgplaquette.hh
@@ -45,5 +47,22 @@ private:
     /** @brief Number of lattice points in spatial direction */
     const unsigned int Mx_lat;
 };
+
+/** @class QoIAvgPlaquetteFactory
+ *
+ * @brief Factory for constructing the QoI for a particular action
+ */
+class QoIAvgPlaquetteFactory : public QoIFactory {
+public:
+    /** @brief Return QoI for a specific  action
+     *
+     * @param[in] action Action to use
+     */
+    virtual std::shared_ptr<QoI> get(std::shared_ptr<Action> action) {
+        std::shared_ptr<Lattice2D> lattice = std::dynamic_pointer_cast<QFTAction>(action)->get_lattice();
+        return std::make_shared<QoIAvgPlaquette>(lattice);
+    }
+};
+
 
 #endif // QOIAVGPLAQUETTE_HH

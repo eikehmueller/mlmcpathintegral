@@ -146,6 +146,7 @@ int main(int argc, char* argv[]) {
     /* ====== Select quantity of interest ====== */
     std::shared_ptr<QoI2DSusceptibility> qoi;
     qoi = std::make_shared<QoI2DSusceptibility>(lattice);
+    std::shared_ptr<QoI2DSusceptibilityFactory> qoi_factory = std::make_shared<QoI2DSusceptibilityFactory>();
     mpi_parallel::cout << std::endl;
 
     /* ====== Select action ====== */
@@ -235,7 +236,7 @@ int main(int argc, char* argv[]) {
                                                     param_heatbath,
                                                     param_hierarchical);
         MonteCarloTwoLevel montecarlo_twolevel(action,
-                                               qoi,
+                                               qoi_factory,
                                                sampler_factory,
                                                conditioned_fine_action_factory,
                                                param_twolevelmc);
@@ -280,11 +281,11 @@ int main(int argc, char* argv[]) {
                                                     param_hierarchical);
 
         MonteCarloMultiLevel montecarlo_multilevel(action,
-                qoi,
-                sampler_factory,
-                conditioned_fine_action_factory,
-                param_stats,
-                param_multilevelmc);
+                                                   qoi_factory,
+                                                   sampler_factory,
+                                                   conditioned_fine_action_factory,
+                                                   param_stats,
+                                                   param_multilevelmc);
 
         montecarlo_multilevel.evaluate();
         montecarlo_multilevel.show_statistics();

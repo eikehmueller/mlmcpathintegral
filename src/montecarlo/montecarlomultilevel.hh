@@ -124,7 +124,7 @@ public:
      * @param[in] param_multilevelmc Multilevel MC parameters
      */
     MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
-                         std::shared_ptr<QoI> qoi_,
+                         std::shared_ptr<QoIFactory> qoi_factory_,
                          std::shared_ptr<SamplerFactory> sampler_factory,
                          std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                          const StatisticsParameters param_stats,
@@ -173,7 +173,7 @@ private:
     /** @brief Two level step on all levels of the multigrid hierarchy */
     std::vector<std::shared_ptr<TwoLevelMetropolisStep> > twolevel_step;
     /** @brief Quantity of interest */
-    std::shared_ptr<QoI> qoi;
+    std::vector<std::shared_ptr<QoI>> qoi;
     /** @brief Number of levels */
     const unsigned int n_level;
     /** @brief Tolerance epsilon */

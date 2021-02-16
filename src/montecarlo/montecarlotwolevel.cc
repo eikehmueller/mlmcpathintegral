@@ -5,14 +5,15 @@
  */
 /* Constructor */
 MonteCarloTwoLevel::MonteCarloTwoLevel(const std::shared_ptr<Action> fine_action_,
-                                       const std::shared_ptr<QoI> qoi_,
+                                       const std::shared_ptr<QoIFactory> qoi_factory_,
                                        const std::shared_ptr<SamplerFactory> sampler_factory,
                                        const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                                        const TwoLevelMCParameters param_twolevelmc) :
     MonteCarlo(param_twolevelmc.n_burnin()),
     n_samples(param_twolevelmc.n_samples()),
     fine_action(fine_action_),
-    qoi(qoi_) {
+    qoi_fine(qoi_factory_->get(fine_action_)),
+    qoi_coarse(qoi_factory_->get(fine_action_->coarse_action())) {
     coarse_action = fine_action->coarse_action();
     coarse_sampler = sampler_factory->get(coarse_action);
     conditioned_fine_action = conditioned_fine_action_factory->get(fine_action);
@@ -37,11 +38,11 @@ void MonteCarloTwoLevel::evaluate_difference(Statistics& stats_fine,
     for (unsigned int k=0; k<n_burnin; ++k) {
         coarse_sampler->draw(phi_coarse_state);
         twolevel_step->draw(phi_coarse_state,phi_state);
-        double qoi_fine = qoi->evaluate(phi_state);
-        double qoi_coarse = qoi->evaluate(phi_coarse_state);
-        stats_fine.record_sample(qoi_fine);
-        stats_coarse.record_sample(qoi_coarse);
-        stats_diff.record_sample(qoi_fine-qoi_coarse);
+        double qoi_fine_value = qoi_fine->evaluate(phi_state);
+        double qoi_coarse_value = qoi_coarse->evaluate(phi_coarse_state);
+        stats_fine.record_sample(qoi_fine_value);
+        stats_coarse.record_sample(qoi_coarse_value);
+        stats_diff.record_sample(qoi_fine_value-qoi_coarse_value);
     }
     mpi_parallel::cout << "Burnin completed" << std::endl;
 
@@ -54,10 +55,10 @@ void MonteCarloTwoLevel::evaluate_difference(Statistics& stats_fine,
     for (unsigned int k=0; k<n_local_samples; ++k) {
         coarse_sampler->draw(phi_coarse_state);
         twolevel_step->draw(phi_coarse_state,phi_state);
-        double qoi_fine = qoi->evaluate(phi_state);
-        double qoi_coarse = qoi->evaluate(phi_coarse_state);
-        stats_fine.record_sample(qoi_fine);
-        stats_coarse.record_sample(qoi_coarse);
-        stats_diff.record_sample(qoi_fine-qoi_coarse);
+        double qoi_fine_value = qoi_fine->evaluate(phi_state);
+        double qoi_coarse_value = qoi_coarse->evaluate(phi_coarse_state);
+        stats_fine.record_sample(qoi_fine_value);
+        stats_coarse.record_sample(qoi_coarse_value);
+        stats_diff.record_sample(qoi_fine_value-qoi_coarse_value);
     }
 }
