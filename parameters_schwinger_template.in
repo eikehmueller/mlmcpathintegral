@@ -37,14 +37,32 @@ singlelevelmc:
   n_burnin = 1000     # Number of burnin samples
   n_samples = 10000      # Number of samples, set to 0 to use epsilon instead 
   epsilon = 1.0E-2   # Tolerance epsilon
-  sampler = 'heatbath'  # Sampler to use [HMC, heatbath, cluster, exact, hierarchical, multilevel]
+  sampler = 'heatbath'  # Sampler to use [HMC, heatbath, cluster, hierarchical, multilevel]
 
 ###########################################
 # Hierarchical sampler parameters
 ###########################################
 hierarchical:
   n_max_level = 3            # Maximal number of levels
-  coarsesampler = 'heatbath' # Sampler to use [HMC, heatbath, cluster, exact]
+  coarsesampler = 'heatbath' # Sampler to use [HMC, heatbath]
+
+###########################################
+# Two level Monte Carlo parameters
+###########################################
+twolevelmc:
+  n_burnin = 100      # Number of burnin samples
+  n_samples = 100000    # Number of samples
+  sampler = 'hierarchical' # Sampler to use [HMC, heatbath, hierarchical]
+
+###########################################
+# Multilevel Monte Carlo parameters
+###########################################
+multilevelmc:
+  n_level = 3      # Number of levels
+  n_burnin = 100      # Number of burnin samples
+  epsilon = 1.0    # Tolerance epsilon
+  show_detailed_stats = false  # Print out detailed statistics?
+  sampler = 'hierarchical'    # Sampler to use [hierarchical, multilevel, cluster]
 
 ###########################################
 # HMC sampler parameters

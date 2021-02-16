@@ -13,6 +13,8 @@
 #include "qoi/qft/qoiavgplaquette.hh"
 #include "qoi/qft/qoi2dsusceptibility.hh"
 #include "montecarlo/montecarlosinglelevel.hh"
+#include "montecarlo/montecarlotwolevel.hh"
+#include "montecarlo/montecarlomultilevel.hh"
 #include "sampler/hmcsampler.hh"
 #include "sampler/hierarchicalsampler.hh"
 #include "sampler/overrelaxedheatbathsampler.hh"
@@ -109,6 +111,14 @@ int main(int argc, char* argv[]) {
     HierarchicalParameters param_hierarchical;
     if (param_hierarchical.readFile(filename)) return 1;
     mpi_parallel::cout << param_hierarchical << std::endl;
+    
+    TwoLevelMCParameters param_twolevelmc;
+    if (param_twolevelmc.readFile(filename)) return 1;
+    mpi_parallel::cout << param_twolevelmc << std::endl;
+
+    MultiLevelMCParameters param_multilevelmc;
+    if (param_multilevelmc.readFile(filename)) return 1;
+    mpi_parallel::cout << param_multilevelmc << std::endl;
 
 #ifdef DEBUG_BUILD
     mpi_parallel::cout << FRED("CAUTION: built in debug mode.") << std::endl;
@@ -205,19 +215,96 @@ int main(int argc, char* argv[]) {
         mpi_parallel::cout << "=== Sampler statistics === " << std::endl;
         montecarlo_singlelevel.get_sampler()->show_stats();
         mpi_parallel::cout << std::endl;
-    } else {
-        mpi_parallel::cout << "ERROR: only single level method implemented for Schwinger model." << std::endl;
-        mpi_exit(EXIT_FAILURE);
     }
     
-    double diff = fabs(numerical_result-analytical_result);
-    double ratio = diff/statistical_error;
-    mpi_parallel::cout << std::setprecision(8) << std::fixed;
-    mpi_parallel::cout << "Comparison to analytical result " << std::endl;
-    mpi_parallel::cout << "  (analytical - numerical) = " << diff;
-    mpi_parallel::cout << std::setprecision(3) << std::fixed;
-    mpi_parallel::cout << " = " << ratio << " * (statistical error) " << std::endl << std::endl;
+    /* **************************************** *
+     * Two level method                         *
+     * **************************************** */
+    if (param_general.method() == MethodTwoLevel) {
+        mpi_parallel::cout << "+--------------------------------+" << std::endl;
+        mpi_parallel::cout << "! Two level MC                   !" << std::endl;
+        mpi_parallel::cout << "+--------------------------------+" << std::endl;
+        mpi_parallel::cout << std::endl;
 
+        std::shared_ptr<SamplerFactory> sampler_factory;
+        sampler_factory = construct_sampler_factory(param_twolevelmc.sampler(),
+                                                    coarse_sampler_factory,
+                                                    conditioned_fine_action_factory,
+                                                    param_general,
+                                                    param_hmc,
+                                                    param_heatbath,
+                                                    param_hierarchical);
+        MonteCarloTwoLevel montecarlo_twolevel(action,
+                                               qoi,
+                                               sampler_factory,
+                                               conditioned_fine_action_factory,
+                                               param_twolevelmc);
+        Statistics stats_fine("QoI[fine]",10);
+        Statistics stats_coarse("QoI[coarse]",10);
+        Statistics stats_diff("delta QoI",10);
+        montecarlo_twolevel.evaluate_difference(stats_fine,
+                                                stats_coarse,
+                                                stats_diff);
+        mpi_parallel::cout << stats_fine << std::endl;
+        mpi_parallel::cout << stats_coarse << std::endl;
+        mpi_parallel::cout << stats_diff << std::endl;
+        mpi_parallel::cout << std::endl;
+        mpi_parallel::cout << "=== Coarse level sampler statistics === " << std::endl;
+        montecarlo_twolevel.get_coarsesampler()->show_stats();
+        mpi_parallel::cout << std::endl;
+        mpi_parallel::cout << "=== Two level sampler statistics === " << std::endl;
+        montecarlo_twolevel.get_twolevelstep()->show_stats();
+        mpi_parallel::cout << std::endl;
+    }
+    
+    /* **************************************** *
+     * Multilevel method                         *
+     * **************************************** */
+    if (param_general.method() == MethodMultiLevel) {
+        if (mpi_comm_size() > 1) {
+            mpi_parallel::cerr << " Multilevel method has not been parallelised (yet)." << std::endl;
+            mpi_exit(EXIT_FAILURE);
+        }
+        mpi_parallel::cout << "+--------------------------------+" << std::endl;
+        mpi_parallel::cout << "! Multilevel MC                  !" << std::endl;
+        mpi_parallel::cout << "+--------------------------------+" << std::endl;
+        mpi_parallel::cout << std::endl;
+
+        std::shared_ptr<SamplerFactory> sampler_factory;
+        sampler_factory = construct_sampler_factory(param_twolevelmc.sampler(),
+                                                    coarse_sampler_factory,
+                                                    conditioned_fine_action_factory,
+                                                    param_general,
+                                                    param_hmc,
+                                                    param_heatbath,
+                                                    param_hierarchical);
+
+        MonteCarloMultiLevel montecarlo_multilevel(action,
+                qoi,
+                sampler_factory,
+                conditioned_fine_action_factory,
+                param_stats,
+                param_multilevelmc);
+
+        montecarlo_multilevel.evaluate();
+        montecarlo_multilevel.show_statistics();
+        if (param_multilevelmc.show_detailed_stats()) {
+            montecarlo_multilevel.show_detailed_statistics();
+        }
+        numerical_result = montecarlo_multilevel.numerical_result();
+        statistical_error = montecarlo_multilevel.statistical_error();
+    }
+    
+    if ( (param_general.method() == MethodSingleLevel) or
+         (param_general.method() == MethodMultiLevel) ) {
+        double diff = fabs(numerical_result-analytical_result);
+        double ratio = diff/statistical_error;
+        mpi_parallel::cout << std::setprecision(8) << std::fixed;
+        mpi_parallel::cout << "Comparison to analytical result " << std::endl;
+        mpi_parallel::cout << "  (analytical - numerical) = " << diff;
+        mpi_parallel::cout << std::setprecision(3) << std::fixed;
+        mpi_parallel::cout << " = " << ratio << " * (statistical error) " << std::endl << std::endl;
+    }
     total_time.stop();
     mpi_parallel::cout << total_time << std::endl;
     mpi_finalize();
