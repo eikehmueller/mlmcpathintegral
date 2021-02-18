@@ -122,6 +122,34 @@ public:
 double quenchedschwinger_chit_analytical(const double beta,
                                          const unsigned int n_plaq);
 
+/** @brief Analytical result for the variance of the topological susceptibility (scaled by the volume) in the continuum limit
+ *
+ * Computes the analytical value of the variance of the topological susceptibility times the lattice volume,
+ * in the continuum limit i.e. \f$\lim_{\beta\rightarrow \infty}Var[\V\chi_t]\f$.
+ *
+ * If the number of plaquettes is \f$P\f$ and the coupling constant is \f$\beta\f$, then this is given by
+ *
+ * \f[
+ *   V \chi_t(\beta/P) = \left(\hat{\Sigma}_4(\zeta) - \hat{\Sigma}_2(\zeta)^2\right)
+ * \f]
+ *
+ * with \f$\zeta = 4\pi^2\frac{\beta}{P}\f$ and the sums
+ *
+ *  \f[
+ *   \begin{aligned}
+ *     \hat{\Sigma}_p(\zeta) &= \frac{\Sigma_p(\zeta)}{\Sigma_0(\zeta)}\\
+ *     \Sigma_p(\zeta) &= \frac{\sum_{m\in\mathbb{Z}}m^p\exp\left[-\frac{1}{2}\zeta m^2\right]}
+ *   \end{aligned}
+ *  \f]
+ *
+ * Note that the limit is taken such that the physical volume is constant, i.e. \f$P/\beta\f$ is fixed.
+ *
+ *   @param[in] beta Coupling constant \f$beta\f$
+ *   @param[in] n_plaq Number of plaquettes \f$P\f$
+ */
+double quenchedschwinger_var_chit_continuum_analytical(const double beta,
+                                                       const unsigned int n_plaq);
+
 /** @brief Compute functions required in calculation of topological susceptibility
  *
  * Evaluate functions \f$I_n(x)\f$, \f$I'_n(x)\f$ and \f$I''_n(x)\f$

@@ -53,6 +53,16 @@ double quenchedschwinger_chit_analytical(const double beta,
     return chit;
 }
 
+/* Analytical expression for variance of topological susceptibility in the continuum limit */
+double quenchedschwinger_var_chit_continuum_analytical(const double beta,
+                                                       const unsigned int n_plaq) {
+    double zeta = 4*M_PI*M_PI*beta/n_plaq;
+    double Sigma_hat_2 = Sigma_hat(zeta,2);
+    double Sigma_hat_4 = Sigma_hat(zeta,4);
+    return Sigma_hat_4 - Sigma_hat_2*Sigma_hat_2;
+}
+
+
 /* Compute functions I'_n(x) and I''_n(x) required in calculation of topological susceptibility */
 void compute_In(const double x,
                 std::vector<double>& In,
