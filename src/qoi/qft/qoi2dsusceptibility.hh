@@ -22,10 +22,10 @@
  * The returned topological susceptibility is defined as
  *
  * \f[
- *    \chi_t = \langle Q^2\rangle
+ *    V\chi_t = \langle Q^2\rangle
  * \f]
  *
- * where \f$Q\f$ is the topological charge. With this definition \f$\chi_t\f$ approaches the
+ * where \f$Q\f$ is the topological charge. With this definition \f$V\chi_t\f$ approaches the
  * continuum values as \f$\beta\rightarrow\infty\f$ while \f$\beta/P\f$ is kept fixed, with
  * \f$P\f$ denoting the number of plaquettes.
  *
@@ -125,7 +125,7 @@ double quenchedschwinger_chit_analytical(const double beta,
 /** @brief Analytical result for the variance of the topological susceptibility (scaled by the volume) in the continuum limit
  *
  * Computes the analytical value of the variance of the topological susceptibility times the lattice volume,
- * in the continuum limit i.e. \f$\lim_{\beta\rightarrow \infty}Var[\V\chi_t]\f$.
+ * in the continuum limit i.e. \f$\lim_{\beta\rightarrow \infty}Var[V\chi_t]\f$.
  *
  * If the number of plaquettes is \f$P\f$ and the coupling constant is \f$\beta\f$, then this is given by
  *
@@ -138,7 +138,7 @@ double quenchedschwinger_chit_analytical(const double beta,
  *  \f[
  *   \begin{aligned}
  *     \hat{\Sigma}_p(\zeta) &= \frac{\Sigma_p(\zeta)}{\Sigma_0(\zeta)}\\
- *     \Sigma_p(\zeta) &= \frac{\sum_{m\in\mathbb{Z}}m^p\exp\left[-\frac{1}{2}\zeta m^2\right]}
+ *     \Sigma_p(\zeta) &= \sum_{m\in\mathbb{Z}}m^p\exp\left[-\frac{1}{2}\zeta m^2\right]
  *   \end{aligned}
  *  \f]
  *
