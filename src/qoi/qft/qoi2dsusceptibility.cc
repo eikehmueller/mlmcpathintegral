@@ -27,7 +27,7 @@ const double QoI2DSusceptibility::evaluate(const std::shared_ptr<SampleState> ph
 double quenchedschwinger_chit_analytical(const double beta,
                                          const unsigned int n_plaq) {
     /* Truncation index of sums */
-    const int nmax = 10;
+    const int nmax = 20;
     /* Compute functions I_n(\beta), I'_n(\beta), I''_n(\beta) */
     std::vector<double> In(nmax);
     std::vector<double> dIn(nmax);
@@ -68,33 +68,60 @@ void compute_In(const double x,
                 std::vector<double>& In,
                 std::vector<double>& dIn,
                 std::vector<double>& ddIn) {
+        
+    /* Structures for parameters to be passed to the integrand */
+    struct ParamType {
+        double x;      // argument x
+        int n;         // order n
+        bool use_qawo; // Use the QAWO integration method for trig-functions?
+    };
     
     /* Integrand -1/(4*pi^2)*phi*exp(-x*cos(phi)) */
     auto integrand_phi1 = [](double phi, void * p) -> double {
-        double x = *((double*) p);
-        return  -1./(4.*M_PI*M_PI)*phi*exp(x*(cos(phi)-1.0));
+        struct ParamType *params = (struct ParamType *) p;
+        double x = params->x;
+        int n = params->n;
+        bool include_trig = not params->use_qawo;
+        double f = -1./(4.*M_PI*M_PI)*phi*exp(x*(cos(phi)-1.0));
+        if (include_trig) f *= sin(n*phi);
+        return f;
     };
 
     /* Integrand 1/(8*pi^3)*phi^2*exp(-x*cos(phi)) */
     auto integrand_phi2 = [](double phi, void * p) -> double {
-        double x = *((double*) p);
-        return  1./(8.*M_PI*M_PI*M_PI)*phi*phi*exp(x*(cos(phi)-1.0));
+        struct ParamType *params = (struct ParamType *) p;
+        double x = params->x;
+        int n = params->n;
+        bool include_trig = not params->use_qawo;
+        double f = 1./(8.*M_PI*M_PI*M_PI)*phi*phi*exp(x*(cos(phi)-1.0));
+        if (include_trig) f *= cos(n*phi);
+        return f;
     };
 
     /* GSL function required for integration */
     gsl_function integrand;
-    integrand.params = (void*) &x;
+    ParamType params;
+    params.x = x;
+    /*
+     * Only use QAWO integration for not too large values of x.
+     * For large values of x the function is concentrated near zero and Gaussian
+     * quadrature is more robust.
+     */
+    params.use_qawo = (x < 32.0);
+    integrand.params = &params;
     
     /* GSL workspace required for numerical integration with QAWO routine */
-    const size_t n_level = 10; // 2^{n_level} must not exceed n_workspace
+    const size_t n_level = 20; // 2^{n_level} must not exceed n_workspace
     const size_t n_workspace = 1<<n_level;
     gsl_integration_workspace* workspace;
     workspace = gsl_integration_workspace_alloc(n_workspace);
     gsl_integration_qawo_table* qawo_table;
-    qawo_table = gsl_integration_qawo_table_alloc(1.0,2.0*M_PI,GSL_INTEG_COSINE,n_level);
+    if (params.use_qawo) {
+        qawo_table = gsl_integration_qawo_table_alloc(1.0,2.0*M_PI,GSL_INTEG_COSINE,n_level);
+    }
     
     /* Tolerances for numerical integration */
-    const double epsabs = 1.E-10;
+    const double epsabs = 1.E-15;
     const double epsrel = 1.E-12;
     
     /* Evaluate all functions*/
@@ -103,16 +130,27 @@ void compute_In(const double x,
         In[n] = gsl_sf_bessel_In_scaled(n,x);
         /* Evaluate the integrals */
         double abserr; // Absolute error of numerical integration
+        params.n = n;
         /* --- I'_n(x), weight function is sin(n*phi) --- */
-        gsl_integration_qawo_table_set(qawo_table,n,2.0*M_PI,GSL_INTEG_SINE);
         integrand.function = integrand_phi1;
-        gsl_integration_qawo(&integrand, -M_PI, epsabs, epsrel, n_workspace, workspace, qawo_table, &dIn[n], &abserr);
+        if (params.use_qawo) {
+            gsl_integration_qawo_table_set(qawo_table,n,2.0*M_PI,GSL_INTEG_SINE);
+            gsl_integration_qawo(&integrand, -M_PI, epsabs, epsrel, n_workspace, workspace, qawo_table, &dIn[n], &abserr);
+        } else {
+            gsl_integration_qag(&integrand, -M_PI, +M_PI, epsabs, epsrel, n_workspace, 1, workspace,&dIn[n], &abserr);
+        }
         /* --- I''_n(x), weight function is cos(n*phi) --- */
-        gsl_integration_qawo_table_set(qawo_table,n,2.0*M_PI,GSL_INTEG_COSINE);
         integrand.function = integrand_phi2;
-        gsl_integration_qawo(&integrand, -M_PI, epsabs, epsrel, n_workspace, workspace, qawo_table, &ddIn[n], &abserr);
+        if (params.use_qawo) {
+            gsl_integration_qawo_table_set(qawo_table,n,2.0*M_PI,GSL_INTEG_COSINE);
+            gsl_integration_qawo(&integrand, -M_PI, epsabs, epsrel, n_workspace, workspace, qawo_table, &ddIn[n], &abserr);
+        } else {
+            gsl_integration_qag(&integrand, -M_PI, +M_PI, epsabs, epsrel, n_workspace, 1, workspace,&ddIn[n], &abserr);
+        }
     }
     /* Free woskspace memory */
-    gsl_integration_qawo_table_free(qawo_table);
+    if (params.use_qawo) {
+        gsl_integration_qawo_table_free(qawo_table);
+    }
     gsl_integration_workspace_free(workspace);
 }
