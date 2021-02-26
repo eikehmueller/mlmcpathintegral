@@ -73,11 +73,10 @@ public:
             x0 = 2.*M_PI-x0;
             sign_flip *= -1;
         }
-        double sigma2_inv = beta*cos(0.25*x0);
-        double sigma2_inv_tilde = beta*sin(0.25*x0);
+        double N_p;
+        double sigma2_inv;
+        compute_N_p_sigma2inv(beta,x0,N_p,sigma2_inv);
         double sigma = 1./sqrt(sigma2_inv);
-        double rho_r = gsl_sf_bessel_I0(2.*sigma2_inv_tilde)/gsl_sf_bessel_I0(2.*sigma2_inv);
-        double N_p = 1./(1.+rho_r*rho_r);
         double xi = distribution(engine);
         double xshift = (xi<N_p)?0:M_PI;
         double x = sigma*normal_distribution(engine)+0.5*x0-xshift;
@@ -99,6 +98,21 @@ public:
   double get_beta() const { return beta; }
 
 private:
+    
+    /** @brief Compute probability of sampling from main mode and width of peak
+     *
+     * Compute the probability of sampling from the main mode of the double-Gaussian
+     * distribution and the inverse squared width \f$1/\sigma^2\f$ of the peak.
+     *
+     * @param[in] beta Coupling constant \f$\beta\f$
+     * @param[in] x0 Shift parameter \f$x_0\f$
+     * @param[out] N_p Resulting probability of sampling from main peak
+     * @param[out] sigma2_inv Resulting squared width \f$1/\sigma^2\f$ of Gaussian
+     */
+    void compute_N_p_sigma2inv(const double beta,
+                               const double x0,
+                               double& N_p,
+                               double& sigma2_inv) const;
     
   /** @brief parameter \f$\beta\f$*/
   const double beta;

@@ -17,10 +17,9 @@ double ApproximateBesselProductDistribution::evaluate(const double x,
         sign_flip *= -1;
     }
     z *= sign_flip;
-    double sigma2_inv = beta*cos(0.25*x0);
-    double sigma2_inv_tilde = beta*sin(0.25*x0);
-    double rho_r = gsl_sf_bessel_I0(2.*sigma2_inv_tilde)/gsl_sf_bessel_I0(2.*sigma2_inv);
-    double N_p = 1./(1.+rho_r*rho_r);
+    double N_p;
+    double sigma2_inv;
+    compute_N_p_sigma2inv(beta,x0,N_p,sigma2_inv);
     double N_m = 1.-N_p;
     double s_p=0.0;
     double s_m=0.0;
@@ -32,3 +31,22 @@ double ApproximateBesselProductDistribution::evaluate(const double x,
     }
     return sqrt(0.5*sigma2_inv/M_PI)*(N_p*s_p + N_m*s_m);
 }
+
+/* Compute probability N_p of drawing from the main mode of the distribution */
+void ApproximateBesselProductDistribution::compute_N_p_sigma2inv(const double beta,
+                                                                 const double x0,
+                                                                 double& N_p,
+                                                                 double& sigma2_inv) const {
+    sigma2_inv = beta*cos(0.25*x0);
+    double sigma2_inv_tilde = beta*sin(0.25*x0);
+    double rho_r = gsl_sf_bessel_I0_scaled(2.*sigma2_inv_tilde)/gsl_sf_bessel_I0_scaled(2.*sigma2_inv);
+    double delta = 4.*beta*(sin(0.25*x0)-cos(0.25*x0));
+    if (delta < 0) {
+        double exp_delta = exp(delta);
+        N_p = 1./(1.+rho_r*rho_r*exp_delta);
+    } else {
+        double exp_minus_delta = exp(-delta);
+        N_p = exp_minus_delta/(exp_minus_delta+rho_r*rho_r);
+    }
+}
+
