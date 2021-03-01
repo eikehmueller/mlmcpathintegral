@@ -39,7 +39,7 @@ void ApproximateBesselProductDistribution::compute_N_p_sigma2inv(const double be
                                                                  double& sigma2_inv) const {
     sigma2_inv = beta*cos(0.25*x0);
     double sigma2_inv_tilde = beta*sin(0.25*x0);
-    double rho_r = gsl_sf_bessel_I0_scaled(2.*sigma2_inv_tilde)/gsl_sf_bessel_I0_scaled(2.*sigma2_inv);
+    double rho_r = fast_bessel_I0_scaled(2.*sigma2_inv_tilde)/fast_bessel_I0_scaled(2.*sigma2_inv);
     double delta = 4.*beta*(sin(0.25*x0)-cos(0.25*x0));
     if (delta < 0) {
         double exp_delta = exp(delta);

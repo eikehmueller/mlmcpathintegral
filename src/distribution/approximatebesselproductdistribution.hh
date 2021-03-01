@@ -4,8 +4,8 @@
 #include <random>
 #include <iostream>
 #include <cmath>
-#include <gsl/gsl_sf_bessel.h>
 #include "common/auxilliary.hh"
+#include "common/fastbessel.hh"
 #include "mpi/mpi_wrapper.hh"
 
 /** @file approximatebesselproductdistribution.hh

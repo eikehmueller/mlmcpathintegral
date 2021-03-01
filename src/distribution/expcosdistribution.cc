@@ -17,6 +17,6 @@ double ExpCosDistribution::evaluate(const double x,
     }
     z *= sign_flip;
     double sigma = 2.*beta*fabs(cos(0.5*dx));
-    double Z_norm = 2.*M_PI*gsl_sf_bessel_I0_scaled(sigma);
+    double Z_norm = 2.*M_PI*fast_bessel_I0_scaled(sigma);
     return 1./Z_norm*exp(sigma*(cos(z-0.5*dx)-1.0));
 }

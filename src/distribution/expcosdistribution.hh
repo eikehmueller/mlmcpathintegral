@@ -5,8 +5,8 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
-#include <gsl/gsl_sf_bessel.h>
 #include "common/auxilliary.hh"
+#include "common/fastbessel.hh"
 
 /** @file expcosdistribution.hh
  *
