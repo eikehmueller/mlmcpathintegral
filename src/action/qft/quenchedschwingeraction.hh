@@ -111,8 +111,7 @@ public:
                             const double beta_)
         : QFTAction(lattice_,renormalisation_),
           beta(beta_),
-          engine(2481317),
-          exp_cos_dist(beta) { }
+          exp_cos_dist(beta) { engine.seed(2481317); }
 
     /** @brief Return coupling constant \f$beta\f$ */
     double getbeta() const {

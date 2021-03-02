@@ -26,8 +26,8 @@
 class parallel_mt19937_64 : public std::mt19937_64 {
 public:
     /** @brief Constructor */
-    parallel_mt19937_64() {};
-
+    parallel_mt19937_64(result_type value = default_seed) { seed(value); };
+    
     /** @brief Seed random number generator
      *
      * @param[in] value Seed to be used on master process.
