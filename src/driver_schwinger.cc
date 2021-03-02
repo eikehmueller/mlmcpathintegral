@@ -17,6 +17,7 @@
 #include "montecarlo/montecarlomultilevel.hh"
 #include "sampler/hmcsampler.hh"
 #include "sampler/hierarchicalsampler.hh"
+#include "sampler/multilevelsampler.hh"
 #include "sampler/overrelaxedheatbathsampler.hh"
 #include "config.h"
 
@@ -30,12 +31,14 @@
 
 /** Helper function to construct suitable sampler factory for given samplerid */
 std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
+                                                          const std::shared_ptr<QoI2DSusceptibilityFactory> qoi_factory,
                                                           const std::shared_ptr<SamplerFactory> coarse_sampler_factory,
                                                           const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                                                           const GeneralParameters param_general,
                                                           const HMCParameters param_hmc,
                                                           const OverrelaxedHeatBathParameters param_heatbath,
-                                                          const HierarchicalParameters param_hierarchical) {
+                                                          const HierarchicalParameters param_hierarchical,
+                                                          const StatisticsParameters param_stats) {
     std::shared_ptr<SamplerFactory> sampler_factory;
     if (samplerid == SamplerHMC) {
         /* --- CASE 1: HMC sampler ---- */
@@ -48,6 +51,13 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
         sampler_factory = std::make_shared<HierarchicalSamplerFactory>(coarse_sampler_factory,
                                                                        conditioned_fine_action_factory,
                                                                        param_hierarchical);
+    } else if (samplerid == SamplerMultilevel) {
+        /* --- CASE 4: Multilevel sampler */
+        sampler_factory = std::make_shared<MultilevelSamplerFactory>(qoi_factory,
+                                                                     coarse_sampler_factory,
+                                                                     conditioned_fine_action_factory,
+                                                                     param_stats,
+                                                                     param_hierarchical);
     } else {
         mpi_parallel::cerr << " ERROR: Unsupported sampler." << std::endl;
         mpi_exit(EXIT_FAILURE);
@@ -181,10 +191,12 @@ int main(int argc, char* argv[]) {
     coarse_sampler_factory = construct_sampler_factory(param_hierarchical.coarsesampler(),
                                                        nullptr,
                                                        nullptr,
+                                                       nullptr,
                                                        param_general,
                                                        param_hmc,
                                                        param_heatbath,
-                                                       param_hierarchical);
+                                                       param_hierarchical,
+                                                       param_stats);
     
     /* **************************************** *
      * Single level method                      *
@@ -198,12 +210,14 @@ int main(int argc, char* argv[]) {
 
         std::shared_ptr<SamplerFactory> sampler_factory;
         sampler_factory = construct_sampler_factory(param_singlelevelmc.sampler(),
+                                                    qoi_factory,
                                                     coarse_sampler_factory,
                                                     conditioned_fine_action_factory,
                                                     param_general,
                                                     param_hmc,
                                                     param_heatbath,
-                                                    param_hierarchical);
+                                                    param_hierarchical,
+                                                    param_stats);
 
         /* ====== Construct single level MC ====== */
         MonteCarloSingleLevel montecarlo_singlelevel(action,
@@ -233,12 +247,14 @@ int main(int argc, char* argv[]) {
 
         std::shared_ptr<SamplerFactory> sampler_factory;
         sampler_factory = construct_sampler_factory(param_twolevelmc.sampler(),
+                                                    qoi_factory,
                                                     coarse_sampler_factory,
                                                     conditioned_fine_action_factory,
                                                     param_general,
                                                     param_hmc,
                                                     param_heatbath,
-                                                    param_hierarchical);
+                                                    param_hierarchical,
+                                                    param_stats);
         MonteCarloTwoLevel montecarlo_twolevel(action,
                                                qoi_factory,
                                                sampler_factory,
@@ -277,12 +293,14 @@ int main(int argc, char* argv[]) {
 
         std::shared_ptr<SamplerFactory> sampler_factory;
         sampler_factory = construct_sampler_factory(param_twolevelmc.sampler(),
+                                                    qoi_factory,
                                                     coarse_sampler_factory,
                                                     conditioned_fine_action_factory,
                                                     param_general,
                                                     param_hmc,
                                                     param_heatbath,
-                                                    param_hierarchical);
+                                                    param_hierarchical,
+                                                    param_stats);
 
         MonteCarloMultiLevel montecarlo_multilevel(action,
                                                    qoi_factory,
