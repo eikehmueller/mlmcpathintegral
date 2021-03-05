@@ -43,15 +43,19 @@ public:
     double beta_coarse() {
         double betacoarse;
         switch (renormalisation) {
-        case RenormalisationNone:
-            betacoarse = 0.25*beta;
-            break;
-        case RenormalisationPerturbative:
-            betacoarse = betacoarse_perturbative();
-            break;
-        case RenormalisationNonperturbative:
-            betacoarse = betacoarse_nonperturbative();
-            break;
+            case RenormalisationNone:
+                betacoarse = 0.25*beta;
+                break;
+            case RenormalisationPerturbative:
+                if (beta > 4.0) {
+                    betacoarse = betacoarse_perturbative();
+                } else {
+                    betacoarse = 0.25*beta;
+                }
+                break;
+            case RenormalisationNonperturbative:
+                betacoarse = betacoarse_nonperturbative();
+                break;
         }
         return betacoarse;
     }
