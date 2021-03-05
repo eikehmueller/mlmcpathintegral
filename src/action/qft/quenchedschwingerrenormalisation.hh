@@ -54,7 +54,11 @@ public:
                 }
                 break;
             case RenormalisationNonperturbative:
-                betacoarse = betacoarse_nonperturbative();
+                if (beta > 4.0) {
+                    betacoarse = betacoarse_nonperturbative();
+                } else {
+                    betacoarse = 0.25*beta;
+                }
                 break;
         }
         return betacoarse;
