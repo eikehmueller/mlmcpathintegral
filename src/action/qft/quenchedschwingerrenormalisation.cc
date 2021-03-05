@@ -26,7 +26,7 @@ double RenormalisedQuenchedSchwingerParameters::betacoarse_nonperturbative() {
     double x_lo = 0.01;
     double x_hi = 2.0;
     // relative tolerance
-    double rel_tol = 1.E-5;
+    double rel_tol = 1.E-12;
     
     // Root
     double x;
