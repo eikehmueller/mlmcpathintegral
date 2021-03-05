@@ -89,6 +89,7 @@ std::ostream& operator<<(std::ostream& os, const Statistics& stats) {
     os << " " << stats.label() << ": Var         = " << stats.variance() << std::endl;
     os << std::setprecision(3) << std::fixed;
     os << " " << stats.label() << ": tau_{int}   = " << stats.tau_int() << std::endl;
+    os << " " << stats.label() << ": window      = " << stats.autocorr_window() << std::endl;
     os << " " << stats.label() << ": # samples   = " << stats.samples() << std::endl;
     return os;
 }

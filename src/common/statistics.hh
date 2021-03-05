@@ -162,6 +162,11 @@ public:
 
     /** @brief Return integrated autocorrelation time \f$\tau_{\text{int}}\f$ */
     double tau_int() const;
+    
+    /** @brief Return size of autocorrelation window */
+    unsigned int autocorr_window() const {
+        return k_max;
+    }
 
     /** @brief Return the number of global samples */
     unsigned int samples() const;
