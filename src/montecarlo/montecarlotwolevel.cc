@@ -37,12 +37,13 @@ void MonteCarloTwoLevel::evaluate_difference() {
     std::shared_ptr<SampleState> phi_coarse_state =
         std::make_shared<SampleState>(coarse_action->sample_size());
     stats_coarse.hard_reset();
+    stats_coarse_sampler.hard_reset();
     stats_fine.hard_reset();
     stats_diff.hard_reset();
 
     // Burn-in phase
     for (unsigned int k=0; k<n_burnin; ++k) {
-        coarse_sampler->draw(phi_coarse_state);
+        draw_coarse_sample(phi_coarse_state);
         twolevel_step->draw(phi_coarse_state,phi_state);
         double qoi_fine_value = qoi_fine->evaluate(phi_state);
         double qoi_coarse_value = qoi_coarse->evaluate(phi_coarse_state);
