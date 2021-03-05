@@ -61,8 +61,7 @@ void QuenchedSchwingerAction::overrelaxation_update(std::shared_ptr<SampleState>
     double theta_m;
     lattice->link_lin2cart(ell,i,j,mu);
     compute_staple_angles(phi_state,i,j,mu,theta_p,theta_m);
-    double theta0 = mod_2pi(0.5*(theta_p+theta_m)+(fabs((theta_p-theta_m))>M_PI)*M_PI);
-    phi_state->data[ell] = mod_2pi(2.0*theta0 - phi_state->data[ell]);
+    phi_state->data[ell] = mod_2pi((theta_p+theta_m) - phi_state->data[ell]);
 }
 
 /* Force for HMC integrator */
