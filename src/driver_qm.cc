@@ -369,22 +369,10 @@ int main(int argc, char* argv[]) {
                                                qoi_factory,
                                                sampler_factory,
                                                conditioned_fine_action_factory,
+                                               param_stats,
                                                param_twolevelmc);
-        Statistics stats_fine("QoI[fine]",10);
-        Statistics stats_coarse("QoI[coarse]",10);
-        Statistics stats_diff("delta QoI",10);
-        montecarlo_twolevel.evaluate_difference(stats_fine,
-                                                stats_coarse,
-                                                stats_diff);
-        mpi_parallel::cout << stats_fine << std::endl;
-        mpi_parallel::cout << stats_coarse << std::endl;
-        mpi_parallel::cout << stats_diff << std::endl;
-        mpi_parallel::cout << std::endl;
-        mpi_parallel::cout << "=== Coarse level sampler statistics === " << std::endl;
-        montecarlo_twolevel.get_coarsesampler()->show_stats();
-        mpi_parallel::cout << std::endl;
-        mpi_parallel::cout << "=== Two level sampler statistics === " << std::endl;
-        montecarlo_twolevel.get_twolevelstep()->show_stats();
+        montecarlo_twolevel.evaluate_difference();
+        montecarlo_twolevel.show_statistics();
         mpi_parallel::cout << std::endl;
     }
 

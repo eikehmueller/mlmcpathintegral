@@ -8,12 +8,20 @@ MonteCarloTwoLevel::MonteCarloTwoLevel(const std::shared_ptr<Action> fine_action
                                        const std::shared_ptr<QoIFactory> qoi_factory_,
                                        const std::shared_ptr<SamplerFactory> sampler_factory,
                                        const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
+                                       const StatisticsParameters param_stats,
                                        const TwoLevelMCParameters param_twolevelmc) :
     MonteCarlo(param_twolevelmc.n_burnin()),
     n_samples(param_twolevelmc.n_samples()),
     fine_action(fine_action_),
     qoi_fine(qoi_factory_->get(fine_action_)),
-    qoi_coarse(qoi_factory_->get(fine_action_->coarse_action())) {
+    qoi_coarse(qoi_factory_->get(fine_action_->coarse_action())),
+    t_indep(0.0),
+    n_indep(0),
+    t_sampler(0),
+    stats_fine("QoI[fine]",10),
+    stats_coarse("QoI[coarse]",10),
+    stats_diff("delta QoI",10),
+    stats_coarse_sampler("QoI[coarsesampler]",param_stats.n_autocorr_window()) {
     coarse_action = fine_action->coarse_action();
     coarse_sampler = sampler_factory->get(coarse_action);
     conditioned_fine_action = conditioned_fine_action_factory->get(fine_action);
@@ -23,9 +31,7 @@ MonteCarloTwoLevel::MonteCarloTwoLevel(const std::shared_ptr<Action> fine_action
 }
 
 /** Calculate mean and variance of difference in QoI */
-void MonteCarloTwoLevel::evaluate_difference(Statistics& stats_fine,
-        Statistics& stats_coarse,
-        Statistics& stats_diff) {
+void MonteCarloTwoLevel::evaluate_difference() {
     std::shared_ptr<SampleState> phi_state =
         std::make_shared<SampleState>(fine_action->sample_size());
     std::shared_ptr<SampleState> phi_coarse_state =
@@ -45,6 +51,7 @@ void MonteCarloTwoLevel::evaluate_difference(Statistics& stats_fine,
         stats_diff.record_sample(qoi_fine_value-qoi_coarse_value);
     }
     mpi_parallel::cout << "Burnin completed" << std::endl;
+    stats_coarse_sampler.reset();
 
     unsigned int n_local_samples = distribute_n(n_samples);
     // Sampling phase
@@ -53,7 +60,7 @@ void MonteCarloTwoLevel::evaluate_difference(Statistics& stats_fine,
     stats_fine.hard_reset();
     stats_diff.hard_reset();
     for (unsigned int k=0; k<n_local_samples; ++k) {
-        coarse_sampler->draw(phi_coarse_state);
+        draw_coarse_sample(phi_coarse_state);
         twolevel_step->draw(phi_coarse_state,phi_state);
         double qoi_fine_value = qoi_fine->evaluate(phi_state);
         double qoi_coarse_value = qoi_coarse->evaluate(phi_coarse_state);
@@ -61,4 +68,31 @@ void MonteCarloTwoLevel::evaluate_difference(Statistics& stats_fine,
         stats_coarse.record_sample(qoi_coarse_value);
         stats_diff.record_sample(qoi_fine_value-qoi_coarse_value);
     }
+}
+
+/* Draw (independent) coarse level sample */
+void MonteCarloTwoLevel::draw_coarse_sample(std::shared_ptr<SampleState> phi_state) {
+    while (t_sampler < ceil(2.*stats_coarse_sampler.tau_int())) {
+        coarse_sampler->draw(phi_state);
+        double qoi_sampler = qoi_coarse->evaluate(phi_state);
+        stats_coarse_sampler.record_sample(qoi_sampler);
+        t_sampler++;
+    }
+    t_indep = (n_indep*t_indep+t_sampler)/(1.0+n_indep);
+    n_indep++;
+    t_sampler = 0; // Reset number of independent samples
+}
+
+/* Print out statistics */
+void MonteCarloTwoLevel::show_statistics() const {
+    mpi_parallel::cout << stats_fine << std::endl;
+    mpi_parallel::cout << stats_coarse << std::endl;
+    mpi_parallel::cout << stats_diff << std::endl;
+    mpi_parallel::cout << std::endl;
+    mpi_parallel::cout << "=== Coarse level sampler statistics === " << std::endl;
+    mpi_parallel::cout << stats_coarse_sampler << std::endl;
+    coarse_sampler->show_stats();
+    mpi_parallel::cout << std::endl;
+    mpi_parallel::cout << "=== Two level sampler statistics === " << std::endl;
+    twolevel_step->show_stats();
 }

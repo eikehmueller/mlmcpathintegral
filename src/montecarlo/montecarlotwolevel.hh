@@ -109,33 +109,30 @@ public:
                        const std::shared_ptr<QoIFactory> qoi_factory_,
                        const std::shared_ptr<SamplerFactory> sampler_factory,
                        const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
+                       const StatisticsParameters param_stats,
                        const TwoLevelMCParameters param_twolevelmc);
 
     /** @brief Calculate mean and variance of difference
      *
      * Calculate the mean and variance of the difference in the QoI
      * evaluated at two subsequent levels.
-     *
-     * @param[inout] stats_fine Statistics for fine level
-     * @param[inout] stats_coarse Statistics for coarse level
-     * @param[inout] stats_diff Statistics for difference
      */
-    void evaluate_difference(Statistics& stats_fine,
-                             Statistics& stats_coarse,
-                             Statistics& stats_diff);
+    void evaluate_difference();
 
-    /** @brief Return coarse sampler */
-    std::shared_ptr<Sampler> get_coarsesampler() {
-        return coarse_sampler;
-    }
-
-    /** @brief Return reference to two-level sampler
-     */
-    std::shared_ptr<TwoLevelMetropolisStep> get_twolevelstep() {
-        return twolevel_step;
-    }
+    /** @brief Show statistics */
+    void show_statistics() const;
 
 private:
+    
+    /** @brief Draw independent sample on coarse level
+     *
+     * By subsampling the coarse level sampler, draw a new approximately
+     * independent coarse level sample \f$\phi^{(c)}\f$
+     *
+     * @param[inout] phi_state Coarse level state \f$\phi^{(c)}\f$
+     */
+    void draw_coarse_sample(std::shared_ptr<SampleState> phi_state);
+    
     /** @brief Number of samples */
     const unsigned int n_samples;
     /** @brief Sampler on coarse level */
@@ -152,6 +149,20 @@ private:
     std::shared_ptr<QoI> qoi_coarse;
     /** Two-level sampler */
     std::shared_ptr<TwoLevelMetropolisStep> twolevel_step;
+    /** @brief number of skipped samples between independent coarse samples on coarse levels */
+    double t_indep;
+    /** @brief number of independent coarse samples on coarse level */
+    int n_indep;
+    /** @brief number of samples generated since last independent coarse sample */
+    int t_sampler;
+    /** @brief Statistics on fine level */
+    Statistics stats_fine;
+    /** @brief Statistics on coarse level */
+    Statistics stats_coarse;
+    /** @brief Statistics on coarse level */
+    Statistics stats_diff;
+    /** @brief Statistics of coarse sampler */
+    Statistics stats_coarse_sampler;
 };
 
 #endif // MONTECARLOTWOLEVEL_HH
