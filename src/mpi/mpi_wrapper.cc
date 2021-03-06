@@ -65,7 +65,7 @@ double mpi_allreduce_avg(const double x) {
 std::vector<double> mpi_allreduce_avg(const std::vector<double> x) {
     std::vector<double> result;
 #ifdef USE_MPI
-    int n_data = mpi_allreduce_min(x.size());
+    int n_data = x.size();
     double* send_data = (double*) malloc(n_data*sizeof(double));
     double* recv_data = (double*) malloc(n_data*sizeof(double));
     for (int j=0; j<n_data; ++j) {
