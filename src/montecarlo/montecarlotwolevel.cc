@@ -54,7 +54,10 @@ void MonteCarloTwoLevel::evaluate_difference() {
     mpi_parallel::cout << "Burnin completed" << std::endl;
     stats_coarse_sampler.reset();
 
-    unsigned int n_local_samples = distribute_n(n_samples);
+    // Work out number of samples
+    int n_proc = mpi_comm_size();
+    unsigned int n_local_samples = (unsigned int) ceil(n_samples/(1.0*n_proc));
+    
     // Sampling phase
     // Do a hard reset since we are interested in the variance
     stats_coarse.hard_reset();
