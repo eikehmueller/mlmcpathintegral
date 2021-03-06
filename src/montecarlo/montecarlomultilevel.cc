@@ -159,7 +159,8 @@ void MonteCarloMultiLevel::draw_coarse_sample(const unsigned int level,
         std::shared_ptr<SampleState> phi_state) {
     // sub-sample if we are using the hierarchical sampler
     if (sub_sample_coarse) {
-        while (t_sampler[level-1] < ceil(2.*stats_coarse_sampler[level-1]->tau_int())) {
+        double tau_int = ceil(2.*stats_coarse_sampler[level-1]->tau_int());
+        while (t_sampler[level-1] < tau_int) {
             coarse_sampler[level-1]->draw(phi_state);
             double qoi_sampler = qoi[level]->evaluate(phi_state);
             stats_coarse_sampler[level-1]->record_sample(qoi_sampler);
