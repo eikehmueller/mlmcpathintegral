@@ -94,7 +94,7 @@ int mpi_allreduce_sum(const int x) {
     return recv_data;
 }
 
-/* Parallel sum for scalar valued quantities */
+/* Parallel minimum for scalar valued quantities */
 int mpi_allreduce_min(const int x) {
     int recv_data=x;
 #ifdef USE_MPI
@@ -103,9 +103,9 @@ int mpi_allreduce_min(const int x) {
     return recv_data;
 }
 
-/* Parallel sum for scalar valued quantities */
+/* Parallel sum for scalar valued unsigned quantities */
 unsigned int mpi_allreduce_sum(const unsigned int x) {
-    int recv_data=x;
+    unsigned int recv_data=x;
 #ifdef USE_MPI
     MPI_Allreduce(&x, &recv_data, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
 #endif // USE_MPI
