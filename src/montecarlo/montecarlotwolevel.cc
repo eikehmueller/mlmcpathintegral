@@ -76,8 +76,8 @@ void MonteCarloTwoLevel::evaluate_difference() {
 
 /* Draw (independent) coarse level sample */
 void MonteCarloTwoLevel::draw_coarse_sample(std::shared_ptr<SampleState> phi_state) {
-    double tau_int = ceil(2.*stats_coarse_sampler.tau_int());
-    while (t_sampler < tau_int) {
+    double two_tau_int = fmin(100,ceil(2.*stats_coarse_sampler.tau_int()));
+    while (t_sampler < two_tau_int) {
         coarse_sampler->draw(phi_state);
         double qoi_sampler = qoi_coarse->evaluate(phi_state);
         stats_coarse_sampler.record_sample(qoi_sampler);
