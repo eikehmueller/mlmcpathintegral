@@ -22,24 +22,37 @@
  * \f$\tilde{p}(x|x_+,x_-)\approx p(x|x_+,x_-)\f$, which can be written as a sum of two Gaussians:
  *
  * \f[
- *  \tilde{p}(x|x_0,0) = \frac{1}{\sqrt{2\pi\sigma}} \left[
- *    N_+ \sum_{k\in\mathbb{Z}} \exp\left(-\frac{1}{2\sigma^2}\left(x-\frac{x_0}{2}+2k\pi\right)^2\right)
- *    + N_- \sum_{k\in\mathbb{Z}} \exp\left(-\frac{1}{2\sigma^2}\left(x-\frac{x_0}{2}+(2k+1)\pi\right)^2\right)
- *  \right]
+ *  \tilde{p}(x|x_0,0) = N_+(x_0) S_+(x|x_0) + N_-(x_0) S_-(x|x_0)
  * \f]
  *
- * where \f$x_0=x_+ - x_-\in [0,\pi]\f$ and \f$\sigma^{-2} = \beta\cos{\frac{x_0}{4}}\f$, with
- * the normalisation constants \f$N_+=\frac{1}{1+\rho}\f$, \f$N_-=\frac{\rho}{1+\rho}\f$
- * where
+ * with
+ * 
+ * \f[ 
+ *    S_+(x|x_0) = \frac{1}{2\pi\sigma_+^2}\sum_{k\in\mathbb{Z}} \exp\left[-\frac{1}{2\sigma_+^2}\left(x-\frac{x_0}{2}+2k\pi\right)^2\right]\\
+ *    S_-(x|x_0) = \frac{1}{2\pi\sigma_-^2}\sum_{k\in\mathbb{Z}} \exp\left[-\frac{1}{2\sigma_-^2}\left(x-\frac{x_0}{2}+\pi+2k\pi\right)^2\right]\\
+ * \f]
+ *
+ * where \f$\sigma_+^{-2} = \beta\left|\cos\left(\frac{x_0}{4}\right)\right|\f$,
+ * \f$\sigma_-^{-2} = \beta\left|\sin\left(\frac{x_0}{4}\right)\right|\f$ and the
+ * normalisation constants
+ * 
  * \f[
- *   \rho = \left(\frac{I_0\left(2\beta \cos(\frac{x_0+2\pi}{4})\right)}{I_0\left(2\beta \cos(\frac{x_0}{4}) \right)}\right)^2
+ *    N_+(x_0) = \frac{1}{1+\rho(x_0)}\\
+ *    N_-(x_0) = \frac{\rho(x_0)}{1+\rho(x_0)}
+ * \f]
+ * 
+ * The function \f$\rho\f$, which can take on values between 0 and 1 of \f$x_0\in[0,\pi]\f$,
+ * is given by
+ * 
+ * \f[
+ *   \rho(x_0) = \left(\frac{\sigma_+}{\sigma_-}\right)^{3} \exp\left[-4(\sigma_+^{-2}-\sigma_-^{-2})\right]
  * \f]
  *
  * Note that it is sufficient to know \f$\tilde{p}(x|x_0,0)\f$ with \f$x\in[-\pi,\pi]\f$ and \f$x_0\in[0,\pi]\f$
  *
- * * \f$p(x|x_+,x_-)=p(x-x_-|x_+-x_-,0)\f$
- * * \f$p(-x|-x_0,0) = p(x|x_0,0)\f$
- * * \f$p(x|2\pi-x_0,0) = p(x|-x_0,0)\f$
+ * \f$p(x|x_+,x_-)=p(x-x_-|x_+-x_-,0)\f$
+ * \f$p(-x|-x_0,0) = p(x|x_0,0)\f$
+ * \f$p(x|2\pi-x_0,0) = p(x|-x_0,0)\f$
  */
 
 class ApproximateBesselProductDistribution {
@@ -73,12 +86,17 @@ public:
             x0 = 2.*M_PI-x0;
             sign_flip *= -1;
         }
-        double N_p;
-        double sigma2_inv;
-        compute_N_p_sigma2inv(beta,x0,N_p,sigma2_inv);
-        double sigma = 1./sqrt(sigma2_inv);
+        double N_p, sigma2_p_inv, sigma2_m_inv;
+        compute_N_p_sigma2inv(beta,x0,N_p,sigma2_p_inv,sigma2_m_inv);
         double xi = distribution(engine);
-        double xshift = (xi<N_p)?0:M_PI;
+        double sigma, xshift;        
+        if (xi<=N_p) {
+            sigma = 1./sqrt(sigma2_p_inv);
+            xshift=0.0;
+        } else {
+            sigma = 1./sqrt(sigma2_m_inv);
+            xshift=M_PI;
+        }        
         double x = sigma*normal_distribution(engine)+0.5*x0-xshift;
         return mod_2pi(sign_flip*x+x_m);
     }
@@ -99,20 +117,21 @@ public:
 
 private:
     
-    /** @brief Compute probability of sampling from main mode and width of peak
+    /** @brief Compute constants required for sampling from the distribution
      *
-     * Compute the probability of sampling from the main mode of the double-Gaussian
-     * distribution and the inverse squared width \f$1/\sigma^2\f$ of the peak.
-     *
+     * This method computes the quantities \f$N_+\f$ and \f$\sigma_\pm^{-2}\f$
+     * 
      * @param[in] beta Coupling constant \f$\beta\f$
      * @param[in] x0 Shift parameter \f$x_0\f$
      * @param[out] N_p Resulting probability of sampling from main peak
-     * @param[out] sigma2_inv Resulting squared width \f$1/\sigma^2\f$ of Gaussian
+     * @param[out] sigma2_p_inv Resulting squared width \f$1/\sigma_+^2\f$ of Gaussian
+     * @param[out] sigma2_m_inv Resulting squared width \f$1/\sigma_-^2\f$ of Gaussian
      */
     void compute_N_p_sigma2inv(const double beta,
                                const double x0,
                                double& N_p,
-                               double& sigma2_inv) const;
+                               double& sigma2_p_inv,
+                               double& sigma2_m_inv) const;
     
   /** @brief parameter \f$\beta\f$*/
   const double beta;

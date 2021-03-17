@@ -18,35 +18,30 @@ double ApproximateBesselProductDistribution::evaluate(const double x,
     }
     z *= sign_flip;
     double N_p;
-    double sigma2_inv;
-    compute_N_p_sigma2inv(beta,x0,N_p,sigma2_inv);
+    double sigma2_p_inv,sigma2_m_inv;
+    compute_N_p_sigma2inv(beta,x0,N_p,sigma2_p_inv,sigma2_m_inv);
     double N_m = 1.-N_p;
     double s_p=0.0;
     double s_m=0.0;
     for (int k=-kmax;k<=kmax;++k) {
         double z_shifted = z-0.5*x0+2*k*M_PI;
-        s_p += exp(-0.5*sigma2_inv*z_shifted*z_shifted);
+        s_p += sqrt(sigma2_p_inv)*exp(-0.5*sigma2_p_inv*z_shifted*z_shifted);
         z_shifted += M_PI;
-        s_m += exp(-0.5*sigma2_inv*z_shifted*z_shifted);
+        s_m += sqrt(sigma2_m_inv)*exp(-0.5*sigma2_m_inv*z_shifted*z_shifted);
     }
-    return sqrt(0.5*sigma2_inv/M_PI)*(N_p*s_p + N_m*s_m);
+    return sqrt(0.5/M_PI)*(N_p*s_p + N_m*s_m);
 }
 
-/* Compute probability N_p of drawing from the main mode of the distribution */
+/* Compute probability N_p of drawing from the main mode of the distribution and
+ * widths of Gaussians */
 void ApproximateBesselProductDistribution::compute_N_p_sigma2inv(const double beta,
                                                                  const double x0,
                                                                  double& N_p,
-                                                                 double& sigma2_inv) const {
-    sigma2_inv = beta*cos(0.25*x0);
-    double sigma2_inv_tilde = beta*sin(0.25*x0);
-    double rho_r = fast_bessel_I0_scaled(2.*sigma2_inv_tilde)/fast_bessel_I0_scaled(2.*sigma2_inv);
-    double delta = 4.*beta*(sin(0.25*x0)-cos(0.25*x0));
-    if (delta < 0) {
-        double exp_delta = exp(delta);
-        N_p = 1./(1.+rho_r*rho_r*exp_delta);
-    } else {
-        double exp_minus_delta = exp(-delta);
-        N_p = exp_minus_delta/(exp_minus_delta+rho_r*rho_r);
-    }
+                                                                 double& sigma2_p_inv,
+                                                                 double& sigma2_m_inv) const {
+    sigma2_p_inv = beta*cos(0.25*x0);
+    sigma2_m_inv = beta*sin(0.25*x0);
+    double rho = pow(sigma2_m_inv/sigma2_p_inv,1.5)*exp(-4.0*(sigma2_p_inv-sigma2_m_inv));
+    N_p = 1.0/(1.0+rho);
 }
 
