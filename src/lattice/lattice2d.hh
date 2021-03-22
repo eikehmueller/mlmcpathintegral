@@ -160,7 +160,7 @@ public:
      *
      * Given a lattice site \f$n=(i,j)\f$ and a direction \f$\mu\f$, work out the
      * corresponding linear index \f$\ell\f$ of the link starting at \f$n\f$
-     * and pointing in direction \f$\mu\f$. The links are arranged such that
+     * and pointing in direction \f$\mu\f$. The links are arranged such that
      * \f[
      *   \ell = 2M_{t,lat}j + 2i + \mu
      * \f]
