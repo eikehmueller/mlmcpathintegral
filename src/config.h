@@ -14,7 +14,7 @@
    single level method to disk */
 
 /* Save (some) states to disk? */
-//#define STATE_PATHS 1
+//#define SAVE_STATES 1
 
 /* First state to save */
 #define SAVE_FIRST_STATE 5000
