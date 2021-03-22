@@ -168,10 +168,10 @@ class ApproximateBesselProductDistribution(Distribution):
         if (self.x0 > np.pi):
             self.x0 = 2.*np.pi - self.x0
             self.sign_flip *= -1
-        self.sigma2_inv = self.beta*np.cos(0.25*self.x0)
-        sigma2_inv_tilde = self.beta*np.sin(0.25*self.x0)
-        rho_r = np.i0(2.*sigma2_inv_tilde)/np.i0(2.*self.sigma2_inv)
-        self.N_p = 1./(1.+rho_r*rho_r)
+        self.sigma2_inv_p = abs(self.beta*np.cos(0.25*self.x0))
+        self.sigma2_inv_m = abs(self.beta*np.sin(0.25*self.x0))
+        rho = (self.sigma2_inv_m/self.sigma2_inv_p)**1.5*np.exp(-4.*(self.sigma2_inv_p-self.sigma2_inv_m))
+        self.N_p = 1./(1.+rho)
         self.N_m = 1.-self.N_p
 
     def _plot_analytical(self):
@@ -208,10 +208,14 @@ class ApproximateBesselProductDistribution(Distribution):
         s_m = 0.0
         for k in range(-self.kmax,self.kmax+1):
             z_shifted = z-0.5*self.x0+2*k*np.pi
-            s_p += np.exp(-0.5*self.sigma2_inv*z_shifted**2)
+            s_p += np.exp(-0.5*self.sigma2_inv_p*z_shifted**2)
             z_shifted += np.pi
-            s_m += np.exp(-0.5*self.sigma2_inv*z_shifted**2);
-        return np.sqrt(0.5*self.sigma2_inv/np.pi)*(self.N_p*s_p + self.N_m*s_m);
+            s_m += np.exp(-0.5*self.sigma2_inv_m*z_shifted**2)
+        value = (np.sqrt(1./(2.*np.pi))
+                 * ( np.sqrt(self.sigma2_inv_p)*self.N_p*s_p
+                     + np.sqrt(self.sigma2_inv_m)*self.N_m*s_m ))
+        return value
+
 
 '''Read data in the format given above from a text file
    Returns a distribution wrapper of the type saved in the file
