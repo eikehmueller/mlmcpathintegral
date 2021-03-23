@@ -46,7 +46,7 @@ bool mpi_master() {
 double mpi_allreduce_sum(const double x) {
     double recv_data=x;
 #ifdef USE_MPI
-    MPI_Allreduce(&x, &recv_data, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&x, &recv_data, 1, MPI::DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 #endif // USE_MPI
     return recv_data;
 }
@@ -55,7 +55,7 @@ double mpi_allreduce_sum(const double x) {
 double mpi_allreduce_avg(const double x) {
     double recv_data=x;
 #ifdef USE_MPI
-    MPI_Allreduce(&x, &recv_data, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&x, &recv_data, 1, MPI::DOUBLE, MPI_SUM, MPI_COMM_WORLD);
     recv_data /= mpi_comm_size();
 #endif // USE_MPI
     return recv_data;
@@ -72,7 +72,7 @@ std::vector<double> mpi_allreduce_avg(const std::vector<double> x) {
         send_data[j] = x[j];
     }
     MPI_Allreduce(send_data, recv_data, n_data,
-                  MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+                  MPI::DOUBLE, MPI_SUM, MPI_COMM_WORLD);
     double inv_nproc = 1.0/mpi_comm_size();
     for (int j=0; j<n_data; ++j) {
         result.push_back(inv_nproc*recv_data[j]);
@@ -89,7 +89,7 @@ std::vector<double> mpi_allreduce_avg(const std::vector<double> x) {
 int mpi_allreduce_sum(const int x) {
     int recv_data=x;
 #ifdef USE_MPI
-    MPI_Allreduce(&x, &recv_data, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&x, &recv_data, 1, MPI::INT, MPI_SUM, MPI_COMM_WORLD);
 #endif // USE_MPI
     return recv_data;
 }
@@ -98,7 +98,7 @@ int mpi_allreduce_sum(const int x) {
 int mpi_allreduce_min(const int x) {
     int recv_data=x;
 #ifdef USE_MPI
-    MPI_Allreduce(&x, &recv_data, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
+    MPI_Allreduce(&x, &recv_data, 1, MPI::INT, MPI_MIN, MPI_COMM_WORLD);
 #endif // USE_MPI
     return recv_data;
 }
@@ -107,7 +107,7 @@ int mpi_allreduce_min(const int x) {
 unsigned int mpi_allreduce_sum(const unsigned int x) {
     unsigned int recv_data=x;
 #ifdef USE_MPI
-    MPI_Allreduce(&x, &recv_data, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&x, &recv_data, 1, MPI::UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
 #endif // USE_MPI
     return recv_data;
 }
@@ -116,7 +116,7 @@ unsigned int mpi_allreduce_sum(const unsigned int x) {
 bool mpi_allreduce_and(const bool x) {
     bool recv_data=x;
 #ifdef USE_MPI
-    MPI_Allreduce(&x, &recv_data, 1, MPI_LOGICAL, MPI_LAND, MPI_COMM_WORLD);
+    MPI_Allreduce(&x, &recv_data, 1, MPI::BOOL, MPI_LAND, MPI_COMM_WORLD);
 #endif // USE_MPI
     return recv_data;
 }
@@ -125,21 +125,21 @@ bool mpi_allreduce_and(const bool x) {
 /* Broadcast double value to all processes */
 void mpi_bcast(double& x,const int root) {
 #ifdef USE_MPI
-    MPI_Bcast(&x,1,MPI_DOUBLE,root,MPI_COMM_WORLD);
+    MPI_Bcast(&x,1,MPI::DOUBLE,root,MPI_COMM_WORLD);
 #endif // USE_MPI
 }
 
 /* Broadcast integer value to all processes */
 void mpi_bcast(int& x,const int root) {
 #ifdef USE_MPI
-    MPI_Bcast(&x,1,MPI_INT,root,MPI_COMM_WORLD);
+    MPI_Bcast(&x,1,MPI::INT,root,MPI_COMM_WORLD);
 #endif // USE_MPI
 }
 
 /* Broadcast bool value to all processes */
 void mpi_bcast(bool& x,const int root) {
 #ifdef USE_MPI
-    MPI_Bcast(&x,1,MPI_LOGICAL,root,MPI_COMM_WORLD);
+    MPI_Bcast(&x,1,MPI::BOOL,root,MPI_COMM_WORLD);
 #endif // USE_MPI
 }
 
@@ -155,7 +155,7 @@ void mpi_bcast(std::string& x,const int root) {
             char_array[j] = x[j];
         }
     }
-    MPI_Bcast(char_array,n,MPI_CHAR,root,MPI_COMM_WORLD);
+    MPI_Bcast(char_array,n,MPI::CHAR,root,MPI_COMM_WORLD);
     x.resize(n);
     for (int j=0; j<n; ++j) {
         x[j] = char_array[j];
@@ -167,8 +167,8 @@ void mpi_bcast(std::string& x,const int root) {
 /* Scatter list of unsigned int values  to all processes */
 void mpi_scatter(unsigned int* data, unsigned int& x) {
 #ifdef USE_MPI
-    MPI_Scatter(data,1,MPI_UNSIGNED,
-                &x,1,MPI_UNSIGNED,
+    MPI_Scatter(data,1,MPI::UNSIGNED,
+                &x,1,MPI::UNSIGNED,
                 0,MPI_COMM_WORLD);
 #else
     x = data[0];
