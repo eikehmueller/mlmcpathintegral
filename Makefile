@@ -33,14 +33,15 @@ ifeq ($(MAIN_QM),)
 endif
 
 MAIN_SCHWINGER=driver_schwinger
-
 MAIN_TESTDIST=test_distribution
+MAIN_TESTSCHWINGERFILLIN=test_schwinger_fillin_distribution
 MAIN_FASTBESSEL=test_fastbessel
 
 MAINS=\
 	driver_qm.o \
 	driver_schwinger.o \
 	test_distribution.o \
+	test_schwinger_fillin_distribution.o \
 	test_fastbessel.o
 OBJS:=$(filter-out $(patsubst %,$(SOURCE_DIR)/%,$(MAINS)),$(patsubst %.cc,%.o,$(SOURCES)))
 OBJS:=$(patsubst %,$(BUILD_DIR)/%,$(OBJS))
@@ -59,7 +60,7 @@ else
   $(info Compiling in sequential mode. Compiler is $(CXX))
 endif
 
-all: $(MAIN_QM) $(MAIN_SCHWINGER) $(MAIN_TESTDIST) $(MAIN_FASTBESSEL)
+all: $(MAIN_QM) $(MAIN_SCHWINGER) $(MAIN_TESTDIST) $(MAIN_FASTBESSEL) $(MAIN_TESTSCHWINGERFILLIN)
 
 # Sort out dependencies, see
 # http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
@@ -101,6 +102,11 @@ $(MAIN_SCHWINGER): $(BUILD_DIR)/driver_schwinger.o $(OBJS) $(SOURCE_DIR)/config.
 $(MAIN_TESTDIST): $(BUILD_DIR)/test_distribution.o $(OBJS) $(SOURCE_DIR)/config.h
 	@printf "%b" "$(COM_COLOR)$(LINK_MESSAGE) $(OBJ_COLOR)$(@)$(NO_COLOR)\n";
 	@$(CXX) $(LFLAGS) -o $(BUILD_DIR)/test_distribution $(OBJS) $(BUILD_DIR)/test_distribution.o $(LLIBS)
+
+# --- test Schwinger fillin ---
+$(MAIN_TESTSCHWINGERFILLIN): $(BUILD_DIR)/test_schwinger_fillin_distribution.o $(OBJS) $(SOURCE_DIR)/config.h
+	@printf "%b" "$(COM_COLOR)$(LINK_MESSAGE) $(OBJ_COLOR)$(@)$(NO_COLOR)\n";
+	@$(CXX) $(LFLAGS) -o $(BUILD_DIR)/test_schwinger_fillin_distribution $(OBJS) $(BUILD_DIR)/test_schwinger_fillin_distribution.o $(LLIBS)
 
 # --- test fast Bessel evaluation ---
 $(MAIN_FASTBESSEL): $(BUILD_DIR)/test_fastbessel.o $(OBJS) $(SOURCE_DIR)/config.h
