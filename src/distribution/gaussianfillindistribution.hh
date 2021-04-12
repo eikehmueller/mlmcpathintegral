@@ -37,13 +37,9 @@ public:
    * Create a new instance for a given value of \f$\beta\f$
    *
    * @param[in] beta_ Parameter \f$\beta\f$
-   * @param[in] alpha_ pCN parameter \f$\alpha\f$
    */
-  GaussianFillinDistribution(const double beta_,
-                             const double alpha_=0.5) :
+  GaussianFillinDistribution(const double beta_) :
     beta(beta_),
-    alpha(alpha_),
-    alpha_star(sqrt(1.-alpha_*alpha_)),
     uniform_distribution(0.0,1.0),
     normal_distribution(0.0,1.0),
     sqrt2(sqrt(2.0)) {}
@@ -114,39 +110,6 @@ public:
       theta_3 = mod_2pi(0.5*(-eta_1-eta_2+eta_3) + omega + 2.*Phi-phi_12-phi_23);
       theta_4 = mod_2pi(0.5*(-eta_1+eta_2-eta_3) + omega + 3.*Phi-phi_12-phi_23-phi_34);
     }
-
-  /** @brief pCN draw from Gaussian distribution for given \f$\phi\f$ and
-   *         previous states \f$\theta_n\f$, \f$\phi_n\f$
-   *
-   * @param[in] engine Random number generator engine
-   * @param[in] phi_n_12 Previous value of parameter \f$\phi_{12}\f$
-   * @param[in] phi_n_23 Previous value of parameter \f$\phi_{23}\f$
-   * @param[in] phi_n_34 Previous value of parameter \f$\phi_{34}\f$
-   * @param[in] phi_n_41 Previous value of parameter \f$\phi_{41}\f$
-   * @param[in] theta_n_1 Previous value of \f$\theta_1\f$
-   * @param[in] theta_n_2 Previous value of \f$\theta_2\f$
-   * @param[in] theta_n_3 Previous value of \f$\theta_3\f$
-   * @param[in] theta_n_4 Previous value of \f$\theta_4\f$
-   * @param[in] phi_12 Parameter \f$\phi_{12}\f$
-   * @param[in] phi_23 Parameter \f$\phi_{23}\f$
-   * @param[in] phi_34 Parameter \f$\phi_{34}\f$
-   * @param[in] phi_41 Parameter \f$\phi_{41}\f$
-   * @param[out] theta_1 Resulting value \f$\theta_1\f$
-   * @param[out] theta_2 Resulting value \f$\theta_2\f$
-   * @param[out] theta_3 Resulting value \f$\theta_3\f$
-   * @param[out] theta_4 Resulting value \f$\theta_4\f$
-   */
-  template <class URNG>
-    void draw_pcn(URNG& engine,
-                  const double phi_n_12, const double phi_n_23,
-                  const double phi_n_34, const double phi_n_41,
-                  const double theta_n_1, const double theta_n_2,
-                  const double theta_n_3, const double theta_n_4,
-                  const double phi_12, const double phi_23,
-                  const double phi_34, const double phi_41,
-                  double& theta_1, double& theta_2,
-                  double& theta_3, double& theta_4) {
-    }
   
   /** @brief Evaluate distribution for a given value of \f$\theta\f$
    *         and parameters \f$\phi\f$
@@ -185,10 +148,6 @@ private:
     
   /** @brief parameter \f$\beta\f$*/
   const double beta;
-  /** @brief pCN parameter \f$\alpha\f$*/
-  const double alpha;
-  /** @brief shorthand for \f$\sqrt{1-\alpha^2}\f$ */
-  const double alpha_star;
   /** @brief Uniform distribution for shift */
   mutable std::uniform_real_distribution<double> uniform_distribution;
   /** @brief Normal distribution for approximate sampling */

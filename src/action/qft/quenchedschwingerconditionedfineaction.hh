@@ -41,7 +41,7 @@ public:
         gaussian_fillin_dist(NULL) {
             if (beta>8.0) {
                 approximate_bessel_product_dist = std::make_shared<ApproximateBesselProductDistribution>(beta);
-                gaussian_fillin_dist = std::make_shared<GaussianFillinDistribution>(beta,0.1);
+                gaussian_fillin_dist = std::make_shared<GaussianFillinDistribution>(beta);
             } else {
                 bessel_product_dist = std::make_shared<BesselProductDistribution>(beta);
             }
