@@ -39,8 +39,8 @@ void QuenchedSchwingerConditionedFineAction::fill_fine_points(std::shared_ptr<Sa
                                         +phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,1)]);
                 double theta_1, theta_2, theta_3, theta_4;
                 gaussian_fillin_dist->draw(engine,
-                                         phi_12,phi_23,phi_34,phi_41,
-                                          theta_1,theta_2,theta_3,theta_4);
+                                           phi_12,phi_23,phi_34,phi_41,
+                                           theta_1,theta_2,theta_3,theta_4);
                 phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,0)] = +theta_1;
                 phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,1)] = -theta_2;
                 phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,0)] = -theta_3;
@@ -109,8 +109,8 @@ double QuenchedSchwingerConditionedFineAction::evaluate(const std::shared_ptr<Sa
                 double theta_2 = -phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,1)];
                 double theta_3 = -phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,0)];
                 double theta_4 = +phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,1)];
-                S -= log(gaussian_fillin_dist->evaluate(phi_12,phi_23,phi_34,phi_41,
-                                                        theta_1,theta_2,theta_3,theta_4));
+                S -= log(gaussian_fillin_dist->evaluate(theta_1,theta_2,theta_3,theta_4,
+                                                        phi_12,phi_23,phi_34,phi_41));
             }
         }
     } else {

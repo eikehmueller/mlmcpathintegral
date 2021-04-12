@@ -57,10 +57,8 @@ double GaussianFillinDistribution::evaluate(const double theta_1, const double t
         double Q = d_eta_1*d_eta_1 + d_eta_2*d_eta_2 + 2.*d_eta_3*d_eta_3;
         g_s += exp(-0.5*sigma2_inv_s*Q);
     }
-    double p_c = get_pc(Phi);
+    double p_c = get_pc(Phi_star);
     double norm_c = pow(sigma2_inv_c,1.5);
     double norm_s = pow(sigma2_inv_s,1.5);
-    printf("eta_1 = %8.4e eta_2 = %8.4e eta_3 = %8.4e\n",eta_1,eta_2,eta_3);
-    printf("g_c = %8.4e g_s = %8.4e\n",g_c,g_s);
     return p_c*norm_c*g_c + (1.-p_c)*norm_s*g_s;
 }
