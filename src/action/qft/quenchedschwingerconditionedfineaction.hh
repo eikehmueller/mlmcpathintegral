@@ -13,6 +13,7 @@
 #include "distribution/expcosdistribution.hh"
 #include "distribution/besselproductdistribution.hh"
 #include "distribution/approximatebesselproductdistribution.hh"
+#include "distribution/gaussianfillindistribution.hh"
 
 /** @file quenchedschwingerconditionedfineaction.hh
  * @brief Header file for quenched Schwinger model conditioned fine action class
@@ -36,9 +37,11 @@ public:
         uniform_dist(-M_PI,+M_PI),
         exp_cos_dist(action->getbeta()),
         bessel_product_dist(NULL),
-        approximate_bessel_product_dist(NULL) {
+        approximate_bessel_product_dist(NULL),
+        gaussian_fillin_dist(NULL) {
             if (beta>8.0) {
                 approximate_bessel_product_dist = std::make_shared<ApproximateBesselProductDistribution>(beta);
+                gaussian_fillin_dist = std::make_shared<GaussianFillinDistribution>(beta,0.1);
             } else {
                 bessel_product_dist = std::make_shared<BesselProductDistribution>(beta);
             }
@@ -83,6 +86,9 @@ private:
     mutable std::shared_ptr<BesselProductDistribution> bessel_product_dist;
     /** @brief Approximate probability distribution for drawing vertical interior links */
     mutable std::shared_ptr<ApproximateBesselProductDistribution> approximate_bessel_product_dist;
+    /** @brief Probability distribution for drawing all using pCN */
+    mutable std::shared_ptr<GaussianFillinDistribution> gaussian_fillin_dist;
+    
 };
 
 struct QuenchedSchwingerConditionedFineActionFactory : public ConditionedFineActionFactory {
