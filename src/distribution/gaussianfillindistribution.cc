@@ -8,9 +8,9 @@ double GaussianFillinDistribution::evaluate(const double theta_1, const double t
                                             const double theta_3, const double theta_4,
                                             const double phi_12, const double phi_23,
                                             const double phi_34, const double phi_41) const {
-    double eta_1 = 0.5*(theta_1+theta_2-theta_3-theta_4) + 0.5*(phi_41-phi_23);
-    double eta_2 = 0.5*(theta_1-theta_2-theta_3+theta_4) + 0.5*(phi_34-phi_12);
-    double eta_3 = 0.5*(theta_1-theta_2+theta_3-theta_4) + 0.25*(-phi_12+phi_23-phi_34+phi_41);
+    double eta_1 = mod_2pi(0.5*(theta_1+theta_2-theta_3-theta_4) + 0.5*(phi_41-phi_23));
+    double eta_2 = mod_2pi(0.5*(theta_1-theta_2-theta_3+theta_4) + 0.5*(phi_34-phi_12));
+    double eta_3 = mod_2pi(0.5*(theta_1-theta_2+theta_3-theta_4) + 0.25*(-phi_12+phi_23-phi_34+phi_41));
     double Phi = 0.25*(phi_12+phi_23+phi_34+phi_41);
     bool swap_eta = false;
     bool shift_eta = false;
