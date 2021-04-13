@@ -27,6 +27,7 @@ void QuenchedSchwingerConditionedFineAction::fill_fine_points(std::shared_ptr<Sa
         }
     }
     if (not (gaussian_fillin_dist == NULL)) {
+        /* STEP 2 & 3: fill in all interior links with Gaussian approximation */
         for (unsigned int i=0;i<Mt_lat/2;++i) {
             for (unsigned int j=0;j<Mx_lat/2;++j) {
                 double phi_12 = mod_2pi(+phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,1)]
@@ -61,11 +62,7 @@ void QuenchedSchwingerConditionedFineAction::fill_fine_points(std::shared_ptr<Sa
                                        + phi_state->data[lattice->link_cart2lin(2*i  ,2*j+2,0)]
                                        - phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)]);
                 double theta_tilde;
-                if (bessel_product_dist == NULL) {
-                    theta_tilde = approximate_bessel_product_dist->draw(engine,theta_p,theta_m);
-                } else {
-                    theta_tilde = bessel_product_dist->draw(engine,theta_p,theta_m);
-                }
+                theta_tilde = bessel_product_dist->draw(engine,theta_p,theta_m);
                 dtheta = uniform_dist(engine);
                 phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,1)] = mod_2pi(0.5*theta_tilde+dtheta);
                 phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,1)] = mod_2pi(0.5*theta_tilde-dtheta);
@@ -95,6 +92,7 @@ double QuenchedSchwingerConditionedFineAction::evaluate(const std::shared_ptr<Sa
     const unsigned int Mx_lat = lattice->getMx_lat();
     double S = 0.0;
     if (not (gaussian_fillin_dist == NULL)) {
+        // Use Gaussian approximation
         for (unsigned int i=0;i<Mt_lat/2;++i) {
             for (unsigned int j=0;j<Mx_lat/2;++j) {
                 double phi_12 = mod_2pi(+phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,1)]
@@ -114,58 +112,27 @@ double QuenchedSchwingerConditionedFineAction::evaluate(const std::shared_ptr<Sa
             }
         }
     } else {
-        if (bessel_product_dist == NULL) {
-            // Contribution from drawing vertical links
-            for (unsigned int i=0;i<Mt_lat/2;++i) {
-                for (unsigned int j=0;j<Mx_lat/2;++j) {
-                    double phi_p = mod_2pi(+ phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,0)]
-                                           + phi_state->data[lattice->link_cart2lin(2*i+2,2*j  ,1)]
-                                           + phi_state->data[lattice->link_cart2lin(2*i+2,2*j+1,1)]
-                                           - phi_state->data[lattice->link_cart2lin(2*i+1,2*j+2,0)]);
-                    double phi_m = mod_2pi(- phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)]
-                                           + phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,1)]
-                                           + phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,1)]
-                                           + phi_state->data[lattice->link_cart2lin(2*i  ,2*j+2,0)]);
-                    double theta = mod_2pi(+ phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,1)]
-                                           + phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,1)]);
-                    S -= log(approximate_bessel_product_dist->evaluate(theta,phi_p,phi_m));
-                }
-            }
-            // Contribution from drawing horizontal links
-            for (unsigned int i=0;i<Mt_lat;++i) {
-                for (unsigned int j=0;j<Mx_lat/2;++j) {
-                    double phi_p = mod_2pi(- phi_state->data[lattice->link_cart2lin(i  ,2*j  ,1)]
-                                           + phi_state->data[lattice->link_cart2lin(i,  2*j  ,0)]
-                                           + phi_state->data[lattice->link_cart2lin(i+1,2*j  ,1)]);
-                    double phi_m = mod_2pi(+ phi_state->data[lattice->link_cart2lin(i  ,2*j+1,1)]
-                                           + phi_state->data[lattice->link_cart2lin(i,  2*j+2,0)]
-                                           - phi_state->data[lattice->link_cart2lin(i+1,2*j+1,1)]);
-                    double theta = mod_2pi(+ phi_state->data[lattice->link_cart2lin(i  ,2*j+1,0)]);
-                    S -= log(exp_cos_dist.evaluate(theta,phi_p,phi_m));
-                }   
-            }
-        } else {
-            for (unsigned int i=0;i<Mt_lat/2;++i) {
-                for (unsigned int j=0;j<Mx_lat/2;++j) {
-                    double phi_12 = + phi_state->data[lattice->link_cart2lin(2*i,  2*j+1,1)]
-                                    + phi_state->data[lattice->link_cart2lin(2*i,  2*j+2,0)];
-                    double phi_23 = + phi_state->data[lattice->link_cart2lin(2*i+1,2*j+2,0)]
-                                    - phi_state->data[lattice->link_cart2lin(2*i+2,2*j+1,1)];
-                    double phi_34 = - phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,0)]
-                                    - phi_state->data[lattice->link_cart2lin(2*i+2,2*j  ,1)];
-                    double phi_41 = - phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)]
-                                    + phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,1)];
-                    double theta_1 = +phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,0)];
-                    double theta_2 = -phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,1)];
-                    double theta_3 = -phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,0)];
-                    double theta_4 = +phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,1)];
-                    double Phi = phi_12+phi_23+phi_34+phi_41;
-                    S -= beta * (  cos(theta_1-theta_2-phi_12)
-                                 + cos(theta_2-theta_3-phi_23)
-                                 + cos(theta_3-theta_4-phi_34)
-                                 + cos(theta_4-theta_1-phi_41) );
-                    S -= log(bessel_product_dist->Znorm_inv(Phi,true));
-                }
+        // Use full distribution
+        for (unsigned int i=0;i<Mt_lat/2;++i) {
+            for (unsigned int j=0;j<Mx_lat/2;++j) {
+                double phi_12 = + phi_state->data[lattice->link_cart2lin(2*i,  2*j+1,1)]
+                                + phi_state->data[lattice->link_cart2lin(2*i,  2*j+2,0)];
+                double phi_23 = + phi_state->data[lattice->link_cart2lin(2*i+1,2*j+2,0)]
+                                - phi_state->data[lattice->link_cart2lin(2*i+2,2*j+1,1)];
+                double phi_34 = - phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,0)]
+                                - phi_state->data[lattice->link_cart2lin(2*i+2,2*j  ,1)];
+                double phi_41 = - phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)]
+                                + phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,1)];
+                double theta_1 = +phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,0)];
+                double theta_2 = -phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,1)];
+                double theta_3 = -phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,0)];
+                double theta_4 = +phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,1)];
+                double Phi = phi_12+phi_23+phi_34+phi_41;
+                S -= beta * (  cos(theta_1-theta_2-phi_12)
+                             + cos(theta_2-theta_3-phi_23)
+                             + cos(theta_3-theta_4-phi_34)
+                             + cos(theta_4-theta_1-phi_41) );
+                S -= log(bessel_product_dist->Znorm_inv(Phi,true));
             }
         }
     }
