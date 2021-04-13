@@ -19,7 +19,7 @@ double GaussianFillinDistribution::evaluate(const double theta_1, const double t
         Phi_star *= -1.0;
         swap_eta = true;
     }
-    if (Phi > 0.5*M_PI) {
+    if (Phi_star > 0.5*M_PI) {
         Phi_star = M_PI-Phi_star;
         swap_eta = not(swap_eta);
         shift_eta = true;
