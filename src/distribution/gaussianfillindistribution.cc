@@ -13,23 +13,19 @@ double GaussianFillinDistribution::evaluate(const double theta_1, const double t
     double eta_3 = mod_2pi(0.5*(theta_1-theta_2+theta_3-theta_4) + 0.25*(-phi_12+phi_23-phi_34+phi_41));
     double Phi = 0.25*(phi_12+phi_23+phi_34+phi_41);
     bool swap_eta = false;
-    bool shift_eta = false;
     double Phi_star = Phi;
-    if (Phi < 0.) {
+    if (Phi_star < 0.) {
         Phi_star *= -1.0;
         swap_eta = true;
     }
     if (Phi_star > 0.5*M_PI) {
         Phi_star = M_PI-Phi_star;
-        swap_eta = not(swap_eta);
-        shift_eta = true;
+        swap_eta = not(swap_eta);        
+        eta_1 = mod_2pi(eta_1+M_PI);
+        eta_2 = mod_2pi(eta_2+M_PI);
     }
     if (swap_eta) {
         std::swap(eta_1,eta_2);        
-    }
-    if (shift_eta) {
-        eta_1 = mod_2pi(eta_1+M_PI);
-        eta_2 = mod_2pi(eta_2+M_PI);
     }
     // Main peak
     double g_c = 0.0;    
