@@ -54,6 +54,14 @@ double GaussianFillinDistribution::evaluate(const double theta_1, const double t
         g_s += exp(-0.5*sigma2_inv_s*Q);
     }
     double p_c = get_pc(Phi_star);
+    /* === DEBUG === */
+    // Only pick a single peak (to be consistent with pCN proposal)
+    if (p_c > 0.5) {
+        p_c = 1.0;
+    } else {
+        p_c = 0.0;
+    }
+    /* === END DEBUG === */
     double norm_c = pow(sigma2_inv_c,1.5);
     double norm_s = pow(sigma2_inv_s,1.5);
     return p_c*norm_c*g_c + (1.-p_c)*norm_s*g_s;

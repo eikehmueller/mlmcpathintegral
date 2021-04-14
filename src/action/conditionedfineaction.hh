@@ -42,9 +42,11 @@ public:
      * Given a phi \f$\phi\f$ for which the coarse points have been set,
      * fill in the fine points by sampling from the conditioned action.
      *
+     * @param[in] phi_state_n State \f$\phi_n\f$ at previous step
      * @param[inout] phi_state State \f$\phi\f$ to fill
      */
-    virtual void fill_fine_points(std::shared_ptr<SampleState> phi_state) const = 0;
+    virtual void fill_fine_points(const std::shared_ptr<SampleState> phi_state_n,
+                                  std::shared_ptr<SampleState> phi_state) const = 0;
 
     /** @brief Evaluate conditioned action at fine points
      *

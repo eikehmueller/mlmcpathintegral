@@ -54,9 +54,11 @@ public:
      * Given a path \f$\phi\f$ for which the coarse links have been set, fill in
      * the fine links by sampling from the conditioned action.
      *
+     * @param[in] phi_state_n State \f$\phi_n\f$ at previous step (for pCN)
      * @param[inout] phi_state State \f$\phi\f$ to fill
      */
-    virtual void fill_fine_points(std::shared_ptr<SampleState> phi_state) const;
+    virtual void fill_fine_points(const std::shared_ptr<SampleState> phi_state_n,
+                                  std::shared_ptr<SampleState> phi_state) const;
 
     /** @brief Evaluate conditioned action at fine points
      *

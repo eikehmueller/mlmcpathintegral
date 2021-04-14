@@ -5,7 +5,8 @@
 
 
 /* Fill in fine points */
-void RotorConditionedFineAction::fill_fine_points(std::shared_ptr<SampleState> x_path) const {
+void RotorConditionedFineAction::fill_fine_points(const std::shared_ptr<SampleState> x_path_n,
+                                                  std::shared_ptr<SampleState> x_path) const {
     unsigned int M_lat = action->get_lattice()->getM_lat();
     // interior points
     for (unsigned int j=0; j<M_lat/2-1; ++j) {
