@@ -192,9 +192,17 @@ public:
           d_eta_3 = 0.5*M_PI;
           sigma_inv_n = sqrt(2.*beta*sin(Phi_n_star));         
       }
+      // Account for symmetry under shifts by integer multiples of 
+      // (\pi,\pi,\pi), (\pi,-\pi,\pi) and (\pi,-\pi,-\pi)
+      double eta_1_bar = mod_pi(0.5*(eta_1+eta_2+d_eta_2));
+      double eta_2_bar = mod_pi(0.5*(eta_3+d_eta_3-(eta_2+d_eta_2)));
+      double eta_3_bar = mod_pi(0.5*(eta_1-(eta_3+d_eta_3)));
+      eta_1 = eta_1_bar + eta_2_bar + eta_3_bar;
+      eta_2 = eta_1_bar - eta_2_bar - eta_3_bar;
+      eta_3 = eta_1_bar + eta_2_bar - eta_3_bar;      
       eta_1 = sigma_inv_n*mod_2pi(eta_1);
-      eta_2 = sigma_inv_n*mod_2pi(eta_2+d_eta_2);
-      eta_3 = sqrt2*sigma_inv_n*mod_2pi(eta_3+d_eta_3);
+      eta_2 = sigma_inv_n*mod_2pi(eta_2);
+      eta_3 = sqrt2*sigma_inv_n*mod_2pi(eta_3);
       // === Step 4 ===
       // pCN draw
       eta_1 = alpha_pcn_comp*eta_1 + alpha_pcn*normal_distribution(engine);

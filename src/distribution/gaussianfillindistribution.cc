@@ -27,30 +27,33 @@ double GaussianFillinDistribution::evaluate(const double theta_1, const double t
     if (swap_eta) {
         std::swap(eta_1,eta_2);        
     }
-    // Main peak
-    double g_c = 0.0;    
-    double mu_c_1[9] = { 0, 1, 1, 1, 1,-1,-1,-1,-1};
-    double mu_c_2[9] = { 0, 1, 1,-1,-1, 1, 1,-1,-1};
-    double mu_c_3[9] = { 0, 1,-1, 1,-1, 1,-1, 1,-1};
+    // Account for symmetry under shifts by integer multiples of 
+    // (\pi,\pi,\pi), (\pi,-\pi,\pi) and (\pi,-\pi,-\pi)
+    double eta_1_bar = mod_pi(0.5*(eta_1+eta_2));
+    double eta_2_bar = mod_pi(0.5*(eta_3-eta_2));
+    double eta_3_bar = mod_pi(0.5*(eta_1-eta_3));
+    eta_1 = eta_1_bar + eta_2_bar + eta_3_bar;
+    eta_2 = eta_1_bar - eta_2_bar - eta_3_bar;
+    eta_3 = eta_1_bar + eta_2_bar - eta_3_bar;
+    // Evaluate normal distributions at both peaks
+    double g_c = 0.0; 
+    double g_s = 0.0;   
+    double mu_1[9] = { 0, 1, 1, 1, 1,-1,-1,-1,-1};
+    double mu_2[9] = { 0, 1, 1,-1,-1, 1, 1,-1,-1};
+    double mu_3[9] = { 0, 1,-1, 1,-1, 1,-1, 1,-1};
     double sigma2_inv_c = 2.*beta*cos(Phi_star);
-    for (int j=0;j<9;++j) {
-        double d_eta_1 = eta_1 - mu_c_1[j]*M_PI;
-        double d_eta_2 = eta_2 - mu_c_2[j]*M_PI;
-        double d_eta_3 = eta_3 - mu_c_3[j]*M_PI;
-        double Q = d_eta_1*d_eta_1 + d_eta_2*d_eta_2 + 2.*d_eta_3*d_eta_3;
-        g_c += exp(-0.5*sigma2_inv_c*Q);
-    }
-    // Secondary peak
-    double g_s = 0.0;
-    double mu_s_1[4] = { 0.0, 0.0,-1.0, 1.0};
-    double mu_s_2[4] = {-1.0, 1.0, 0.0, 0.0};
-    double mu_s_3[4] = {-0.5,-0.5, 0.5, 0.5};
     double sigma2_inv_s = 2.*beta*sin(Phi_star);
-    for (int j=0;j<4;++j) {
-        double d_eta_1 = eta_1 - mu_s_1[j]*M_PI;
-        double d_eta_2 = eta_2 - mu_s_2[j]*M_PI;
-        double d_eta_3 = eta_3 - mu_s_3[j]*M_PI;
+    for (int j=0;j<9;++j) {
+        // Main peak
+        double d_eta_1 = eta_1 - mu_1[j]*M_PI;
+        double d_eta_2 = eta_2 - mu_2[j]*M_PI;
+        double d_eta_3 = eta_3 - mu_3[j]*M_PI;
         double Q = d_eta_1*d_eta_1 + d_eta_2*d_eta_2 + 2.*d_eta_3*d_eta_3;
+        g_c += exp(-0.5*sigma2_inv_c*Q);        
+        // Secondary peak
+        d_eta_2 += M_PI;
+        d_eta_3 += 0.5*M_PI;
+        Q = d_eta_1*d_eta_1 + d_eta_2*d_eta_2 + 2.*d_eta_3*d_eta_3;
         g_s += exp(-0.5*sigma2_inv_s*Q);
     }
     double p_c = get_pc(Phi_star);
