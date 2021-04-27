@@ -242,8 +242,8 @@ public:
           std::swap(eta_1,eta_2);        
       }
       if (shift_eta) {
-        eta_1 = eta_1+M_PI;
-        eta_2 = eta_2+M_PI;
+        eta_1 += M_PI;
+        eta_2 += M_PI;
       }
       // === Step 6 ===
       // Draw uniform random variable
