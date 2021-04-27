@@ -7,3 +7,4 @@ local.mk
 build
 MLMCPathintegral
 qoi.dat
+state_*.dat
