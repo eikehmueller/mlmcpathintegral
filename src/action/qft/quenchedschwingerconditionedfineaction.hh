@@ -39,7 +39,13 @@ public:
         bessel_product_dist(NULL),
         gaussian_fillin_dist(NULL) {
             if (beta>8.0) {
-                gaussian_fillin_dist = std::make_shared<GaussianFillinDistribution>(beta);
+                double alpha_pcn = 0.9;
+                bool single_peak = false;
+                bool add_gaussian_noise = false;
+                gaussian_fillin_dist = std::make_shared<GaussianFillinDistribution>(beta,
+                                                                                    alpha_pcn,
+                                                                                    single_peak,
+                                                                                    add_gaussian_noise);
             } else {
                 bessel_product_dist = std::make_shared<BesselProductDistribution>(beta);
             }

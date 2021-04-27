@@ -38,10 +38,17 @@ public:
    *
    * @param[in] beta_ Parameter \f$\beta\f$
    * @param[in] alpha_pcn_ pCN offset parameter \f$\alpha\f$
+   * @param[in] single_peak_ Only sample from one of the two peaks?
+   * @param[in] add_gaussian_noise_ Add Gaussian noise? If false, only take peak value
    */
-  GaussianFillinDistribution(const double beta_, const double alpha_pcn_ = 0.9) :
+  GaussianFillinDistribution(const double beta_,                       
+                             const double alpha_pcn_ = 0.9,
+                             const bool single_peak_ = false,
+                             const bool add_gaussian_noise_ = false) :
     beta(beta_),
     alpha_pcn(alpha_pcn_),
+    single_peak(single_peak_),
+    add_gaussian_noise(add_gaussian_noise_),
     alpha_pcn_comp(sqrt(1.-alpha_pcn_*alpha_pcn_)),
     uniform_distribution(0.0,1.0),
     normal_distribution(0.0,1.0),
@@ -65,7 +72,8 @@ public:
             const double phi_34, const double phi_41,
             double& theta_1, double& theta_2,
             double& theta_3, double& theta_4) {
-      double mu_1, mu_2, mu_3, sigma; // Mean and variance of Gaussians       
+      double eta_1, eta_2, eta_3; // Coordinates in non-trivial 3d subspace
+      double sigma; // Variance of Gaussians       
       double Phi = 0.25*(phi_12+phi_23+phi_34+phi_41);
       double Phi_star = Phi;
       // Map Phi to the range [0,pi/2]
@@ -84,29 +92,33 @@ public:
       double p_c = get_pc(Phi_star);
       /* === DEBUG === */
       // Only pick a single peak (to be consistent with pCN proposal)
-      if (p_c > 0.5) {
-          p_c = 1.0;
-      } else {
-          p_c = 0.0;
+      if (single_peak) {
+         if (p_c > 0.5) {
+             p_c = 1.0;
+         } else {
+             p_c = 0.0;
+         }
       }
       /* === END DEBUG === */
       double xi = uniform_distribution(engine);
       if (xi < p_c) {
           // Draw from main peak
-          mu_1 = 0.0;
-          mu_2 = 0.0;
-          mu_3 = 0.0;
+          eta_1 = 0.0;
+          eta_2 = 0.0;
+          eta_3 = 0.0;
           sigma = 1./sqrt(4.*beta*cos(Phi_star));
       } else {
           // Draw from secondary peak           
-          mu_1 = M_PI;
-          mu_2 = 0.0;
-          mu_3 = 0.5*M_PI;
+          eta_1 = M_PI;
+          eta_2 = 0.0;
+          eta_3 = 0.5*M_PI;
           sigma = 1./sqrt(4.*beta*sin(Phi_star));
       }
-      double eta_1 = mu_1 + sqrt2*sigma*normal_distribution(engine);
-      double eta_2 = mu_2 + sqrt2*sigma*normal_distribution(engine);
-      double eta_3 = mu_3 + sigma*normal_distribution(engine);
+      if (add_gaussian_noise) {
+          eta_1 += sqrt2*sigma*normal_distribution(engine);
+          eta_2 += sqrt2*sigma*normal_distribution(engine);
+          eta_3 += sigma*normal_distribution(engine);
+      }
       if (swap_eta) {
           std::swap(eta_1,eta_2);
       }
@@ -303,6 +315,10 @@ private:
   const double alpha_pcn;
   /** @brief complementary pCN parameter \f$\sqrt{1-\alpha^2}\f$ */
   const double alpha_pcn_comp;
+  /** @brief Only sample from one of the two peaks? */
+  const bool single_peak;
+  /** @brief Add Gaussian noise? If false, only take peak value */
+  const bool add_gaussian_noise;
 };
 
 #endif // GAUSSIANFILLINDISTRIBUTION
