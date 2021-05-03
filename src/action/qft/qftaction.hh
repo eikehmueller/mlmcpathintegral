@@ -35,7 +35,7 @@ public:
         : Action(renormalisation_),
           lattice(lattice_),
           fine_lattice(lattice->fine_lattice()),
-          coarse_lattice(lattice->coarse_lattice()),
+          coarse_lattice(lattice->coarse_lattice(false)),
           Mt_lat(lattice->getMt_lat()),
           Mx_lat(lattice->getMx_lat()) { }
     
