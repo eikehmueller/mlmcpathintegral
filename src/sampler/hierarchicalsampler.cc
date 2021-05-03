@@ -79,7 +79,7 @@ void HierarchicalSampler::set_state(std::shared_ptr<SampleState> phi_state) {
 
 /* Show statistics on all levels */
 void HierarchicalSampler::show_stats() {
-    mpi_parallel::cout << std::setprecision(3) << std::fixed;
+    mpi_parallel::cout << std::setprecision(4) << std::fixed;
     mpi_parallel::cout << "  cost per sample = " << cost_per_sample() << " mu s" << std::endl << std::endl;
     mpi_parallel::cout << "  acceptance rate = " << p_accept() << std::endl;
     for (unsigned int ell=0; ell<n_level; ++ell) {
