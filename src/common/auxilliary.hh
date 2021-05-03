@@ -6,6 +6,10 @@
  */
 #include "config.h"
 #include <cmath>
+#include <vector>
+#include <gsl/gsl_sf_bessel.h>
+#include <gsl/gsl_integration.h>
+
 
 /* Generate coloured output? This is pretty, but will add escape
  * sequences if the output is precessed with a program which does not
@@ -69,5 +73,74 @@ double log_factorial(unsigned int n);
  * @param[in] k Parameter \f$k\f$
  */
 double log_nCk(unsigned int n, unsigned int k);
+
+/** @brief Analytical result for function \f$\Phi_{\chi_t}\f$ required in topological
+ * susceptibility calculation.
+ *
+ * Computes the analytical value of the function \f$\Phi_{\chi_t}\f$ which is required in the
+ * calculation of the analytical expression for the topological susceptibility.
+ * If the number of plaquettes is \f$P\f$, then this is given by
+ *
+ * \f[
+ *   \Phi_{\chi_t}(\beta,P)
+  *    = \beta \sum_{n=-\infty}^{\infty} w_n(\beta,P)\left[
+ *      (P-1) \left(\frac{I'_n(\beta)}{I_n(\beta)}\right)^2 - \frac{I''_n(\beta)}{I_n(\beta)}
+ *   \right]
+ * \f]
+ *  with the weights
+ * \f[
+ *  w_n(\beta,P) = \frac{(I_n(\beta)^P)}{\sum_{n=-\infty}^{\infty} (I_n(\beta))^P}
+ * \f]
+ *  and the functions
+ *  \f[
+ *  \begin{aligned}
+ *    I_n(x) &= \frac{1}{2\pi} \int_{-\pi}^{+\pi} e^{i n\phi + x(\cos(\phi)-1)} \; d\phi \\
+ *        &= \frac{1}{2\pi} \int_{-\pi}^{+\pi} e^{x(\cos(\phi)-1)} \cos(n\phi) \; d\phi \\
+ *    I'_n(x) &= \frac{i}{2\pi} \int_{-\pi}^{+\pi} \frac{\phi}{2\pi }e^{i n\phi + x(\cos(\phi)-1)} \; d\phi \\
+ *        &= -\frac{1}{4\pi^2} \int_{-\pi}^{+\pi} \phi e^{x(\cos(\phi)-1)} \sin(n\phi) \; d\phi \\
+ *    I''_n(x) &= \frac{i}{2\pi} \int_{-\pi}^{+\pi} \left(\frac{\phi}{2\pi }\right)^2 e^{i n\phi + x(\cos(\phi)-1)} \; d\phi \\
+ *        &= -\frac{1}{8\pi^3} \int_{-\pi}^{+\pi} \phi^2 e^{x(\cos(\phi)-1)} \cos(n\phi) \; d\phi
+ *  \end{aligned}
+ *  \f]
+ *  
+ *  The topological susceptibility (scaled by the lattice volume)of the quenched Schwinger
+ *  model is then given by
+ * 
+ * \f[
+ *    V \chi_t(\beta,P) = P/\beta \Phi_{\chi_t}(\beta,P)
+ * \f]
+ * 
+ *  All functions are scaled by a factor \f$e^{-x}\f$ for numerical stability (this factor will cancel out, since we
+ *  only every compute ratios of the above functions). Note that \f$I_n(x)\f$ is the (rescaled) modified Bessel
+ *  function of the first kind. For more details see the following two papers:
+ *
+ *  - Bonati, C. and Rossi, P., 2019. "Topological susceptibility of two-dimensional U (N) gauge theories."
+ *   Physical Review D, 99(5), p.054503 https://doi.org/10.1103/PhysRevD.99.054503
+ *
+ *  - Kiskis, J., Narayanan, R. and Sigdel, D., 2014. "Correlation between Polyakov loops oriented in two different
+ *   directions in SU(N) gauge theory on a two-dimensional torus. Physical Review D, 89(8), p.085031.
+ *   https://doi.org/10.1103/PhysRevD.89.085031
+ *
+ *   @param[in] beta Coupling constant \f$beta\f$
+ *   @param[in] n_plaq Number of plaquettes \f$P\f$
+ */
+double Phi_chit(const double beta,
+                const unsigned int n_plaq);
+
+/** @brief Compute functions required in calculation of topological susceptibility
+ * function \f$\Phi_{\chi_t}\f$
+ *
+ * Evaluate functions \f$I_n(x)\f$, \f$I'_n(x)\f$ and \f$I''_n(x)\f$
+ * required in calculation of \f$\chi_t\f$.
+ *
+ * @param[in] x Value at which to evaluate functions
+ * @param[inout] In Vector which will contain \f$I_n(\beta)\f$
+ * @param[inout] dIn Vector which will contain \f$I'_n(\beta)\f$
+ * @param[inout] ddIn Vector which will contain \f$I''_n(\beta)\f$
+ */
+void compute_In(const double x,
+                std::vector<double>& In,
+                std::vector<double>& dIn,
+                std::vector<double>& ddIn);
 
 #endif // AUXILLIARY_HH
