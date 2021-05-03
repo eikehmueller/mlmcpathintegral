@@ -271,10 +271,12 @@ int main(int argc, char* argv[]) {
             std::shared_ptr<RotorAction> rotor_action =
                 std::dynamic_pointer_cast<RotorAction>(action);
             double analytical_result_continuum = rotor_action->chit_continuum();
-            analytical_result = rotor_action->chit_perturbative();
+            double perturbative_result = rotor_action->chit_perturbative();
+            analytical_result = rotor_action->chit_exact();
             mpi_parallel::cout << std::endl;
             mpi_parallel::cout << std::setprecision(6) << std::fixed;
-            mpi_parallel::cout << " Analytical result        <chi_t> = " << analytical_result << " + O((a/I)^2), a/I = " << lattice->geta_lat()/action->getm0() << std::endl;
+            mpi_parallel::cout << " Analytical result        <chi_t> = " << analytical_result << std::endl;
+            mpi_parallel::cout << " Perturbative expansion   <chi_t> = " << perturbative_result << " + O((a/I)^2), a/I = " << lattice->geta_lat()/action->getm0() << std::endl;
             mpi_parallel::cout << " Continuum limit [a -> 0] <chi_t> = " << analytical_result_continuum << std::endl;
             mpi_parallel::cout << std::endl;
         }

@@ -244,9 +244,15 @@ public:
         return mod_2pi(M_PI+2.*xbar-x);
     }
 
+    /** @brief Exact analytical expression for topological susceptibility
+     *
+     * Return analytical value for finite values of \f$a\f$
+     */
+    double chit_exact() const;
+
     /** @brief Perturbative expression for topological susceptibility
      *
-     * Return analytical value (up to corrections of \f$O((a/I)^2\f$) for finite
+     * Return perturbative value (up to corrections of \f$O((a/I)^2\f$) for finite
      * values of \f$a\f$
      */
     double chit_perturbative() const;

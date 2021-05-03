@@ -89,6 +89,13 @@ void RotorAction::initialise_state(std::shared_ptr<SampleState> x_path) const {
 #endif // SAVE_PATHS
 }
 
+/** Exact analytical expression for chi_t for finite a */
+double RotorAction::chit_exact() const {
+    double T_final = lattice->getT_final();
+    return 1./m0*Phi_chit(m0/a_lat,T_final/a_lat);
+}
+
+
 /** Perturbative expression for chi_t for finite a */
 double RotorAction::chit_perturbative() const {
     double T_final = lattice->getT_final();
