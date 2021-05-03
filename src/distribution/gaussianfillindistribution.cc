@@ -35,41 +35,44 @@ double GaussianFillinDistribution::evaluate(const double theta_1, const double t
     eta_1 = eta_1_bar + eta_2_bar + eta_3_bar;
     eta_2 = eta_1_bar - eta_2_bar - eta_3_bar;
     eta_3 = eta_1_bar + eta_2_bar - eta_3_bar;
-    // Evaluate normal distributions at both peaks
-    double g_c = 0.0; 
-    double g_s = 0.0;   
-    double mu_1[9] = { 0, 1, 1, 1, 1,-1,-1,-1,-1};
-    double mu_2[9] = { 0, 1, 1,-1,-1, 1, 1,-1,-1};
-    double mu_3[9] = { 0, 1,-1, 1,-1, 1,-1, 1,-1};
-    double sigma2_inv_c = 2.*beta*cos(Phi_star);
-    double sigma2_inv_s = 2.*beta*sin(Phi_star);
-    for (int j=0;j<9;++j) {
-        // Main peak
-        double d_eta_1 = eta_1 - mu_1[j]*M_PI;
-        double d_eta_2 = eta_2 - mu_2[j]*M_PI;
-        double d_eta_3 = eta_3 - mu_3[j]*M_PI;
-        double Q = d_eta_1*d_eta_1 + d_eta_2*d_eta_2 + 2.*d_eta_3*d_eta_3;
-        g_c += exp(-0.5*sigma2_inv_c*Q);        
-        // Secondary peak
-        d_eta_2 += M_PI;
-        d_eta_3 += 0.5*M_PI;
-        Q = d_eta_1*d_eta_1 + d_eta_2*d_eta_2 + 2.*d_eta_3*d_eta_3;
-        g_s += exp(-0.5*sigma2_inv_s*Q);
-    }
     double p_c = get_pc(Phi_star);
-    double norm_c, norm_s;
-    // Only pick a single peak (to be consistent with pCN proposal)
-    if (single_peak) {
-        if (p_c > 0.5) {
-            norm_c = pow(sigma2_inv_c,1.5);
-            return norm_c*g_c;
-        } else {
-            norm_s = pow(sigma2_inv_s,1.5);
-            return norm_s*g_s;
+    // If we did not add Gaussian noise, we know that eta = (0,0,0) for the
+    // main peak and eta != (0,0,0) for the secondary peak. Otherwise, we need to
+    // evaluate the pdf, which is the sum of two peaks.
+    if (add_gaussian_noise) {
+        // Evaluate normal distributions at both peaks
+        double g_c = 0.0; 
+        double g_s = 0.0;   
+        double mu_1[9] = { 0, 1, 1, 1, 1,-1,-1,-1,-1};
+        double mu_2[9] = { 0, 1, 1,-1,-1, 1, 1,-1,-1};
+        double mu_3[9] = { 0, 1,-1, 1,-1, 1,-1, 1,-1};
+        double sigma2_inv_c = 2.*beta*cos(Phi_star);
+        double sigma2_inv_s = 2.*beta*sin(Phi_star);
+        for (int j=0;j<9;++j) {
+            // Main peak
+            double d_eta_1 = eta_1 - mu_1[j]*M_PI;
+            double d_eta_2 = eta_2 - mu_2[j]*M_PI;
+            double d_eta_3 = eta_3 - mu_3[j]*M_PI;
+            double Q = d_eta_1*d_eta_1 + d_eta_2*d_eta_2 + 2.*d_eta_3*d_eta_3;
+            g_c += exp(-0.5*sigma2_inv_c*Q);        
+            // Secondary peak
+            d_eta_2 += M_PI;
+            d_eta_3 += 0.5*M_PI;
+            Q = d_eta_1*d_eta_1 + d_eta_2*d_eta_2 + 2.*d_eta_3*d_eta_3;
+            g_s += exp(-0.5*sigma2_inv_s*Q);
         }
-    } else {
-        norm_c = pow(sigma2_inv_c,1.5);
-        norm_s = pow(sigma2_inv_s,1.5);
+        // normalisation constants
+        double norm_c = pow(sigma2_inv_c,1.5);
+        double norm_s = pow(sigma2_inv_s,1.5);
         return p_c*norm_c*g_c + (1.-p_c)*norm_s*g_s;
+    } else {
+        double tolerance = 1.E-12;
+        if (eta_1*eta_1+eta_2*eta_2+eta_3*eta_3 < tolerance) {
+            // Main peak
+            return p_c;
+        } else {
+            // Secondary peak
+            return 1-p_c;
+        }
     }
 }

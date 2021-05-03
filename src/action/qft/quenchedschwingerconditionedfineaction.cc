@@ -39,25 +39,6 @@ void QuenchedSchwingerConditionedFineAction::fill_fine_points(const std::shared_
                                         -phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,0)]);
                 double phi_41 = mod_2pi(-phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)]
                                         +phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,1)]);
-                /*
-                double phi_n_12 = mod_2pi(+phi_state_n->data[lattice->link_cart2lin(2*i  ,2*j+1,1)]
-                                          +phi_state_n->data[lattice->link_cart2lin(2*i  ,2*j+2,0)]);
-                double phi_n_23 = mod_2pi(+phi_state_n->data[lattice->link_cart2lin(2*i+1,2*j+2,0)]
-                                          -phi_state_n->data[lattice->link_cart2lin(2*i+2,2*j+1,1)]);
-                double phi_n_34 = mod_2pi(-phi_state_n->data[lattice->link_cart2lin(2*i+2,2*j  ,1)]
-                                          -phi_state_n->data[lattice->link_cart2lin(2*i+1,2*j  ,0)]);
-                double phi_n_41 = mod_2pi(-phi_state_n->data[lattice->link_cart2lin(2*i  ,2*j  ,0)]
-                                          +phi_state_n->data[lattice->link_cart2lin(2*i  ,2*j  ,1)]);
-                double theta_n_1 = +phi_state_n->data[lattice->link_cart2lin(2*i  ,2*j+1,0)];
-                double theta_n_2 = -phi_state_n->data[lattice->link_cart2lin(2*i+1,2*j+1,1)];
-                double theta_n_3 = -phi_state_n->data[lattice->link_cart2lin(2*i+1,2*j+1,0)];
-                double theta_n_4 = +phi_state_n->data[lattice->link_cart2lin(2*i+1,2*j  ,1)];                
-                gaussian_fillin_dist->draw_pcn(engine,
-                                               phi_n_12,phi_n_23,phi_n_34,phi_n_41,
-                                               theta_n_1,theta_n_2,theta_n_3,theta_n_4,
-                                               phi_12,phi_23,phi_34,phi_41,
-                                               theta_1,theta_2,theta_3,theta_4);
-                */
                 double theta_1, theta_2, theta_3, theta_4;
                 gaussian_fillin_dist->draw(engine,
                                            phi_12,phi_23,phi_34,phi_41,
