@@ -18,9 +18,9 @@ MonteCarloTwoLevel::MonteCarloTwoLevel(const std::shared_ptr<Action> fine_action
     t_indep(0.0),
     n_indep(0),
     t_sampler(0),
-    stats_fine("QoI[fine]",10),
-    stats_coarse("QoI[coarse]",10),
-    stats_diff("delta QoI",10),
+    stats_fine("QoI[fine]",param_twolevelmc.n_fine_autocorr_window()),
+    stats_coarse("QoI[coarse]",param_twolevelmc.n_coarse_autocorr_window()),
+    stats_diff("delta QoI",param_twolevelmc.n_delta_autocorr_window()),
     stats_coarse_sampler("QoI[coarsesampler]",param_stats.n_autocorr_window()) {
     coarse_action = fine_action->coarse_action();
     coarse_sampler = sampler_factory->get(coarse_action);

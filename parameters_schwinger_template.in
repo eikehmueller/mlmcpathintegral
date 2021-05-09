@@ -52,6 +52,9 @@ hierarchical:
 twolevelmc:
   n_burnin = 100      # Number of burnin samples
   n_samples = 100000    # Number of samples
+  n_coarse_autocorr_window = 10 # Coarse level window size
+  n_fine_autocorr_window = 10 # Fine level window size
+  n_delta_autocorr_window = 10 # Difference window size	
   sampler = 'hierarchical' # Sampler to use [HMC, heatbath, hierarchical]
 
 ###########################################
