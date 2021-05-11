@@ -177,13 +177,16 @@ public:
      *
      * temporal direction (index i) = horizontal
      * spatial direction (index j) = vertical
+     * 
+     * NOTE THAT j + Mx_lat AND i + Mx_lat HAVE TO BE POSITIVE. This is to ensure
+     * unpredictable behaviour when computing a % b for negative values of a,
      *
      * @param[in] i Position index in temporal direction
      * @param[in] j Position index in spatial direction
      * @param[in] mu Direction \f$\mu\f$, must be 0 (temporal) or 1 (spatial)
      */
     inline unsigned int link_cart2lin(const int i, const int j, const int mu) const {
-        return 2*Mt_lat*(j%Mx_lat) + 2*(i%Mt_lat)+mu;
+        return 2*Mt_lat*((j+Mx_lat)%Mx_lat) + 2*((i+Mt_lat)%Mt_lat)+mu;
     }
 
     /** @brief Convert linear index to lattice index
