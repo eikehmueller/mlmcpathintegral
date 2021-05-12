@@ -24,9 +24,9 @@ void QMAction::copy_from_fine(const std::shared_ptr<SampleState> x_fine,
 }
 
 void QMAction::check_coarsening_is_permitted(const unsigned int n_level) {
-    if ( (M_lat>>n_level)<<n_level == M_lat) {
+    if ( (M_lat>>(n_level-1))<<(n_level-1) == M_lat) {
         mpi_parallel::cout << "M_lat = " << M_lat << " = 2^{" << n_level << "-1} * " << (M_lat>>(n_level-1)) << std::endl;
     } else {
-        mpi_parallel::cout << "ERROR: M_lat = " << M_lat << " is not a multiple of 2^{n_level} = 2^{"<<n_level << "}" << std::endl;
+        mpi_parallel::cout << "ERROR: M_lat = " << M_lat << " is not a multiple of 2^{n_level-1} = 2^{"<<n_level-1 << "}" << std::endl;
     }
 }

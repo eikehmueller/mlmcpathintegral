@@ -43,6 +43,15 @@ double inline mod_2pi(const double x) {
     return x - 2.*M_PI*floor(0.5*(x+M_PI)/M_PI);
 }
 
+/** @brief Calculate \f$ x mod [-pi/2,pi/2) \f$
+ *
+ * @param[in] x Value of \f$x\f$
+ */
+double inline mod_pi(const double x) {
+    return x - M_PI*floor((x+0.5*M_PI)/M_PI);
+}
+
+
 /** @brief Calculate Sum \f$\hat{\Sigma_p(\xi)}\f$
  *
  * Return value of sum

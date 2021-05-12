@@ -31,9 +31,15 @@ public:
         Parameters("twolevelmc"),
         n_burnin_(100),
         n_samples_(100),
+        n_coarse_autocorr_window_(10),
+        n_fine_autocorr_window_(10),
+        n_delta_autocorr_window_(10),
         sampler_(SamplerHMC) {
         addKey("n_burnin",Integer,Positive);
         addKey("n_samples",Integer,Positive);
+        addKey("n_coarse_autocorr_window",Integer,Positive);
+        addKey("n_fine_autocorr_window",Integer,Positive);
+        addKey("n_delta_autocorr_window",Integer,Positive);
         addKey("sampler",String);
     }
 
@@ -47,6 +53,9 @@ public:
         if (!readSuccess) {
             n_burnin_ = getContents("n_burnin")->getInt();
             n_samples_ = getContents("n_samples")->getInt();
+            n_coarse_autocorr_window_ = getContents("n_coarse_autocorr_window")->getInt();
+            n_fine_autocorr_window_ = getContents("n_fine_autocorr_window")->getInt();
+            n_delta_autocorr_window_ = getContents("n_delta_autocorr_window")->getInt();
             std::string sampler_str = getContents("sampler")->getString();
             if (sampler_str == "HMC") {
                 sampler_ = SamplerHMC;
@@ -72,9 +81,21 @@ public:
     unsigned int n_burnin() const {
         return n_burnin_;
     }
-    /** @brief Return number of samples */
+    /** @brief Return number of samples param_twolevelmc.n_autocorr_window()*/
     unsigned int n_samples() const {
         return n_samples_;
+    }
+    /** @brief Return size of autocorrelatin window for coarse level sampler */
+    unsigned int n_coarse_autocorr_window() const {
+        return n_coarse_autocorr_window_;
+    }
+    /** @brief Return size of autocorrelatin window for fine level */
+    unsigned int n_fine_autocorr_window() const {
+        return n_fine_autocorr_window_;
+    }
+    /** @brief Return size of autocorrelatin window for difference */
+    unsigned int n_delta_autocorr_window() const {
+        return n_delta_autocorr_window_;
     }
     /** @brief Return sampler type */
     SamplerType sampler() const {
@@ -85,6 +106,12 @@ private:
     unsigned int n_burnin_;
     /** @brief Number of samples */
     unsigned int n_samples_;
+    /** @brief Size of window used for measuring coarse level sampler autocorrelations */
+    unsigned int n_coarse_autocorr_window_;
+    /** @brief Size of window used for measuring fine level autocorrelations */
+    unsigned int n_fine_autocorr_window_;
+    /** @brief Size of window used for measuring difference autocorrelations */
+    unsigned int n_delta_autocorr_window_;
     /** @brief Sampler type */
     SamplerType sampler_;
 };
