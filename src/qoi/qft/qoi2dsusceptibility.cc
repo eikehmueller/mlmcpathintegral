@@ -29,6 +29,13 @@ double quenchedschwinger_chit_analytical(const double beta,
     return n_plaq/beta*Phi_chit(beta,n_plaq);
 }
 
+/* Perturbative expression for topological susceptibility */
+double quenchedschwinger_chit_perturbative(const double beta,
+                                         const unsigned int n_plaq) {
+    return n_plaq/beta*Phi_chit_perturbative(beta,n_plaq);
+}
+
+
 /* Analytical expression for variance of topological susceptibility in the continuum limit */
 double quenchedschwinger_var_chit_continuum_analytical(const double beta,
                                                        const unsigned int n_plaq) {

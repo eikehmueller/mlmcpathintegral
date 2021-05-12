@@ -104,6 +104,19 @@ public:
 double quenchedschwinger_chit_analytical(const double beta,
                                          const unsigned int n_plaq);
 
+/** @brief Perturbative approximation to analytical result for topological susceptibility
+ *
+ * Compute the topological susceptibility up to (and including) corrections of \f$O(1/\beta)\f$.
+ * Use this formula if the analytical expression can not be computed reliably due to numerical
+ * instabilities which occur if \f$\beta\gg 1\f$.
+ * 
+ *   @param[in] beta Coupling constant \f$beta\f$
+ *   @param[in] n_plaq Number of plaquettes \f$P\f$
+ */
+double quenchedschwinger_chit_perturbative(const double beta,
+                                           const unsigned int n_plaq);
+
+
 /** @brief Analytical result for the variance of the topological susceptibility (scaled by the volume) in the continuum limit
  *
  * Computes the analytical value of the variance of the topological susceptibility times the lattice volume,

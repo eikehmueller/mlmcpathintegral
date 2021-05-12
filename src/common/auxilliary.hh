@@ -9,6 +9,7 @@
 #include <vector>
 #include <gsl/gsl_sf_bessel.h>
 #include <gsl/gsl_integration.h>
+#include "mpi/mpi_wrapper.hh"
 
 
 /* Generate coloured output? This is pretty, but will add escape
@@ -136,6 +137,16 @@ double log_nCk(unsigned int n, unsigned int k);
 double Phi_chit(const double beta,
                 const unsigned int n_plaq);
 
+/** @brief Perturbative approximation to \f$\Phi_{\chi_t}\f$ up to (and including) terms of 
+ * \f$O(1/\beta)\f$
+ * 
+ *   @param[in] beta Coupling constant \f$beta\f$
+ *   @param[in] n_plaq Number of plaquettes \f$P\f$
+ */
+double Phi_chit_perturbative(const double beta,
+                             const unsigned int n_plaq);
+                             
+                             
 /** @brief Compute functions required in calculation of topological susceptibility
  * function \f$\Phi_{\chi_t}\f$
  *

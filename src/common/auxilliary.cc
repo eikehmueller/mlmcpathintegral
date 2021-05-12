@@ -44,6 +44,11 @@ double log_nCk(unsigned int n, unsigned int k) {
 /* Analytical expression for susceptibility function Phi_chit(beta,P) */
 double Phi_chit(const double beta,
                 const unsigned int n_plaq) {
+    if (beta > 2000.0) {
+        // The computation becomes unstable for large values of beta
+        mpi_parallel::cerr << "ERROR: Phi_chit(beta,P) unstable for beta>2000. Use Phi_chit_perturbative instead." << std::endl;
+        mpi_exit(EXIT_FAILURE);
+    }
     /* Truncation index of sums */
     const int nmax = 20;
     /* Compute functions I_n(\beta), I'_n(\beta), I''_n(\beta) */
@@ -70,6 +75,22 @@ double Phi_chit(const double beta,
     }
     return phi_chit;
 }
+
+/* Perturbative approximation for susceptibility function Phi_chit(beta,P) */
+double Phi_chit_perturbative(const double beta,
+                             const unsigned int n_plaq) {
+    double xi = n_plaq/beta;
+    double z = 1./beta;
+    double Sigma_hat2 = Sigma_hat(xi,2);
+    double Sigma_hat4 = Sigma_hat(xi,4);
+    // Leading order
+    double Phi_LO = 1.0-xi*Sigma_hat2;
+    // Next-to-leading order coefficient
+    double Phi_NLO = 0.5-xi*Sigma_hat2+0.25*xi*xi*(Sigma_hat4-Sigma_hat2*Sigma_hat2);
+    // Total result
+    return (Phi_LO + z*Phi_NLO)/(4.*M_PI*M_PI);
+}
+
 
 /* Compute functions I'_n(x) and I''_n(x) required in calculation of topological 
  * susceptibility function \f$\Phi_{\chi_t(\beta,P)}\f$ */

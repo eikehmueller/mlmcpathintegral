@@ -168,14 +168,24 @@ int main(int argc, char* argv[]) {
     // numerical result and statistical error
     double numerical_result;
     double statistical_error;
-    double analytical_result = quenchedschwinger_chit_analytical(param_schwinger.beta(),
-                                                                 lattice->getNcells());
+    double analytical_result;
+    if (param_schwinger.beta() > 2000.0) {
+        analytical_result = quenchedschwinger_chit_perturbative(param_schwinger.beta(),
+                                                                lattice->getNcells());
+    } else {
+        analytical_result = quenchedschwinger_chit_analytical(param_schwinger.beta(),
+                                                              lattice->getNcells());
+    }
     double analytical_result_variance = quenchedschwinger_var_chit_continuum_analytical(param_schwinger.beta(),
                                                                                         lattice->getNcells());
     mpi_parallel::cout << std::endl;
     mpi_parallel::cout << std::setprecision(8) << std::fixed;
     mpi_parallel::cout << " Analytical results"  << std::endl;
-    mpi_parallel::cout << "      E[V*chi_t]              = " << analytical_result << std::endl;
+    mpi_parallel::cout << "      E[V*chi_t]              = " << analytical_result;
+    if (param_schwinger.beta() > 2000.0) {
+        mpi_parallel::cout << " + O(beta^{-2}) = O(" << pow(param_schwinger.beta(),-2) << ")";
+    }
+    mpi_parallel::cout << std::endl;
     mpi_parallel::cout << "      lim_{a->0} Var[V*chi_t] = " << analytical_result_variance << std::endl;
     mpi_parallel::cout << std::endl;
 
