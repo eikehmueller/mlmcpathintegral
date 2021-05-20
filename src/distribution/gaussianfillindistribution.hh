@@ -152,7 +152,7 @@ private:
   double get_pc(const double Phi) const {
     double sigma2_p_inv = beta*cos(Phi);
     double sigma2_m_inv = beta*sin(Phi);
-    double rho = pow(sigma2_m_inv/sigma2_p_inv,1.5)*exp(-4.0*(sigma2_p_inv-sigma2_m_inv));
+    double rho = pow(sigma2_p_inv/sigma2_m_inv,1.5)*exp(-4.0*(sigma2_p_inv-sigma2_m_inv));
     return 1./(1.+rho);
   }
     
