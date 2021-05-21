@@ -150,10 +150,16 @@ private:
    * @param[in] Phi angle \f$\Phi\f$
    */
   double get_pc(const double Phi) const {
-    double sigma2_p_inv = beta*cos(Phi);
-    double sigma2_m_inv = beta*sin(Phi);
-    double rho = pow(sigma2_p_inv/sigma2_m_inv,1.5)*exp(-4.0*(sigma2_p_inv-sigma2_m_inv));
-    return 1./(1.+rho);
+    if (Phi < 0.125*M_PI) {
+        return 1.0;
+    } else if (Phi > 0.375*M_PI) {
+        return 0.0;
+    } else {
+        double sigma2_p_inv = beta*cos(Phi);
+        double sigma2_m_inv = beta*sin(Phi);
+        double rho = pow(sigma2_p_inv/sigma2_m_inv,1.5)*exp(-4.0*(sigma2_p_inv-sigma2_m_inv));
+        return 1./(1.+rho);        
+    }
   }
     
   /** @brief parameter \f$\beta\f$*/

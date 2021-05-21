@@ -38,8 +38,8 @@ public:
         exp_cos_dist(action->getbeta()),
         bessel_product_dist(NULL),
         gaussian_fillin_dist(NULL) {
-            if (beta>1.0) {
-                bool add_gaussian_noise = false;
+            if (beta>8.0) {
+                bool add_gaussian_noise = true;
                 gaussian_fillin_dist = std::make_shared<GaussianFillinDistribution>(beta,
                                                                                     add_gaussian_noise);
             } else {
