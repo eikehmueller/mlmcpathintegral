@@ -27,14 +27,6 @@ double GaussianFillinDistribution::evaluate(const double theta_1, const double t
     if (swap_eta) {
         std::swap(eta_1,eta_2);        
     }
-    // Account for symmetry under shifts by integer multiples of 
-    // (\pi,\pi,\pi), (\pi,-\pi,\pi) and (\pi,-\pi,-\pi)
-    double eta_1_bar = mod_pi(0.5*(eta_1+eta_2));
-    double eta_2_bar = mod_pi(0.5*(eta_3-eta_2));
-    double eta_3_bar = mod_pi(0.5*(eta_1-eta_3));
-    eta_1 = eta_1_bar + eta_2_bar + eta_3_bar;
-    eta_2 = eta_1_bar - eta_2_bar - eta_3_bar;
-    eta_3 = eta_1_bar + eta_2_bar - eta_3_bar;
     double p_c = get_pc(Phi_star);
     // If we did not add Gaussian noise, we know that eta = (0,0,0) for the
     // main peak and eta != (0,0,0) for the secondary peak. Otherwise, we need to
@@ -43,22 +35,22 @@ double GaussianFillinDistribution::evaluate(const double theta_1, const double t
         // Evaluate normal distributions at both peaks
         double g_c = 0.0; 
         double g_s = 0.0;   
-        double mu_1[9] = { 0, 1, 1, 1, 1,-1,-1,-1,-1};
-        double mu_2[9] = { 0, 1, 1,-1,-1, 1, 1,-1,-1};
-        double mu_3[9] = { 0, 1,-1, 1,-1, 1,-1, 1,-1};
         double sigma2_inv_c = 2.*beta*cos(Phi_star);
         double sigma2_inv_s = 2.*beta*sin(Phi_star);
-        for (int j=0;j<9;++j) {
-            // Main peak
-            double d_eta_1 = eta_1 - mu_1[j]*M_PI;
-            double d_eta_2 = eta_2 - mu_2[j]*M_PI;
-            double d_eta_3 = eta_3 - mu_3[j]*M_PI;
+        // Main peaks
+        for (auto p=main_peaks.begin();p!=main_peaks.end();++p) {            
+            double d_eta_1 = eta_1 - (*p)[0];
+            double d_eta_2 = eta_2 - (*p)[1];
+            double d_eta_3 = eta_3 - (*p)[2];
             double Q = d_eta_1*d_eta_1 + d_eta_2*d_eta_2 + 2.*d_eta_3*d_eta_3;
             g_c += exp(-0.5*sigma2_inv_c*Q);        
-            // Secondary peak
-            d_eta_2 += M_PI;
-            d_eta_3 += 0.5*M_PI;
-            Q = d_eta_1*d_eta_1 + d_eta_2*d_eta_2 + 2.*d_eta_3*d_eta_3;
+        }
+        // Secondary peaks
+        for (auto p=secondary_peaks.begin();p!=secondary_peaks.end();++p) {
+            double d_eta_1 = eta_1 - (*p)[0];
+            double d_eta_2 = eta_2 - (*p)[1];
+            double d_eta_3 = eta_3 - (*p)[2];
+            double Q = d_eta_1*d_eta_1 + d_eta_2*d_eta_2 + 2.*d_eta_3*d_eta_3;
             g_s += exp(-0.5*sigma2_inv_s*Q);
         }
         // normalisation constants
@@ -74,5 +66,56 @@ double GaussianFillinDistribution::evaluate(const double theta_1, const double t
             // Secondary peak
             return 1-p_c;
         }
+    }
+}
+
+/* Construct peak locations */
+void GaussianFillinDistribution::construct_peaks() {
+    // Construct unique set of peak positions in units of \pi/2
+    std::set<std::array<int,3> > main_indices;
+    std::set<std::array<int,3> > secondary_indices;
+    // Position of peaks in unit box
+    std::array<std::array<int,3>,9> p_main = { 0, 0, 0,
+                                               2, 2, 2,
+                                              -2, 2, 2,
+                                               2,-2, 2,
+                                              -2,-2, 2,
+                                               2, 2,-2,
+                                              -2, 2,-2,
+                                               2,-2,-2,
+                                              -2,-2,-2};
+    std::array<std::array<int,3>,4> p_secondary = { 2, 0, 1,
+                                                   -2, 0, 1,
+                                                    0, 2,-1,
+                                                    0,-2,-1};
+    for (int k_x=-n_offsets;k_x<=+n_offsets;++k_x) {
+        for (int k_y=-n_offsets;k_y<=+n_offsets;++k_y) {
+            for (int k_z=-n_offsets;k_z<=+n_offsets;++k_z) {
+                // Add offset
+                auto add_offset = [&](std::array<int,3> a){
+                    return std::array<int,3> { a[0]+4*k_x,
+                                               a[1]+4*k_y,
+                                               a[2]+4*k_z}; };
+                for (auto x=p_main.begin();x!=p_main.end();++x) {
+                    main_indices.insert(add_offset(*x));
+                }
+                for (auto x=p_secondary.begin();x!=p_secondary.end();++x) {
+                    secondary_indices.insert(add_offset(*x));
+                }
+            }
+        }
+    }
+    // Scale by multiples of \pi/2 to convert back to units of standard box
+    main_peaks.clear();
+    for (auto x=main_indices.begin();x!=main_indices.end();++x) {
+        std::array<double,3> a;
+        for (int j=0;j<3;++j) a[j]=0.5*M_PI*(*x)[j];
+        main_peaks.push_back(a);			 
+    }
+    secondary_peaks.clear();
+    for (auto x=secondary_indices.begin();x!=secondary_indices.end();++x) {
+        std::array<double,3> a;
+        for (int j=0;j<3;++j) a[j]=0.5*M_PI*(*x)[j];
+        secondary_peaks.push_back(a);
     }
 }

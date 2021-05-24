@@ -1,6 +1,9 @@
 #ifndef GAUSSIANFILLINDISTRIBUTION_HH
 #define GAUSSIANFILLINDISTRIBUTION_HH GAUSSIANFILLINDISTRIBUTIONHH
 #include <random>
+#include <set>
+#include <array>
+#include <vector>
 #include <algorithm>
 #include <cmath>
 #include <iostream>
@@ -49,7 +52,14 @@ public:
     add_gaussian_noise(add_gaussian_noise_),
     uniform_distribution(0.0,1.0),
     normal_distribution(0.0,1.0),
-    sqrt2(sqrt(2.0)) {}
+    sqrt2(sqrt(2.0)),
+    n_offsets(1) { 
+        if (not add_gaussian_noise) {
+            mpi_parallel::cerr << "ERROR: sampling only from peak currently broken." << std::endl;
+            mpi_exit(EXIT_FAILURE);
+        }
+        construct_peaks();
+    }
 
   /** @brief Draw number directly from Gaussian distribution for given \f$\phi\f$
    *
@@ -145,6 +155,11 @@ public:
   double get_beta() const { return beta; }
 private:
 
+  /** @brief Construct peaks used the density in the Gaussian approximation
+   */
+  void construct_peaks();
+
+
   /** @brief Compute probability of sampling from main Gaussian
    *
    * @param[in] Phi angle \f$\Phi\f$
@@ -172,6 +187,12 @@ private:
   const double sqrt2;
   /** @brief Add Gaussian noise? If false, only take peak value */
   const bool add_gaussian_noise;
+  /** @brief Number of offsets of unit cell used when constructing peaks */
+  const int n_offsets;
+  /** @brief Locations of main peaks in box and nearest neighbours */
+  mutable std::vector<std::array<double,3> > main_peaks;
+  /** @brief Locations of secondary peaks in box and nearest neighbours */
+  mutable std::vector<std::array<double,3> > secondary_peaks;
 };
 
 #endif // GAUSSIANFILLINDISTRIBUTION
