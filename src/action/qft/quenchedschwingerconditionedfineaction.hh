@@ -37,16 +37,30 @@ public:
         uniform_dist(-M_PI,+M_PI),
         exp_cos_dist(action->getbeta()),
         bessel_product_dist(NULL),
-        gaussian_fillin_dist(NULL) {
+        gaussian_fillin_dist(NULL),
+        approximate_bessel_product_dist(NULL) {
             if (beta>8.0) {
-                bool add_gaussian_noise = true;
-                gaussian_fillin_dist = std::make_shared<GaussianFillinDistribution>(beta,
-                                                                                    add_gaussian_noise);
+                // Use Gaussian approximation for larger values of beta?
+                bool gaussian_approximation = false;
+                if (gaussian_approximation) {
+                    bool add_gaussian_noise = true;
+                    gaussian_fillin_dist = std::make_shared<GaussianFillinDistribution>(beta,
+                                                                                        add_gaussian_noise);                                                                                    
+                } else {
+                    approximate_bessel_product_dist = std::make_shared<ApproximateBesselProductDistribution>(beta);
+                }
             } else {
                 bessel_product_dist = std::make_shared<BesselProductDistribution>(beta);
             }
-        engine.seed(71814151);
-    }
+            // Sanity check: make sure at least one fill-in distribution is defined
+            if ( (gaussian_fillin_dist == NULL) and 
+                 (approximate_bessel_product_dist == NULL) and 
+                 (bessel_product_dist == NULL) ) {
+                mpi_parallel::cerr << "ERROR: no fill-in distribution defined!" << std::endl;
+                mpi_exit(EXIT_FAILURE);
+            }
+            engine.seed(71814151);
+        }
 
     /** @brief Destructor */
     virtual ~QuenchedSchwingerConditionedFineAction() {}
@@ -88,7 +102,9 @@ private:
     mutable std::shared_ptr<BesselProductDistribution> bessel_product_dist;
     /** @brief Probability distribution for drawing all using pCN */
     mutable std::shared_ptr<GaussianFillinDistribution> gaussian_fillin_dist;
-    
+    /** @brief Approximate probability distribution for drawing vertical interior links */
+    mutable std::shared_ptr<ApproximateBesselProductDistribution> approximate_bessel_product_dist;
+
 };
 
 struct QuenchedSchwingerConditionedFineActionFactory : public ConditionedFineActionFactory {

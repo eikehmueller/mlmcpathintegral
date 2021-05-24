@@ -27,6 +27,7 @@ void QuenchedSchwingerConditionedFineAction::fill_fine_points(const std::shared_
                 = mod_2pi(phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,1)]-dtheta);
         }
     }
+    // *** Use Gaussian approximation for fill-in ***
     if (not (gaussian_fillin_dist == NULL)) {
         /* STEP 2 & 3: fill in all interior links with Gaussian approximation */
         for (unsigned int i=0;i<Mt_lat/2;++i) {
@@ -49,6 +50,7 @@ void QuenchedSchwingerConditionedFineAction::fill_fine_points(const std::shared_
                 phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,1)] = +theta_4;
             }
         }
+    // *** Use (approximate) true distribution for fill-in ***
     } else {
         /* STEP 2: Fill interior links in spatial direction */
         for (unsigned int i=0;i<Mt_lat/2;++i) {
@@ -63,7 +65,16 @@ void QuenchedSchwingerConditionedFineAction::fill_fine_points(const std::shared_
                                        + phi_state->data[lattice->link_cart2lin(2*i  ,2*j+2,0)]
                                        - phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)]);
                 double theta_tilde;
-                theta_tilde = bessel_product_dist->draw(engine,theta_p,theta_m);
+                if (not (bessel_product_dist == NULL)) {
+                    // *** True distribution for vertical links ***
+                    theta_tilde = bessel_product_dist->draw(engine,theta_p,theta_m);                    
+                } else if (not (approximate_bessel_product_dist == NULL)){
+                    // *** Approximate distribution for vertical links ***
+                    theta_tilde = approximate_bessel_product_dist->draw(engine,theta_p,theta_m);
+                } else {
+                    mpi_parallel::cerr << "ERROR: no fill-in distribution defined!" << std::endl;
+                    mpi_exit(EXIT_FAILURE);
+                }
                 dtheta = uniform_dist(engine);
                 phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,1)] = mod_2pi(0.5*theta_tilde+dtheta);
                 phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,1)] = mod_2pi(0.5*theta_tilde-dtheta);
@@ -93,7 +104,7 @@ double QuenchedSchwingerConditionedFineAction::evaluate(const std::shared_ptr<Sa
     const unsigned int Mx_lat = lattice->getMx_lat();
     double S = 0.0;
     if (not (gaussian_fillin_dist == NULL)) {
-        // Use Gaussian approximation
+        // *** Use Gaussian approximation ***
         for (unsigned int i=0;i<Mt_lat/2;++i) {
             for (unsigned int j=0;j<Mx_lat/2;++j) {
                 double phi_12 = mod_2pi(+phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,1)]
@@ -112,8 +123,39 @@ double QuenchedSchwingerConditionedFineAction::evaluate(const std::shared_ptr<Sa
                                                         phi_12,phi_23,phi_34,phi_41));
             }
         }
-    } else {
-        // Use full distribution
+    } else if ( not (approximate_bessel_product_dist == NULL) ) {
+        // *** True distribution with approximation ***
+        // Contribution from drawing vertical links
+        for (unsigned int i=0;i<Mt_lat/2;++i) {
+            for (unsigned int j=0;j<Mx_lat/2;++j) {
+                double phi_p = mod_2pi(+ phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,0)]
+                                       + phi_state->data[lattice->link_cart2lin(2*i+2,2*j  ,1)]
+                                       + phi_state->data[lattice->link_cart2lin(2*i+2,2*j+1,1)]
+                                       - phi_state->data[lattice->link_cart2lin(2*i+1,2*j+2,0)]);
+                double phi_m = mod_2pi(- phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)]
+                                       + phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,1)]
+                                       + phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,1)]
+                                       + phi_state->data[lattice->link_cart2lin(2*i  ,2*j+2,0)]);
+                double theta = mod_2pi(+ phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,1)]
+                                       + phi_state->data[lattice->link_cart2lin(2*i+1,2*j+1,1)]);
+                S -= log(approximate_bessel_product_dist->evaluate(theta,phi_p,phi_m));
+            }
+        }
+        // Contribution from drawing horizontal links
+        for (unsigned int i=0;i<Mt_lat;++i) {
+            for (unsigned int j=0;j<Mx_lat/2;++j) {
+                double phi_p = mod_2pi(- phi_state->data[lattice->link_cart2lin(i  ,2*j  ,1)]
+                                       + phi_state->data[lattice->link_cart2lin(i,  2*j  ,0)]
+                                       + phi_state->data[lattice->link_cart2lin(i+1,2*j  ,1)]);
+                double phi_m = mod_2pi(+ phi_state->data[lattice->link_cart2lin(i  ,2*j+1,1)]
+                                       + phi_state->data[lattice->link_cart2lin(i,  2*j+2,0)]
+                                       - phi_state->data[lattice->link_cart2lin(i+1,2*j+1,1)]);
+                double theta = mod_2pi(+ phi_state->data[lattice->link_cart2lin(i  ,2*j+1,0)]);
+                S -= log(exp_cos_dist.evaluate(theta,phi_p,phi_m));
+            }   
+        }
+    } else if ( not (bessel_product_dist == NULL) ) {
+        // *** True distribution ***
         for (unsigned int i=0;i<Mt_lat/2;++i) {
             for (unsigned int j=0;j<Mx_lat/2;++j) {
                 double phi_12 = + phi_state->data[lattice->link_cart2lin(2*i,  2*j+1,1)]
@@ -136,6 +178,9 @@ double QuenchedSchwingerConditionedFineAction::evaluate(const std::shared_ptr<Sa
                 S -= log(bessel_product_dist->Znorm_inv(Phi,true));
             }
         }
+    } else {
+        mpi_parallel::cerr << "ERROR: no fill-in distribution defined!" << std::endl;
+        mpi_exit(EXIT_FAILURE);
     }
     return S;
 }
