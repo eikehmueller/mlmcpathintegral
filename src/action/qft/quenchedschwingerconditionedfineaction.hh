@@ -41,7 +41,7 @@ public:
         approximate_bessel_product_dist(NULL) {
             if (beta>8.0) {
                 // Use Gaussian approximation for larger values of beta?
-                bool gaussian_approximation = true;
+                bool gaussian_approximation = false;
                 if (gaussian_approximation) {
                     bool add_gaussian_noise = true;
                     gaussian_fillin_dist = std::make_shared<GaussianFillinDistribution>(beta,
