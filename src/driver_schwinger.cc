@@ -16,9 +16,11 @@
 #include "montecarlo/montecarlotwolevel.hh"
 #include "montecarlo/montecarlomultilevel.hh"
 #include "sampler/hmcsampler.hh"
+#include "sampler/clustersampler.hh"
 #include "sampler/hierarchicalsampler.hh"
 #include "sampler/multilevelsampler.hh"
 #include "sampler/overrelaxedheatbathsampler.hh"
+#include "sampler/quenchedschwingerclustersampler.hh"
 #include "config.h"
 
 /** @file driver_schwinger.cc
@@ -36,6 +38,7 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
                                                           const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                                                           const GeneralParameters param_general,
                                                           const HMCParameters param_hmc,
+                                                          const ClusterParameters param_cluster,
                                                           const OverrelaxedHeatBathParameters param_heatbath,
                                                           const HierarchicalParameters param_hierarchical,
                                                           const StatisticsParameters param_stats) {
@@ -58,6 +61,9 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
                                                                      conditioned_fine_action_factory,
                                                                      param_stats,
                                                                      param_hierarchical);
+    } else if (samplerid == SamplerCluster) {
+        /* --- CASE 5: Cluster sampler */
+        sampler_factory = std::make_shared<QuenchedSchwingerClusterSamplerFactory>(param_cluster);
     } else {
         mpi_parallel::cerr << " ERROR: Unsupported sampler." << std::endl;
         mpi_exit(EXIT_FAILURE);
@@ -109,6 +115,10 @@ int main(int argc, char* argv[]) {
     HMCParameters param_hmc;
     if (param_hmc.readFile(filename)) return 1;
     mpi_parallel::cout << param_hmc << std::endl;
+
+    ClusterParameters param_cluster;
+    if (param_cluster.readFile(filename)) return 1;
+    mpi_parallel::cout << param_cluster << std::endl;
   
     OverrelaxedHeatBathParameters param_heatbath;
     if (param_heatbath.readFile(filename)) return 1;
@@ -204,6 +214,7 @@ int main(int argc, char* argv[]) {
                                                        nullptr,
                                                        param_general,
                                                        param_hmc,
+                                                       param_cluster,
                                                        param_heatbath,
                                                        param_hierarchical,
                                                        param_stats);
@@ -225,6 +236,7 @@ int main(int argc, char* argv[]) {
                                                     conditioned_fine_action_factory,
                                                     param_general,
                                                     param_hmc,
+                                                    param_cluster,
                                                     param_heatbath,
                                                     param_hierarchical,
                                                     param_stats);
@@ -262,6 +274,7 @@ int main(int argc, char* argv[]) {
                                                     conditioned_fine_action_factory,
                                                     param_general,
                                                     param_hmc,
+                                                    param_cluster,
                                                     param_heatbath,
                                                     param_hierarchical,
                                                     param_stats);
@@ -296,6 +309,7 @@ int main(int argc, char* argv[]) {
                                                     conditioned_fine_action_factory,
                                                     param_general,
                                                     param_hmc,
+                                                    param_cluster,
                                                     param_heatbath,
                                                     param_hierarchical,
                                                     param_stats);
