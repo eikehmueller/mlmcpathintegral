@@ -39,9 +39,10 @@ void QuenchedSchwingerClusterSampler::draw(std::shared_ptr<SampleState> phi_stat
     std::shared_ptr<Lattice2D> lattice2d = action->get_lattice();
     unsigned int Mt_lat = lattice2d->getMt_lat();
     unsigned int Mx_lat = lattice2d->getMx_lat();
+    unsigned int ndof = action->sample_size();
     // Draw path with cluster sampler
     cluster_sampler->draw(psi_cluster_state); 
-    for (unsigned int j=0; j<Mt_lat*Mx_lat; ++j) phi_state->data[j] = 0.0;
+    for (unsigned int j=0; j<ndof; ++j) phi_state->data[j] = 0.0;
     // Set vertical links
     int i_lin = 0;
     for (int i=0;i<Mt_lat-1;++i) {
