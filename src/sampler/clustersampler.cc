@@ -38,7 +38,7 @@ ClusterSampler::ClusterSampler(const std::shared_ptr<ClusterAction> action_,
 std::pair<bool,int> ClusterSampler::process_link(const int i,
         const int direction) {
     // Neighbouring site
-    int i_neighbour = (i+direction) % M_lat;
+    int i_neighbour = (i+direction + M_lat) % M_lat;
     // Check if neighbouring site is bonded
     double Sell = action->S_ell(x_path_cur->data[i],
                                 x_path_cur->data[i_neighbour]);
