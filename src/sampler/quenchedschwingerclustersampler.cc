@@ -16,8 +16,9 @@ QuenchedSchwingerClusterSampler::QuenchedSchwingerClusterSampler(const std::shar
     psi_cluster_state = std::make_shared<SampleState>(ndof);
     
     // Create rotor action and cluster sampler
-    double beta = action->getbeta();    
-    std::shared_ptr<Lattice1D> lattice1d = std::make_shared<Lattice1D>(ndof/2,1.0);
+    double beta = action->getbeta();
+    unsigned int ndof_cluster = action->get_lattice()->getNcells();
+    std::shared_ptr<Lattice1D> lattice1d = std::make_shared<Lattice1D>(ndof_cluster,1.0);
     rotor_action = std::make_shared<RotorAction>(lattice1d,
                                                  RenormalisationNone,
                                                  beta*lattice1d->geta_lat());
