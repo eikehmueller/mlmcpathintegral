@@ -24,7 +24,16 @@
  *
  * The sampler exploits the equivalence between the quenched Schwinger model and 
  * the topological oscillator to generate samples from the former with the cluster
- * sampler
+ * sampler.
+ * 
+ * The key observation is that the distribution of the differences \f$x_j-x_{j-1}\f$ for a
+ * topological oscillator discretised with \f$M\f$ sites is the same as the 
+ * distribution of the plaquettes of the Schwinger model on a lattice with
+ * \f$M = M_t\cdot M_x\f$ cells.
+ * 
+ * This sampler uses the ClusterSampler class to generator samples from the topological
+ * oscillator distribution, converts them to plaquettes which can be mapped to
+ * configurations of links on the lattice.
  */
 class QuenchedSchwingerClusterSampler : public Sampler {
 public:
@@ -44,7 +53,7 @@ public:
 
     /** @brief Draw a sample
      *
-     * returns a sample path \f$X\f$
+     * returns a sample state \f$\phi\f$
      *
      * @param[out] phi_state State \f$\phi\f$ drawn from distribution
      */

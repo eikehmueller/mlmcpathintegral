@@ -43,6 +43,7 @@ void QuenchedSchwingerClusterSampler::draw(std::shared_ptr<SampleState> phi_stat
     unsigned int ndof = action->sample_size();
     // Draw path with cluster sampler
     cluster_sampler->draw(psi_cluster_state); 
+    // Set links to zero
     for (unsigned int j=0; j<ndof; ++j) phi_state->data[j] = 0.0;
     // Set vertical links
     int i_lin = 0;
@@ -62,7 +63,7 @@ void QuenchedSchwingerClusterSampler::draw(std::shared_ptr<SampleState> phi_stat
           - psi_cluster_state->data[i_lin+1] + psi_cluster_state->data[i_lin];
         i_lin++;
     }
-    // Gauge transformation
+    // Apply gauge transformation
     for (int i=0;i<Mt_lat;++i) {
         for (int j=0;j<Mx_lat;++j) {            
             double theta = uniform_distribution(engine);
