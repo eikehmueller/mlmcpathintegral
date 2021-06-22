@@ -158,7 +158,7 @@ public:
      * 
      * The estimator for the MSE of the variance is given by
      * 
-     * MSE[Var(Q)] = 1/n * ( E[(Q-Q[Q])^4] - (E[(Q-E[Q])^2])^2 )
+     * RMSE[Var(Q)] = sqrt( 1/n * ( E[(Q-Q[Q])^4] - (E[(Q-E[Q])^2])^2 ) )
      * 
      * This is a biased estimator, but the bias is expected to
      * be small as n >> 1.

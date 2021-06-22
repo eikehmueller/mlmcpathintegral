@@ -37,7 +37,7 @@ double Statistics::variance_error() const {
     double avg3_ = mpi_allreduce_avg(avg3_longterm);
     double avg4_ = mpi_allreduce_avg(avg4_longterm);
     unsigned int n_samples_ = mpi_allreduce_sum(n_samples_longterm);
-    return 1.0/n_samples_*(avg4_-4*avg_*avg3_+8*avg_*avg_*avg2_-avg2_*avg2_-4*avg_*avg_*avg_*avg_);
+    return sqrt(1.0/n_samples_*(avg4_-4*avg_*avg3_+8*avg_*avg_*avg2_-avg2_*avg2_-4*avg_*avg_*avg_*avg_));
 }
 
 
