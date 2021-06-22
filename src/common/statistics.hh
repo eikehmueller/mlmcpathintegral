@@ -137,6 +137,9 @@ public:
         S_k.clear();
         S_k.resize(k_max,0.0);
         avg_longterm = 0.0;
+        avg2_longterm = 0.0;
+        avg3_longterm = 0.0;
+        avg4_longterm = 0.0;
         n_samples_longterm = 0;
     }
 
@@ -150,7 +153,18 @@ public:
     /** @brief Return estimator for variance
      */
     double variance() const;
-
+    
+    /* @brief Return estimator for error of variance
+     * 
+     * The estimator for the MSE of the variance is given by
+     * 
+     * MSE[Var(Q)] = 1/n * ( E[(Q-Q[Q])^4] - (E[(Q-E[Q])^2])^2 )
+     * 
+     * This is a biased estimator, but the bias is expected to
+     * be small as n >> 1.
+     */
+    double variance_error() const;
+    
     /** @brief Return estimator for average */
     double average() const;
 
@@ -199,6 +213,12 @@ private:
     double avg;
     /** @brief Running average for long term quantities */
     double avg_longterm;
+    /** @brief Running average for Q^2 */
+    double avg2_longterm;
+    /** @brief Running average for Q^3 */
+    double avg3_longterm;
+    /** @brief Running average for Q^4 */
+    double avg4_longterm;
 };
 
 std::ostream& operator<<(std::ostream& os, const Statistics& stats);

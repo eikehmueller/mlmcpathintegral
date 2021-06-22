@@ -12,6 +12,9 @@ void Statistics::record_sample(const double Q) {
     // Update running averages
     avg = ((n_samples-1.0)*avg + Q)/(1.0*n_samples);
     avg_longterm = ((n_samples_longterm-1.0)*avg_longterm + Q)/(1.0*n_samples_longterm);
+    avg2_longterm = ((n_samples_longterm-1.0)*avg2_longterm + Q*Q)/(1.0*n_samples_longterm);
+    avg3_longterm = ((n_samples_longterm-1.0)*avg3_longterm + Q*Q*Q)/(1.0*n_samples_longterm);
+    avg4_longterm = ((n_samples_longterm-1.0)*avg4_longterm + Q*Q*Q*Q)/(1.0*n_samples_longterm);
     // Update running S_k
     for (unsigned int k=0; k<Q_k.size(); ++k) {
         unsigned int N_k = n_samples_longterm - k;
@@ -26,6 +29,17 @@ double Statistics::variance() const {
     unsigned int n_samples_ = mpi_allreduce_sum(n_samples_longterm);
     return 1.0*n_samples_/(n_samples_-1.0)*(avg2_-avg_*avg_);
 }
+
+/* Return estimator for error of variance */
+double Statistics::variance_error() const {
+    double avg_ = mpi_allreduce_avg(avg_longterm);
+    double avg2_ = mpi_allreduce_avg(avg2_longterm);
+    double avg3_ = mpi_allreduce_avg(avg3_longterm);
+    double avg4_ = mpi_allreduce_avg(avg4_longterm);
+    unsigned int n_samples_ = mpi_allreduce_sum(n_samples_longterm);
+    return 1.0/n_samples_*(avg4_-4*avg_*avg3_+8*avg_*avg_*avg2_-avg2_*avg2_-4*avg_*avg_*avg_*avg_);
+}
+
 
 /* Return estimator for average */
 double Statistics::average() const {
@@ -86,7 +100,8 @@ std::ostream& operator<<(std::ostream& os, const Statistics& stats) {
     os << std::setprecision(6) << std::fixed;
     os << stats.label() << ": Avg +/- Err = " << stats.average();
     os << " +/- " << stats.error() << std::endl;
-    os << " " << stats.label() << ": Var         = " << stats.variance() << std::endl;
+    os << " " << stats.label() << ": Var +/- Err = " << stats.variance();
+    os << " +/- " << stats.variance_error() << std::endl;
     os << std::setprecision(3) << std::fixed;
     os << " " << stats.label() << ": tau_{int}   = " << stats.tau_int() << std::endl;
     os << " " << stats.label() << ": window      = " << stats.autocorr_window() << std::endl;
