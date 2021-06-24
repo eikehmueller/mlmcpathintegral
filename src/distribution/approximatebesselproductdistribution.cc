@@ -39,9 +39,16 @@ void ApproximateBesselProductDistribution::compute_N_p_sigma2inv(const double be
                                                                  double& N_p,
                                                                  double& sigma2_p_inv,
                                                                  double& sigma2_m_inv) const {
-    sigma2_p_inv = beta*cos(0.25*x0);
-    sigma2_m_inv = beta*sin(0.25*x0);
-    double rho = pow(sigma2_m_inv/sigma2_p_inv,1.5)*exp(-4.0*(sigma2_p_inv-sigma2_m_inv));
-    N_p = 1.0/(1.0+rho);
+    double epsilon = 0.125*M_PI;
+    if (x0 < epsilon) {
+        sigma2_p_inv = beta;
+        sigma2_m_inv = 0.0;
+        N_p = 1.0;
+    } else {
+        sigma2_p_inv = beta*cos(0.25*x0);
+        sigma2_m_inv = beta*sin(0.25*x0);
+        double rho = pow(sigma2_p_inv/sigma2_m_inv,1.5)*exp(-4.0*(sigma2_p_inv-sigma2_m_inv));
+        N_p = 1.0/(1.0+rho);
+    }
 }
 
