@@ -70,7 +70,7 @@ double GaussianFillinDistribution::evaluate(const double theta_1, const double t
 }
 
 /* Construct peak locations */
-void GaussianFillinDistribution::construct_peaks() {
+void GaussianFillinDistribution::construct_peaks(int n_offsets) {
     // Construct unique set of peak positions in units of \pi/2
     std::set<std::array<int,3> > main_indices;
     std::set<std::array<int,3> > secondary_indices;

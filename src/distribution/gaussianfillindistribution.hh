@@ -52,13 +52,16 @@ public:
     add_gaussian_noise(add_gaussian_noise_),
     uniform_distribution(0.0,1.0),
     normal_distribution(0.0,1.0),
-    sqrt2(sqrt(2.0)),
-    n_offsets(1) { 
+    sqrt2(sqrt(2.0)) {
         if (not add_gaussian_noise) {
             mpi_parallel::cerr << "ERROR: sampling only from peak currently broken." << std::endl;
             mpi_exit(EXIT_FAILURE);
         }
-        construct_peaks();
+        int n_offsets = 1;
+        // For large values of beta the peaks in period copies of the unit cell
+        // are strongly suppressed.
+        if (beta > 72.0) n_offsets = 0;
+        construct_peaks(n_offsets);
     }
 
   /** @brief Draw number directly from Gaussian distribution for given \f$\phi\f$
@@ -156,8 +159,10 @@ public:
 private:
 
   /** @brief Construct peaks used the density in the Gaussian approximation
+   *
+   * @param[in] n_offsets Number of offset copies of unit cell
    */
-  void construct_peaks();
+  void construct_peaks(int n_offsets);
 
 
   /** @brief Compute probability of sampling from main Gaussian
@@ -187,8 +192,6 @@ private:
   const double sqrt2;
   /** @brief Add Gaussian noise? If false, only take peak value */
   const bool add_gaussian_noise;
-  /** @brief Number of offsets of unit cell used when constructing peaks */
-  const int n_offsets;
   /** @brief Locations of main peaks in box and nearest neighbours */
   mutable std::vector<std::array<double,3> > main_peaks;
   /** @brief Locations of secondary peaks in box and nearest neighbours */
