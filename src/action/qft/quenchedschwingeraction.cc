@@ -91,15 +91,44 @@ void QuenchedSchwingerAction::copy_from_coarse(const std::shared_ptr<SampleState
     const unsigned int Mt_c_lat = coarse_lattice->getMt_lat();
     const unsigned int Mx_c_lat = coarse_lattice->getMx_lat();
     double theta_c;
-    for (unsigned int i=0;i<Mt_c_lat;++i) {
-        for (unsigned int j=0;j<Mx_c_lat;++j) {
-            theta_c = phi_coarse->data[coarse_lattice->link_cart2lin(i  ,j  ,0)];
-            phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)] = 0.5*theta_c;
-            phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,0)] = 0.5*theta_c;
-            theta_c = phi_coarse->data[coarse_lattice->link_cart2lin(i  ,j  ,1)];
-            phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,1)] = 0.5*theta_c;
-            phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,1)] = 0.5*theta_c;
+    if ( ( Mt_c_lat == Mt_lat/2 ) and ( Mx_c_lat == Mx_lat/2 ) ) {
+        /* case 1: coarsened in both directions */
+        for (unsigned int i=0;i<Mt_c_lat;++i) {
+            for (unsigned int j=0;j<Mx_c_lat;++j) {
+                theta_c = phi_coarse->data[coarse_lattice->link_cart2lin(i  ,j  ,0)];
+                phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,0)] = 0.5*theta_c;
+                phi_state->data[lattice->link_cart2lin(2*i+1,2*j  ,0)] = 0.5*theta_c;
+                theta_c = phi_coarse->data[coarse_lattice->link_cart2lin(i  ,j  ,1)];
+                phi_state->data[lattice->link_cart2lin(2*i  ,2*j  ,1)] = 0.5*theta_c;
+                phi_state->data[lattice->link_cart2lin(2*i  ,2*j+1,1)] = 0.5*theta_c;
+            }
         }
+    } else if ( ( Mt_c_lat == Mt_lat/2 ) and ( Mx_c_lat == Mx_lat ) ) {
+        /* case 2: coarsened in temporal direction only */
+        for (unsigned int i=0;i<Mt_c_lat;++i) {
+            for (unsigned int j=0;j<Mx_lat;++j) {
+                theta_c = phi_coarse->data[coarse_lattice->link_cart2lin(i  ,j  ,0)];
+                phi_state->data[lattice->link_cart2lin(2*i  ,j  ,0)] = 0.5*theta_c;
+                phi_state->data[lattice->link_cart2lin(2*i+1,j  ,0)] = 0.5*theta_c;
+                theta_c = phi_coarse->data[coarse_lattice->link_cart2lin(i  ,j  ,1)];
+                phi_state->data[lattice->link_cart2lin(2*i  ,j  ,1)] = theta_c;
+            }
+        }
+    } else if ( ( Mt_c_lat == Mt_lat ) and ( Mx_c_lat == Mx_lat/2 ) ) {
+        /* case 3: coarsened in spatial direction only */
+        for (unsigned int i=0;i<Mt_lat;++i) {
+            for (unsigned int j=0;j<Mx_c_lat;++j) {
+                theta_c = phi_coarse->data[coarse_lattice->link_cart2lin(i  ,j  ,0)];
+                phi_state->data[lattice->link_cart2lin(i  ,2*j  ,0)] = theta_c;
+                theta_c = phi_coarse->data[coarse_lattice->link_cart2lin(i  ,j  ,1)];
+                phi_state->data[lattice->link_cart2lin(i  ,2*j  ,1)] = 0.5*theta_c;
+                phi_state->data[lattice->link_cart2lin(i  ,2*j+1,1)] = 0.5*theta_c;
+            }
+        }
+    } else {
+        mpi_parallel::cerr << "ERROR: cannot copy from coarse lattice." << std::endl;
+        mpi_exit(EXIT_FAILURE);
+        throw std::runtime_error("...");
     }
 }
 
@@ -108,15 +137,46 @@ void QuenchedSchwingerAction::copy_from_fine(const std::shared_ptr<SampleState> 
                                              std::shared_ptr<SampleState> phi_state) {
     const unsigned int Mt_lat = lattice->getMt_lat();
     const unsigned int Mx_lat = lattice->getMx_lat();
-    for (unsigned int i=0;i<Mt_lat;++i) {
-        for (unsigned int j=0;j<Mx_lat;++j) {
-            phi_state->data[lattice->link_cart2lin(i  ,j  ,0)]
-                = mod_2pi(phi_fine->data[fine_lattice->link_cart2lin(2*i  ,2*j  ,0)]
-                        + phi_fine->data[fine_lattice->link_cart2lin(2*i+1,2*j  ,0)]);
-            phi_state->data[lattice->link_cart2lin(i  ,j  ,1)]
-                = mod_2pi(phi_fine->data[fine_lattice->link_cart2lin(2*i  ,2*j  ,1)]
-                        + phi_fine->data[fine_lattice->link_cart2lin(2*i  ,2*j+1,1)]);
+    const unsigned int Mt_f_lat = fine_lattice->getMt_lat();
+    const unsigned int Mx_f_lat = fine_lattice->getMx_lat();
+    if ( ( Mt_f_lat == 2*Mt_lat ) and ( Mx_f_lat == 2*Mx_lat ) ) {
+        /* case 1: refined in both directions */
+        for (unsigned int i=0;i<Mt_lat;++i) {
+            for (unsigned int j=0;j<Mx_lat;++j) {
+                phi_state->data[lattice->link_cart2lin(i  ,j  ,0)]
+                    = mod_2pi(phi_fine->data[fine_lattice->link_cart2lin(2*i  ,2*j  ,0)]
+                            + phi_fine->data[fine_lattice->link_cart2lin(2*i+1,2*j  ,0)]);
+                phi_state->data[lattice->link_cart2lin(i  ,j  ,1)]
+                    = mod_2pi(phi_fine->data[fine_lattice->link_cart2lin(2*i  ,2*j  ,1)]
+                            + phi_fine->data[fine_lattice->link_cart2lin(2*i  ,2*j+1,1)]);
+            }
         }
+    } else if ( ( Mt_f_lat == 2*Mt_lat ) and ( Mx_f_lat == Mx_lat ) ) {
+        /* case 2: refined in temporal direction only */
+        for (unsigned int i=0;i<Mt_lat;++i) {
+            for (unsigned int j=0;j<Mx_lat;++j) {
+                phi_state->data[lattice->link_cart2lin(i  ,j  ,0)]
+                    = mod_2pi(phi_fine->data[fine_lattice->link_cart2lin(2*i  ,j  ,0)]
+                            + phi_fine->data[fine_lattice->link_cart2lin(2*i+1,j  ,0)]);
+                phi_state->data[lattice->link_cart2lin(i  ,j  ,1)]
+                    = mod_2pi(phi_fine->data[fine_lattice->link_cart2lin(2*i  ,j  ,1)]);
+            }
+        }
+    } else if ( ( Mt_f_lat == Mt_lat ) and ( Mx_f_lat == 2*Mx_lat ) ) {
+        /* case 3: refined in spatial direction only */
+        for (unsigned int i=0;i<Mt_lat;++i) {
+            for (unsigned int j=0;j<Mx_lat;++j) {
+                phi_state->data[lattice->link_cart2lin(i  ,j  ,0)]
+                    = mod_2pi(phi_fine->data[fine_lattice->link_cart2lin(i  ,2*j  ,0)]);
+                phi_state->data[lattice->link_cart2lin(i  ,j  ,1)]
+                    = mod_2pi(phi_fine->data[fine_lattice->link_cart2lin(i  ,2*j  ,1)]
+                            + phi_fine->data[fine_lattice->link_cart2lin(i  ,2*j+1,1)]);
+            }
+        }
+    } else {
+        mpi_parallel::cerr << "ERROR: cannot copy from fine lattice." << std::endl;
+        mpi_exit(EXIT_FAILURE);
+        throw std::runtime_error("...");
     }
 }
 

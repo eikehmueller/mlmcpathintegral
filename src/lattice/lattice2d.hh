@@ -11,6 +11,13 @@
  * @brief Header file for two-dimensional lattice class
  */
 
+/** type of coarsening */
+enum CoarseningType {
+    CoarsenBoth = 0,      // Coarsen in both directions
+    CoarsenTemporal = 1,  // Coarsen in temporal direction only
+    CoarsenSpatial = 2    // Coarsen in spatial direction only
+};
+
 /** @class Lattice2DParameters
  *
  * @brief Class for storing parameters of a two-dimensional lattice
@@ -220,19 +227,37 @@ public:
      *
      * Returns lattice with twice the lattice spacing
      */
-    virtual std::shared_ptr<Lattice2D> coarse_lattice(const bool exit_on_failure=true) {
-        if ( (Mt_lat%2) or (Mx_lat%2) ) {
-            if (exit_on_failure ) {
-                mpi_parallel::cerr << "ERROR: cannot coarsen 2d lattice with M_{t,lat} = " << Mt_lat;
-                mpi_parallel::cerr << " , M_{x,lat} = " << Mx_lat << std::endl;
-                mpi_exit(EXIT_FAILURE);
-                throw std::runtime_error("...");
-            } else {
-                return nullptr;
+    virtual std::shared_ptr<Lattice2D> coarse_lattice(const CoarseningType coarsen=CoarsenBoth,
+                                                      const bool exit_on_failure=true) {
+        unsigned int Mt_lat_coarse = Mt_lat;
+        unsigned int Mx_lat_coarse = Mx_lat;
+        if ( ( coarsen == CoarsenBoth) or ( coarsen == CoarsenTemporal) ) {
+            if (Mt_lat%2) {
+                if (exit_on_failure ) {
+                    mpi_parallel::cerr << "ERROR: cannot coarsen 2d lattice with M_{t,lat} = " << Mt_lat;
+                    mpi_parallel::cerr << " , M_{x,lat} = " << Mx_lat << " in temporal direction." << std::endl;
+                    mpi_exit(EXIT_FAILURE);
+                    throw std::runtime_error("...");
+                } else {
+                    return nullptr;
+                }
             }
-        } else {
-            return std::make_shared<Lattice2D>(Mt_lat/2,Mx_lat/2,T_lat,L_lat,coarsening_level+1);
+            Mt_lat_coarse = Mt_lat/2;
         }
+        if ( ( coarsen == CoarsenBoth) or ( coarsen == CoarsenSpatial) ) {
+            if (Mx_lat%2) {
+                if (exit_on_failure ) {
+                    mpi_parallel::cerr << "ERROR: cannot coarsen 2d lattice with M_{t,lat} = " << Mt_lat;
+                    mpi_parallel::cerr << " , M_{x,lat} = " << Mx_lat << " in spatial direction." << std::endl;
+                    mpi_exit(EXIT_FAILURE);
+                    throw std::runtime_error("...");
+                } else {
+                    return nullptr;
+                }
+            }
+            Mx_lat_coarse = Mx_lat/2;
+        }
+        return std::make_shared<Lattice2D>(Mt_lat_coarse,Mx_lat_coarse,T_lat,L_lat,coarsening_level+1);
     };
 
 protected:

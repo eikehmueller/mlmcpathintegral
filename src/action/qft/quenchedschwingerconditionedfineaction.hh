@@ -86,6 +86,67 @@ public:
     virtual double evaluate(const std::shared_ptr<SampleState> phi_state) const;
 
 private:
+    /** @brief Fill in fine points if lattice has been coarsened in both directions
+     *
+     * Given a path \f$\phi\f$ for which the coarse links have been set, fill in
+     * the fine links by sampling from the conditioned action.
+     *
+     * @param[in] phi_state_n State \f$\phi_n\f$ at previous step (for pCN)
+     * @param[inout] phi_state State \f$\phi\f$ to fill
+     */
+    virtual void fill_fine_points_both(const std::shared_ptr<SampleState> phi_state_n,
+                                       std::shared_ptr<SampleState> phi_state) const;
+    
+    /** @brief Fill in fine points if lattice has been coarsened in temporal direction only
+     *
+     * Given a path \f$\phi\f$ for which the coarse links have been set, fill in
+     * the fine links by sampling from the conditioned action.
+     *
+     * @param[in] phi_state_n State \f$\phi_n\f$ at previous step (for pCN)
+     * @param[inout] phi_state State \f$\phi\f$ to fill
+     */
+    virtual void fill_fine_points_temporal(const std::shared_ptr<SampleState> phi_state_n,
+                                           std::shared_ptr<SampleState> phi_state) const;
+    
+    /** @brief Fill in fine points if lattice has been coarsened in spatial direction only
+     *
+     * Given a path \f$\phi\f$ for which the coarse links have been set, fill in
+     * the fine links by sampling from the conditioned action.
+     *
+     * @param[in] phi_state_n State \f$\phi_n\f$ at previous step (for pCN)
+     * @param[inout] phi_state State \f$\phi\f$ to fill
+     */
+    virtual void fill_fine_points_spatial(const std::shared_ptr<SampleState> phi_state_n,
+                                          std::shared_ptr<SampleState> phi_state) const;
+
+    /** @brief Evaluate conditioned action at fine points if lattice has been coarsened in both directions
+     *
+     * Given a path \f$\phi\f$ for which all points have been set, evaluate the
+     * conditioned action.
+     *
+     * @param[inout] phi_state Path \f$\phi\f$ to evaluate
+     */
+    virtual double evaluate_both(const std::shared_ptr<SampleState> phi_state) const;
+
+    /** @brief Evaluate conditioned action at fine points if lattice has been coarsened in temporal direction only
+     *
+     * Given a path \f$\phi\f$ for which all points have been set, evaluate the
+     * conditioned action.
+     *
+     * @param[inout] phi_state Path \f$\phi\f$ to evaluate
+     */
+    virtual double evaluate_temporal(const std::shared_ptr<SampleState> phi_state) const;
+
+    /** @brief Evaluate conditioned action at fine points if lattice has been coarsened in spatial direction only
+     *
+     * Given a path \f$\phi\f$ for which all points have been set, evaluate the
+     * conditioned action.
+     *
+     * @param[inout] phi_state Path \f$\phi\f$ to evaluate
+     */
+    virtual double evaluate_spatial(const std::shared_ptr<SampleState> phi_state) const;
+    
+private:
     /** @brief Underlying action class */
     const std::shared_ptr<QuenchedSchwingerAction> action;
     /** @brief Coupling constant \f$\beta\f$ */

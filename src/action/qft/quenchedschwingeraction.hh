@@ -103,13 +103,15 @@ public:
     /** @brief Initialise class
      *
      * @param[in] lattice_ Underlying two-dimensional lattice
+     * @param[in] coarsening_type_ Type of lattice coarsening (both, temporal-only or spatial-only)
      * @param[in] renormalisation_ Type of renormalisation
      * @param[in] beta_ non-dimensionalised coupling constant \f$\beta=1/(g^2 a_t a_x)\f$
      */
     QuenchedSchwingerAction(const std::shared_ptr<Lattice2D> lattice_,
+                            const CoarseningType coarsening_type_,
                             const RenormalisationType renormalisation_,
                             const double beta_)
-        : QFTAction(lattice_,renormalisation_),
+        : QFTAction(lattice_,coarsening_type_,renormalisation_),
           beta(beta_),
           exp_cos_dist(beta) { engine.seed(2481317); }
 
@@ -117,7 +119,7 @@ public:
     double getbeta() const {
         return beta;
     }
-    
+        
     /** @brief return size of a sample, i.e. the number of links on the lattice */
     virtual unsigned int sample_size() const {
         return lattice->getNedges();
@@ -136,7 +138,8 @@ public:
     virtual std::shared_ptr<Action> coarse_action() {
         RenormalisedQuenchedSchwingerParameters c_param(lattice,beta,renormalisation);
         std::shared_ptr<Action> new_action;
-        new_action = std::make_shared<QuenchedSchwingerAction>(lattice->coarse_lattice(),
+        new_action = std::make_shared<QuenchedSchwingerAction>(lattice->coarse_lattice(coarsening_type,true),
+                                                               coarsening_type,
                                                                renormalisation,
                                                                c_param.beta_coarse());
         return new_action;
