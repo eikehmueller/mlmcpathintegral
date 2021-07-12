@@ -4,8 +4,7 @@
  */
 
 /* Fill in fine links */
-void QuenchedSchwingerConditionedFineAction::fill_fine_points(const std::shared_ptr<SampleState> phi_state_n,
-                                                              std::shared_ptr<SampleState> phi_state) const {
+void QuenchedSchwingerConditionedFineAction::fill_fine_points(std::shared_ptr<SampleState> phi_state) const {
     std::shared_ptr<Lattice2D> lattice = action->get_lattice();
     const unsigned int Mt_lat = lattice->getMt_lat();
     const unsigned int Mx_lat = lattice->getMx_lat();
