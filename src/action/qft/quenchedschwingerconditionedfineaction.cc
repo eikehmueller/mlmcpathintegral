@@ -4,18 +4,17 @@
  */
 
 /* Fill in fine links */
-void QuenchedSchwingerConditionedFineAction::fill_fine_points(const std::shared_ptr<SampleState> phi_state_n,
-                                                              std::shared_ptr<SampleState> phi_state) const {
+void QuenchedSchwingerConditionedFineAction::fill_fine_points(std::shared_ptr<SampleState> phi_state) const {
     // Call the appropriate coarsening function
     switch (action->get_coarsening_type()) {
         case(CoarsenBoth):
-            fill_fine_points_both(phi_state_n,phi_state);
+            fill_fine_points_both(phi_state);
             break;
         case(CoarsenTemporal):
-            fill_fine_points_temporal(phi_state_n,phi_state);
+            fill_fine_points_temporal(phi_state);
             break;
         case(CoarsenSpatial):
-            fill_fine_points_spatial(phi_state_n,phi_state);
+            fill_fine_points_spatial(phi_state);
             break;
         default:
             mpi_parallel::cerr << "ERROR: invalid coarsening for fill_fine_points." << std::endl;
@@ -26,8 +25,7 @@ void QuenchedSchwingerConditionedFineAction::fill_fine_points(const std::shared_
 }
 
 /* Fill in fine links if lattice has been coarsened in both directions (2d-fill-in) */
-void QuenchedSchwingerConditionedFineAction::fill_fine_points_both(const std::shared_ptr<SampleState> phi_state_n,
-                                                                   std::shared_ptr<SampleState> phi_state) const {
+void QuenchedSchwingerConditionedFineAction::fill_fine_points_both(std::shared_ptr<SampleState> phi_state) const {
     std::shared_ptr<Lattice2D> lattice = action->get_lattice();
     const unsigned int Mt_lat = lattice->getMt_lat();
     const unsigned int Mx_lat = lattice->getMx_lat();
@@ -120,8 +118,7 @@ void QuenchedSchwingerConditionedFineAction::fill_fine_points_both(const std::sh
 }
 
 /* Fill in fine links if lattice has been coarsened in the temporal direction only (1d-fill-in) */
-void QuenchedSchwingerConditionedFineAction::fill_fine_points_temporal(const std::shared_ptr<SampleState> phi_state_n,
-                                                                       std::shared_ptr<SampleState> phi_state) const {
+void QuenchedSchwingerConditionedFineAction::fill_fine_points_temporal(std::shared_ptr<SampleState> phi_state) const {
     std::shared_ptr<Lattice2D> lattice = action->get_lattice();
     const unsigned int Mt_lat = lattice->getMt_lat();
     const unsigned int Mx_lat = lattice->getMx_lat();
@@ -154,8 +151,7 @@ void QuenchedSchwingerConditionedFineAction::fill_fine_points_temporal(const std
 }
 
 /* Fill in fine links if lattice has been coarsened in the spatial direction only (1d-fill-in) */
-void QuenchedSchwingerConditionedFineAction::fill_fine_points_spatial(const std::shared_ptr<SampleState> phi_state_n,
-                                                                      std::shared_ptr<SampleState> phi_state) const {
+void QuenchedSchwingerConditionedFineAction::fill_fine_points_spatial(std::shared_ptr<SampleState> phi_state) const {
     std::shared_ptr<Lattice2D> lattice = action->get_lattice();
     const unsigned int Mt_lat = lattice->getMt_lat();
     const unsigned int Mx_lat = lattice->getMx_lat();

@@ -45,11 +45,9 @@ public:
      * Given a path \f$X\f$ for which the coarse points have been set, fill in
      * the fine points by sampling from the conditioned action.
      *
-     * @param[in] x_path_n SampleState \f$X_n\f$ at previous step
      * @param[inout] x_path SampleState \f$X\f$ to fill
      */
-    virtual void fill_fine_points(const std::shared_ptr<SampleState> x_path_n,
-                                  std::shared_ptr<SampleState> x_path) const;
+    virtual void fill_fine_points(std::shared_ptr<SampleState> x_path) const;
 
     /** @brief Evaluate conditioned action at fine points
      *

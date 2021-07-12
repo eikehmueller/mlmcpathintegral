@@ -37,7 +37,7 @@ void TwoLevelMetropolisStep::draw(const std::shared_ptr<SampleState> phi_coarse_
     // Step 1: coarse level points
     fine_action->copy_from_coarse(phi_coarse_state,theta_prime);
     // Step 2: fine level points from conditioned action
-    conditioned_fine_action->fill_fine_points(theta_fine,theta_prime);
+    conditioned_fine_action->fill_fine_points(theta_prime);
     /*
      * Calculate the difference in level-\ell actions,
      * required to calculate the ratio
