@@ -38,7 +38,11 @@ public:
           lattice(lattice_),
           fine_lattice(lattice->fine_lattice()),
           coarsening_type(coarsening_type_),
-          coarse_lattice(lattice->coarse_lattice(coarsening_type_,false)),
+          coarse_lattice(lattice->coarse_lattice(((coarsening_type_==CoarsenBoth) or
+                                                  (coarsening_type_==CoarsenTemporal))?2:1,
+                                                 ((coarsening_type_==CoarsenBoth) or
+                                                  (coarsening_type_==CoarsenSpatial))?2:1,
+                                                 false)),
           Mt_lat(lattice->getMt_lat()),
           Mx_lat(lattice->getMx_lat()) { }
     

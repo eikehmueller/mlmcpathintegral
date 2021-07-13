@@ -223,16 +223,19 @@ public:
 
     /** @brief Construct coarsened lattice
      *
+     * @param[in] rho_coarsen_t coarsening factor in temporal direction
+     * @param[in] rho_coarsen_x coarsening factor in spatial direction
      * @param[in] exit_on_failure Abort with an error message if construction is not possible?
      *
      * Returns lattice with twice the lattice spacing
      */
-    virtual std::shared_ptr<Lattice2D> coarse_lattice(const CoarseningType coarsen=CoarsenBoth,
+    virtual std::shared_ptr<Lattice2D> coarse_lattice(const int rho_coarsen_t,
+                                                      const int rho_coarsen_x,
                                                       const bool exit_on_failure=true) {
         unsigned int Mt_lat_coarse = Mt_lat;
         unsigned int Mx_lat_coarse = Mx_lat;
-        if ( ( coarsen == CoarsenBoth) or ( coarsen == CoarsenTemporal) ) {
-            if (Mt_lat%2) {
+        if ( rho_coarsen_t > 1 ) {
+            if (Mt_lat%rho_coarsen_t) {
                 if (exit_on_failure ) {
                     mpi_parallel::cerr << "ERROR: cannot coarsen 2d lattice with M_{t,lat} = " << Mt_lat;
                     mpi_parallel::cerr << " , M_{x,lat} = " << Mx_lat << " in temporal direction." << std::endl;
@@ -242,10 +245,10 @@ public:
                     return nullptr;
                 }
             }
-            Mt_lat_coarse = Mt_lat/2;
+            Mt_lat_coarse = Mt_lat/rho_coarsen_t;
         }
-        if ( ( coarsen == CoarsenBoth) or ( coarsen == CoarsenSpatial) ) {
-            if (Mx_lat%2) {
+        if ( rho_coarsen_x > 1 ) {
+            if (Mx_lat%rho_coarsen_x) {
                 if (exit_on_failure ) {
                     mpi_parallel::cerr << "ERROR: cannot coarsen 2d lattice with M_{t,lat} = " << Mt_lat;
                     mpi_parallel::cerr << " , M_{x,lat} = " << Mx_lat << " in spatial direction." << std::endl;
@@ -255,7 +258,7 @@ public:
                     return nullptr;
                 }
             }
-            Mx_lat_coarse = Mx_lat/2;
+            Mx_lat_coarse = Mx_lat/rho_coarsen_x;
         }
         return std::make_shared<Lattice2D>(Mt_lat_coarse,Mx_lat_coarse,T_lat,L_lat,coarsening_level+1);
     };
