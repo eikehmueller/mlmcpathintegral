@@ -138,8 +138,8 @@ public:
     virtual std::shared_ptr<Action> coarse_action() {
         RenormalisedQuenchedSchwingerParameters c_param(lattice,beta,renormalisation);
         std::shared_ptr<Action> new_action;
-        int rho_coarsen_t;
-        int rho_coarsen_x;
+        int rho_coarsen_t=1;
+        int rho_coarsen_x=1;
         CoarseningType coarse_coarsening_type;
         if (coarsening_type == CoarsenBoth) {
             coarse_coarsening_type = CoarsenBoth;
@@ -148,17 +148,26 @@ public:
         } else if (coarsening_type == CoarsenTemporal) {
             rho_coarsen_t = 2;
             rho_coarsen_x = 1;
-            coarse_coarsening_type = CoarsenSpatial;
+            
         } else if (coarsening_type == CoarsenSpatial) {
             rho_coarsen_t = 1;
             rho_coarsen_x = 2;
-            coarse_coarsening_type = CoarsenTemporal;
         } else {
             coarse_coarsening_type = CoarsenUnspecified;
         }
-        new_action = std::make_shared<QuenchedSchwingerAction>(lattice->coarse_lattice(rho_coarsen_t,
-                                                                                       rho_coarsen_x,
-                                                                                       true),
+        // Construct coarse lattice
+        std::shared_ptr<Lattice2D> coarse_lattice = lattice->coarse_lattice(rho_coarsen_t,
+                                                                            rho_coarsen_x,
+                                                                            true);
+        if (  (coarsening_type == CoarsenTemporal) or (coarsening_type == CoarsenSpatial) ) {
+            if (coarse_lattice->getMt_lat() >= coarse_lattice->getMx_lat()) {
+                coarse_coarsening_type = CoarsenTemporal;
+            } else {
+                coarse_coarsening_type = CoarsenSpatial;
+            }
+        }
+        
+        new_action = std::make_shared<QuenchedSchwingerAction>(coarse_lattice,
                                                                coarse_coarsening_type,
                                                                renormalisation,
                                                                c_param.beta_coarse());
