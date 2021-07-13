@@ -29,6 +29,8 @@ statistics:
 schwinger:
   beta = 1.0               # Coupling constant beta
   renormalisation = 'none' # Renormalisation [none, perturbative, nonperturbative]
+  coarsening = 'both'      # Coarsening strategy of 2d lattice [both, temporal, spatial]
+
   
 ###########################################
 # Single level Monte Carlo parameters

@@ -32,9 +32,11 @@ public:
     SchwingerParameters() :
         Parameters("schwinger"),
         beta_(1.0),
-        renormalisation_(RenormalisationNone) {
+        renormalisation_(RenormalisationNone),
+        coarsening_type_(CoarsenUnspecified) {
         addKey("beta",Double,Positive);
         addKey("renormalisation",String);
+        addKey("coarsening",String);
     }
 
     /** @brief Read parameters from file
@@ -54,6 +56,14 @@ public:
             } else if (renormalisation_str == "nonperturbative") {
                 renormalisation_ = RenormalisationNonperturbative;
             }
+            std::string coarsening_str = getContents("coarsening")->getString();
+            if (coarsening_str == "both") {
+                coarsening_type_ = CoarsenBoth;
+            } else if (coarsening_str == "temporal") {
+                coarsening_type_ = CoarsenTemporal;
+            } else if (coarsening_str == "spatial") {
+                coarsening_type_ = CoarsenSpatial;
+            }
         }
         return readSuccess;
     }
@@ -66,12 +76,18 @@ public:
     RenormalisationType renormalisation() const {
         return renormalisation_;
     }
+    /** @brief Return coarsening type */
+    CoarseningType coarsening_type() const {
+        return coarsening_type_;
+    }
 
 private:
     /** @brief Coupling parameter \f$\beta\f$ */
     double beta_;
     /** @brief Renormalisation */
     RenormalisationType renormalisation_;
+    /** @brief Coarsening type */
+    CoarseningType coarsening_type_;
 };
 
 /** @class QuenchedSchwingerAction

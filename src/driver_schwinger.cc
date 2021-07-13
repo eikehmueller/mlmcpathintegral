@@ -172,7 +172,7 @@ int main(int argc, char* argv[]) {
     /* ====== Select action ====== */
     std::shared_ptr<Action> action;
     action = std::make_shared<QuenchedSchwingerAction>(lattice,
-                                                       CoarsenBoth,
+                                                       param_schwinger.coarsening_type(),
                                                        param_schwinger.renormalisation(),
                                                        param_schwinger.beta());
 
