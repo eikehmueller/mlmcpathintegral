@@ -129,7 +129,10 @@ public:
                             const double beta_)
         : QFTAction(lattice_,coarsening_type_,renormalisation_),
           beta(beta_),
-          exp_cos_dist(beta) { engine.seed(2481317); }
+          exp_cos_dist(beta) {
+              engine.seed(2481317);
+              std::cout << "Schwinger model on " << lattice->getMt_lat() << " x " << lattice->getMx_lat() << " lattice." << std::endl;
+          }
 
     /** @brief Return coupling constant \f$beta\f$ */
     double getbeta() const {
@@ -152,7 +155,10 @@ public:
      * of the lattice hierarchy.
      */
     virtual std::shared_ptr<Action> coarse_action() {
-        RenormalisedQuenchedSchwingerParameters c_param(lattice,beta,renormalisation);
+        RenormalisedQuenchedSchwingerParameters c_param(lattice,
+                                                        beta,
+                                                        renormalisation,
+                                                        coarsening_type);
         std::shared_ptr<Action> new_action;
         int rho_coarsen_t=1;
         int rho_coarsen_x=1;

@@ -4,6 +4,7 @@
 #include <memory>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_roots.h>
+#include "mpi/mpi_wrapper.hh"
 #include "lattice/lattice2d.hh"
 #include "action/renormalisation.hh"
 #include "qoi/qft/qoi2dsusceptibility.hh"
@@ -34,30 +35,52 @@ public:
      */
     RenormalisedQuenchedSchwingerParameters(const std::shared_ptr<Lattice2D> lattice_,
                                             const double beta_,
-                                            const RenormalisationType renormalisation_) :
+                                            const RenormalisationType renormalisation_,
+                                            const CoarseningType coarsening_type_) :
         RenormalisedParameters(renormalisation_),
         lattice(lattice_),
-        beta(beta_) {}
+        beta(beta_),
+        coarsening_type(coarsening_type_) {}
 
     /** @brief Renormalised coarse level mass \f$\beta^{(c)}\f$*/
     double beta_coarse() {
         double betacoarse;
         switch (renormalisation) {
             case RenormalisationNone:
-                betacoarse = 0.25*beta;
+                if (coarsening_type == CoarsenBoth) {
+                    betacoarse = 0.25*beta;
+                } else if ( (coarsening_type == CoarsenTemporal) or (coarsening_type == CoarsenSpatial) ) {
+                    betacoarse = 0.5*beta;
+                } else {
+                    mpi_parallel::cerr << "ERROR: invalid coarsening type in renormalisation" << std::endl;
+                    mpi_exit(EXIT_FAILURE);
+                    throw std::runtime_error("...");
+                }
                 break;
             case RenormalisationPerturbative:
-                if (beta > 4.0) {
-                    betacoarse = betacoarse_perturbative();
+                if (coarsening_type == CoarsenBoth) {
+                    if (beta > 4.0) {
+                        betacoarse = betacoarse_perturbative();
+                    } else {
+                        betacoarse = 0.25*beta;
+                    }
                 } else {
-                    betacoarse = 0.25*beta;
+                    mpi_parallel::cerr << "ERROR: perturbative renormalisation not implemented 1d coarsening" << std::endl;
+                    mpi_exit(EXIT_FAILURE);
+                    throw std::runtime_error("...");
                 }
                 break;
             case RenormalisationNonperturbative:
-                if (beta > 4.0) {
-                    betacoarse = betacoarse_nonperturbative();
+                if (coarsening_type == CoarsenBoth) {
+                    if (beta > 4.0) {
+                        betacoarse = betacoarse_nonperturbative();
+                    } else {
+                        betacoarse = 0.25*beta;
+                    }
                 } else {
-                    betacoarse = 0.25*beta;
+                    mpi_parallel::cerr << "ERROR: perturbative renormalisation not implemented 1d coarsening" << std::endl;
+                    mpi_exit(EXIT_FAILURE);
+                    throw std::runtime_error("...");
                 }
                 break;
         }
@@ -111,6 +134,8 @@ private:
     const std::shared_ptr<Lattice2D> lattice;
     /** @brief Coupling constant \f$\beta\f$ */
     const double beta;
+    /** @brief Coarsening */
+    const CoarseningType coarsening_type;
 };
 
 #endif // QUENCHEDSCHWINGERRENORMALISATION_HH
