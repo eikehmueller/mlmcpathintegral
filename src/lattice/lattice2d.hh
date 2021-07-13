@@ -13,9 +13,10 @@
 
 /** type of coarsening */
 enum CoarseningType {
-    CoarsenBoth = 0,      // Coarsen in both directions
-    CoarsenTemporal = 1,  // Coarsen in temporal direction only
-    CoarsenSpatial = 2    // Coarsen in spatial direction only
+    CoarsenUnspecified = -1,    // Unspecified coarsening
+    CoarsenBoth = 0,           // Coarsen in both directions
+    CoarsenTemporal = 1,       // Coarsen in temporal direction only
+    CoarsenSpatial = 2         // Coarsen in spatial direction only
 };
 
 /** @class Lattice2DParameters
@@ -231,7 +232,7 @@ public:
      */
     virtual std::shared_ptr<Lattice2D> coarse_lattice(const int rho_coarsen_t,
                                                       const int rho_coarsen_x,
-                                                      const bool exit_on_failure=true) {
+                                                      const bool exit_on_failure) {
         unsigned int Mt_lat_coarse = Mt_lat;
         unsigned int Mx_lat_coarse = Mx_lat;
         if ( rho_coarsen_t > 1 ) {

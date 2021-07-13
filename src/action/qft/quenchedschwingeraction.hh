@@ -138,8 +138,28 @@ public:
     virtual std::shared_ptr<Action> coarse_action() {
         RenormalisedQuenchedSchwingerParameters c_param(lattice,beta,renormalisation);
         std::shared_ptr<Action> new_action;
-        new_action = std::make_shared<QuenchedSchwingerAction>(lattice->coarse_lattice(coarsening_type,true),
-                                                               coarsening_type,
+        int rho_coarsen_t;
+        int rho_coarsen_x;
+        CoarseningType coarse_coarsening_type;
+        if (coarsening_type == CoarsenBoth) {
+            coarse_coarsening_type = CoarsenBoth;
+            rho_coarsen_t = 2;
+            rho_coarsen_x = 2;
+        } else if (coarsening_type == CoarsenTemporal) {
+            rho_coarsen_t = 2;
+            rho_coarsen_x = 1;
+            coarse_coarsening_type = CoarsenSpatial;
+        } else if (coarsening_type == CoarsenSpatial) {
+            rho_coarsen_t = 1;
+            rho_coarsen_x = 2;
+            coarse_coarsening_type = CoarsenTemporal;
+        } else {
+            coarse_coarsening_type = CoarsenUnspecified;
+        }
+        new_action = std::make_shared<QuenchedSchwingerAction>(lattice->coarse_lattice(rho_coarsen_t,
+                                                                                       rho_coarsen_x,
+                                                                                       true),
+                                                               coarse_coarsening_type,
                                                                renormalisation,
                                                                c_param.beta_coarse());
         return new_action;
