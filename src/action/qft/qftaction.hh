@@ -28,15 +28,17 @@ public:
     /** @brief Initialise class
      *
      * @param[in] lattice_ Underlying two-dimensional lattice
+     * @param[in] fine_lattice_ Two-dimensional lattice on next finer level
      * @param[in] coarsening_type_ Type of lattice coarsening
      * @param[in] renormalisation_ Type of renormalisation
      */
     QFTAction(const std::shared_ptr<Lattice2D> lattice_,
+              const std::shared_ptr<Lattice2D> fine_lattice_,
               const CoarseningType coarsening_type_,
               const RenormalisationType renormalisation_)
         : Action(renormalisation_),
           lattice(lattice_),
-          fine_lattice(lattice->fine_lattice()),
+          fine_lattice(fine_lattice_),
           coarsening_type(coarsening_type_),
           coarse_lattice(lattice->coarse_lattice(((coarsening_type_==CoarsenBoth) or
                                                   (coarsening_type_==CoarsenTemporal))?2:1,

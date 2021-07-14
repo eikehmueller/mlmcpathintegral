@@ -216,10 +216,18 @@ public:
 
     /** @brief Construct coarsened lattice
      *
-     * Returns lattice with half the lattice spacing
+     * @param[in] rho_refine_t refinement factor in temporal direction
+     * @param[in] rho_refine_x refinement factor in spatial direction
+     *
+     * Returns lattice with reduced the lattice spacing
      */
-    virtual std::shared_ptr<Lattice2D> fine_lattice() {
-        return std::make_shared<Lattice2D>(2*Mt_lat,2*Mx_lat,T_lat,L_lat,coarsening_level-1);
+    virtual std::shared_ptr<Lattice2D> fine_lattice(const int rho_refine_t,
+                                                    const int rho_refine_x) {
+        return std::make_shared<Lattice2D>(rho_refine_t*Mt_lat,
+                                           rho_refine_x*Mx_lat,
+                                           T_lat,
+                                           L_lat,
+                                           coarsening_level-1);
     };
 
     /** @brief Construct coarsened lattice
