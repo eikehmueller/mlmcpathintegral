@@ -129,10 +129,7 @@ public:
                             const double beta_)
         : QFTAction(lattice_,coarsening_type_,renormalisation_),
           beta(beta_),
-          exp_cos_dist(beta) {
-              engine.seed(2481317);
-              std::cout << "Schwinger model on " << lattice->getMt_lat() << " x " << lattice->getMx_lat() << " lattice." << std::endl;
-          }
+          exp_cos_dist(beta) { engine.seed(2481317); }
 
     /** @brief Return coupling constant \f$beta\f$ */
     double getbeta() const {
