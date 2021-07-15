@@ -89,8 +89,16 @@ private:
      * on the current level, only including terms of up to \f$\mathcal{O}(\beta^{-1})\f$
      */
     double betacoarse_perturbative() const {
-        double delta = coarsening_type==CoarsenBoth?1.5:0.5;
-        return 0.25*(1.+delta/beta)*beta;
+        double delta;
+        double rho;
+        if (coarsening_type==CoarsenBoth) {
+            rho = 0.25;
+            delta = 1.5;
+        } else {
+            rho = 0.5;
+            delta = 0.5;
+        }
+        return rho*(1.+delta/beta)*beta;
     }
     
     /** @brief Non-perturbative value of coarse level coupling
