@@ -5,8 +5,8 @@
  */
 
 double RenormalisedQuenchedSchwingerParameters::betacoarse_nonperturbative() {
-        
-    struct ParamType params = {beta,lattice->getNcells()};
+    int rho_refine = (coarsening_type==CoarsenBoth)?4:2;
+    struct ParamType params = {beta,lattice->getNcells(),rho_refine};
     
     gsl_function f_gsl;
     f_gsl.function = &f_root;
@@ -36,7 +36,7 @@ double RenormalisedQuenchedSchwingerParameters::betacoarse_nonperturbative() {
     double f_hi = f_root (x_hi, &params);
     if ( ( (f_lo>0) and (f_hi>0) ) or ( (f_lo<0) and (f_hi<0) )) {
         // Use fallback value if there is no root in the interval [x_lo,x_hi]
-        x = 0.25;
+        x = coarsening_type==CoarsenBoth?0.25:0.5;
     } else {
         gsl_root_fsolver_set (solver, &f_gsl, x_lo, x_hi);
     

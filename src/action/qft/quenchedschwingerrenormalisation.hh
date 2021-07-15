@@ -40,7 +40,15 @@ public:
         RenormalisedParameters(renormalisation_),
         lattice(lattice_),
         beta(beta_),
-        coarsening_type(coarsening_type_) {}
+        coarsening_type(coarsening_type_) {
+            if (not ( (coarsening_type == CoarsenBoth) or
+                      (coarsening_type == CoarsenTemporal) or
+                      (coarsening_type == CoarsenSpatial) ) ) {
+                mpi_parallel::cerr << "ERROR: invalid coarsening type in renormalisation" << std::endl;
+                mpi_exit(EXIT_FAILURE);
+                throw std::runtime_error("...");
+            }
+        }
 
     /** @brief Renormalised coarse level mass \f$\beta^{(c)}\f$*/
     double beta_coarse() {
@@ -49,38 +57,22 @@ public:
             case RenormalisationNone:
                 if (coarsening_type == CoarsenBoth) {
                     betacoarse = 0.25*beta;
-                } else if ( (coarsening_type == CoarsenTemporal) or (coarsening_type == CoarsenSpatial) ) {
-                    betacoarse = 0.5*beta;
                 } else {
-                    mpi_parallel::cerr << "ERROR: invalid coarsening type in renormalisation" << std::endl;
-                    mpi_exit(EXIT_FAILURE);
-                    throw std::runtime_error("...");
+                    betacoarse = 0.5*beta;
                 }
                 break;
             case RenormalisationPerturbative:
-                if (coarsening_type == CoarsenBoth) {
-                    if (beta > 4.0) {
-                        betacoarse = betacoarse_perturbative();
-                    } else {
-                        betacoarse = 0.25*beta;
-                    }
+                if (beta > 4.0) {
+                    betacoarse = betacoarse_perturbative();
                 } else {
-                    mpi_parallel::cerr << "ERROR: perturbative renormalisation not implemented 1d coarsening" << std::endl;
-                    mpi_exit(EXIT_FAILURE);
-                    throw std::runtime_error("...");
+                    betacoarse = 0.25*beta;
                 }
                 break;
             case RenormalisationNonperturbative:
-                if (coarsening_type == CoarsenBoth) {
-                    if (beta > 4.0) {
-                        betacoarse = betacoarse_nonperturbative();
-                    } else {
-                        betacoarse = 0.25*beta;
-                    }
+                if (beta > 4.0) {
+                    betacoarse = betacoarse_nonperturbative();
                 } else {
-                    mpi_parallel::cerr << "ERROR: perturbative renormalisation not implemented 1d coarsening" << std::endl;
-                    mpi_exit(EXIT_FAILURE);
-                    throw std::runtime_error("...");
+                    betacoarse = 0.25*beta;
                 }
                 break;
         }
@@ -97,7 +89,8 @@ private:
      * on the current level, only including terms of up to \f$\mathcal{O}(\beta^{-1})\f$
      */
     double betacoarse_perturbative() const {
-        return 0.25*(1.+1.5/beta)*beta;
+        double delta = coarsening_type==CoarsenBoth?1.5:0.5;
+        return 0.25*(1.+delta/beta)*beta;
     }
     
     /** @brief Non-perturbative value of coarse level coupling
@@ -113,6 +106,7 @@ private:
     struct ParamType {
         double beta; // Coupling constant beta
         unsigned int n_plaq; // Number of plaquettes
+        int rho_refine; // Refinement factor
     };
     
     /** @brief Function used for root finding in non-perturbative matching
@@ -127,7 +121,8 @@ private:
         struct ParamType *params = (struct ParamType *) p;
         double beta = params->beta;
         unsigned int n_plaq = params->n_plaq;
-        return  quenchedschwinger_chit_analytical(x*beta,n_plaq/4)-quenchedschwinger_chit_analytical(beta,n_plaq);
+        int rho_refine = params->rho_refine;
+        return  quenchedschwinger_chit_analytical(x*beta,n_plaq/rho_refine)-quenchedschwinger_chit_analytical(beta,n_plaq);
     };
     
     /** @brief Underlying lattice */
