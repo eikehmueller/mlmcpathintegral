@@ -19,7 +19,6 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
     n_autocorr_window(param_stats.n_autocorr_window()),
     cost_per_sample_(0.0) {
     mpi_parallel::cout << " Multilevel sampler: ";
-    fine_action->check_coarsening_is_permitted(n_level);
     action.push_back(fine_action);
     // Construct action and two-level MCMC step on all levels
     for (unsigned int ell=0; ell<n_level-1; ++ell) {
@@ -32,6 +31,9 @@ MultilevelSampler::MultilevelSampler(const std::shared_ptr<Action> fine_action,
                     action_tmp,
                     conditioned_fine_action);
         twolevel_step.push_back(twolevel_step_tmp);
+    }
+    for (unsigned int ell=0; ell<n_level; ++ell) {
+        mpi_parallel::cout << "  action on level " << ell << " : " << action[ell]->info_string() << std::endl;
     }
     // Construct QoI sampler factory
     for (unsigned int ell=0; ell<n_level; ++ell) {

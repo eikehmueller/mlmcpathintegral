@@ -5,6 +5,8 @@
 #include <random>
 #include <vector>
 #include <iostream>
+#include <string>
+#include <sstream>
 #include "common/samplestate.hh"
 #include "action/renormalisation.hh"
 #include "mpi/mpi_wrapper.hh"
@@ -124,13 +126,12 @@ public:
      * This will return the coarsening level of the underlying lattice */
     virtual int get_coarsening_level() const = 0;
 
-
-    /** @brief Check whether action supports number of coarsening steps
+    /** @brief Action information string
      *
-     * @param[in] n_level Number of additional coarsening steps (can be zero)
+     * return some information on this instance of the action
      */
-    virtual void check_coarsening_is_permitted(const unsigned int n_level) = 0;
-
+    virtual std::string info_string() const = 0;
+    
 protected:
     /** @brief Renormalisation */
     const RenormalisationType renormalisation;

@@ -189,3 +189,10 @@ void QuenchedSchwingerAction::initialise_state(std::shared_ptr<SampleState> phi_
         return uniform(engine);
     });
 }
+
+/* Return lattice information */
+std::string QuenchedSchwingerAction::info_string() const {
+    std::stringstream sstr;
+    sstr << QFTAction::info_string() << ", beta = " << beta;
+    return sstr.str();
+}

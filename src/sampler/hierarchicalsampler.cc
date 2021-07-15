@@ -12,8 +12,7 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
     Sampler(),
     n_level(param_hierarchical.n_max_level()-fine_action->get_coarsening_level()),
     cost_per_sample_(0.0) {
-    mpi_parallel::cout << " Hierarchical sampler: " << std::endl;
-    fine_action->check_coarsening_is_permitted(n_level);
+    mpi_parallel::cout << "Hierarchical sampler: " << std::endl;
     action.push_back(fine_action);
     // Construct action and two-level MCMC step on all levels
     for (unsigned int ell=0; ell<n_level-1; ++ell) {
@@ -27,6 +26,9 @@ HierarchicalSampler::HierarchicalSampler(const std::shared_ptr<Action> fine_acti
                     action_tmp,
                     conditioned_fine_action);
         twolevel_step.push_back(twolevel_step_tmp);
+    }
+    for (unsigned int ell=0; ell<n_level; ++ell) {
+        mpi_parallel::cout << "  action on level " << ell << " : " << action[ell]->info_string() << std::endl;
     }
     // Action on coarsest level
     std::shared_ptr<Action> coarse_action = action[n_level-1];

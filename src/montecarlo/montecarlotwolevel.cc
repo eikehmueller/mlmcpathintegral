@@ -22,12 +22,15 @@ MonteCarloTwoLevel::MonteCarloTwoLevel(const std::shared_ptr<Action> fine_action
     stats_coarse("QoI[coarse]",param_twolevelmc.n_coarse_autocorr_window()),
     stats_diff("delta QoI",param_twolevelmc.n_delta_autocorr_window()),
     stats_coarse_sampler("QoI[coarsesampler]",param_stats.n_autocorr_window()) {
-    coarse_action = fine_action->coarse_action();
-    coarse_sampler = sampler_factory->get(coarse_action);
-    conditioned_fine_action = conditioned_fine_action_factory->get(fine_action);
-    twolevel_step = std::make_shared<TwoLevelMetropolisStep>(coarse_action,
-                    fine_action,
-                    conditioned_fine_action);
+        mpi_parallel::cout << "Twolevel Monte Carlo:" << std::endl;
+        coarse_action = fine_action->coarse_action();
+        mpi_parallel::cout << "  fine action   : " << fine_action->info_string() << std::endl;
+        mpi_parallel::cout << "  coarse action : " << coarse_action->info_string() << std::endl;
+        coarse_sampler = sampler_factory->get(coarse_action);
+        conditioned_fine_action = conditioned_fine_action_factory->get(fine_action);
+        twolevel_step = std::make_shared<TwoLevelMetropolisStep>(coarse_action,
+                                                                 fine_action,
+                                                                 conditioned_fine_action);
 }
 
 /** Calculate mean and variance of difference in QoI */

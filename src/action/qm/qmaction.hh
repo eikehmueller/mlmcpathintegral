@@ -203,12 +203,6 @@ public:
     virtual void copy_from_fine(const std::shared_ptr<SampleState> x_fine,
                                 std::shared_ptr<SampleState> x_path);
 
-    /** @brief Check whether action supports number of coarsening steps
-     *
-     * @param[in] n_level Number of additional coarsening steps (can be zero)
-     */
-    virtual void check_coarsening_is_permitted(const unsigned int n_level);
-
     /** @brief Get coarsening level
     *
     * This will return the coarsening level of the underlying lattice */
@@ -216,6 +210,12 @@ public:
         return lattice->get_coarsening_level();
     }
 
+    /** @brief Action information string
+     *
+     * return some information on this instance of the action
+     */
+    virtual std::string info_string() const;
+    
 protected:
     /** @brief Underlying lattice */
     const std::shared_ptr<Lattice1D> lattice;

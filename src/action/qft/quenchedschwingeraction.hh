@@ -259,6 +259,12 @@ public:
      */
     virtual void initialise_state(std::shared_ptr<SampleState> phi_state) const;
     
+    /** @brief Action information string
+     *
+     * return some information on this instance of the action
+     */
+    virtual std::string info_string() const;
+    
 private:
             
     /** @brief Compute staple angles \f$\theta_{n,\mu}^{(+)}\f$ and \f$\theta_{n,\mu}^{(-)}\f$

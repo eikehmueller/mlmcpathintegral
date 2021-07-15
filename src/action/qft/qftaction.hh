@@ -64,12 +64,12 @@ public:
     CoarseningType get_coarsening_type() const {
         return coarsening_type;
     }
-
-    /** @brief Check whether action supports number of coarsening steps
+    
+    /** @brief Action information string
      *
-     * @param[in] n_level Number of additional coarsening steps (can be zero)
+     * return some information on this instance of the action
      */
-    virtual void check_coarsening_is_permitted(const unsigned int n_level);
+    virtual std::string info_string() const;
 
 protected:
     /** @brief Underlying lattice */
