@@ -197,7 +197,7 @@ public:
         return 2*Mt_lat*((j+Mx_lat)%Mx_lat) + 2*((i+Mt_lat)%Mt_lat)+mu;
     }
 
-    /** @brief Convert linear index to lattice index
+    /** @brief Convert linear index of link to lattice index
      *
      * Given \f$\ell = (2 j+\mu) M_{t,lat} + i\f$, work out cartesian index \f$(i,j)\f$
      * of site and direction \f$\mu\f$
@@ -212,6 +212,55 @@ public:
         unsigned int r = ell - (2*Mt_lat)*j;
         i = r >> 1; // i = r/2
         mu = r & 1; // mu = r % 2
+    }
+    
+    /** @brief Convert cartesian lattice index of diagonal link to linear index
+     *
+     * Given a lattice site \f$n=(i,j)\f$ such that $i+j$ is even and a direction \f$\mu\f$,
+     * work out the corresponding linear index \f$\ell\f$ of the diagonal link starting at \f$n\f$
+     * and pointing in direction \f$\mu\f$, where \f$\hat{0}=(1,-1)\f$ and \f$\hat{1}=(1,1)\f$.
+     * The links are arranged such that
+     *
+     * \f[
+     *   \ell = (j-(1-\mu))M_{t,lat}j + i
+     * \f]
+     *
+     * ...             ...            ...            ...           ...
+     *  |    \         |         /   |    \         |          /   |
+     *  |      4      |      5      |      6      |      9      |
+     *  |          \   |   /         |          \   |    /         |
+     *  o---------o---------o---------o---------o
+     *  |         /    |    \        |         /    |    \         |
+     *  |      0      |      1     |       2      |      3      |
+     *  |    /         |         \   |    /         |          \   |
+     *  o---------o---------o---------o---------o
+     *
+     * temporal direction (index i) = horizontal
+     * spatial direction (index j) = vertical
+     *
+     * @param[in] i Position index in temporal direction
+     * @param[in] j Position index in spatial direction
+     * @param[in] mu Direction \f$\mu\f$, must be 0 (temporal) or 1 (spatial)
+     */
+    inline unsigned int diag_link_cart2lin(const int i, const int j, const int mu) const {
+        return Mt_lat*((j+1-mu+Mx_lat)%Mx_lat) + ((i+Mt_lat)%Mt_lat);
+    }
+
+    /** @brief Convert linear index of diagonal link to lattice index
+     *
+     * Given \f$\ell = (j-(1-\mu))M_{t,lat}j + i\f$, work out cartesian index \f$(i,j)\f$
+     * of site and direction \f$\mu\f$
+     
+     * @param[in] ell Linear index \f$\ell\f$
+     * @param[out] i Position index in temporal direction
+     * @param[out] j Position index in spatial direction
+     * @param[out] mu Direction \f$\mu\f$
+     */
+    inline void diag_link_lin2cart(const unsigned int ell, int& i, int& j, int& mu) const {
+        int tmp = ell / Mt_lat; // tmp = j - mu + 1 = ell // M_t
+        i = ell - (Mt_lat)*tmp; // i = ell mod M_t
+        mu = 1 - ((tmp+i) & 1); // since i+j is even, 1-mu = (tmp + i) % 2
+        j = tmp + mu - 1;       // finally, use that tmp = j + (1-mu)
     }
 
     /** @brief Construct coarsened lattice
