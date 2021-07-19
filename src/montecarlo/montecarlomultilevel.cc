@@ -22,7 +22,6 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
     n_indep(param_multilevelmc.n_level(),0),
     t_sampler(param_multilevelmc.n_level(),0) {
     mpi_parallel::cout << " MultilevelMC: ";
-    fine_action->check_coarsening_is_permitted(n_level);
     action.push_back(fine_action);
     // Construct action and two-level MCMC step on all levels
     for (unsigned int ell=0; ell<n_level-1; ++ell) {
@@ -43,7 +42,10 @@ MonteCarloMultiLevel::MonteCarloMultiLevel(std::shared_ptr<Action> fine_action_,
         stats_coarse_sampler.push_back(std::make_shared<Statistics>(stats_sampler_label.str(),
                                        n_autocorr_window));
     }
-        // Construct QoI on all levels
+    for (unsigned int ell=0; ell<n_level; ++ell) {
+        mpi_parallel::cout << "  action on level " << ell << " : " << action[ell]->info_string() << std::endl;
+    }
+    // Construct QoI on all levels
     for (unsigned int ell=0; ell<n_level; ++ell) {
         qoi.push_back(qoi_factory_->get(action[ell]));
     }

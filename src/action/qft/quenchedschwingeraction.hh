@@ -32,9 +32,11 @@ public:
     SchwingerParameters() :
         Parameters("schwinger"),
         beta_(1.0),
-        renormalisation_(RenormalisationNone) {
+        renormalisation_(RenormalisationNone),
+        coarsening_type_(CoarsenUnspecified) {
         addKey("beta",Double,Positive);
         addKey("renormalisation",String);
+        addKey("coarsening",String);
     }
 
     /** @brief Read parameters from file
@@ -54,6 +56,14 @@ public:
             } else if (renormalisation_str == "nonperturbative") {
                 renormalisation_ = RenormalisationNonperturbative;
             }
+            std::string coarsening_str = getContents("coarsening")->getString();
+            if (coarsening_str == "both") {
+                coarsening_type_ = CoarsenBoth;
+            } else if (coarsening_str == "temporal") {
+                coarsening_type_ = CoarsenTemporal;
+            } else if (coarsening_str == "spatial") {
+                coarsening_type_ = CoarsenSpatial;
+            }
         }
         return readSuccess;
     }
@@ -66,12 +76,18 @@ public:
     RenormalisationType renormalisation() const {
         return renormalisation_;
     }
+    /** @brief Return coarsening type */
+    CoarseningType coarsening_type() const {
+        return coarsening_type_;
+    }
 
 private:
     /** @brief Coupling parameter \f$\beta\f$ */
     double beta_;
     /** @brief Renormalisation */
     RenormalisationType renormalisation_;
+    /** @brief Coarsening type */
+    CoarseningType coarsening_type_;
 };
 
 /** @class QuenchedSchwingerAction
@@ -103,13 +119,17 @@ public:
     /** @brief Initialise class
      *
      * @param[in] lattice_ Underlying two-dimensional lattice
+     * @param[in] lattice_ Underlying fine level two-dimensional lattice
+     * @param[in] coarsening_type_ Type of lattice coarsening (both, temporal-only or spatial-only)
      * @param[in] renormalisation_ Type of renormalisation
      * @param[in] beta_ non-dimensionalised coupling constant \f$\beta=1/(g^2 a_t a_x)\f$
      */
     QuenchedSchwingerAction(const std::shared_ptr<Lattice2D> lattice_,
+                            const std::shared_ptr<Lattice2D> fine_lattice_,
+                            const CoarseningType coarsening_type_,
                             const RenormalisationType renormalisation_,
                             const double beta_)
-        : QFTAction(lattice_,renormalisation_),
+        : QFTAction(lattice_,fine_lattice_,coarsening_type_,renormalisation_),
           beta(beta_),
           exp_cos_dist(beta) { engine.seed(2481317); }
 
@@ -117,7 +137,7 @@ public:
     double getbeta() const {
         return beta;
     }
-    
+        
     /** @brief return size of a sample, i.e. the number of links on the lattice */
     virtual unsigned int sample_size() const {
         return lattice->getNedges();
@@ -134,9 +154,43 @@ public:
      * of the lattice hierarchy.
      */
     virtual std::shared_ptr<Action> coarse_action() {
-        RenormalisedQuenchedSchwingerParameters c_param(lattice,beta,renormalisation);
+        RenormalisedQuenchedSchwingerParameters c_param(lattice,
+                                                        beta,
+                                                        renormalisation,
+                                                        coarsening_type);
         std::shared_ptr<Action> new_action;
-        new_action = std::make_shared<QuenchedSchwingerAction>(lattice->coarse_lattice(),
+        int rho_coarsen_t=1;
+        int rho_coarsen_x=1;
+        CoarseningType coarse_coarsening_type;
+        if (coarsening_type == CoarsenBoth) {
+            coarse_coarsening_type = CoarsenBoth;
+            rho_coarsen_t = 2;
+            rho_coarsen_x = 2;
+        } else if (coarsening_type == CoarsenTemporal) {
+            rho_coarsen_t = 2;
+            rho_coarsen_x = 1;
+            
+        } else if (coarsening_type == CoarsenSpatial) {
+            rho_coarsen_t = 1;
+            rho_coarsen_x = 2;
+        } else {
+            coarse_coarsening_type = CoarsenUnspecified;
+        }
+        // Construct coarse lattice
+        std::shared_ptr<Lattice2D> coarse_lattice = lattice->coarse_lattice(rho_coarsen_t,
+                                                                            rho_coarsen_x,
+                                                                            true);
+        if (  (coarsening_type == CoarsenTemporal) or (coarsening_type == CoarsenSpatial) ) {
+            if (coarse_lattice->getMt_lat() >= coarse_lattice->getMx_lat()) {
+                coarse_coarsening_type = CoarsenTemporal;
+            } else {
+                coarse_coarsening_type = CoarsenSpatial;
+            }
+        }
+        
+        new_action = std::make_shared<QuenchedSchwingerAction>(coarse_lattice,
+                                                               lattice,
+                                                               coarse_coarsening_type,
                                                                renormalisation,
                                                                c_param.beta_coarse());
         return new_action;
@@ -204,6 +258,12 @@ public:
      * @param[out] phi_state State \f$\phi\f$ to be set
      */
     virtual void initialise_state(std::shared_ptr<SampleState> phi_state) const;
+    
+    /** @brief Action information string
+     *
+     * return some information on this instance of the action
+     */
+    virtual std::string info_string() const;
     
 private:
             

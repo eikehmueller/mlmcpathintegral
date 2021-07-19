@@ -11,6 +11,14 @@
  * @brief Header file for two-dimensional lattice class
  */
 
+/** type of coarsening */
+enum CoarseningType {
+    CoarsenUnspecified = -1,    // Unspecified coarsening
+    CoarsenBoth = 0,           // Coarsen in both directions
+    CoarsenTemporal = 1,       // Coarsen in temporal direction only
+    CoarsenSpatial = 2         // Coarsen in spatial direction only
+};
+
 /** @class Lattice2DParameters
  *
  * @brief Class for storing parameters of a two-dimensional lattice
@@ -189,7 +197,7 @@ public:
         return 2*Mt_lat*((j+Mx_lat)%Mx_lat) + 2*((i+Mt_lat)%Mt_lat)+mu;
     }
 
-    /** @brief Convert linear index to lattice index
+    /** @brief Convert linear index of link to lattice index
      *
      * Given \f$\ell = (2 j+\mu) M_{t,lat} + i\f$, work out cartesian index \f$(i,j)\f$
      * of site and direction \f$\mu\f$
@@ -205,34 +213,112 @@ public:
         i = r >> 1; // i = r/2
         mu = r & 1; // mu = r % 2
     }
+    
+    /** @brief Convert cartesian lattice index of diagonal link to linear index
+     *
+     * Given a lattice site \f$n=(i,j)\f$ such that $i+j$ is even and a direction \f$\mu\f$,
+     * work out the corresponding linear index \f$\ell\f$ of the diagonal link starting at \f$n\f$
+     * and pointing in direction \f$\mu\f$, where \f$\hat{0}=(1,-1)\f$ and \f$\hat{1}=(1,1)\f$.
+     * The links are arranged such that
+     *
+     * \f[
+     *   \ell = (j-(1-\mu))M_{t,lat}j + i
+     * \f]
+     *
+     * ...             ...            ...            ...           ...
+     *  |    \         |         /   |    \         |          /   |
+     *  |      4      |      5      |      6      |      9      |
+     *  |          \   |   /         |          \   |    /         |
+     *  o---------o---------o---------o---------o
+     *  |         /    |    \        |         /    |    \         |
+     *  |      0      |      1     |       2      |      3      |
+     *  |    /         |         \   |    /         |          \   |
+     *  o---------o---------o---------o---------o
+     *
+     * temporal direction (index i) = horizontal
+     * spatial direction (index j) = vertical
+     *
+     * @param[in] i Position index in temporal direction
+     * @param[in] j Position index in spatial direction
+     * @param[in] mu Direction \f$\mu\f$, must be 0 (temporal) or 1 (spatial)
+     */
+    inline unsigned int diag_link_cart2lin(const int i, const int j, const int mu) const {
+        return Mt_lat*((j+1-mu+Mx_lat)%Mx_lat) + ((i+Mt_lat)%Mt_lat);
+    }
+
+    /** @brief Convert linear index of diagonal link to lattice index
+     *
+     * Given \f$\ell = (j-(1-\mu))M_{t,lat}j + i\f$, work out cartesian index \f$(i,j)\f$
+     * of site and direction \f$\mu\f$
+     
+     * @param[in] ell Linear index \f$\ell\f$
+     * @param[out] i Position index in temporal direction
+     * @param[out] j Position index in spatial direction
+     * @param[out] mu Direction \f$\mu\f$
+     */
+    inline void diag_link_lin2cart(const unsigned int ell, int& i, int& j, int& mu) const {
+        int tmp = ell / Mt_lat; // tmp = j - mu + 1 = ell // M_t
+        i = ell - (Mt_lat)*tmp; // i = ell mod M_t
+        mu = 1 - ((tmp+i) & 1); // since i+j is even, 1-mu = (tmp + i) % 2
+        j = tmp + mu - 1;       // finally, use that tmp = j + (1-mu)
+    }
 
     /** @brief Construct coarsened lattice
      *
-     * Returns lattice with half the lattice spacing
+     * @param[in] rho_refine_t refinement factor in temporal direction
+     * @param[in] rho_refine_x refinement factor in spatial direction
+     *
+     * Returns lattice with reduced the lattice spacing
      */
-    virtual std::shared_ptr<Lattice2D> fine_lattice() {
-        return std::make_shared<Lattice2D>(2*Mt_lat,2*Mx_lat,T_lat,L_lat,coarsening_level-1);
+    virtual std::shared_ptr<Lattice2D> fine_lattice(const int rho_refine_t,
+                                                    const int rho_refine_x) {
+        return std::make_shared<Lattice2D>(rho_refine_t*Mt_lat,
+                                           rho_refine_x*Mx_lat,
+                                           T_lat,
+                                           L_lat,
+                                           coarsening_level-1);
     };
 
     /** @brief Construct coarsened lattice
      *
+     * @param[in] rho_coarsen_t coarsening factor in temporal direction
+     * @param[in] rho_coarsen_x coarsening factor in spatial direction
      * @param[in] exit_on_failure Abort with an error message if construction is not possible?
      *
      * Returns lattice with twice the lattice spacing
      */
-    virtual std::shared_ptr<Lattice2D> coarse_lattice(const bool exit_on_failure=true) {
-        if ( (Mt_lat%2) or (Mx_lat%2) ) {
-            if (exit_on_failure ) {
-                mpi_parallel::cerr << "ERROR: cannot coarsen 2d lattice with M_{t,lat} = " << Mt_lat;
-                mpi_parallel::cerr << " , M_{x,lat} = " << Mx_lat << std::endl;
-                mpi_exit(EXIT_FAILURE);
-                throw std::runtime_error("...");
-            } else {
-                return nullptr;
+    virtual std::shared_ptr<Lattice2D> coarse_lattice(const int rho_coarsen_t,
+                                                      const int rho_coarsen_x,
+                                                      const bool exit_on_failure) {
+        unsigned int Mt_lat_coarse = Mt_lat;
+        unsigned int Mx_lat_coarse = Mx_lat;
+        if ( rho_coarsen_t > 1 ) {
+            if (Mt_lat%rho_coarsen_t) {
+                if (exit_on_failure ) {
+                    mpi_parallel::cerr << "ERROR: cannot coarsen 2d lattice with M_{t,lat} = " << Mt_lat;
+                    mpi_parallel::cerr << " , M_{x,lat} = " << Mx_lat << " in temporal direction." << std::endl;
+                    mpi_exit(EXIT_FAILURE);
+                    throw std::runtime_error("...");
+                } else {
+                    return nullptr;
+                }
             }
-        } else {
-            return std::make_shared<Lattice2D>(Mt_lat/2,Mx_lat/2,T_lat,L_lat,coarsening_level+1);
+            Mt_lat_coarse = Mt_lat/rho_coarsen_t;
         }
+        if ( rho_coarsen_x > 1 ) {
+            if (Mx_lat%rho_coarsen_x) {
+                if (exit_on_failure ) {
+                    mpi_parallel::cerr << "ERROR: cannot coarsen 2d lattice with M_{t,lat} = " << Mt_lat;
+                    mpi_parallel::cerr << " , M_{x,lat} = " << Mx_lat << " in spatial direction." << std::endl;
+                    mpi_exit(EXIT_FAILURE);
+                    throw std::runtime_error("...");
+                } else {
+                    return nullptr;
+                }
+            }
+            Mx_lat_coarse = Mx_lat/rho_coarsen_x;
+        }
+        return std::make_shared<Lattice2D>(Mt_lat_coarse,Mx_lat_coarse,T_lat,L_lat,coarsening_level+1);
     };
 
 protected:
