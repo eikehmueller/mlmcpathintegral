@@ -164,6 +164,46 @@ public:
         return Mt_lat*Mx_lat;
     }
     
+    /** @brief Convert cartesian lattice index of vertex to linear index
+     *
+     * Given a lattice site \f$n=(i,j)\f$, work out the corresponding linear index \f$\ell\f$.
+     * The links are arranged such that
+     * \f[
+     *   \ell = M_{t,lat}j + i
+     * \f]
+     *
+     * ...             ...            ...            ...           ...
+     *  |          |          |         |         |
+     *  |          |          |         |         |
+     *  4------5------6------7-----(8)
+     *  |          |          |         |         |
+     *  |          |          |         |         |
+     *  0------1------2------3-----(0)
+     *
+     * temporal direction (index i) = horizontal
+     * spatial direction (index j) = vertical
+     *
+     *
+     * @param[in] i Position index in temporal direction
+     * @param[in] j Position index in spatial direction
+     */
+    inline unsigned int vertex_cart2lin(const int i, const int j) const {
+        return Mt_lat*((j+Mx_lat)%Mx_lat) + ((i+Mt_lat)%Mt_lat);
+    }
+
+    /** @brief Convert linear index of vertex to lattice index
+     *
+     * Given \f$\ell = j M_{t,lat} + i\f$, work out cartesian index \f$(i,j)\f$.
+     
+     * @param[in] ell Linear index \f$\ell\f$
+     * @param[out] i Position index in temporal direction
+     * @param[out] j Position index in spatial direction
+     */
+    inline void vertex_lin2cart(const unsigned int ell, int& i, int& j) const {
+        j = ell / Mt_lat;
+        i = ell - Mt_lat*j;
+    }
+    
     /** @brief Convert cartesian lattice index of link to linear index
      *
      * Given a lattice site \f$n=(i,j)\f$ and a direction \f$\mu\f$, work out the
