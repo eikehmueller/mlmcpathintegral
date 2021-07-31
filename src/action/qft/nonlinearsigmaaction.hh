@@ -18,6 +18,7 @@
 #include "lattice/lattice2d.hh"
 #include "action/action.hh"
 #include "action/qft/qftaction.hh"
+#include "action/qft/nonlinearsigmarenormalisation.hh"
 
 /** @file nonlinearsigmaaction.hh
  * @brief Header file for action of the O(3) non-linear sigma model in two dimensions
@@ -137,13 +138,10 @@ public:
      * of the lattice hierarchy.
      */
     virtual std::shared_ptr<Action> coarse_action() {
-        double beta_coarse = beta;
-        /*
         RenormalisedNonlinearSigmaParameters c_param(lattice,
                                                      beta,
                                                      renormalisation);
         double beta_coarse = c_param.beta_coarse();
-         */
         std::shared_ptr<Action> new_action;
         std::shared_ptr<Lattice2D> coarse_lattice = lattice->coarse_lattice(2,2,true);
         
