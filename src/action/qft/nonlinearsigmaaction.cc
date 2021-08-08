@@ -144,12 +144,23 @@ void NonlinearSigmaAction::copy_from_fine(const std::shared_ptr<SampleState> phi
 
 /* Initialise state with random entries */
 void NonlinearSigmaAction::initialise_state(std::shared_ptr<SampleState> phi_state) const {
-    std::uniform_real_distribution<double> uniform(-M_PI,M_PI);
-    std::generate(phi_state->data.data(),
-                  phi_state->data.data()+phi_state->data.size(),
-    [this,&uniform]() {
-        return uniform(engine);
-    });
+    std::uniform_real_distribution<double> uniform(-1.0,1.0);
+    for (unsigned int j=0;j<Mt_lat*Mx_lat;++j) {
+        // Draw a point inside shell with inner radius 0.1 and outer radius 1.0
+        double sigma_n[3];
+        double nrm_sq;
+        do {
+            sigma_n[0] = uniform(engine);
+            sigma_n[1] = uniform(engine);
+            sigma_n[2] = uniform(engine);
+            nrm_sq = sigma_n[0]*sigma_n[0]+sigma_n[1]*sigma_n[1]+sigma_n[2]*sigma_n[2];
+        } while ( (nrm_sq > 1.0) or (nrm_sq < 0.01) );
+        // convert to angles
+        double phi = atan2(sigma_n[1],sigma_n[0]);
+        double theta = atan2(sqrt(sigma_n[0]*sigma_n[0]+sigma_n[1]*sigma_n[1]),sigma_n[2]);
+        phi_state->data[2*j] = theta;
+        phi_state->data[2*j+1] = phi;
+    }
 }
 
 /* Return lattice information */
