@@ -125,7 +125,7 @@ public:
         
     /** @brief return size of a sample, i.e. the number of links on the lattice */
     virtual unsigned int sample_size() const {
-        return lattice->getNvertices();
+        return 2*lattice->getNvertices();
     };
 
     /** @brief Cost of one action evaluation */
