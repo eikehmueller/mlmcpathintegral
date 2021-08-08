@@ -32,14 +32,14 @@ ifeq ($(MAIN_QM),)
   MAIN_QM=driver_qm
 endif
 
-MAIN_SCHWINGER=driver_schwinger
+MAIN_QFT=driver_qft
 MAIN_TESTDIST=test_distribution
 MAIN_TESTSCHWINGERFILLIN=test_schwinger_fillin_distribution
 MAIN_FASTBESSEL=test_fastbessel
 
 MAINS=\
 	driver_qm.o \
-	driver_schwinger.o \
+	driver_qft.o \
 	test_distribution.o \
 	test_schwinger_fillin_distribution.o \
 	test_fastbessel.o
@@ -60,7 +60,7 @@ else
   $(info Compiling in sequential mode. Compiler is $(CXX))
 endif
 
-all: $(MAIN_QM) $(MAIN_SCHWINGER) $(MAIN_TESTDIST) $(MAIN_FASTBESSEL) $(MAIN_TESTSCHWINGERFILLIN)
+all: $(MAIN_QM) $(MAIN_QFT) $(MAIN_TESTDIST) $(MAIN_FASTBESSEL) $(MAIN_TESTSCHWINGERFILLIN)
 
 # Sort out dependencies, see
 # http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
@@ -93,10 +93,10 @@ $(MAIN_QM): $(BUILD_DIR)/driver_qm.o $(OBJS) $(SOURCE_DIR)/config.h
 	@printf "%b" "$(COM_COLOR)$(LINK_MESSAGE) $(OBJ_COLOR)$(@)$(NO_COLOR)\n";
 	@$(CXX) $(LFLAGS) -o $(BUILD_DIR)/$(MAIN_QM) $(OBJS) $(BUILD_DIR)/driver_qm.o $(LLIBS)
 
-# --- Schwinger model ---
-$(MAIN_SCHWINGER): $(BUILD_DIR)/driver_schwinger.o $(OBJS) $(SOURCE_DIR)/config.h
+# --- QFT (Schwinger- and non-linear sigma- model) ---
+$(MAIN_QFT): $(BUILD_DIR)/driver_qft.o $(OBJS) $(SOURCE_DIR)/config.h
 	@printf "%b" "$(COM_COLOR)$(LINK_MESSAGE) $(OBJ_COLOR)$(@)$(NO_COLOR)\n";
-	@$(CXX) $(LFLAGS) -o $(BUILD_DIR)/$(MAIN_SCHWINGER) $(OBJS) $(BUILD_DIR)/driver_schwinger.o $(LLIBS)
+	@$(CXX) $(LFLAGS) -o $(BUILD_DIR)/$(MAIN_QFT) $(OBJS) $(BUILD_DIR)/driver_qft.o $(LLIBS)
 
 # --- test distributions ---
 $(MAIN_TESTDIST): $(BUILD_DIR)/test_distribution.o $(OBJS) $(SOURCE_DIR)/config.h
