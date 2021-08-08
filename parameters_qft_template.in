@@ -6,6 +6,13 @@ general:
                          # [singlelevel,twolevel,multilevel]
 
 ###########################################
+# QFT specific parameters
+###########################################
+quantumfieldtheory:
+  action = 'nonlinearsigma' # Action to use. Allowed values are:
+                            # [quenchedschwinger, nonlinearsigma]
+
+###########################################
 # Lattice parameters
 ###########################################
 lattice:
@@ -30,6 +37,13 @@ schwinger:
   beta = 1.0               # Coupling constant beta
   renormalisation = 'none' # Renormalisation [none, perturbative, nonperturbative]
   coarsening = 'both'      # Coarsening strategy of 2d lattice [both, temporal, spatial]
+
+###########################################
+# Nonlinear sigma action parameters
+###########################################
+nonlinearsigma:
+  beta = 1.0               # Coupling constant beta
+  renormalisation = 'none' # Renormalisation [none, perturbative, nonperturbative]
 
   
 ###########################################

@@ -17,6 +17,58 @@
  * @brief Header file for base class of QFT actions
  */
 
+/** @brief Enum for different actions
+ *  - 0: Quenched Schwinger model
+ *  - 1: Nonlinear sigma model
+ */
+enum QFTActionType {
+    ActionQuenchedSchwinger = 0,
+    ActionNonlinearSigma = 1
+};
+
+/** @class QFTParameters
+ *
+ * @brief Class for storing general quantum field theory parameters
+ *
+ */
+class QFTParameters : public Parameters {
+public:
+    /** @brief Construct a new instance */
+    QFTParameters() :
+        Parameters("quantumfieldtheory"),
+        action_(ActionQuenchedSchwinger) {
+        addKey("action",String);
+    }
+
+    /** @brief Read parameters from file
+     *
+     * @param[in] filename Name of file to read
+     */
+    int readFile(const std::string filename) {
+
+        int readSuccess = Parameters::readFile(filename);
+        if (!readSuccess) {
+            std::string action_str = getContents("action")->getString();
+            if (action_str=="quenchedschwinger") {
+                action_ = ActionQuenchedSchwinger;
+            } else if (action_str=="nonlinearsigma") {
+                action_ = ActionNonlinearSigma;
+            } else {
+            }
+        }
+        return readSuccess;
+    }
+
+    /** @brief Return the action type */
+    QFTActionType action() const {
+        return action_;
+    }
+
+private:
+    /** @brief Type of action */
+    QFTActionType action_;
+};
+
 /** @class QFTAction
  *
  * @brief Base class for action 2d QFT actions

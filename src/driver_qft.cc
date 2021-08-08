@@ -10,8 +10,10 @@
 #include "action/renormalisation.hh"
 #include "action/qft/quenchedschwingeraction.hh"
 #include "action/qft/quenchedschwingerconditionedfineaction.hh"
+#include "action/qft/nonlinearsigmaaction.hh"
 #include "qoi/qft/qoiavgplaquette.hh"
 #include "qoi/qft/qoi2dsusceptibility.hh"
+#include "qoi/qft/qoi2dmagnetisation.hh"
 #include "montecarlo/montecarlosinglelevel.hh"
 #include "montecarlo/montecarlotwolevel.hh"
 #include "montecarlo/montecarlomultilevel.hh"
@@ -33,10 +35,11 @@
 
 /** Helper function to construct suitable sampler factory for given samplerid */
 std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
-                                                          const std::shared_ptr<QoI2DSusceptibilityFactory> qoi_factory,
+                                                          const std::shared_ptr<QoIFactory> qoi_factory,
                                                           const std::shared_ptr<SamplerFactory> coarse_sampler_factory,
                                                           const std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory,
                                                           const GeneralParameters param_general,
+                                                          const QFTParameters param_qft,
                                                           const HMCParameters param_hmc,
                                                           const ClusterParameters param_cluster,
                                                           const OverrelaxedHeatBathParameters param_heatbath,
@@ -50,11 +53,19 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
         /* --- CASE 2: heat bath sampler ---- */
         sampler_factory = std::make_shared<OverrelaxedHeatBathSamplerFactory>(param_heatbath);
     } else if (samplerid == SamplerHierarchical) {
+        if (param_qft.action() == ActionNonlinearSigma) {
+            mpi_parallel::cerr << " ERROR: hierarchical sampler not yet supported for nonlinear sigma model." << std::endl;
+            mpi_exit(EXIT_FAILURE);
+        }
         /* --- CASE 3: Hierarchical sampler */
         sampler_factory = std::make_shared<HierarchicalSamplerFactory>(coarse_sampler_factory,
                                                                        conditioned_fine_action_factory,
                                                                        param_hierarchical);
     } else if (samplerid == SamplerMultilevel) {
+        if (param_qft.action() == ActionNonlinearSigma) {
+            mpi_parallel::cerr << " ERROR: multilevel sampler not yet supported for nonlinear sigma model." << std::endl;
+            mpi_exit(EXIT_FAILURE);
+        }
         /* --- CASE 4: Multilevel sampler */
         sampler_factory = std::make_shared<MultilevelSamplerFactory>(qoi_factory,
                                                                      coarse_sampler_factory,
@@ -62,6 +73,10 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
                                                                      param_stats,
                                                                      param_hierarchical);
     } else if (samplerid == SamplerCluster) {
+        if (param_qft.action() != ActionQuenchedSchwinger) {
+            mpi_parallel::cerr << " ERROR: can only use cluster sampler for quenched schwinger action." << std::endl;
+            mpi_exit(EXIT_FAILURE);
+        }
         /* --- CASE 5: Cluster sampler */
         sampler_factory = std::make_shared<QuenchedSchwingerClusterSamplerFactory>(param_cluster);
     } else {
@@ -99,18 +114,37 @@ int main(int argc, char* argv[]) {
     mpi_parallel::cout << std::endl;
 
     /* ====== Read parameters ====== */
+    
     GeneralParameters param_general;
-    Lattice2DParameters param_lattice;
-    StatisticsParameters param_stats;
-    SchwingerParameters param_schwinger;
     if (param_general.readFile(filename)) return 1;
     mpi_parallel::cout << param_general << std::endl;
+    
+    QFTParameters param_qft;
+    if (param_qft.readFile(filename)) return 1;
+    mpi_parallel::cout << param_qft << std::endl;
+    
+    Lattice2DParameters param_lattice;
     if (param_lattice.readFile(filename)) return 1;
     mpi_parallel::cout << param_lattice << std::endl;
+    
+    StatisticsParameters param_stats;
     if (param_stats.readFile(filename)) return 1;
     mpi_parallel::cout << param_stats << std::endl;
-    if (param_schwinger.readFile(filename)) return 1;
-    mpi_parallel::cout << param_schwinger << std::endl;
+    
+    NonlinearSigmaParameters param_nonlinearsigma;
+    SchwingerParameters param_schwinger;
+    switch (param_qft.action()) {
+    case (ActionQuenchedSchwinger): {
+        if (param_schwinger.readFile(filename)) return 1;
+        mpi_parallel::cout << param_schwinger << std::endl;
+        break;
+    }
+    case (ActionNonlinearSigma): {
+        if (param_nonlinearsigma.readFile(filename)) return 1;
+        mpi_parallel::cout << param_nonlinearsigma << std::endl;
+        break;
+    }
+    }
     
     HMCParameters param_hmc;
     if (param_hmc.readFile(filename)) return 1;
@@ -163,43 +197,70 @@ int main(int argc, char* argv[]) {
                                           param_lattice.T_lat(),
                                           param_lattice.L_lat());
 
-    /* ====== Select quantity of interest ====== */
-    std::shared_ptr<QoI2DSusceptibility> qoi;
-    qoi = std::make_shared<QoI2DSusceptibility>(lattice);
-    std::shared_ptr<QoI2DSusceptibilityFactory> qoi_factory = std::make_shared<QoI2DSusceptibilityFactory>();
+    /* ====== Select quantity of interest and construct QoI factory ====== */
+    std::shared_ptr<QoI> qoi;
+    std::shared_ptr<QoIFactory> qoi_factory;
     mpi_parallel::cout << std::endl;
-
+    if (param_qft.action() == ActionQuenchedSchwinger) {
+        qoi = std::make_shared<QoI2DSusceptibility>(lattice);
+        qoi_factory = std::make_shared<QoI2DSusceptibilityFactory>();
+        mpi_parallel::cout << "QoI = Susceptibility Q[phi]^2 " << std::endl;
+    }
+    if ( (param_qft.action() == ActionNonlinearSigma) ) {
+        qoi = std::make_shared<QoI2DMagnetisation>(lattice);
+        qoi_factory = std::make_shared<QoI2DMagnetisationFactory>();
+        mpi_parallel::cout << "QoI = Average squared magnetisation 1/M*mu[phi]^2 " << std::endl;
+    }
+    
     /* ====== Select action ====== */
     std::shared_ptr<Action> action;
-    action = std::make_shared<QuenchedSchwingerAction>(lattice,
-                                                       nullptr,
-                                                       param_schwinger.coarsening_type(),
-                                                       param_schwinger.renormalisation(),
-                                                       param_schwinger.beta());
+    switch (param_qft.action()) {
+        case (ActionQuenchedSchwinger): {
+            action = std::make_shared<QuenchedSchwingerAction>(lattice,
+                                                               nullptr,
+                                                               param_schwinger.coarsening_type(),
+                                                               param_schwinger.renormalisation(),
+                                                               param_schwinger.beta());
+            break;
+        }
+        case (ActionNonlinearSigma): {
+            action = std::make_shared<NonlinearSigmaAction>(lattice,
+                                                            nullptr,
+                                                            param_nonlinearsigma.renormalisation(),
+                                                            param_nonlinearsigma.beta());
+            break;
+        }
+    } 
 
-    // numerical result and statistical error
+    // numerical result, statistical error and analytical result
     double numerical_result;
     double statistical_error;
     double analytical_result;
-    if (param_schwinger.beta() > 2000.0) {
-        analytical_result = quenchedschwinger_chit_perturbative(param_schwinger.beta(),
-                                                                lattice->getNcells());
-    } else {
-        analytical_result = quenchedschwinger_chit_analytical(param_schwinger.beta(),
-                                                              lattice->getNcells());
-    }
-    double analytical_result_variance = quenchedschwinger_var_chit_continuum_analytical(param_schwinger.beta(),
+    
+    // do we compare to analytical result (only supported for some actions)
+    bool do_analytical_comparison = false;
+    if (param_qft.action() == ActionQuenchedSchwinger) {
+        do_analytical_comparison = true;
+        if (param_schwinger.beta() > 2000.0) {
+            analytical_result = quenchedschwinger_chit_perturbative(param_schwinger.beta(),
+                                                                    lattice->getNcells());
+        } else {
+            analytical_result = quenchedschwinger_chit_analytical(param_schwinger.beta(),
+                                                                  lattice->getNcells());
+        }
+        double analytical_result_variance = quenchedschwinger_var_chit_continuum_analytical(param_schwinger.beta(),
                                                                                         lattice->getNcells());
-    mpi_parallel::cout << std::endl;
-    mpi_parallel::cout << std::setprecision(8) << std::fixed;
-    mpi_parallel::cout << " Analytical results"  << std::endl;
-    mpi_parallel::cout << "      E[V*chi_t]              = " << analytical_result;
-    if (param_schwinger.beta() > 2000.0) {
-        mpi_parallel::cout << " + O(beta^{-2}) = O(" << pow(param_schwinger.beta(),-2) << ")";
+        mpi_parallel::cout << std::endl;
+        mpi_parallel::cout << std::setprecision(8) << std::fixed;
+        mpi_parallel::cout << " Analytical results"  << std::endl;
+        mpi_parallel::cout << "      E[V*chi_t]              = " << analytical_result;
+        if (param_schwinger.beta() > 2000.0) {
+            mpi_parallel::cout << " + O(beta^{-2}) = O(" << pow(param_schwinger.beta(),-2) << ")";
+        }
+        mpi_parallel::cout << std::endl;
+        mpi_parallel::cout << "      lim_{a->0} Var[V*chi_t] = " << analytical_result_variance << std::endl;
+        mpi_parallel::cout << std::endl;
     }
-    mpi_parallel::cout << std::endl;
-    mpi_parallel::cout << "      lim_{a->0} Var[V*chi_t] = " << analytical_result_variance << std::endl;
-    mpi_parallel::cout << std::endl;
 
     /* Construction conditioned fine action factory */
     std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory
@@ -215,6 +276,7 @@ int main(int argc, char* argv[]) {
                                                        nullptr,
                                                        nullptr,
                                                        param_general,
+                                                       param_qft,
                                                        param_hmc,
                                                        param_cluster,
                                                        param_heatbath,
@@ -237,6 +299,7 @@ int main(int argc, char* argv[]) {
                                                     coarse_sampler_factory,
                                                     conditioned_fine_action_factory,
                                                     param_general,
+                                                    param_qft,
                                                     param_hmc,
                                                     param_cluster,
                                                     param_heatbath,
@@ -264,6 +327,10 @@ int main(int argc, char* argv[]) {
      * Two level method                         *
      * **************************************** */
     if (param_general.method() == MethodTwoLevel) {
+        if (param_qft.action() == ActionNonlinearSigma) {
+            mpi_parallel::cerr << " ERROR: two-level method not yet supported for nonlinear sigma model." << std::endl;
+            mpi_exit(EXIT_FAILURE);
+        }
         mpi_parallel::cout << "+--------------------------------+" << std::endl;
         mpi_parallel::cout << "! Two level MC                   !" << std::endl;
         mpi_parallel::cout << "+--------------------------------+" << std::endl;
@@ -275,6 +342,7 @@ int main(int argc, char* argv[]) {
                                                     coarse_sampler_factory,
                                                     conditioned_fine_action_factory,
                                                     param_general,
+                                                    param_qft,
                                                     param_hmc,
                                                     param_cluster,
                                                     param_heatbath,
@@ -295,6 +363,10 @@ int main(int argc, char* argv[]) {
      * Multilevel method                         *
      * **************************************** */
     if (param_general.method() == MethodMultiLevel) {
+        if (param_qft.action() == ActionNonlinearSigma) {
+            mpi_parallel::cerr << " ERROR: multilevel method not yet supported for nonlinear sigma model." << std::endl;
+            mpi_exit(EXIT_FAILURE);
+        }
         if (mpi_comm_size() > 1) {
             mpi_parallel::cerr << " Multilevel method has not been parallelised (yet)." << std::endl;
             mpi_exit(EXIT_FAILURE);
@@ -310,6 +382,7 @@ int main(int argc, char* argv[]) {
                                                     coarse_sampler_factory,
                                                     conditioned_fine_action_factory,
                                                     param_general,
+                                                    param_qft,
                                                     param_hmc,
                                                     param_cluster,
                                                     param_heatbath,
@@ -332,15 +405,18 @@ int main(int argc, char* argv[]) {
         statistical_error = montecarlo_multilevel.statistical_error();
     }
     
-    if ( (param_general.method() == MethodSingleLevel) or
-         (param_general.method() == MethodMultiLevel) ) {
-        double diff = fabs(numerical_result-analytical_result);
-        double ratio = diff/statistical_error;
-        mpi_parallel::cout << std::setprecision(8) << std::fixed;
-        mpi_parallel::cout << "Comparison to analytical result " << std::endl;
-        mpi_parallel::cout << "  (analytical - numerical) = " << diff;
-        mpi_parallel::cout << std::setprecision(3) << std::fixed;
-        mpi_parallel::cout << " = " << ratio << " * (statistical error) " << std::endl << std::endl;
+    // print out comparison to analytical result, if this exists
+    if (do_analytical_comparison) {
+        if ( (param_general.method() == MethodSingleLevel) or
+             (param_general.method() == MethodMultiLevel) ) {
+            double diff = fabs(numerical_result-analytical_result);
+            double ratio = diff/statistical_error;
+            mpi_parallel::cout << std::setprecision(8) << std::fixed;
+            mpi_parallel::cout << "Comparison to analytical result " << std::endl;
+            mpi_parallel::cout << "  (analytical - numerical) = " << diff;
+            mpi_parallel::cout << std::setprecision(3) << std::fixed;
+            mpi_parallel::cout << " = " << ratio << " * (statistical error) " << std::endl << std::endl;
+        }
     }
     total_time.stop();
     mpi_parallel::cout << total_time << std::endl;
