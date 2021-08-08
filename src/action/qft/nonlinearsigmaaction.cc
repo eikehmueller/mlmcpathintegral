@@ -17,7 +17,7 @@ const double NonlinearSigmaAction::evaluate(const std::shared_ptr<SampleState> p
             S += sigma_n.dot(Delta_n);
         }
     }
-    return -beta*S;
+    return -0.5*beta*S;
 }
 
 /* local heat bath update */
