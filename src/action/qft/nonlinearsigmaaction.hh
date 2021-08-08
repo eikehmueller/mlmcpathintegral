@@ -85,9 +85,10 @@ private:
  *
  * Allows calculation with the action
  * \f[
- *      S[\sigma]= - \frac{1}2} \beta \sum_n \sigma_n \cdot (\sigma_{n+\hat{0}+\sigma_{n-\hat{0}+\sigma_{n+\hat{1}+\sigma_{n-\hat{1})
+ *      S[\sigma]= - \frac{1}2} \beta \sum_n \sigma_n \cdot \Delta_n
  * \f]
  *
+ * where \f$\Delta_n = \sigma_{n+\hat{0}+\sigma_{n-\hat{0}+\sigma_{n+\hat{1}+\sigma_{n-\hat{1}\f$
  * with \f$\sigma_n \in\mathbb{R}^3\f$ and \f$|\sigma_n| = 1\f$
  *
  * This is the lattice version of the continuum action
@@ -162,7 +163,31 @@ public:
 
     /** @brief Draw local value of state from heat bath
      *
-     * Update the local entry at position \f$\ell\f$ of the state using a heat bath defined by the neighbouring sites
+     * Update the local entry at position \f$\ell\f$ of the state using a heat bath defined by the neighbouring sites.
+     * For this, observe that if all spins are kept fixed, except for the spin \f$\sigma_n\f$ at site \f$n\f$, then the
+     * action can be written as:
+     *
+     * \f[
+     * \begin{aligned}
+     *   S_n &= -\beta \sigma_n\cdot \Delta_n\\
+     *      &= -\beta |\Delta_n| \cos(\omega_n)\\
+     *      &= \text{const.} + 2\beta |\Delta_n| \sin^2(\omega_n/2)
+     * \end{aligned}
+     * \f]
+     *
+     * Here \f$\omega_n\f$ is the angle between \f$\sigma_n\f$ and the sum of all neighbouring spins
+     * \f$\Delta_n\f$. Hence, for the heat-bath update we need to proceed as follows
+     *
+     * 1. set \f$\sigma_n \mapsto \hat{\Delta}_n := |\Delta_n|^{-1}\Delta_n\f$
+     * 2. draw an angle \f$\omega_n\f$ from the distribution \f$\pi_n\f$  with
+     *   \f$\pi_n(\omega) \propto \exp\left[2\beta|\Delta_n| \sin^2(\omega/2)\right]\f$
+     * 3. find a vector \f$\Delta_n^\perp\f$
+     * 4. rotate \f$\sigma_n\f$ around \f$\Delta_n^\perp\f$ by the angle \f$\omega_n\f$
+     * 5. draw an angle \f$\tau_n\f$ uniformly from the interval \f$[0,2\pi[\f$
+     * 6. rotate \f$\sigma_n\f$ around \f$\Delta_n\f$ by an angle \f$\tau_n\f$
+     *
+     * Note that the final two steps leave the action invariant, and are hence also implemented in the
+     * overrelaxation step.
      *
      *  @param[inout] phi_state State to update
      *  @param[in] ell index of dof to update
@@ -171,7 +196,10 @@ public:
 
     /** @brief Perform local overrelaxation update
      *
-     * Update the local entry at position \f$\ell\f$ of the state using overrelaxation
+     * Update the local entry at position \f$\ell\f$ of the state using overrelaxation.
+     *
+     * For this, draw an angle \f$\tau_n\f$ uniformly from the interval \f$[0,2\pi[\f$ and
+     * rotate \f$\sigma_n\f$ around \f$\Delta_n\f$ by this angle.
      *
      *  @param[inout] phi_state State to update
      *  @param[in] ell index of dof to update
@@ -182,6 +210,17 @@ public:
      *
      * Calculate \f$P = \frac{\partial S[\phi]}{\partial \phi}\f$ for a specific
      * state and return the resulting force as a state.
+     *
+     * Since the action can be written as \f$S[\sigma]= - \frac{1}2} \beta \sum_n \sigma_n \cdot \Delta_n\f$,
+     * the force at point \f$n\f$is given by
+     * \f[
+     * \begin{aligned}
+     *   \frac{\partial S}/{\partial\theta} &= -\beta\left\[ ((\Delta_n)_0 \cos(\phi_n)+(\Delta_n)_1\sin(\phi_n)) \cos(\theta_n)
+     *                                -(\Delta_n)_2\sin(\theta_n) \right] \\
+     *   \frac{\partial S}/{\partial\phi} &= -\beta\left[-(\Delta_n)_0\sin(\phi_n)+(\Delta_n)_1\cos(\phi_n)\right]
+     * \end{aligned}
+     * \f]
+     *
      *
      * @param[in] phi_state State \f$\phi\f$ on which to evaluate the force
      * @param[out] p_state Resulting force \f$P\f$ at every point

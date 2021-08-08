@@ -13,7 +13,9 @@ const double NonlinearSigmaAction::evaluate(const std::shared_ptr<SampleState> p
             // Field at point n
             sigma_n.setZero();
             add_sigma(phi_state,i  ,j  ,sigma_n);
+            // Sum of neighbouring fields at point n
             Delta_n = delta_neighbours(phi_state,i,j);
+            // Add dot-product of sigma_n and Delta_n to action
             S += sigma_n.dot(Delta_n);
         }
     }
@@ -101,9 +103,16 @@ void NonlinearSigmaAction::force(const std::shared_ptr<SampleState> phi_state,
     for (unsigned int ell=0;ell<p_state->data.size();++ell) {
         p_state->data[ell] = 0.0;
     }
+    Eigen::Vector3d Delta_n;
     for (int i=0;i<Mt_lat;++i) {
         for (int j=0;j<Mx_lat;++j) {
-            // IMPLEMENT THIS
+            double theta = phi_state->data[2*lattice->vertex_cart2lin(i,j)];
+            double phi = phi_state->data[2*lattice->vertex_cart2lin(i,j)+1];
+            Delta_n = delta_neighbours(phi_state,i,j);
+            double dS_dtheta = -beta*((Delta_n[0]*cos(phi)+Delta_n[1]*sin(phi))*cos(theta)-Delta_n[2]*sin(theta));
+            double dS_dphi = -beta*(-Delta_n[0]*sin(phi)+Delta_n[1]*cos(phi))*sin(theta);
+            p_state->data[2*lattice->vertex_cart2lin(i,j)] = dS_dtheta;
+            p_state->data[2*lattice->vertex_cart2lin(i,j)+1] = dS_dphi;
         }
     }
 }
