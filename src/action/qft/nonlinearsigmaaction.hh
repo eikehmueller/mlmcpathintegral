@@ -119,6 +119,9 @@ private:
  */
 
 class NonlinearSigmaAction : public QFTAction {
+    // The conditioned fine action class needs access to some private class 
+    // methods to avoid code duplication
+    friend class NonlinearSigmaConditionedFineAction;
 public:
     /** @brief Initialise class
      *
@@ -144,8 +147,13 @@ public:
     double getbeta() const {
         return beta;
     }
+    
+    /** @brief return true if the action is formulated on a rotated lattice */
+    bool is_rotated() const {
+        return rotated;
+    }
         
-    /** @brief return size of a sample, i.e. the number of links on the lattice */
+    /** @brief return size of a sample, i.e. the number of vertices on the lattice */
     virtual unsigned int sample_size() const {
         if (rotated) {
             return lattice->getNvertices();
@@ -195,31 +203,8 @@ public:
 
     /** @brief Draw local value of state from heat bath
      *
-     * Update the local entry at position \f$\ell\f$ of the state using a heat bath defined by the neighbouring sites.
-     * For this, observe that if all spins are kept fixed, except for the spin \f$\sigma_n\f$ at site \f$n\f$, then the
-     * action can be written as:
-     *
-     * \f[
-     * \begin{aligned}
-     *   S_n &= -\beta \sigma_n\cdot \Delta_n\\
-     *      &= -\beta |\Delta_n| \cos(\omega_n)\\
-     *      &= \text{const.} + 2\beta |\Delta_n| \sin^2(\omega_n/2)
-     * \end{aligned}
-     * \f]
-     *
-     * Here \f$\omega_n\f$ is the angle between \f$\sigma_n\f$ and the sum of all neighbouring spins
-     * \f$\Delta_n\f$. Hence, for the heat-bath update we need to proceed as follows
-     *
-     * 1. set \f$\sigma_n \mapsto \hat{\Delta}_n := |\Delta_n|^{-1}\Delta_n\f$
-     * 2. draw an angle \f$\omega_n\f$ from the distribution \f$\pi_n\f$  with
-     *   \f$\pi_n(\omega) \propto \exp\left[2\beta|\Delta_n| \sin^2(\omega/2)\right]\f$
-     * 3. find a vector \f$\Delta_n^\perp\f$
-     * 4. rotate \f$\sigma_n\f$ around \f$\Delta_n^\perp\f$ by the angle \f$\omega_n\f$
-     * 5. draw an angle \f$\tau_n\f$ uniformly from the interval \f$[0,2\pi[\f$
-     * 6. rotate \f$\sigma_n\f$ around \f$\Delta_n\f$ by an angle \f$\tau_n\f$
-     *
-     * Note that the final two steps leave the action invariant, and are hence also implemented in the
-     * overrelaxation step.
+     * Update the local entry at position \f$\ell\f$ of the state using a heat bath
+     * defined by the neighbouring sites.
      *
      *  @param[inout] phi_state State to update
      *  @param[in] ell index of dof to update
@@ -236,6 +221,7 @@ public:
      *  @param[inout] phi_state State to update
      *  @param[in] ell index of dof to update
      */
+          
     virtual void overrelaxation_update(std::shared_ptr<SampleState> phi_state, const unsigned int ell);
 
     /** @brief Calculate force for HMC integrator for a specific state
@@ -260,6 +246,54 @@ public:
      */
     virtual void force(const std::shared_ptr<SampleState> phi_state,
                        std::shared_ptr<SampleState> p_state) const;
+
+    /** @brief Get values in dof-vector for specific (i,j)
+     * 
+     * @param[in] phi_state State vector
+     * @param[in] i Temporal index
+     * @param[in] j Spatial index
+     * @param[out] theta Value of angle theta
+     * @param[out] phi Value of angle phi
+     */
+    virtual void get_dofs(const std::shared_ptr<SampleState> phi_state,
+                          const int i,
+                          const int j,
+                          double& theta,
+                          double& phi) const {
+        // Linear index
+        unsigned int ell;
+        if (rotated) {
+            ell = lattice->diag_vertex_cart2lin(i,j);
+        } else {
+            ell = lattice->vertex_cart2lin(i,j);
+        }
+        theta = phi_state->data[2*ell];
+        phi = phi_state->data[2*ell+1];
+    }
+
+    /** @brief Set values in dof-vector for specific (i,j)
+     * 
+     * @param[in] phi_state State vector
+     * @param[in] i Temporal index
+     * @param[in] j Spatial index
+     * @param[in] theta Value of angle theta
+     * @param[in] phi Value of angle phi
+     */
+    virtual void set_dofs(std::shared_ptr<SampleState> phi_state,
+                          const int i,
+                          const int j,
+                          const double theta,
+                          const double phi) const {
+        // Linear index
+        unsigned int ell;
+        if (rotated) {
+            ell = lattice->diag_vertex_cart2lin(i,j);
+        } else {
+            ell = lattice->vertex_cart2lin(i,j);
+        }
+        phi_state->data[2*ell] = theta;
+        phi_state->data[2*ell+1] = phi;
+    }
 
     /** @brief Copy coarse data points from sample on coarser level
      *
@@ -335,6 +369,9 @@ public:
      *   C--+--C--+--C--+--C          C--F--C--F--C--F--C          
      *      
      *  => Copy the C-points from the next finer lattice (right)
+     * 
+     * (note that the F-points will then later be filled in based on the
+     * conditioned action)
      *
      * @param[in] phi_fine Fine state to copy from
      * @param[in] phi_coarse Coarse state to copy to (same level as action)
@@ -358,19 +395,63 @@ public:
     virtual std::string info_string() const;
 
 private:
+    /** @brief Draw local value of state from heat bath at vertex (i,j)
+     *
+     * Update the local entry at position \f$\ell\f$ of the state using a heat bath defined by the neighbouring sites.
+     * For this, observe that if all spins are kept fixed, except for the spin \f$\sigma_n\f$ at site \f$n\f$, then the
+     * action can be written as:
+     *
+     * \f[
+     * \begin{aligned}
+     *   S_n &= -\beta \sigma_n\cdot \Delta_n\\
+     *      &= -\beta |\Delta_n| \cos(\omega_n)\\
+     *      &= \text{const.} + 2\beta |\Delta_n| \sin^2(\omega_n/2)
+     * \end{aligned}
+     * \f]
+     *
+     * Here \f$\omega_n\f$ is the angle between \f$\sigma_n\f$ and the sum of all neighbouring spins
+     * \f$\Delta_n\f$. Hence, for the heat-bath update we need to proceed as follows
+     *
+     * 1. set \f$\sigma_n \mapsto \hat{\Delta}_n := |\Delta_n|^{-1}\Delta_n\f$
+     * 2. draw an angle \f$\omega_n\f$ from the distribution \f$\pi_n\f$  with
+     *   \f$\pi_n(\omega) \propto \exp\left[2\beta|\Delta_n| \sin^2(\omega/2)\right]\f$
+     * 3. find a vector \f$\Delta_n^\perp\f$
+     * 4. rotate \f$\sigma_n\f$ around \f$\Delta_n^\perp\f$ by the angle \f$\omega_n\f$
+     * 5. draw an angle \f$\tau_n\f$ uniformly from the interval \f$[0,2\pi[\f$
+     * 6. rotate \f$\sigma_n\f$ around \f$\Delta_n\f$ by an angle \f$\tau_n\f$
+     *
+     * Note that the final two steps leave the action invariant, and are hence also implemented in the
+     * overrelaxation step.
+     *
+     *  @param[inout] phi_state State to update
+     *  @param[in] i temporal index of site to update
+     *  @param[in] j spatial index of site to update
+     */
+    void heatbath_ij_update(std::shared_ptr<SampleState> phi_state,
+                            const int i,
+                            const int j);
+
+
     /** @brief Extract 3d-vector at lattice vertex (i,j) from sample state and add it to vector
      *
      * @param[in] phi_state State \f$\phi\f$
      * @param[in] i temporal index
      * @param[in] j spatial index
+     * @param[in] diag Use rotated lattice?
      * @param[out] sigma unit vector
      */
     void add_sigma(const std::shared_ptr<SampleState> phi_state,
                    const int i,
                    const int j,
                    Eigen::Vector3d& sigma) const {
-        double theta = phi_state->data[2*lattice->vertex_cart2lin(i,j)];
-        double phi = phi_state->data[2*lattice->vertex_cart2lin(i,j)+1];
+        unsigned int ell;
+        if (rotated) {
+            ell = lattice->diag_vertex_cart2lin(i,j);
+        } else {
+            ell = lattice->vertex_cart2lin(i,j);
+        }
+        double theta = phi_state->data[2*ell];
+        double phi = phi_state->data[2*ell+1];
         sigma[0] += sin(theta)*cos(phi);
         sigma[1] += sin(theta)*sin(phi);
         sigma[2] += cos(theta);
@@ -382,15 +463,13 @@ private:
      * @param[in] phi_state State \f$\phi\f$
      * @param[in] i temporal index
      * @param[in] j spatial index
-     * @param[in] diag Use diagonal (instead of nearest) neighbours?
      * @param[out] Delta_n resulting vector
      */
     Eigen::Vector3d delta_neighbours(const std::shared_ptr<SampleState> phi_state,
                                      const int i,
-                                     const int j,
-                                     const bool diag) const {
+                                     const int j) const {
         Eigen::Vector3d Delta_n(0.,0.,0.);
-        if (diag) {
+        if (rotated) {
             add_sigma(phi_state,i+1,j+1,Delta_n);
             add_sigma(phi_state,i+1,j-1,Delta_n);
             add_sigma(phi_state,i-1,j+1,Delta_n);

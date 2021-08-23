@@ -204,6 +204,50 @@ public:
         i = ell - Mt_lat*j;
     }
     
+    /** @brief Convert Cartesian rotated lattice index to linear index
+     * 
+     * This assumes that (i,j) describes a point on the rotated lattice, i.e.
+     * i+j is a multiple of two.
+     * 
+     * @param i Position index in temporal direction
+     * @param j Position index in spatial direction
+     * 
+     * @return linear index of vertex
+     */
+    inline unsigned int diag_vertex_cart2lin(const int i, const int j) const {
+        assert((i+j)%2==0);        
+        /* Rotated indices are only allowed if the lattice contains an
+         * even number of cells in both directions
+         */
+        assert(Mx_lat%2==0);
+        assert(Mt_lat%2==0);        
+        int Mt_lat_half = Mt_lat/2;
+        int Mx_lat_half = Mx_lat/2;
+        int i_shifted = (i+Mt_lat)-(i&1);
+        int j_shifted = (j+Mx_lat)-(j&1);
+        int offset = (Mt_lat*Mx_lat/2)*(i&1);
+        return Mt_lat_half*(j_shifted%Mx_lat_half)+i_shifted%Mt_lat_half+offset;
+    }
+    
+    /** @brief Convert linear index of vertex to rotated lattice index
+     *
+     * Given the linear index \f$\ell\f$, work out cartesian index \f$(i,j)\f$.
+     
+     * @param[in] ell Linear index \f$\ell\f$
+     * @param[out] i Position index in temporal direction
+     * @param[out] j Position index in spatial direction
+     */
+    inline void diag_vertex_lin2cart(const unsigned int ell, int& i, int& j) const {
+        /* Rotated indices are only allowed if the lattice contains an
+         * even number of cells in both directions
+         */
+        int Mt_lat_half = Mt_lat/2;
+        int Mx_lat_half = Mx_lat/2;
+        int parity = ell / (Mt_lat*Mx_lat/2);        
+        j = 2*(ell / Mt_lat_half)+parity;
+        i = 2*(ell - Mt_lat_half*j)+parity;
+    }
+
     /** @brief Convert cartesian lattice index of link to linear index
      *
      * Given a lattice site \f$n=(i,j)\f$ and a direction \f$\mu\f$, work out the

@@ -11,6 +11,7 @@
 #include "action/qft/quenchedschwingeraction.hh"
 #include "action/qft/quenchedschwingerconditionedfineaction.hh"
 #include "action/qft/nonlinearsigmaaction.hh"
+#include "action/qft/nonlinearsigmaconditionedfineaction.hh"
 #include "qoi/qft/qoiavgplaquette.hh"
 #include "qoi/qft/qoi2dsusceptibility.hh"
 #include "qoi/qft/qoi2dmagnetisation.hh"
@@ -53,19 +54,11 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
         /* --- CASE 2: heat bath sampler ---- */
         sampler_factory = std::make_shared<OverrelaxedHeatBathSamplerFactory>(param_heatbath);
     } else if (samplerid == SamplerHierarchical) {
-        if (param_qft.action() == ActionNonlinearSigma) {
-            mpi_parallel::cerr << " ERROR: hierarchical sampler not yet supported for nonlinear sigma model." << std::endl;
-            mpi_exit(EXIT_FAILURE);
-        }
         /* --- CASE 3: Hierarchical sampler */
         sampler_factory = std::make_shared<HierarchicalSamplerFactory>(coarse_sampler_factory,
                                                                        conditioned_fine_action_factory,
                                                                        param_hierarchical);
     } else if (samplerid == SamplerMultilevel) {
-        if (param_qft.action() == ActionNonlinearSigma) {
-            mpi_parallel::cerr << " ERROR: multilevel sampler not yet supported for nonlinear sigma model." << std::endl;
-            mpi_exit(EXIT_FAILURE);
-        }
         /* --- CASE 4: Multilevel sampler */
         sampler_factory = std::make_shared<MultilevelSamplerFactory>(qoi_factory,
                                                                      coarse_sampler_factory,
@@ -263,8 +256,19 @@ int main(int argc, char* argv[]) {
     }
 
     /* Construction conditioned fine action factory */
-    std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory
-        = std::make_shared<QuenchedSchwingerConditionedFineActionFactory>();
+    std::shared_ptr<ConditionedFineActionFactory> conditioned_fine_action_factory;
+    switch (param_qft.action()) {
+        case (ActionQuenchedSchwinger): {
+            conditioned_fine_action_factory = std::make_shared<QuenchedSchwingerConditionedFineActionFactory>();
+            break;
+        }
+        case (ActionNonlinearSigma): {
+            conditioned_fine_action_factory = std::make_shared<NonlinearSigmaConditionedFineActionFactory>();
+            break;
+        }
+    } 
+
+        
 
     /* Construct coarse level sampler factory, which might be used by the hierarchical samplers */
     std::shared_ptr<SamplerFactory> coarse_sampler_factory;
