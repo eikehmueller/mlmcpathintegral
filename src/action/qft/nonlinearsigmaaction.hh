@@ -97,6 +97,25 @@ private:
  *      S_{cont}[\sigma] = \frac{1}{2}\beta\int d^2 \sum_{\mu=0,1} \partial_\mu \sigma(x)\cdot \partial_\mu \sigma(x)
  * \f]
  *
+ * The action can be either formulated on a normal, unrotated lattice or on a rotated
+ * lattice. In both cases the same Cartesion lattice object is used, but in the lattice
+ * case only the points marked in the following diagram are used:
+ * 
+ * 
+ *   X--+--X--+--X--+--X
+ *   !  !  !  !  !  !  !
+ *   +--B--+--B--+--X--+
+ *   !  !  !  !  !  !  !
+ *   X--+--A--+--X--+--X
+ *   !  !  !  !  !  !  !
+ *   +--B--+--B--+--X--+
+ *   !  !  !  !  !  !  !
+ *   X--+--X--+--X--+--X
+ * 
+ * Note that for a rotated lattice the nearest neighbours of a point are defined as the 
+ * 'diagonal' neighbours. For example, in the above diagram the point 'A' has the four
+ * nearest neighbours marked with the letter 'B'.
+ * 
  */
 
 class NonlinearSigmaAction : public QFTAction {
@@ -244,6 +263,39 @@ public:
 
     /** @brief Copy coarse data points from sample on coarser level
      *
+     * There are two cases, depending on whether the action is formulated on
+     * a rotated lattice or not:
+     *
+     * === Case 1 === we are operating on an un-rotated lattice
+     * 
+     *     current lattice              coarse lattice
+     *   C--F--C--F--C--F--C          C--+--C--+--C--+--C
+     *   !  !  !  !  !  !  !          !  !  !  !  !  !  !
+     *   F--C--F--C--F--C--F          +--C--+--C--+--C--+
+     *   !  !  !  !  !  !  !          !  !  !  !  !  !  !
+     *   C--F--C--F--C--F--C          C--+--C--+--C--+--C
+     *   !  !  !  !  !  !  !          !  !  !  !  !  !  !
+     *   F--C--F--C--F--C--F          +--C--+--C--+--C--+
+     *   !  !  !  !  !  !  !          !  !  !  !  !  !  !
+     *   C--F--C--F--C--F--C          C--+--C--+--C--+--C
+     * 
+     *  => Copy the C-points from the next coarser lattice (right)
+     *
+     * === Case 2 === we are operating on a rotated lattice (Marked by 'C' and 'F')
+     *
+     *     current lattice              coarse lattice
+     *   C--+--C--+--C--+--C          C-----C-----C-----C
+     *   !  !  !  !  !  !  !          !     !     !     ! 
+     *   +--F--+--F--+--F--+          !     !     !     ! 
+     *   !  !  !  !  !  !  !          !     !     !     ! 
+     *   C--+--C--+--C--+--C          C-----C-----C-----C
+     *   !  !  !  !  !  !  !          !     !     !     !
+     *   +--F--+--F--+--F--+          !     !     !     !
+     *   !  !  !  !  !  !  !          !     !     !     !
+     *   C--+--C--+--C--+--C          C-----C-----C-----C
+     * 
+     *  => Copy the C-points from the next coarser lattice (right)
+     *
      * @param[in] phi_coarse Coarse sample to copy from
      * @param[in] phi_state Fine state to copy to (sample level as action)
      */
@@ -251,6 +303,38 @@ public:
                                   std::shared_ptr<SampleState> phi_state);
 
     /** @brief Copy coarse data points from state on finer level
+     * 
+     * As for the copy_from_coarse method, we need to consider two cases:
+     * 
+     * === Case 1 === we are operating on an un-rotated lattice
+     * 
+     *     current lattice               fine lattice
+     *   C-----C-----C-----C          C--+--C--+--C--+--C          
+     *   !     !     !     !          !  !  !  !  !  !  !          
+     *   !     !     !     !          +--F--+--F--+--F--+          
+     *   !     !     !     !          !  !  !  !  !  !  !          
+     *   C-----C-----C-----C          C--+--C--+--C--+--C          
+     *   !     !     !     !          !  !  !  !  !  !  !          
+     *   !     !     !     !          +--F--+--F--+--F--+          
+     *   !     !     !     !          !  !  !  !  !  !  !          
+     *   C-----C-----C-----C          C--+--C--+--C--+--C          
+     * 
+     *  => Copy the C-points from the next finer lattice (right)
+     * 
+     * === Case 2 === we are operating on a rotated lattice
+     *
+     *     current lattice               fine lattice
+     *   C--+--C--+--C--+--C          C--F--C--F--C--F--C
+     *   !  !  !  !  !  !  !          !  !  !  !  !  !  !          
+     *   +--C--+--C--+--C--+          F--C--F--C--F--C--F          
+     *   !  !  !  !  !  !  !          !  !  !  !  !  !  !
+     *   C--+--C--+--C--+--C          C--F--C--F--C--F--C          
+     *   !  !  !  !  !  !  !          !  !  !  !  !  !  !
+     *   +--C--+--C--+--C--+          F--C--F--C--F--C--F          
+     *   !  !  !  !  !  !  !          !  !  !  !  !  !  !
+     *   C--+--C--+--C--+--C          C--F--C--F--C--F--C          
+     *      
+     *  => Copy the C-points from the next finer lattice (right)
      *
      * @param[in] phi_fine Fine state to copy from
      * @param[in] phi_coarse Coarse state to copy to (same level as action)

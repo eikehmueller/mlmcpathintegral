@@ -135,11 +135,25 @@ void NonlinearSigmaAction::force(const std::shared_ptr<SampleState> phi_state,
 /* Copy coarse links from state on coarser level */
 void NonlinearSigmaAction::copy_from_coarse(const std::shared_ptr<SampleState> phi_coarse,
                                             std::shared_ptr<SampleState> phi_state) {
-    double theta_c;
-    /* case 1: coarsened in both directions */
-    for (unsigned int i=0;i<Mt_lat/2;++i) {
-        for (unsigned int j=0;j<Mx_lat/2;++j) {
-                // IMPLEMENT THIS
+    if (rotated) {        
+        for (unsigned int i=0;i<Mt_lat/2;++i) {
+            for (unsigned int j=0;j<Mx_lat/2;++j) {
+                phi_state->data[2*lattice->vertex_cart2lin(2*i,2*j)] 
+                  = phi_state->data[2*coarse_lattice->vertex_cart2lin(i,j)];
+                phi_state->data[2*lattice->vertex_cart2lin(2*i,2*j)+1]
+                  = phi_state->data[2*coarse_lattice->vertex_cart2lin(i,j)+1];
+            }    
+        }
+    } else {
+        for (unsigned int i=0;i<Mt_lat;++i) {
+            for (unsigned int j=0;j<Mx_lat;++j) {
+                if ((i+j)%2==0) {
+                  phi_state->data[2*lattice->vertex_cart2lin(i,j)] 
+                    = phi_state->data[2*coarse_lattice->vertex_cart2lin(i,j)];
+                  phi_state->data[2*lattice->vertex_cart2lin(i,j)+1]
+                    = phi_state->data[2*coarse_lattice->vertex_cart2lin(i,j)+1];
+                }
+            }    
         }
     }
 }
@@ -147,9 +161,25 @@ void NonlinearSigmaAction::copy_from_coarse(const std::shared_ptr<SampleState> p
 /* Copy coarse links from state on finer level */
 void NonlinearSigmaAction::copy_from_fine(const std::shared_ptr<SampleState> phi_fine,
                                           std::shared_ptr<SampleState> phi_state) {
-    for (unsigned int i=0;i<Mt_lat;++i) {
-        for (unsigned int j=0;j<Mx_lat;++j) {
-            // IMPLEMENT THIS
+    if (rotated) {
+        for (unsigned int i=0;i<Mt_lat;++i) {
+            for (unsigned int j=0;j<Mx_lat;++j) {
+                if ((i+j)%2==0) {
+                  phi_state->data[2*lattice->vertex_cart2lin(i,j)] 
+                    = phi_state->data[2*lattice->vertex_cart2lin(i,j)];
+                  phi_state->data[2*fine_lattice->vertex_cart2lin(i,j)+1]
+                    = phi_state->data[2*fine_lattice->vertex_cart2lin(i,j)+1];
+                }
+            }    
+        }
+    } else {
+        for (unsigned int i=0;i<Mt_lat;++i) {
+            for (unsigned int j=0;j<Mx_lat;++j) {
+                phi_state->data[2*lattice->vertex_cart2lin(i,j)] 
+                  = phi_state->data[2*fine_lattice->vertex_cart2lin(2*i,2*j)];
+                phi_state->data[2*lattice->vertex_cart2lin(i,j)+1]
+                  = phi_state->data[2*fine_lattice->vertex_cart2lin(2*i,2*j)+1];
+            }    
         }
     }
 }
