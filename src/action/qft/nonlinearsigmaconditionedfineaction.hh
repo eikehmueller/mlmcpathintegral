@@ -17,6 +17,25 @@
 /** @class NonlinearSigmaConditionedFineAction
  *
  * @brief Conditioned fine action for the non-linear sigma model
+ * 
+ * Fills in the values at the sites marked by 'X', given the values at the coarse
+ * level sites marked by 'C' in the following diagrams
+ * 
+ *    unrotated action              rotated action
+ *   C--X--C--X--C--X--C         C--+--C--+--C--+--C
+ *   !  !  !  !  !  !  !         !  !  !  !  !  !  !
+ *   X--C--X--C--X--C--X         +--X--+--X--+--X--+
+ *   !  !  !  !  !  !  !         !  !  !  !  !  !  !
+ *   C--X--C--X--C--X--C         C--+--C--+--C--+--C
+ *   !  !  !  !  !  !  !         !  !  !  !  !  !  !
+ *   X--C--X--C--X--C--X         +--X--+--X--+--X--+
+ *   !  !  !  !  !  !  !         !  !  !  !  !  !  !
+ *   C--X--C--X--C--X--C         C--+--C--+--C--+--C
+ * 
+ * Note that in the unrotated case the sites that need to be filled in
+ * have exactly one even and one odd index, i.e. i+j is odd. In the rotated
+ * case, but i *and* j are odd.
+ * 
  */
 class NonlinearSigmaConditionedFineAction : public ConditionedFineAction {
 public:
