@@ -107,13 +107,16 @@ public:
      * @param[in] lattice_ Underlying fine level two-dimensional lattice
      * @param[in] renormalisation_ Type of renormalisation
      * @param[in] beta_ non-dimensionalised coupling constant \f$\beta=1/(g^2 a_t a_x)\f$
+     * @param[in] rotated_ Is the action formulated on a rotated lattice?
      */
     NonlinearSigmaAction(const std::shared_ptr<Lattice2D> lattice_,
                          const std::shared_ptr<Lattice2D> fine_lattice_,
                          const RenormalisationType renormalisation_,
-                         const double beta_)
+                         const double beta_,
+                         const double rotated_=false)
         : QFTAction(lattice_,fine_lattice_,CoarsenBoth,renormalisation_),
           beta(beta_),
+          rotated(rotated_),
           uniform_dist(0.,2.*M_PI) {
               engine.seed(2481317);
           }
@@ -125,7 +128,11 @@ public:
         
     /** @brief return size of a sample, i.e. the number of links on the lattice */
     virtual unsigned int sample_size() const {
-        return 2*lattice->getNvertices();
+        if (rotated) {
+            return lattice->getNvertices();
+        } else {
+            return 2*lattice->getNvertices();
+        }
     };
 
     /** @brief Cost of one action evaluation */
@@ -144,12 +151,18 @@ public:
                                                      renormalisation);
         double beta_coarse = c_param.beta_coarse();
         std::shared_ptr<Action> new_action;
-        std::shared_ptr<Lattice2D> coarse_lattice = lattice->coarse_lattice(2,2,true);
+        std::shared_ptr<Lattice2D> coarse_lattice;
+        if (rotated) {
+            coarse_lattice = lattice->coarse_lattice(2,2,true);
+        } else {
+            coarse_lattice = lattice;
+        }
         
         new_action = std::make_shared<NonlinearSigmaAction>(coarse_lattice,
                                                             lattice,
                                                             renormalisation,
-                                                            beta_coarse);
+                                                            beta_coarse,
+                                                            not rotated);
         return new_action;
     };
 
@@ -285,24 +298,33 @@ private:
      * @param[in] phi_state State \f$\phi\f$
      * @param[in] i temporal index
      * @param[in] j spatial index
+     * @param[in] diag Use diagonal (instead of nearest) neighbours?
      * @param[out] Delta_n resulting vector
      */
     Eigen::Vector3d delta_neighbours(const std::shared_ptr<SampleState> phi_state,
                                      const int i,
-                                     const int j) const {
+                                     const int j,
+                                     const bool diag) const {
         Eigen::Vector3d Delta_n(0.,0.,0.);
-        add_sigma(phi_state,i+1,j  ,Delta_n);
-        add_sigma(phi_state,i-1,j  ,Delta_n);
-        add_sigma(phi_state,i  ,j+1,Delta_n);
-        add_sigma(phi_state,i  ,j-1,Delta_n);
+        if (diag) {
+            add_sigma(phi_state,i+1,j+1,Delta_n);
+            add_sigma(phi_state,i+1,j-1,Delta_n);
+            add_sigma(phi_state,i-1,j+1,Delta_n);
+            add_sigma(phi_state,i-1,j-1,Delta_n);
+        } else {
+            add_sigma(phi_state,i+1,j  ,Delta_n);
+            add_sigma(phi_state,i-1,j  ,Delta_n);
+            add_sigma(phi_state,i  ,j+1,Delta_n);
+            add_sigma(phi_state,i  ,j-1,Delta_n);
+        }
         return Delta_n;
     }
-
-    
 
 protected:
     /** @brief Dimensionless coupling constant \f$\beta=1/(a_t a_x g^2)\f$*/
     const double beta;
+    /** @brief Formulated on rotated lattice? */
+    const bool rotated;
     /** @brief Random number engine */
     typedef mpi_parallel::mt19937_64 Engine;
     /** @brief Type of Mersenne twister engine */

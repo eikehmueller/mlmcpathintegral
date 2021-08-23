@@ -10,13 +10,16 @@ const double NonlinearSigmaAction::evaluate(const std::shared_ptr<SampleState> p
     Eigen::Vector3d Delta_n;
     for (int i=0;i<Mt_lat;++i) {
         for (int j=0;j<Mx_lat;++j) {
-            // Field at point n
-            sigma_n.setZero();
-            add_sigma(phi_state,i  ,j  ,sigma_n);
-            // Sum of neighbouring fields at point n
-            Delta_n = delta_neighbours(phi_state,i,j);
-            // Add dot-product of sigma_n and Delta_n to action
-            S += sigma_n.dot(Delta_n);
+            // only consider even points if lattice is rotated
+            if ( (not rotated) or ((i+j)%2==0) ) {
+                // Field at point n
+                sigma_n.setZero();
+                add_sigma(phi_state,i  ,j  ,sigma_n);
+                // Sum of neighbouring fields at point n
+                Delta_n = delta_neighbours(phi_state,i,j,rotated);
+                // Add dot-product of sigma_n and Delta_n to action
+                S += sigma_n.dot(Delta_n);
+            }
         }
     }
     return -0.5*beta*S;
@@ -32,46 +35,49 @@ void NonlinearSigmaAction::heatbath_update(std::shared_ptr<SampleState> phi_stat
     double Delta_n_nrm;
     for (int i=0;i<Mt_lat;++i) {
         for (int j=0;j<Mx_lat;++j) {
-            Delta_n = delta_neighbours(phi_state,i,j);
-            Delta_n_nrm = Delta_n.norm();
-            // Unit vector pointing in same direction as Delta_n
-            Delta_n_hat = Delta_n;
-            Delta_n_hat.normalize();
-            // Work out the 'best' vector which is perpendicular to Delta_n
-            // ('best' = largest angle to Delta_n)
-            double tmp[3];
-            tmp[0] = abs(Delta_n_hat[0]);
-            tmp[1] = abs(Delta_n_hat[1]);
-            tmp[2] = abs(Delta_n_hat[2]);
-            int index = std::distance(tmp,std::min_element(tmp,tmp+3));
-            double rho_inv = 1./sqrt(1.-tmp[index]*tmp[index]);
-            switch(index) {
-                case(0):
-                    Delta_n_perp[0] = 0.0;
-                    Delta_n_perp[1] = -Delta_n_hat[2]*rho_inv;
-                    Delta_n_perp[2] = +Delta_n_hat[1]*rho_inv;
-                    break;
-                case(1):
-                    Delta_n_perp[0] = -Delta_n_hat[2]*rho_inv;
-                    Delta_n_perp[1] = 0.0;
-                    Delta_n_perp[2] = +Delta_n_hat[0]*rho_inv;
-                    break;
-                case(2):
-                    Delta_n_perp[0] = +Delta_n_hat[1]*rho_inv;
-                    Delta_n_perp[1] = -Delta_n_hat[0]*rho_inv;
-                    Delta_n_perp[2] = 0.0;
-                    break;
+            // only consider even points if lattice is rotated
+            if ( (not rotated) or ((i+j)%2==0) ) {
+                Delta_n = delta_neighbours(phi_state,i,j,rotated);
+                Delta_n_nrm = Delta_n.norm();
+                // Unit vector pointing in same direction as Delta_n
+                Delta_n_hat = Delta_n;
+                Delta_n_hat.normalize();
+                // Work out the 'best' vector which is perpendicular to Delta_n
+                // ('best' = largest angle to Delta_n)
+                double tmp[3];
+                tmp[0] = abs(Delta_n_hat[0]);
+                tmp[1] = abs(Delta_n_hat[1]);
+                tmp[2] = abs(Delta_n_hat[2]);
+                int index = std::distance(tmp,std::min_element(tmp,tmp+3));
+                double rho_inv = 1./sqrt(1.-tmp[index]*tmp[index]);
+                switch(index) {
+                    case(0):
+                        Delta_n_perp[0] = 0.0;
+                        Delta_n_perp[1] = -Delta_n_hat[2]*rho_inv;
+                        Delta_n_perp[2] = +Delta_n_hat[1]*rho_inv;
+                        break;
+                    case(1):
+                        Delta_n_perp[0] = -Delta_n_hat[2]*rho_inv;
+                        Delta_n_perp[1] = 0.0;
+                        Delta_n_perp[2] = +Delta_n_hat[0]*rho_inv;
+                        break;
+                    case(2):
+                        Delta_n_perp[0] = +Delta_n_hat[1]*rho_inv;
+                        Delta_n_perp[1] = -Delta_n_hat[0]*rho_inv;
+                        Delta_n_perp[2] = 0.0;
+                        break;
+                }
+                // Draw altitude and azimuth rotation angles
+                double theta = exp_sin2_dist.draw(engine,2.*beta*Delta_n_nrm);
+                double phi = uniform_dist(engine);
+                sigma_n = Eigen::AngleAxisd(phi, Delta_n)
+                        * Eigen::AngleAxisd(theta, Delta_n_perp)
+                        * Delta_n_hat;
+                phi = atan2(sigma_n[1],sigma_n[0]);
+                theta = atan2(sqrt(sigma_n[0]*sigma_n[0]+sigma_n[1]*sigma_n[1]),sigma_n[2]);
+                phi_state->data[2*lattice->vertex_cart2lin(i,j)] = theta;
+                phi_state->data[2*lattice->vertex_cart2lin(i,j)+1] = phi;
             }
-            // Draw altitude and azimuth rotation angles
-            double theta = exp_sin2_dist.draw(engine,2.*beta*Delta_n_nrm);
-            double phi = uniform_dist(engine);
-            sigma_n = Eigen::AngleAxisd(phi, Delta_n)
-                    * Eigen::AngleAxisd(theta, Delta_n_perp)
-                    * Delta_n_hat;
-            phi = atan2(sigma_n[1],sigma_n[0]);
-            theta = atan2(sqrt(sigma_n[0]*sigma_n[0]+sigma_n[1]*sigma_n[1]),sigma_n[2]);
-            phi_state->data[2*lattice->vertex_cart2lin(i,j)] = theta;
-            phi_state->data[2*lattice->vertex_cart2lin(i,j)+1] = phi;
         }
     }
 }
@@ -84,18 +90,21 @@ void NonlinearSigmaAction::overrelaxation_update(std::shared_ptr<SampleState> ph
     double Delta_n_nrm;
     for (int i=0;i<Mt_lat;++i) {
         for (int j=0;j<Mx_lat;++j) {
-            // Field at point n
-            sigma_n.setZero();
-            add_sigma(phi_state,i  ,j  ,sigma_n);
-            // Sum of nearest neihbours
-            Delta_n = delta_neighbours(phi_state,i,j);
-            // Rotate around vector Delta_n (this does not change the action)
-            double phi = uniform_dist(engine);
-            sigma_n = Eigen::AngleAxisd(phi, Delta_n) * sigma_n;
-            phi = atan2(sigma_n[1],sigma_n[0]);
-            double theta = atan2(sqrt(sigma_n[0]*sigma_n[0]+sigma_n[1]*sigma_n[1]),sigma_n[2]);
-            phi_state->data[2*lattice->vertex_cart2lin(i,j)] = theta;
-            phi_state->data[2*lattice->vertex_cart2lin(i,j)+1] = phi;
+            // only consider even points if lattice is rotated
+            if ( (not rotated) or ((i+j)%2==0) ) {
+                // Field at point n
+                sigma_n.setZero();
+                add_sigma(phi_state,i  ,j  ,sigma_n);
+                // Sum of nearest neihbours
+                Delta_n = delta_neighbours(phi_state,i,j,rotated);
+                // Rotate around vector Delta_n (this does not change the action)
+                double phi = uniform_dist(engine);
+                sigma_n = Eigen::AngleAxisd(phi, Delta_n) * sigma_n;
+                phi = atan2(sigma_n[1],sigma_n[0]);
+                double theta = atan2(sqrt(sigma_n[0]*sigma_n[0]+sigma_n[1]*sigma_n[1]),sigma_n[2]);
+                phi_state->data[2*lattice->vertex_cart2lin(i,j)] = theta;
+                phi_state->data[2*lattice->vertex_cart2lin(i,j)+1] = phi;
+            }
         }
     }
 }
@@ -109,13 +118,16 @@ void NonlinearSigmaAction::force(const std::shared_ptr<SampleState> phi_state,
     Eigen::Vector3d Delta_n;
     for (int i=0;i<Mt_lat;++i) {
         for (int j=0;j<Mx_lat;++j) {
-            double theta = phi_state->data[2*lattice->vertex_cart2lin(i,j)];
-            double phi = phi_state->data[2*lattice->vertex_cart2lin(i,j)+1];
-            Delta_n = delta_neighbours(phi_state,i,j);
-            double dS_dtheta = -beta*((Delta_n[0]*cos(phi)+Delta_n[1]*sin(phi))*cos(theta)-Delta_n[2]*sin(theta));
-            double dS_dphi = -beta*(-Delta_n[0]*sin(phi)+Delta_n[1]*cos(phi))*sin(theta);
-            p_state->data[2*lattice->vertex_cart2lin(i,j)] = dS_dtheta;
-            p_state->data[2*lattice->vertex_cart2lin(i,j)+1] = dS_dphi;
+            // only consider even points if lattice is rotated
+            if ( (not rotated) or ((i+j)%2==0) ) {
+                double theta = phi_state->data[2*lattice->vertex_cart2lin(i,j)];
+                double phi = phi_state->data[2*lattice->vertex_cart2lin(i,j)+1];
+                Delta_n = delta_neighbours(phi_state,i,j,rotated);
+                double dS_dtheta = -beta*((Delta_n[0]*cos(phi)+Delta_n[1]*sin(phi))*cos(theta)-Delta_n[2]*sin(theta));
+                double dS_dphi = -beta*(-Delta_n[0]*sin(phi)+Delta_n[1]*cos(phi))*sin(theta);
+                p_state->data[2*lattice->vertex_cart2lin(i,j)] = dS_dtheta;
+                p_state->data[2*lattice->vertex_cart2lin(i,j)+1] = dS_dphi;
+            }
         }
     }
 }
