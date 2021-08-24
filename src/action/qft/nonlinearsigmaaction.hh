@@ -247,9 +247,9 @@ public:
     virtual void force(const std::shared_ptr<SampleState> phi_state,
                        std::shared_ptr<SampleState> p_state) const;
 
-    /** @brief Get values in dof-vector for specific (i,j)
+    /** @brief Get values of \f$\theta,\phi\f$ stored in dof-vector for specific (i,j)
      * 
-     * @param[in] phi_state State vector
+     * @param[in] phi_state State vector to extract dofs from
      * @param[in] i Temporal index
      * @param[in] j Spatial index
      * @param[out] theta Value of angle theta
@@ -271,7 +271,7 @@ public:
         phi = phi_state->data[2*ell+1];
     }
 
-    /** @brief Set values in dof-vector for specific (i,j)
+    /** @brief Set values of \f$\theta,\phi\f$ stored in dof-vector for specific (i,j)
      * 
      * @param[in] phi_state State vector
      * @param[in] i Temporal index
@@ -443,15 +443,9 @@ private:
     void add_sigma(const std::shared_ptr<SampleState> phi_state,
                    const int i,
                    const int j,
-                   Eigen::Vector3d& sigma) const {
-        unsigned int ell;
-        if (rotated) {
-            ell = lattice->diag_vertex_cart2lin(i,j);
-        } else {
-            ell = lattice->vertex_cart2lin(i,j);
-        }
-        double theta = phi_state->data[2*ell];
-        double phi = phi_state->data[2*ell+1];
+                   Eigen::Vector3d& sigma) const {        
+        double theta, phi;
+        get_dofs(phi_state,i,j,theta,phi);
         sigma[0] += sin(theta)*cos(phi);
         sigma[1] += sin(theta)*sin(phi);
         sigma[2] += cos(theta);
