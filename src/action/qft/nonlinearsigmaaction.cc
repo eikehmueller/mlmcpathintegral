@@ -155,7 +155,7 @@ void NonlinearSigmaAction::copy_from_coarse(const std::shared_ptr<SampleState> p
         for (unsigned int i=0;i<Mt_lat;++i) {
             for (unsigned int j=0;j<Mx_lat;++j) {
                 if ((i+j)%2==0) {
-                    unsigned int ell = coarse_lattice->vertex_cart2lin(i,j);
+                    unsigned int ell = coarse_lattice->diag_vertex_cart2lin(i,j);
                     set_dofs(phi_state,i,j,
                              phi_coarse->data[2*ell],
                              phi_coarse->data[2*ell+1]);
@@ -172,7 +172,7 @@ void NonlinearSigmaAction::copy_from_fine(const std::shared_ptr<SampleState> phi
         for (unsigned int i=0;i<Mt_lat;++i) {
             for (unsigned int j=0;j<Mx_lat;++j) {
                 if ((i+j)%2==0) {
-                    unsigned int ell = fine_lattice->diag_vertex_cart2lin(i,j);
+                    unsigned int ell = fine_lattice->vertex_cart2lin(i,j);
                     set_dofs(phi_state,i,j,
                              phi_fine->data[2*ell],
                              phi_fine->data[2*ell+1]);
@@ -182,7 +182,7 @@ void NonlinearSigmaAction::copy_from_fine(const std::shared_ptr<SampleState> phi
     } else {
         for (unsigned int i=0;i<Mt_lat;++i) {
             for (unsigned int j=0;j<Mx_lat;++j) {
-                unsigned int ell = fine_lattice->vertex_cart2lin(2*i,2*j);
+                unsigned int ell = fine_lattice->diag_vertex_cart2lin(2*i,2*j);
                 set_dofs(phi_state,i,j,
                          phi_fine->data[2*ell],
                          phi_fine->data[2*ell+1]);
