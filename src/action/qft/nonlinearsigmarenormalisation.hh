@@ -31,15 +31,41 @@ public:
         lattice(lattice_),
         beta(beta_) {}
 
-    /** @brief Renormalised coarse level coupling \f$\beta^{(c)}\f$*/
+    /** @brief Renormalised coarse level coupling \f$\beta^{(c)}\f$
+     * 
+     * So far, only perturbative renormalisation has been implemented.
+     * 
+     * If we write the Lagrangian as 1/(2*g^2)*|d/d_mu n|^2, the
+     * \f$\beta\f$-function is given by [Peskin & Schroeder section 13.3, Eq. (13.86)]:
+     * 
+     * \beta(g) = -g^3/(4\pi) + O(g^5)
+     * 
+     * Since
+     * 
+     * \f[
+     *      \beta = -\frac{dg}{d\log(a M)}
+     * \f]
+     * 
+     * (where \f$M\f$ is a reference scale that cancels out).
+     * 
+     * we find that
+     * 
+     * 1/g(2a)^2 = 1/g(a)^2 - \frac{\log(2)}{2\pi} + O(g)
+     * 
+     */
     double beta_coarse() {
-        double betacoarse=beta;
+        double betacoarse;
         switch (renormalisation) {
-            case RenormalisationNone:
+            case RenormalisationNone:                
+                betacoarse=beta;
                 break;
             case RenormalisationPerturbative:
+                betacoarse = beta - log(2.)/(2.*M_PI);
                 break;
             case RenormalisationNonperturbative:
+                mpi_parallel::cerr << "ERROR: non-perturbative renormalisation not implemented for non-linear sigma model." << std::endl;
+                mpi_exit(EXIT_FAILURE);
+                throw std::runtime_error("...");
                 break;
         }
         return betacoarse;
