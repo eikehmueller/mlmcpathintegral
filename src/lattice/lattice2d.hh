@@ -204,7 +204,7 @@ public:
         i = ell - Mt_lat*j;
     }
     
-    /** @brief Convert Cartesian rotated lattice index to linear index
+    /** @brief Convert Cartesian rotated lattice index to linear index.
      * 
      * This assumes that (i,j) describes a point on the rotated lattice, i.e.
      * i+j is a multiple of two.
@@ -223,9 +223,11 @@ public:
         assert(Mt_lat%2==0);        
         int Mt_lat_half = Mt_lat/2;
         int Mx_lat_half = Mx_lat/2;
-        int i_shifted = (i+Mt_lat)-(i&1);
-        int j_shifted = (j+Mx_lat)-(j&1);
-        int offset = (Mt_lat*Mx_lat/2)*(i&1);
+        int i_shifted = ((i+Mt_lat)-(i&1))/2;
+        int j_shifted = ((j+Mx_lat)-(j&1))/2;
+        // The first Mt_lat*Mx_lat/4 entries are reserved for points which
+        // have both even i and j indices.
+        int offset = (Mt_lat*Mx_lat/4)*(i&1);
         return Mt_lat_half*(j_shifted%Mx_lat_half)+i_shifted%Mt_lat_half+offset;
     }
     
@@ -243,9 +245,11 @@ public:
          */
         int Mt_lat_half = Mt_lat/2;
         int Mx_lat_half = Mx_lat/2;
-        int parity = ell / (Mt_lat*Mx_lat/2);        
-        j = 2*(ell / Mt_lat_half)+parity;
-        i = 2*(ell - Mt_lat_half*j)+parity;
+        int parity = ell / (Mt_lat*Mx_lat/4);
+        unsigned int ell_half = ell - (Mt_lat*Mx_lat/4)*parity;
+        int j_half = ell_half / Mt_lat_half;
+        j = 2*j_half+parity;
+        i = 2*(ell_half - Mt_lat_half*j_half)+parity;
     }
 
     /** @brief Convert cartesian lattice index of link to linear index
