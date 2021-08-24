@@ -34,16 +34,19 @@ double NonlinearSigmaConditionedFineAction::evaluate(const std::shared_ptr<Sampl
             // If action is formulated on rotated lattice, only consider points
             // at double-odd vertices. Otherwise, consider all points not on
             // the rotated coarse lattice
-            if (((action->is_rotated()) and (i&2) and (j&1)) or ((i+j)&1)) {
+            if (  ( action->is_rotated() and (i&2) and (j&1) ) 
+                or ( not action->is_rotated() and (i+j)&1 ) ) {
                 // Field at point n
                 sigma_n.setZero();
                 action->add_sigma(phi_state,i,j,sigma_n);
                 // Sum of neighbouring fields at point n
                 Delta_n = action->delta_neighbours(phi_state,i,j);
-                // Add dot-product of sigma_n and Delta_n to action
-                S += sigma_n.dot(Delta_n);
+                // Work out length of Delta_n and angle between Delta_n and sigma_n
+                double Delta_n_nrm = Delta_n.norm();
+                double theta = acos(sigma_n.dot(Delta_n)/Delta_n_nrm);
+                S -= log(exp_sin2_dist.evaluate(theta,2.*beta*Delta_n_nrm));
             }
         }
     }
-    return -0.5*beta*S;
+    return S;
 }

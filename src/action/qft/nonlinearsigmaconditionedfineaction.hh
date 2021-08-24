@@ -6,6 +6,7 @@
 #include "common/auxilliary.hh"
 #include "common/samplestate.hh"
 #include "lattice/lattice2d.hh"
+#include "distribution/expsin2distribution.hh"
 #include "action/action.hh"
 #include "action/conditionedfineaction.hh"
 #include "action/qft/nonlinearsigmaaction.hh"
@@ -47,7 +48,7 @@ public:
      */
     NonlinearSigmaConditionedFineAction (const std::shared_ptr<NonlinearSigmaAction> action_) :
         action(action_),
-        beta(action->getbeta()) {}
+        beta(action->getbeta()) { engine.seed(115147); }
 
     /** @brief Destructor */
     virtual ~NonlinearSigmaConditionedFineAction() {}
@@ -75,6 +76,10 @@ private:
     const std::shared_ptr<NonlinearSigmaAction> action;
     /** @brief Coupling constant \f$\beta\f$ */
     const double beta;
+    /** @brief Random number engine */
+    mutable mpi_parallel::mt19937_64 engine;
+    /** @brief Probability distribution for evaluating conditional probabilities */
+    mutable ExpSin2Distribution exp_sin2_dist;
 };
 
 struct NonlinearSigmaConditionedFineActionFactory : public ConditionedFineActionFactory {
