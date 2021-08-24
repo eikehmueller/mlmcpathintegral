@@ -85,7 +85,7 @@ private:
  *
  * Allows calculation with the action
  * \f[
- *      S[\sigma]= - \frac{1}2} \beta \sum_n \sigma_n \cdot \Delta_n
+ *      S[\sigma]= - \frac{1}{2} \beta \sum_n \sigma_n \cdot \Delta_n
  * \f]
  *
  * where \f$\Delta_n = \sigma_{n+\hat{0}+\sigma_{n-\hat{0}+\sigma_{n+\hat{1}+\sigma_{n-\hat{1}\f$
