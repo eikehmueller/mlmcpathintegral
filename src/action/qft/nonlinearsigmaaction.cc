@@ -194,7 +194,7 @@ void NonlinearSigmaAction::copy_from_fine(const std::shared_ptr<SampleState> phi
 /* Initialise state with random entries */
 void NonlinearSigmaAction::initialise_state(std::shared_ptr<SampleState> phi_state) const {
     std::uniform_real_distribution<double> uniform(-1.0,1.0);
-    for (unsigned int ell=0;ell<sample_size();++ell) {
+    for (unsigned int ell=0;ell<sample_size()/2;++ell) {
         // Draw a point inside shell with inner radius 0.1 and outer radius 1.0
         double sigma_n[3];
         double nrm_sq;
