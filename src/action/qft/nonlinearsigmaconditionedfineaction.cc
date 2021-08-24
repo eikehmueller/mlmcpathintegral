@@ -13,7 +13,7 @@ void NonlinearSigmaConditionedFineAction::fill_fine_points(std::shared_ptr<Sampl
             // If action is formulated on rotated lattice, only consider points
             // at double-odd vertices. Otherwise, consider all points not on
             // the rotated coarse lattice
-            if (((action->is_rotated()) and (i&2) and (j&1)) or ((i+j)&1)) {
+            if (is_fillin_point(i,j)) {
                 action->heatbath_ij_update(phi_state,i,j);                
             }
         }
@@ -25,7 +25,6 @@ double NonlinearSigmaConditionedFineAction::evaluate(const std::shared_ptr<Sampl
     std::shared_ptr<Lattice2D> lattice = action->get_lattice();
     const unsigned int Mt_lat = lattice->getMt_lat();
     const unsigned int Mx_lat = lattice->getMx_lat();
-    // TO DO
     double S=0;
     Eigen::Vector3d sigma_n;
     Eigen::Vector3d Delta_n;
@@ -34,8 +33,7 @@ double NonlinearSigmaConditionedFineAction::evaluate(const std::shared_ptr<Sampl
             // If action is formulated on rotated lattice, only consider points
             // at double-odd vertices. Otherwise, consider all points not on
             // the rotated coarse lattice
-            if (  ( action->is_rotated() and (i&2) and (j&1) ) 
-                or ( not action->is_rotated() and (i+j)&1 ) ) {
+            if (is_fillin_point(i,j)) {
                 // Field at point n
                 sigma_n.setZero();
                 action->add_sigma(phi_state,i,j,sigma_n);

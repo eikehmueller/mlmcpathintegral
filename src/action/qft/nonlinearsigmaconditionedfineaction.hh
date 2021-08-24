@@ -72,6 +72,20 @@ public:
     virtual double evaluate(const std::shared_ptr<SampleState> phi_state) const;
     
 private:
+
+    /** @brief Work out whether a lattice point is a fill-in point
+     * 
+     * If the action is rotated, we only fill in at points for which both indices are odd,
+     * otherwise we only fill in if either i or j is odd (i.e. i+j is odd).
+     * 
+     * @param[in] i index in temporal direction
+     * @param[in] j index in spatial direction
+     */
+     inline bool is_fillin_point(const int i, const int j) const {
+       return ( ( action->is_rotated() and (i&1) and (j&1) )
+             or ( not action->is_rotated() and (i+j)&1 ) ); 
+     }
+
     /** @brief Underlying action class */
     const std::shared_ptr<NonlinearSigmaAction> action;
     /** @brief Coupling constant \f$\beta\f$ */
