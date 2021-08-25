@@ -200,7 +200,7 @@ int main(int argc, char* argv[]) {
         mpi_parallel::cout << "QoI = Susceptibility Q[phi]^2 " << std::endl;
     }
     if ( (param_qft.action() == ActionNonlinearSigma) ) {
-        qoi = std::make_shared<QoI2DMagnetisation>(lattice);
+        qoi = std::make_shared<QoI2DMagnetisation>(lattice,false);
         qoi_factory = std::make_shared<QoI2DMagnetisationFactory>();
         mpi_parallel::cout << "QoI = Average squared magnetisation 1/M*mu[phi]^2 " << std::endl;
     }
