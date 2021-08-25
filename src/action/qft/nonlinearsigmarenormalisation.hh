@@ -60,7 +60,7 @@ public:
                 betacoarse=beta;
                 break;
             case RenormalisationPerturbative:
-                betacoarse = beta - log(2.)/(2.*M_PI);
+                betacoarse = beta - 0.5*log(2.)/(2.*M_PI);
                 break;
             case RenormalisationNonperturbative:
                 mpi_parallel::cerr << "ERROR: non-perturbative renormalisation not implemented for non-linear sigma model." << std::endl;
