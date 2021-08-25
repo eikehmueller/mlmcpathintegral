@@ -25,5 +25,6 @@ const double QoI2DMagnetisation::evaluate(const std::shared_ptr<SampleState> phi
     } else {
         N_lat = Mt_lat*Mx_lat;
     }
-    return (mu[0]*mu[0]+mu[1]*mu[1]+mu[2]*mu[2])/N_lat;
+    double volume = lattice->getT_lat()*lattice->getL_lat();
+    return (mu[0]*mu[0]+mu[1]*mu[1]+mu[2]*mu[2])/(N_lat*N_lat*volume);
 }
