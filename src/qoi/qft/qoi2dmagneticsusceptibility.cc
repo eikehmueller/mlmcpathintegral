@@ -1,10 +1,10 @@
-#include "qoi2dmagnetisation.hh"
-/** @file qoi2dmagnetisation.cc
- * @brief Implementation of qoi2dmagnetisation.hh
+#include "qoi2dmagneticsusceptibility.hh"
+/** @file qoi2dmagneticsusceptibility.cc
+ * @brief Implementation of qoi2ddmagneticsusceptibility.hh
  */
 
 /* Evaluate QoI */
-const double QoI2DMagnetisation::evaluate(const std::shared_ptr<SampleState> phi_state) {
+const double QoI2DMagneticSusceptibility::evaluate(const std::shared_ptr<SampleState> phi_state) {
     // lambda function for working out linear index of link
     double mu[3] = {0.0, 0.0, 0.0};
     for (int i=0;i<Mt_lat;++i) {
@@ -31,6 +31,5 @@ const double QoI2DMagnetisation::evaluate(const std::shared_ptr<SampleState> phi
     } else {
         N_lat = Mt_lat*Mx_lat;
     }
-    double volume = lattice->getT_lat()*lattice->getL_lat();
-    return (mu[0]*mu[0]+mu[1]*mu[1]+mu[2]*mu[2])/(N_lat*N_lat*volume);
+    return (mu[0]*mu[0]+mu[1]*mu[1]+mu[2]*mu[2])/N_lat;
 }

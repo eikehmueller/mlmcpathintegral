@@ -14,7 +14,7 @@
 #include "action/qft/nonlinearsigmaconditionedfineaction.hh"
 #include "qoi/qft/qoiavgplaquette.hh"
 #include "qoi/qft/qoi2dsusceptibility.hh"
-#include "qoi/qft/qoi2dmagnetisation.hh"
+#include "qoi/qft/qoi2dmagneticsusceptibility.hh"
 #include "montecarlo/montecarlosinglelevel.hh"
 #include "montecarlo/montecarlotwolevel.hh"
 #include "montecarlo/montecarlomultilevel.hh"
@@ -200,9 +200,9 @@ int main(int argc, char* argv[]) {
         mpi_parallel::cout << "QoI = Susceptibility Q[phi]^2 " << std::endl;
     }
     if ( (param_qft.action() == ActionNonlinearSigma) ) {
-        qoi = std::make_shared<QoI2DMagnetisation>(lattice,false);
-        qoi_factory = std::make_shared<QoI2DMagnetisationFactory>();
-        mpi_parallel::cout << "QoI = Average squared magnetisation 1/volume*mu[phi]^2 " << std::endl;
+        qoi = std::make_shared<QoI2DMagneticSusceptibility>(lattice,false);
+        qoi_factory = std::make_shared<QoI2DMagneticSusceptibilityFactory>();
+        mpi_parallel::cout << "QoI = Average squared magnetisation 1/M*mu[phi]^2 " << std::endl;
     }
     
     /* ====== Select action ====== */

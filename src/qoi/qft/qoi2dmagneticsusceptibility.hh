@@ -1,5 +1,5 @@
-#ifndef QOI2DMAGNETISATION_HH
-#define QOI2DMAGNETISATION_HH QOI2DMAGNETISATION_HH
+#ifndef QOI2DMAGNETICSUSCEPTIBILITY_HH
+#define QOI2DMAGNETICSUSCEPTIBILITY_HH QOI2DMAGNETICSUSCEPTIBILITY_HH
 #include <memory>
 #include "common/samplestate.hh"
 #include "mpi/mpi_wrapper.hh"
@@ -7,18 +7,18 @@
 #include "action/qft/nonlinearsigmaaction.hh"
 #include "qoi/quantityofinterest.hh"
 
-/** @file qoi2dmagnetisation.hh
+/** @file qoi2dmagneticsusceptibility.hh
  * @brief Header file for average squared magnetisation of non-linear O(3) sigma model
  */
 
-/** @class QoI2DMagnetisation
+/** @class QoI2DMagneticSusceptibility
  *
- * @brief class for calculating the average squared magnetisation of the non-linear O(3) sigma model
+ * @brief class for calculating the magnetic susceptibility of the non-linear O(3) sigma model
  *
- * The returned magnetisation is defined as
+ * The returned magnetic susceptibility (average squared magnetisation)  is defined as
  *
  * \f[
- *    V\chi_t = 1/M*\langle \mu^2 \rangle
+ *    \chi_t = 1/M*\langle \mu^2 \rangle
  * \f]
  *
  * where the 3-vector \f$\mu\f$ is the sum of all spins on the lattice and \f$M\f$ is the number
@@ -26,14 +26,14 @@
  *
  */
 
-class QoI2DMagnetisation : public QoI {
+class QoI2DMagneticSusceptibility : public QoI {
 public:
     /** @brief Create new instance
      *
      * @param[in] lattice_ Lattice
      * @param[in] rotated_ is the lattice action rotated?
      */
-    QoI2DMagnetisation(const std::shared_ptr<Lattice2D> lattice_,
+    QoI2DMagneticSusceptibility(const std::shared_ptr<Lattice2D> lattice_,
                        const bool rotated_) :
         lattice(lattice_),
         rotated(rotated_),
@@ -41,7 +41,7 @@ public:
         Mx_lat(lattice_->getMx_lat()) {}
 
     /** @brief Destructor */
-    virtual ~QoI2DMagnetisation() {}
+    virtual ~QoI2DMagneticSusceptibility() {}
 
     /** @brief Evaluate on a state
      *
@@ -60,11 +60,11 @@ private:
     const unsigned int Mx_lat;
 };
 
-/** @class QoI2DMagnetisationFactory
+/** @class QoI2DMagneticSusceptibilityFactory
  *
  * @brief Factory for constructing the QoI for a particular action
  */
-class QoI2DMagnetisationFactory : public QoIFactory {
+class QoI2DMagneticSusceptibilityFactory : public QoIFactory {
 public:
     /** @brief Return QoI for a specific  action
      *
@@ -75,8 +75,8 @@ public:
         nonlinear_sigma_action = std::dynamic_pointer_cast<NonlinearSigmaAction>(action);
         std::shared_ptr<Lattice2D> lattice = nonlinear_sigma_action->get_lattice();
         bool rotated = nonlinear_sigma_action->is_rotated();
-        return std::make_shared<QoI2DMagnetisation>(lattice,rotated);
+        return std::make_shared<QoI2DMagneticSusceptibility>(lattice,rotated);
     }
 };
 
-#endif // QOI2DMAGNETISATION_HH
+#endif // QOI2DMAGNETICSUSCEPTIBILITY_HH
