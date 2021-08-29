@@ -109,6 +109,7 @@ void NonlinearSigmaAction::overrelaxation_update(std::shared_ptr<SampleState> ph
     add_sigma(phi_state,i,j,sigma_n);
     // Sum of nearest neihbours
     Delta_n = delta_neighbours(phi_state,i,j);
+    Delta_n.normalize();
     // Rotate around vector Delta_n (this does not change the action)
     double phi = uniform_dist(engine);
     sigma_n = Eigen::AngleAxisd(phi, Delta_n) * sigma_n;
