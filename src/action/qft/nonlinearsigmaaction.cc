@@ -82,7 +82,7 @@ void NonlinearSigmaAction::heatbath_ij_update(std::shared_ptr<SampleState> phi_s
     // Draw altitude and azimuth rotation angles
     double theta = exp_sin2_dist.draw(engine,2.*beta*Delta_n_nrm);
     double phi = uniform_dist(engine);
-    sigma_n = Eigen::AngleAxisd(phi, Delta_n)
+    sigma_n = Eigen::AngleAxisd(phi, Delta_n_hat)
             * Eigen::AngleAxisd(theta, Delta_n_perp)
             * Delta_n_hat;
     phi = atan2(sigma_n[1],sigma_n[0]);
