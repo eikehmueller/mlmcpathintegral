@@ -81,7 +81,6 @@ public:
      *
      * @param[in] lattice_ Underlying two-dimensional lattice
      * @param[in] fine_lattice_ Two-dimensional lattice on next finer level
-     * @param[in] coarsening_type_ Type of lattice coarsening
      * @param[in] renormalisation_ Type of renormalisation
      */
     QFTAction(const std::shared_ptr<Lattice2D> lattice_,
@@ -90,7 +89,7 @@ public:
         : Action(renormalisation_),
           lattice(lattice_),
           fine_lattice(fine_lattice_),
-          coarse_lattice(lattice->coarse_lattice(false)) { }
+          coarse_lattice(lattice->get_coarse_lattice()) { }
     
     /** @brief Get underlying lattice */
     std::shared_ptr<Lattice2D> get_lattice() {

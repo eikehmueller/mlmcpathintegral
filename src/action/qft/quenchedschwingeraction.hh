@@ -151,7 +151,13 @@ public:
                                                         beta,
                                                         renormalisation);        
         // Construct coarse lattice
-        std::shared_ptr<Lattice2D> coarse_lattice = lattice->coarse_lattice(true);
+        std::shared_ptr<Lattice2D> coarse_lattice = lattice->get_coarse_lattice();
+        if (coarse_lattice == nullptr) {
+            mpi_parallel::cerr << "ERROR: cannot coarsen 2d lattice with M_{t,lat} = " << lattice->getMt_lat();
+            mpi_parallel::cerr << " , M_{x,lat} = " << lattice->getMx_lat() << "." << std::endl;
+            mpi_exit(EXIT_FAILURE);
+            throw std::runtime_error("...");
+        }
         // Construct coarse action
         std::shared_ptr<Action> new_action;
         new_action = std::make_shared<QuenchedSchwingerAction>(coarse_lattice,

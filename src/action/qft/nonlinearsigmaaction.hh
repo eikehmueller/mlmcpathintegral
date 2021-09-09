@@ -187,7 +187,7 @@ public:
         std::shared_ptr<Action> new_action;
         std::shared_ptr<Lattice2D> coarse_lattice;
         if (rotated) {
-            coarse_lattice = lattice->coarse_lattice(true);
+            coarse_lattice = lattice->get_coarse_lattice();
         } else {
             coarse_lattice = lattice;
         }
