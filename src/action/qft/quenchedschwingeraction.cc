@@ -6,6 +6,8 @@
 /* Value of action for a given configuration */
 const double QuenchedSchwingerAction::evaluate(const std::shared_ptr<SampleState> phi_state) const {
     double S=0;
+    const unsigned int Mt_lat = lattice->getMt_lat();
+    const unsigned int Mx_lat = lattice->getMx_lat();
     for (int i=0;i<Mt_lat;++i) {
         for (int j=0;j<Mx_lat;++j) {
             double theta =  phi_state->data[lattice->link_cart2lin(i  ,j  ,0)]
@@ -70,6 +72,8 @@ void QuenchedSchwingerAction::force(const std::shared_ptr<SampleState> phi_state
     for (unsigned int ell=0;ell<p_state->data.size();++ell) {
         p_state->data[ell] = 0.0;
     }
+    const unsigned int Mt_lat = lattice->getMt_lat();
+    const unsigned int Mx_lat = lattice->getMx_lat();
     for (int i=0;i<Mt_lat;++i) {
         for (int j=0;j<Mx_lat;++j) {
             double theta = phi_state->data[lattice->link_cart2lin(i,  j,  0)]
@@ -88,6 +92,8 @@ void QuenchedSchwingerAction::force(const std::shared_ptr<SampleState> phi_state
 /* Copy coarse links from state on coarser level */
 void QuenchedSchwingerAction::copy_from_coarse(const std::shared_ptr<SampleState> phi_coarse,
                                                std::shared_ptr<SampleState> phi_state) {
+    const unsigned int Mt_lat = lattice->getMt_lat();
+    const unsigned int Mx_lat = lattice->getMx_lat();
     const unsigned int Mt_c_lat = coarse_lattice->getMt_lat();
     const unsigned int Mx_c_lat = coarse_lattice->getMx_lat();
     double theta_c;

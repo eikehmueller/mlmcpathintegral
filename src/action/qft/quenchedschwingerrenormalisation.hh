@@ -35,44 +35,45 @@ public:
      */
     RenormalisedQuenchedSchwingerParameters(const std::shared_ptr<Lattice2D> lattice_,
                                             const double beta_,
-                                            const RenormalisationType renormalisation_,
-                                            const CoarseningType coarsening_type_) :
+                                            const RenormalisationType renormalisation_) :
         RenormalisedParameters(renormalisation_),
         lattice(lattice_),
-        beta(beta_),
-        coarsening_type(coarsening_type_) {
-            if (not ( (coarsening_type == CoarsenBoth) or
-                      (coarsening_type == CoarsenTemporal) or
-                      (coarsening_type == CoarsenSpatial) ) ) {
-                mpi_parallel::cerr << "ERROR: invalid coarsening type in renormalisation" << std::endl;
-                mpi_exit(EXIT_FAILURE);
-                throw std::runtime_error("...");
-            }
-        }
+        beta(beta_) {}
 
     /** @brief Renormalised coarse level mass \f$\beta^{(c)}\f$*/
     double beta_coarse() {
         double betacoarse;
+        CoarseningType coarsening_type = lattice->get_coarsening_type();
+        if (not ( (coarsening_type == CoarsenBoth) or
+                  (coarsening_type == CoarsenTemporal) or
+                  (coarsening_type == CoarsenSpatial) or
+                  (coarsening_type == CoarsenAlternate) ) ) {
+                mpi_parallel::cerr << "ERROR: invalid coarsening type in renormalisation" << std::endl;
+                mpi_exit(EXIT_FAILURE);
+                throw std::runtime_error("...");
+            }
+        double betacoarse_raw;
+        if (coarsening_type == CoarsenBoth) {
+            betacoarse_raw = 0.25*beta;
+        } else {
+            betacoarse_raw = 0.5*beta;
+        }
         switch (renormalisation) {
             case RenormalisationNone:
-                if (coarsening_type == CoarsenBoth) {
-                    betacoarse = 0.25*beta;
-                } else {
-                    betacoarse = 0.5*beta;
-                }
+                betacoarse = betacoarse_raw;
                 break;
             case RenormalisationPerturbative:
                 if (beta > 4.0) {
                     betacoarse = betacoarse_perturbative();
                 } else {
-                    betacoarse = 0.25*beta;
+                    betacoarse = betacoarse_raw;
                 }
                 break;
             case RenormalisationNonperturbative:
                 if (beta > 4.0) {
                     betacoarse = betacoarse_nonperturbative();
                 } else {
-                    betacoarse = 0.25*beta;
+                    betacoarse = betacoarse_raw;
                 }
                 break;
         }
@@ -91,7 +92,7 @@ private:
     double betacoarse_perturbative() const {
         double delta;
         double rho;
-        if (coarsening_type==CoarsenBoth) {
+        if (lattice->get_coarsening_type()==CoarsenBoth) {
             rho = 0.25;
             delta = 1.5;
         } else {
@@ -137,8 +138,6 @@ private:
     const std::shared_ptr<Lattice2D> lattice;
     /** @brief Coupling constant \f$\beta\f$ */
     const double beta;
-    /** @brief Coarsening */
-    const CoarseningType coarsening_type;
 };
 
 #endif // QUENCHEDSCHWINGERRENORMALISATION_HH

@@ -217,7 +217,7 @@ struct QuenchedSchwingerConditionedFineActionFactory : public ConditionedFineAct
     virtual std::shared_ptr<ConditionedFineAction> get(std::shared_ptr<Action> action) {
         std::shared_ptr<QuenchedSchwingerAction> schwinger_action = std::dynamic_pointer_cast<QuenchedSchwingerAction>(action);
         // Select correct type based on coarsening type
-        CoarseningType coarsening_type = schwinger_action->get_coarsening_type();
+        CoarseningType coarsening_type = schwinger_action->get_lattice()->get_coarsening_type();
         if ( coarsening_type == CoarsenBoth ) {
             return std::make_shared<QuenchedSchwingerConditionedFineAction>(schwinger_action);
         } else {

@@ -117,11 +117,13 @@ void QuenchedSchwingerGaussianConditionedFineAction::fill_fine_points(std::share
 /* Fill in fine links (semi-coarsening) */
 void QuenchedSchwingerSemiConditionedFineAction::fill_fine_points(std::shared_ptr<SampleState> phi_state) const {
     std::shared_ptr<Lattice2D> lattice = action->get_lattice();
+    std::shared_ptr<Lattice2D> coarse_lattice = action->get_coarse_lattice();
     const unsigned int Mt_lat = lattice->getMt_lat();
     const unsigned int Mx_lat = lattice->getMx_lat();
     /* STEP 1: Fill in temporal links on perimeter by drawing from uniform distribution */
     double dtheta;
-    if (action->get_coarsening_type() == CoarsenTemporal) {
+    if ( (Mt_lat==2*coarse_lattice->getMt_lat()) and 
+         (Mx_lat==  coarse_lattice->getMx_lat()) ) {
         /*  Case 1: temporal coarsening */
         /* fill in interior links in temporal direction */
         for (unsigned int i=0;i<Mt_lat/2;++i) {
@@ -147,7 +149,8 @@ void QuenchedSchwingerSemiConditionedFineAction::fill_fine_points(std::shared_pt
                 phi_state->data[lattice->link_cart2lin(2*i+1,j,1)] = theta_tilde;
             }
         }
-    } else if (action->get_coarsening_type() == CoarsenSpatial) {
+    } else if ( (Mt_lat==  coarse_lattice->getMt_lat()) and 
+                (Mx_lat==2*coarse_lattice->getMx_lat()) ) {
         /* CASE 2: spatial coarsening */
         /* fill in interior links in spatial direction */
         for (unsigned int i=0;i<Mt_lat;++i) {
@@ -276,10 +279,12 @@ double QuenchedSchwingerGaussianConditionedFineAction::evaluate(const std::share
 /* Evaluate conditioned action at fine links (semi-coarsening) */
 double QuenchedSchwingerSemiConditionedFineAction::evaluate(const std::shared_ptr<SampleState> phi_state) const {
     std::shared_ptr<Lattice2D> lattice = action->get_lattice();
+    std::shared_ptr<Lattice2D> coarse_lattice = action->get_coarse_lattice();
     const unsigned int Mt_lat = lattice->getMt_lat();
     const unsigned int Mx_lat = lattice->getMx_lat();
     double S = 0.0;
-    if (action->get_coarsening_type() == CoarsenTemporal) {
+    if ( (Mt_lat==2*coarse_lattice->getMt_lat()) and 
+         (Mx_lat==  coarse_lattice->getMx_lat()) ) {
         // Contribution from drawing spatial links
         for (unsigned int i=0;i<Mt_lat/2;++i) {
             for (unsigned int j=0;j<Mx_lat;++j) {
@@ -293,7 +298,8 @@ double QuenchedSchwingerSemiConditionedFineAction::evaluate(const std::shared_pt
                 S -= log(exp_cos_dist.evaluate(theta,phi_p,phi_m));
             }
         }
-    } else if (action->get_coarsening_type() == CoarsenSpatial) {
+    } else if ( (Mt_lat==  coarse_lattice->getMt_lat()) and 
+                (Mx_lat==2*coarse_lattice->getMx_lat()) ) {
         // Contribution from drawing temporal links
         for (unsigned int i=0;i<Mt_lat;++i) {
             for (unsigned int j=0;j<Mx_lat/2;++j) {

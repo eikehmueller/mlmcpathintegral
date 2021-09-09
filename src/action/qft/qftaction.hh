@@ -86,23 +86,20 @@ public:
      */
     QFTAction(const std::shared_ptr<Lattice2D> lattice_,
               const std::shared_ptr<Lattice2D> fine_lattice_,
-              const CoarseningType coarsening_type_,
               const RenormalisationType renormalisation_)
         : Action(renormalisation_),
           lattice(lattice_),
           fine_lattice(fine_lattice_),
-          coarsening_type(coarsening_type_),
-          coarse_lattice(lattice->coarse_lattice(((coarsening_type_==CoarsenBoth) or
-                                                  (coarsening_type_==CoarsenTemporal))?2:1,
-                                                 ((coarsening_type_==CoarsenBoth) or
-                                                  (coarsening_type_==CoarsenSpatial))?2:1,
-                                                 false)),
-          Mt_lat(lattice->getMt_lat()),
-          Mx_lat(lattice->getMx_lat()) { }
+          coarse_lattice(lattice->coarse_lattice(false)) { }
     
     /** @brief Get underlying lattice */
     std::shared_ptr<Lattice2D> get_lattice() {
         return lattice;
+    }
+    
+    /** @brief Get underlying coarse lattice */
+    std::shared_ptr<Lattice2D> get_coarse_lattice() {
+        return coarse_lattice;
     }
     
     /** @brief Get coarsening level
@@ -111,12 +108,7 @@ public:
     virtual int get_coarsening_level() const {
         return lattice->get_coarsening_level();
     }
-    
-    /** @brief Return coarsening type */
-    CoarseningType get_coarsening_type() const {
-        return coarsening_type;
-    }
-    
+        
     /** @brief Action information string
      *
      * return some information on this instance of the action
@@ -130,13 +122,6 @@ protected:
     const std::shared_ptr<Lattice2D> fine_lattice;
     /** @brief Underlying coarsened lattice */
     const std::shared_ptr<Lattice2D> coarse_lattice;
-    /** @brief Coarsening type for lattice (can be both directions, temporal-only or spatial-only) */
-    const CoarseningType coarsening_type;
-    /** @brief Number of time slices */
-    const unsigned int Mt_lat;
-    /** @brief Number of points in spatial direction */
-    const unsigned int Mx_lat;
-
 };
 
 #endif // QFTACTION_HH

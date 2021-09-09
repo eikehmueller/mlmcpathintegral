@@ -136,11 +136,18 @@ public:
                          const RenormalisationType renormalisation_,
                          const double beta_,
                          const double rotated_=false)
-        : QFTAction(lattice_,fine_lattice_,CoarsenBoth,renormalisation_),
+        : QFTAction(lattice_,fine_lattice_,renormalisation_),
           beta(beta_),
           rotated(rotated_),
           uniform_dist(0.,2.*M_PI) {
               engine.seed(2481317);
+              CoarseningType coarsening_type = lattice->get_coarsening_type();
+              if (not (coarsening_type == CoarsenRotate) ) {
+                  mpi_parallel::cerr << "ERROR: invalid coarsening for Non-linear sigma model." << std::endl;
+                  mpi_parallel::cerr << "Has to be 'rotate'." << std::endl;
+                  mpi_exit(EXIT_FAILURE);
+                  throw std::runtime_error("...");
+              }
           }
 
     /** @brief Return coupling constant \f$beta\f$ */
@@ -180,7 +187,7 @@ public:
         std::shared_ptr<Action> new_action;
         std::shared_ptr<Lattice2D> coarse_lattice;
         if (rotated) {
-            coarse_lattice = lattice->coarse_lattice(2,2,true);
+            coarse_lattice = lattice->coarse_lattice(true);
         } else {
             coarse_lattice = lattice;
         }

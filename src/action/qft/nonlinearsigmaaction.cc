@@ -5,6 +5,8 @@
 
 /* Value of action for a given configuration */
 const double NonlinearSigmaAction::evaluate(const std::shared_ptr<SampleState> phi_state) const {
+    const unsigned int Mt_lat = lattice->getMt_lat();
+    const unsigned int Mx_lat = lattice->getMx_lat();
     double S=0;
     Eigen::Vector3d sigma_n;
     Eigen::Vector3d Delta_n;
@@ -124,6 +126,8 @@ void NonlinearSigmaAction::force(const std::shared_ptr<SampleState> phi_state,
     for (unsigned int ell=0;ell<p_state->data.size();++ell) {
         p_state->data[ell] = 0.0;
     }
+    const unsigned int Mt_lat = lattice->getMt_lat();
+    const unsigned int Mx_lat = lattice->getMx_lat();
     Eigen::Vector3d Delta_n;
     for (int i=0;i<Mt_lat;++i) {
         for (int j=0;j<Mx_lat;++j) {
@@ -143,6 +147,8 @@ void NonlinearSigmaAction::force(const std::shared_ptr<SampleState> phi_state,
 /* Copy coarse links from state on coarser level */
 void NonlinearSigmaAction::copy_from_coarse(const std::shared_ptr<SampleState> phi_coarse,
                                             std::shared_ptr<SampleState> phi_state) {
+    const unsigned int Mt_lat = lattice->getMt_lat();
+    const unsigned int Mx_lat = lattice->getMx_lat();
     if (rotated) {
         for (unsigned int i=0;i<Mt_lat/2;++i) {
             for (unsigned int j=0;j<Mx_lat/2;++j) {
@@ -169,6 +175,8 @@ void NonlinearSigmaAction::copy_from_coarse(const std::shared_ptr<SampleState> p
 /* Copy coarse links from state on finer level */
 void NonlinearSigmaAction::copy_from_fine(const std::shared_ptr<SampleState> phi_fine,
                                           std::shared_ptr<SampleState> phi_state) {
+    const unsigned int Mt_lat = lattice->getMt_lat();
+    const unsigned int Mx_lat = lattice->getMx_lat();
     if (rotated) {
         for (unsigned int i=0;i<Mt_lat;++i) {
             for (unsigned int j=0;j<Mx_lat;++j) {

@@ -188,7 +188,8 @@ int main(int argc, char* argv[]) {
     lattice = std::make_shared<Lattice2D>(param_lattice.Mt_lat(),
                                           param_lattice.Mx_lat(),
                                           param_lattice.T_lat(),
-                                          param_lattice.L_lat());
+                                          param_lattice.L_lat(),
+                                          param_lattice.coarsening_type());
 
     /* ====== Select quantity of interest and construct QoI factory ====== */
     std::shared_ptr<QoI> qoi;
@@ -210,8 +211,7 @@ int main(int argc, char* argv[]) {
     switch (param_qft.action()) {
         case (ActionQuenchedSchwinger): {
             action = std::make_shared<QuenchedSchwingerAction>(lattice,
-                                                               nullptr,
-                                                               param_schwinger.coarsening_type(),
+                                                               nullptr,                                                               
                                                                param_schwinger.renormalisation(),
                                                                param_schwinger.beta());
             break;

@@ -6,6 +6,6 @@
 /* Return lattice information */
 std::string QFTAction::info_string() const {
     std::stringstream sstr;
-    sstr << "lattice = " << Mt_lat << " x " << Mx_lat;
+    sstr << "lattice = " << lattice->getMt_lat() << " x " << lattice->getMx_lat();
     return sstr.str();
 }

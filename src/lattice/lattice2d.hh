@@ -17,7 +17,8 @@ enum CoarseningType {
     CoarsenBoth = 0,           // Coarsen in both directions
     CoarsenTemporal = 1,       // Coarsen in temporal direction only
     CoarsenSpatial = 2,        // Coarsen in spatial direction only
-    CoarsenRotation = 3        // Coarsen in both directions while
+    CoarsenAlternate = 3,      // Alternate coarsening in both directions
+    CoarsenRotate = 4          // Coarsen in both directions while
                                // rotating the lattice
 };
 
@@ -37,11 +38,13 @@ public:
         Mt_lat_(8),
         Mx_lat_(8),
         T_lat_(1.0),
-        L_lat_(1.0) {
+        L_lat_(1.0),
+        coarsening_type_(CoarsenUnspecified) {
         addKey("Mt_lat",Integer,Positive);
         addKey("Mx_lat",Integer,Positive);
         addKey("T_lat",Double,Positive);
         addKey("L_lat",Double,Positive);
+        addKey("coarsening",String);
     }
 
     /** @brief Read parameters from file
@@ -56,6 +59,18 @@ public:
             Mx_lat_ = getContents("Mx_lat")->getInt();
             T_lat_ = getContents("T_lat")->getDouble();
             L_lat_ = getContents("L_lat")->getDouble();
+            std::string coarsening_str = getContents("coarsening")->getString();
+            if (coarsening_str == "both") {
+                coarsening_type_ = CoarsenBoth;
+            } else if (coarsening_str == "temporal") {
+                coarsening_type_ = CoarsenTemporal;
+            } else if (coarsening_str == "spatial") {
+                coarsening_type_ = CoarsenSpatial;
+            } else if (coarsening_str == "alternate") {
+                coarsening_type_ = CoarsenAlternate;
+            } else if (coarsening_str == "rotate") {
+                coarsening_type_ = CoarsenRotate;
+            }
         }
         return readSuccess;
     }
@@ -80,6 +95,10 @@ public:
         return L_lat_;
     }
 
+    /** @brief Return coarsening type */
+    CoarseningType coarsening_type() const {
+        return coarsening_type_;
+    }
     
 private:
     /** @brief Number of lattice points in temporal direction */
@@ -90,6 +109,8 @@ private:
     double T_lat_;
     /** @brief Spatial extent of lattice */
     double L_lat_;
+    /** @brief Coarsening type */
+    CoarseningType coarsening_type_;
 };
 
 /** @class Lattice2D
@@ -106,12 +127,14 @@ public:
      * @param[in] Mx_lat Number of points in spatial direction
      * @param[in] T_lat Temporal extent of lattice
      * @param[in] L_lat Spatial extent of lattice
-     * @param[in] coarsening_level_ Coarsening level
+     * @param[in] Coarsening type
+     * @param[in] coarsening_level_ Coarsening level     
      */
     Lattice2D(const unsigned int Mt_lat_,
               const unsigned int Mx_lat_,
               const double T_lat_,
               const double L_lat_,
+              const CoarseningType coarsening_type_,
               const int coarsening_level_=0) :
         Lattice(coarsening_level_),
         Mt_lat(Mt_lat_),
@@ -119,7 +142,10 @@ public:
         T_lat(T_lat_),
         L_lat(L_lat_),
         at_lat(T_lat_/Mt_lat_),
-        ax_lat(L_lat_/Mx_lat_) {}
+        ax_lat(L_lat_/Mx_lat_),
+        coarsening_type(coarsening_type_),
+        rotated(false),
+        last_coarsening(-1) {}
 
     /** @brief Return number of timeslices \f$M_{t,lat}\f$ */
     unsigned int getMt_lat() const {
@@ -214,7 +240,7 @@ public:
      * @param i Position index in temporal direction
      * @param j Position index in spatial direction
      * 
-     * @return linear index of vertex
+     * @return linear index oCoarsenf vertex
      */
     inline unsigned int diag_vertex_cart2lin(const int i, const int j) const {
         assert((i+j)%2==0);        
@@ -235,7 +261,7 @@ public:
     
     /** @brief Convert linear index of vertex to rotated lattice index
      *
-     * Given the linear index \f$\ell\f$, work out cartesian index \f$(i,j)\f$.
+     * Given the linear indexCoarsen \f$\ell\f$, work out cartesian index \f$(i,j)\f$.
      
      * @param[in] ell Linear index \f$\ell\f$
      * @param[out] i Position index in temporal direction
@@ -303,22 +329,6 @@ public:
         i = r >> 1; // i = r/2
         mu = r & 1; // mu = r % 2
     }
-    
-    /** @brief Construct coarsened lattice
-     *
-     * @param[in] rho_refine_t refinement factor in temporal direction
-     * @param[in] rho_refine_x refinement factor in spatial direction
-     *
-     * Returns lattice with reduced the lattice spacing
-     */
-    virtual std::shared_ptr<Lattice2D> fine_lattice(const int rho_refine_t,
-                                                    const int rho_refine_x) {
-        return std::make_shared<Lattice2D>(rho_refine_t*Mt_lat,
-                                           rho_refine_x*Mx_lat,
-                                           T_lat,
-                                           L_lat,
-                                           coarsening_level-1);
-    };
 
     /** @brief Construct coarsened lattice
      *
@@ -328,9 +338,48 @@ public:
      *
      * Returns lattice with twice the lattice spacing
      */
-    virtual std::shared_ptr<Lattice2D> coarse_lattice(const int rho_coarsen_t,
-                                                      const int rho_coarsen_x,
-                                                      const bool exit_on_failure) {
+    virtual std::shared_ptr<Lattice2D> coarse_lattice(const bool exit_on_failure) {
+        int rho_coarsen_t;   // temporal coarsening factor
+        int rho_coarsen_x;   // spatial coarsening factor
+        bool coarse_rotated; // Is the coarse lattice rotated?
+        int this_coarsening; // Coarsening used to obtain this lattice (if coarsening in
+                             // alternate directions
+        switch (coarsening_type) {
+            case CoarsenBoth:
+                rho_coarsen_t = 2;
+                rho_coarsen_x = 2;
+            break;
+            case CoarsenTemporal:
+                rho_coarsen_t = 2;
+                rho_coarsen_x = 1;
+            break;
+            case CoarsenSpatial:
+                rho_coarsen_t = 1;
+                rho_coarsen_x = 2;
+            break;
+            case CoarsenAlternate:
+                if (not (last_coarsening==1)) {
+                    rho_coarsen_t = 2;
+                    rho_coarsen_x = 1;
+                    this_coarsening = 1;
+                } else {
+                    rho_coarsen_t = 1;
+                    rho_coarsen_x = 2;
+                    this_coarsening = 0;
+                }
+            break;
+            case CoarsenRotate:
+            if (rotated) {
+                rho_coarsen_t = 2;
+                rho_coarsen_x = 2;
+                coarse_rotated = false;
+            } else {
+                rho_coarsen_t = 1;
+                rho_coarsen_x = 1;
+                coarse_rotated = true;
+            }
+            break;
+        }
         unsigned int Mt_lat_coarse = Mt_lat;
         unsigned int Mx_lat_coarse = Mx_lat;
         if ( rho_coarsen_t > 1 ) {
@@ -359,8 +408,52 @@ public:
             }
             Mx_lat_coarse = Mx_lat/rho_coarsen_x;
         }
-        return std::make_shared<Lattice2D>(Mt_lat_coarse,Mx_lat_coarse,T_lat,L_lat,coarsening_level+1);
+        std::shared_ptr<Lattice2D> coarse_lattice;
+        coarse_lattice = std::make_shared<Lattice2D>(Mt_lat_coarse,
+                                                     Mx_lat_coarse,
+                                                     T_lat,
+                                                     L_lat,
+                                                     coarsening_type,
+                                                     coarsening_level+1);
+        // Rotate coarse lattice if necessary
+        if (coarsening_type == CoarsenRotate) {
+            coarse_lattice->set_rotated(coarse_rotated);
+        }
+        // Set last coarsening of coarse lattice if necessary
+        if (coarsening_type == CoarsenAlternate) {
+            coarse_lattice->set_last_coarsening(this_coarsening);
+        }
+        return coarse_lattice;
     };
+    
+    /** @brief Is this lattice a rotated lattice? */
+    const bool is_rotated() const { return rotated; }
+     
+    /** @brief return coarsening type */   
+    const CoarseningType get_coarsening_type() const { return coarsening_type; }
+    
+protected:
+    /** @brief Set rotation
+     * 
+     * @param[in] new_rotated new rotation direction
+     */
+     void set_rotated(const bool new_rotated) {
+         if ( (new_rotated == true) and (not (coarsening_type == CoarsenRotate) ) ) {
+            mpi_parallel::cerr << "ERROR: can only rotate lattice if coarsening type is \"rotate\"" << std::endl;
+            mpi_exit(EXIT_FAILURE);
+            throw std::runtime_error("...");
+         }
+         rotated = new_rotated;
+     }
+     
+     /** @brief Set direction of coarsening used to obtain this lattice (if 
+      *         alternate coarsening is used)
+      * 
+      * @param[in] last_coarsening_ coarsening direction (0=temporal, 1=spatial_
+      */
+      void set_last_coarsening(const int last_coarsening_) {
+          last_coarsening = last_coarsening_;
+      }
 
 protected:
     /** @brief Number of time slices */
@@ -375,6 +468,12 @@ protected:
     const double at_lat;
     /** @brief lattice spacing in spatial direction */
     const double ax_lat;
+    /** @brief coarsening type of lattice */
+    const CoarseningType coarsening_type;
+    /** @brief is this lattice a rotated lattice? */
+    bool rotated;
+    /** @brief coarsening direction used to obtain this lattice */
+    int last_coarsening;
 };
 
 #endif // LATTICE2D_HH

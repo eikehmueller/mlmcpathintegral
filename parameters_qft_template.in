@@ -16,10 +16,11 @@ quantumfieldtheory:
 # Lattice parameters
 ###########################################
 lattice:
-  Mt_lat = 16     # Number of time slices
-  Mx_lat = 16     # Number of spatial lattice sites
-  T_lat = 1.0     # Temporal lattice extent
-  L_lat = 1.0     # Spatial lattice extent
+  Mt_lat = 16          # Number of time slices
+  Mx_lat = 16          # Number of spatial lattice sites
+  T_lat = 1.0          # Temporal lattice extent
+  L_lat = 1.0          # Spatial lattice extent
+  coarsening = 'both'  # Coarsening strategy [both, temporal, spatial, alternate, rotate]
 
 ###########################################
 # Statistics parameters
@@ -36,7 +37,6 @@ statistics:
 schwinger:
   beta = 1.0               # Coupling constant beta
   renormalisation = 'none' # Renormalisation [none, perturbative, nonperturbative]
-  coarsening = 'both'      # Coarsening strategy of 2d lattice [both, temporal, spatial]
 
 ###########################################
 # Nonlinear sigma action parameters
