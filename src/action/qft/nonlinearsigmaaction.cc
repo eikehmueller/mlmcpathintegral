@@ -5,24 +5,16 @@
 
 /* Value of action for a given configuration */
 const double NonlinearSigmaAction::evaluate(const std::shared_ptr<SampleState> phi_state) const {
-    const unsigned int Mt_lat = lattice->getMt_lat();
-    const unsigned int Mx_lat = lattice->getMx_lat();
     double S=0;
     Eigen::Vector3d sigma_n;
     Eigen::Vector3d Delta_n;
-    for (int i=0;i<Mt_lat;++i) {
-        for (int j=0;j<Mx_lat;++j) {
-            // only consider even points if lattice is rotated
-            if ( (not rotated) or ((i+j)%2==0) ) {
-                // Field at point n
-                sigma_n.setZero();
-                add_sigma(phi_state,i,j,sigma_n);
-                // Sum of neighbouring fields at point n
-                Delta_n = delta_neighbours(phi_state,i,j);
-                // Add dot-product of sigma_n and Delta_n to action
-                S += sigma_n.dot(Delta_n);
-            }
-        }
+    for (unsigned int ell=0;ell<lattice->getNvertices();++ell) {
+        sigma_n.setZero();
+        add_sigma(phi_state,ell,sigma_n);
+        // Sum of neighbouring fields at point n
+        Delta_n = delta_neighbours(phi_state,ell);
+        // Add dot-product of sigma_n and Delta_n to action
+        S += sigma_n.dot(Delta_n);
     }
     return -0.5*beta*S;
 }
@@ -30,28 +22,13 @@ const double NonlinearSigmaAction::evaluate(const std::shared_ptr<SampleState> p
 /* local heat bath update */
 void NonlinearSigmaAction::heatbath_update(std::shared_ptr<SampleState> phi_state,
                                            const unsigned int ell) {
-    // work out index on lattice
-    int i,j;
-    if (rotated) {
-        lattice->diag_vertex_lin2cart(ell,i,j);        
-    } else {
-        lattice->vertex_lin2cart(ell,i,j);
-    }
-    heatbath_ij_update(phi_state,i,j);
-}
-
-/* local heat bath update at a particular lattice point */
-void NonlinearSigmaAction::heatbath_ij_update(std::shared_ptr<SampleState> phi_state,
-                                              const int i,
-                                              const int j) {
-
     // temporary vectors
     Eigen::Vector3d sigma_n;
     Eigen::Vector3d Delta_n; // sum of nearest neighbour vectors
     Eigen::Vector3d Delta_n_hat; // unit vector pointing in direction Delta_n
     Eigen::Vector3d Delta_n_perp; // vector perpendicular to Delta_n
     double Delta_n_nrm;
-    Delta_n = delta_neighbours(phi_state,i,j);
+    Delta_n = delta_neighbours(phi_state,ell);
     Delta_n_nrm = Delta_n.norm();
     // Unit vector pointing in same direction as Delta_n
     Delta_n_hat = Delta_n;
@@ -89,35 +66,30 @@ void NonlinearSigmaAction::heatbath_ij_update(std::shared_ptr<SampleState> phi_s
             * Delta_n_hat;
     phi = atan2(sigma_n[1],sigma_n[0]);
     theta = atan2(sqrt(sigma_n[0]*sigma_n[0]+sigma_n[1]*sigma_n[1]),sigma_n[2]);
-    set_dofs(phi_state,i,j,theta,phi);
+    phi_state->data[2*ell] = theta;
+    phi_state->data[2*ell+1] = phi;
 }
 
 /* local overrelaxation update */
 void NonlinearSigmaAction::overrelaxation_update(std::shared_ptr<SampleState> phi_state,
                                                  const unsigned int ell) {
-    // work out index on lattice
-    int i,j;
-    if (rotated) {
-        lattice->diag_vertex_lin2cart(ell,i,j);        
-    } else {
-        lattice->vertex_lin2cart(ell,i,j);
-    }
     // temporary vectors
     Eigen::Vector3d sigma_n;
     Eigen::Vector3d Delta_n; // sum of nearest neighbour vectors
     double Delta_n_nrm;
     // Field at point n
     sigma_n.setZero();
-    add_sigma(phi_state,i,j,sigma_n);
+    add_sigma(phi_state,ell,sigma_n);
     // Sum of nearest neihbours
-    Delta_n = delta_neighbours(phi_state,i,j);
+    Delta_n = delta_neighbours(phi_state,ell);
     Delta_n.normalize();
     // Rotate around vector Delta_n (this does not change the action)
     double phi = uniform_dist(engine);
     sigma_n = Eigen::AngleAxisd(phi, Delta_n) * sigma_n;
     phi = atan2(sigma_n[1],sigma_n[0]);
     double theta = atan2(sqrt(sigma_n[0]*sigma_n[0]+sigma_n[1]*sigma_n[1]),sigma_n[2]);
-    set_dofs(phi_state,i,j,theta,phi);
+    phi_state->data[2*ell] = theta;
+    phi_state->data[2*ell+1] = phi;
 }
 
 /* Force for HMC integrator */
@@ -126,77 +98,39 @@ void NonlinearSigmaAction::force(const std::shared_ptr<SampleState> phi_state,
     for (unsigned int ell=0;ell<p_state->data.size();++ell) {
         p_state->data[ell] = 0.0;
     }
-    const unsigned int Mt_lat = lattice->getMt_lat();
-    const unsigned int Mx_lat = lattice->getMx_lat();
     Eigen::Vector3d Delta_n;
-    for (int i=0;i<Mt_lat;++i) {
-        for (int j=0;j<Mx_lat;++j) {
-            // only consider even points if lattice is rotated
-            if ( (not rotated) or ((i+j)%2==0) ) {
-                double theta, phi;
-                get_dofs(phi_state,i,j,theta,phi);
-                Delta_n = delta_neighbours(phi_state,i,j);
-                double dS_dtheta = -beta*((Delta_n[0]*cos(phi)+Delta_n[1]*sin(phi))*cos(theta)-Delta_n[2]*sin(theta));
-                double dS_dphi = -beta*(-Delta_n[0]*sin(phi)+Delta_n[1]*cos(phi))*sin(theta);
-                set_dofs(p_state,i,j,dS_dtheta,dS_dphi);
-            }
-        }
+    for (unsigned int ell=0;ell<lattice->getNvertices();++ell) {
+        double theta = phi_state->data[2*ell];
+        double phi = phi_state->data[2*ell+1];
+        Delta_n = delta_neighbours(phi_state,ell);
+        double dS_dtheta = -beta*((Delta_n[0]*cos(phi)+Delta_n[1]*sin(phi))*cos(theta)-Delta_n[2]*sin(theta));
+        double dS_dphi = -beta*(-Delta_n[0]*sin(phi)+Delta_n[1]*cos(phi))*sin(theta);
+        p_state->data[2*ell] = dS_dtheta;
+        p_state->data[2*ell+1] = dS_dphi;
     }
 }
 
 /* Copy coarse links from state on coarser level */
 void NonlinearSigmaAction::copy_from_coarse(const std::shared_ptr<SampleState> phi_coarse,
                                             std::shared_ptr<SampleState> phi_state) {
-    const unsigned int Mt_lat = lattice->getMt_lat();
-    const unsigned int Mx_lat = lattice->getMx_lat();
-    if (rotated) {
-        for (unsigned int i=0;i<Mt_lat/2;++i) {
-            for (unsigned int j=0;j<Mx_lat/2;++j) {
-                unsigned int ell = coarse_lattice->vertex_cart2lin(i,j);
-                set_dofs(phi_state,2*i,2*j,
-                         phi_coarse->data[2*ell],
-                         phi_coarse->data[2*ell+1]);
-            }    
-        }
-    } else {
-        for (unsigned int i=0;i<Mt_lat;++i) {
-            for (unsigned int j=0;j<Mx_lat;++j) {
-                if ((i+j)%2==0) {
-                    unsigned int ell = coarse_lattice->diag_vertex_cart2lin(i,j);
-                    set_dofs(phi_state,i,j,
-                             phi_coarse->data[2*ell],
-                             phi_coarse->data[2*ell+1]);
-                }
-            }    
-        }
+    const std::map<unsigned int, unsigned int>& fine2coarse_map = lattice->get_fine2coarse_map();
+    for (auto it=fine2coarse_map.begin();it!=fine2coarse_map.end();++it) {
+        unsigned int ell = it->first;
+        unsigned int ell_coarse = it->second;
+        phi_state->data[2*ell] = phi_coarse->data[2*ell_coarse];
+        phi_state->data[2*ell+1] = phi_coarse->data[2*ell_coarse+1];
     }
 }
 
 /* Copy coarse links from state on finer level */
 void NonlinearSigmaAction::copy_from_fine(const std::shared_ptr<SampleState> phi_fine,
                                           std::shared_ptr<SampleState> phi_state) {
-    const unsigned int Mt_lat = lattice->getMt_lat();
-    const unsigned int Mx_lat = lattice->getMx_lat();
-    if (rotated) {
-        for (unsigned int i=0;i<Mt_lat;++i) {
-            for (unsigned int j=0;j<Mx_lat;++j) {
-                if ((i+j)%2==0) {
-                    unsigned int ell = fine_lattice->vertex_cart2lin(i,j);
-                    set_dofs(phi_state,i,j,
-                             phi_fine->data[2*ell],
-                             phi_fine->data[2*ell+1]);
-                }
-            }    
-        }
-    } else {
-        for (unsigned int i=0;i<Mt_lat;++i) {
-            for (unsigned int j=0;j<Mx_lat;++j) {
-                unsigned int ell = fine_lattice->diag_vertex_cart2lin(2*i,2*j);
-                set_dofs(phi_state,i,j,
-                         phi_fine->data[2*ell],
-                         phi_fine->data[2*ell+1]);
-            }    
-        }
+    const std::map<unsigned int, unsigned int>& fine2coarse_map = fine_lattice->get_fine2coarse_map();
+    for (auto it=fine2coarse_map.begin();it!=fine2coarse_map.end();++it) {
+        unsigned int ell_fine = it->first;
+        unsigned int ell = it->second;
+        phi_state->data[2*ell] = phi_fine->data[2*ell_fine];
+        phi_state->data[2*ell+1] = phi_fine->data[2*ell_fine+1];
     }
 }
 

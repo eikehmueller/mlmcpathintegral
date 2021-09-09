@@ -3,6 +3,9 @@
 #include <memory>
 #include <stdexcept>
 #include <cassert>
+#include <vector>
+#include <array>
+#include <algorithm>
 #include "mpi/mpi_wrapper.hh"
 #include "common/parameters.hh"
 #include "lattice/lattice.hh"
@@ -124,17 +127,29 @@ public:
     
     /** @brief Return number of edges (assuming periodic boundaries) */
     unsigned int getNedges() const {
-        return 2*Mt_lat*Mx_lat;
+        if (rotated) {
+            return Mt_lat*Mx_lat;        
+        } else {
+            return 2*Mt_lat*Mx_lat;
+        }
     }
 
     /** @brief Return number of vertices (assuming periodic boundaries) */
     unsigned int getNvertices() const {
-        return Mt_lat*Mx_lat;
+        if (rotated) {
+            return Mt_lat*Mx_lat/2;
+        } else {
+            return Mt_lat*Mx_lat;
+        }
     }
 
     /** @brief Return number of cells (assuming periodic boundaries) */
     unsigned int getNcells() const {
-        return Mt_lat*Mx_lat;
+        if (rotated) {
+            return Mt_lat*Mx_lat/2;
+        } else {
+            return Mt_lat*Mx_lat;            
+        }
     }
     
     /** @brief Convert cartesian lattice index of vertex to linear index
@@ -161,7 +176,19 @@ public:
      * @param[in] j Position index in spatial direction
      */
     inline unsigned int vertex_cart2lin(const int i, const int j) const {
-        return Mt_lat*((j+Mx_lat)%Mx_lat) + ((i+Mt_lat)%Mt_lat);
+        if (rotated) {
+            assert((i+j)%2==0);        
+            int Mt_lat_half = Mt_lat/2;
+            int Mx_lat_half = Mx_lat/2;
+            int i_shifted = ((i+Mt_lat)-(i&1))/2;
+            int j_shifted = ((j+Mx_lat)-(j&1))/2;
+            // The first Mt_lat*Mx_lat/4 entries are reserved for points which
+            // have both even i and j indices.
+            int offset = (Mt_lat*Mx_lat/4)*(i&1);
+            return Mt_lat_half*(j_shifted%Mx_lat_half)+i_shifted%Mt_lat_half+offset;
+        } else {
+            return Mt_lat*((j+Mx_lat)%Mx_lat) + ((i+Mt_lat)%Mt_lat);
+        }
     }
 
     /** @brief Convert linear index of vertex to lattice index
@@ -173,8 +200,18 @@ public:
      * @param[out] j Position index in spatial direction
      */
     inline void vertex_lin2cart(const unsigned int ell, int& i, int& j) const {
-        j = ell / Mt_lat;
-        i = ell - Mt_lat*j;
+        if (rotated) {
+            int Mt_lat_half = Mt_lat/2;
+            int Mx_lat_half = Mx_lat/2;
+            int parity = ell / (Mt_lat*Mx_lat/4);
+            unsigned int ell_half = ell - (Mt_lat*Mx_lat/4)*parity;
+            int j_half = ell_half / Mt_lat_half;
+            j = 2*j_half+parity;
+            i = 2*(ell_half - Mt_lat_half*j_half)+parity;            
+        } else {
+            j = ell / Mt_lat;
+            i = ell - Mt_lat*j;            
+        }
     }
     
     /** @brief Convert Cartesian rotated lattice index to linear index.
@@ -293,6 +330,56 @@ public:
     /** @brief return coarsening type */   
     const CoarseningType get_coarsening_type() const { return coarsening_type; }
     
+    /** @brief return list of coarse vertices
+     * 
+     * This list contains the linear indices of all vertices that correspond to a
+     * vertex on the next-coarser lattice.
+     */
+    const std::vector<unsigned int>& get_coarse_vertices() {
+        return coarse_vertices;
+    }
+    
+    /** @brief return list of fine-only dofs
+     * 
+     * This list contains the linear indices of all vertices that DO NOT have
+     * correspond to a vertex on the next-coarser lattice.
+
+     */
+    const std::vector<unsigned int>& get_fineonly_vertices() {
+        return fineonly_vertices;
+    }
+
+    /** @brief return list of neighbour vertices
+     * 
+     * Each entry is a list which contains the linear indices of the direct
+     * neighbour vertices.
+     */
+    const std::vector<std::vector<unsigned int> >& get_neighbour_vertices() {
+        return neighbour_vertices;
+    }
+
+    /** @brief return neighbour vertices of a particular vertex
+     * 
+     * Each entry is a list which contains the linear indices of the direct
+     * neighbour vertices.
+     */
+
+    const std::vector<unsigned int>& get_neighbour_vertices(const unsigned int ell) {
+        return neighbour_vertices[ell];
+    }
+
+    
+    /** @brief return fine-to-coarse map 
+     * 
+     * For each vertex on the current lattice that corresponds to a coarse-lattice
+     * site
+     * */
+    const std::map<unsigned int, unsigned int>& get_fine2coarse_map() {
+        return fine2coarse_map;
+    }
+    
+protected:
+    
 protected:
     /** @brief Number of time slices */
     const unsigned int Mt_lat;
@@ -302,8 +389,16 @@ protected:
     const CoarseningType coarsening_type;
     /** @brief is this lattice a rotated lattice? */
     bool rotated;
-    /** @brief coarsening direction used to obtain this lattice */
-    int last_coarsening;
+    /** @brief coarse lattice */
+    std::shared_ptr<Lattice2D> coarse_lattice;
+    /** @brief list of vertices that also exist on next-coarser lattice */
+    std::vector<unsigned int> coarse_vertices;
+    /** @brief list of vertices that DO NOT exist on next-coarser lattice */
+    std::vector<unsigned int> fineonly_vertices;
+    /** @brief list of direct neighbour vertices */
+    std::vector<std::vector<unsigned int> > neighbour_vertices;
+    /** @brief map of coarse vertices to the corrresponding vertex on coarse lattice */
+    std::map<unsigned int, unsigned int> fine2coarse_map;
 };
 
 #endif // LATTICE2D_HH

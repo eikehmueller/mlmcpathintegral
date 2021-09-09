@@ -31,14 +31,9 @@ public:
     /** @brief Create new instance
      *
      * @param[in] lattice_ Lattice
-     * @param[in] rotated_ is the lattice action rotated?
      */
-    QoI2DMagneticSusceptibility(const std::shared_ptr<Lattice2D> lattice_,
-                       const bool rotated_) :
-        lattice(lattice_),
-        rotated(rotated_),
-        Mt_lat(lattice_->getMt_lat()),
-        Mx_lat(lattice_->getMx_lat()) {}
+    QoI2DMagneticSusceptibility(const std::shared_ptr<Lattice2D> lattice_) :
+        lattice(lattice_) {}
 
     /** @brief Destructor */
     virtual ~QoI2DMagneticSusceptibility() {}
@@ -50,14 +45,8 @@ public:
     const double virtual evaluate(const std::shared_ptr<SampleState> phi_state);
 
 private:
-    /** @brief Temporal extent of lattice */
+    /** @brief underlying lattice */
     const std::shared_ptr<Lattice2D> lattice;
-    /** @brief Is the lattice action rotated? */
-    const bool rotated;
-    /** @brief Number of time slices */
-    const unsigned int Mt_lat;
-    /** @brief Number of lattice points in spatial direction */
-    const unsigned int Mx_lat;
 };
 
 /** @class QoI2DMagneticSusceptibilityFactory
@@ -73,9 +62,8 @@ public:
     virtual std::shared_ptr<QoI> get(std::shared_ptr<Action> action) {
         std::shared_ptr<NonlinearSigmaAction> nonlinear_sigma_action;
         nonlinear_sigma_action = std::dynamic_pointer_cast<NonlinearSigmaAction>(action);
-        std::shared_ptr<Lattice2D> lattice = nonlinear_sigma_action->get_lattice();
-        bool rotated = nonlinear_sigma_action->is_rotated();
-        return std::make_shared<QoI2DMagneticSusceptibility>(lattice,rotated);
+        std::shared_ptr<Lattice2D> lattice = nonlinear_sigma_action->get_lattice();        
+        return std::make_shared<QoI2DMagneticSusceptibility>(lattice);
     }
 };
 
