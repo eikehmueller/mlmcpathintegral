@@ -117,25 +117,6 @@ Lattice2D::Lattice2D(const unsigned int Mt_lat_,
         }
         std::sort(coarse_vertices.begin(),coarse_vertices.end());
         std::sort(fineonly_vertices.begin(),fineonly_vertices.end());
-        // list of direct neighbour vertices
-        std::array<int,4> offset_i;
-        std::array<int,4> offset_j;
-        if (rotated) {
-            offset_i = {+1,+1,-1,-1};
-            offset_j = {+1,-1,+1,-1};
-        } else {
-            offset_i = {+1,-1, 0, 0};
-            offset_j = { 0, 0,+1,-1};
-        }
-        for (unsigned int ell=0;ell<getNvertices();++ell) {
-            int i,j;
-            vertex_lin2cart(ell,i,j);
-            std::vector<unsigned int> local_nb;
-            for (int k=0;k<4;++k) {
-                local_nb.push_back(vertex_cart2lin(i+offset_i[k],j+offset_j[k]));
-            }
-            neighbour_vertices.push_back(local_nb);
-        }
         // list of coarse dofs corresponding to a particular fine vertex
         for (auto it=coarse_vertices.begin();it<coarse_vertices.end();++it) {
             unsigned int ell = *it;
@@ -146,9 +127,27 @@ Lattice2D::Lattice2D(const unsigned int Mt_lat_,
             fine2coarse_map[ell] = ell_coarse;
             
         }
-        std::cout << std::endl;
     } else {
         coarse_lattice = nullptr;
+    }
+    // list of direct neighbour vertices
+    std::array<int,4> offset_i;
+    std::array<int,4> offset_j;
+    if (rotated) {
+        offset_i = {+1,+1,-1,-1};
+        offset_j = {+1,-1,+1,-1};
+    } else {
+        offset_i = {+1,-1, 0, 0};
+        offset_j = { 0, 0,+1,-1};
+    }
+    for (unsigned int ell=0;ell<getNvertices();++ell) {
+        int i,j;
+        vertex_lin2cart(ell,i,j);
+        std::vector<unsigned int> local_nb;
+        for (int k=0;k<4;++k) {
+            local_nb.push_back(vertex_cart2lin(i+offset_i[k],j+offset_j[k]));
+        }
+        neighbour_vertices.push_back(local_nb);
     }
 }
         
