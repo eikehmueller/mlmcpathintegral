@@ -105,8 +105,8 @@ public:
      *
      * @param[in] Mt_lat Number of time slices
      * @param[in] Mx_lat Number of points in spatial direction
-     * @param[in] Coarsening type
-     * @param[in] coarsening_level_ Coarsening level     
+     * @param[in] Coarsening type (see enum CoarseningType )
+     * @param[in] coarsening_level_ Coarsening level (0=finest lattice)
      */
     Lattice2D(const unsigned int Mt_lat_,
               const unsigned int Mx_lat_,
@@ -298,18 +298,22 @@ public:
                              // alternate directions
         switch (coarsening_type) {
             case CoarsenBoth:
+                // Coarsen in both directions
                 rho_coarsen_t = 2;
                 rho_coarsen_x = 2;
             break;
             case CoarsenTemporal:
+                // Coarsen in temporal direction only
                 rho_coarsen_t = 2;
                 rho_coarsen_x = 1;
             break;
             case CoarsenSpatial:
+                // Coarsen in spatial direction only
                 rho_coarsen_t = 1;
                 rho_coarsen_x = 2;
             break;
             case CoarsenAlternate:
+                // Coarsen in alternate directions
                 if (not (last_coarsening==1)) {
                     rho_coarsen_t = 2;
                     rho_coarsen_x = 1;
@@ -367,11 +371,11 @@ public:
                                                      coarsening_level+1);
         // Rotate coarse lattice if necessary
         if (coarsening_type == CoarsenRotate) {
-            coarse_lattice->set_rotated(coarse_rotated);
+            coarse_lattice->rotated = coarse_rotated;
         }
         // Set last coarsening of coarse lattice if necessary
         if (coarsening_type == CoarsenAlternate) {
-            coarse_lattice->set_last_coarsening(this_coarsening);
+            coarse_lattice->last_coarsening = this_coarsening;
         }
         return coarse_lattice;
     };
@@ -382,29 +386,6 @@ public:
     /** @brief return coarsening type */   
     const CoarseningType get_coarsening_type() const { return coarsening_type; }
     
-protected:
-    /** @brief Set rotation
-     * 
-     * @param[in] new_rotated new rotation direction
-     */
-     void set_rotated(const bool new_rotated) {
-         if ( (new_rotated == true) and (not (coarsening_type == CoarsenRotate) ) ) {
-            mpi_parallel::cerr << "ERROR: can only rotate lattice if coarsening type is \"rotate\"" << std::endl;
-            mpi_exit(EXIT_FAILURE);
-            throw std::runtime_error("...");
-         }
-         rotated = new_rotated;
-     }
-     
-     /** @brief Set direction of coarsening used to obtain this lattice (if 
-      *         alternate coarsening is used)
-      * 
-      * @param[in] last_coarsening_ coarsening direction (0=temporal, 1=spatial_
-      */
-      void set_last_coarsening(const int last_coarsening_) {
-          last_coarsening = last_coarsening_;
-      }
-
 protected:
     /** @brief Number of time slices */
     const unsigned int Mt_lat;
