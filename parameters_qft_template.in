@@ -18,8 +18,6 @@ quantumfieldtheory:
 lattice:
   Mt_lat = 16          # Number of time slices
   Mx_lat = 16          # Number of spatial lattice sites
-  T_lat = 1.0          # Temporal lattice extent
-  L_lat = 1.0          # Spatial lattice extent
   coarsening = 'both'  # Coarsening strategy [both, temporal, spatial, alternate, rotate]
 
 ###########################################

@@ -37,13 +37,9 @@ public:
         Parameters("lattice"),
         Mt_lat_(8),
         Mx_lat_(8),
-        T_lat_(1.0),
-        L_lat_(1.0),
         coarsening_type_(CoarsenUnspecified) {
         addKey("Mt_lat",Integer,Positive);
         addKey("Mx_lat",Integer,Positive);
-        addKey("T_lat",Double,Positive);
-        addKey("L_lat",Double,Positive);
         addKey("coarsening",String);
     }
 
@@ -57,8 +53,6 @@ public:
         if (!readSuccess) {
             Mt_lat_ = getContents("Mt_lat")->getInt();
             Mx_lat_ = getContents("Mx_lat")->getInt();
-            T_lat_ = getContents("T_lat")->getDouble();
-            L_lat_ = getContents("L_lat")->getDouble();
             std::string coarsening_str = getContents("coarsening")->getString();
             if (coarsening_str == "both") {
                 coarsening_type_ = CoarsenBoth;
@@ -85,16 +79,6 @@ public:
         return Mx_lat_;
     }
 
-    /** @brief Return temporal extent of lattice */
-    double T_lat() const {
-        return T_lat_;
-    }
-
-    /** @brief Return spatial extent of lattice */
-    double L_lat() const {
-        return L_lat_;
-    }
-
     /** @brief Return coarsening type */
     CoarseningType coarsening_type() const {
         return coarsening_type_;
@@ -105,10 +89,6 @@ private:
     unsigned int Mt_lat_;
     /** @brief Number of lattice points in spatial direction */
     unsigned int Mx_lat_;
-    /** @brief Temporal extent of lattice */
-    double T_lat_;
-    /** @brief Spatial extent of lattice */
-    double L_lat_;
     /** @brief Coarsening type */
     CoarseningType coarsening_type_;
 };
@@ -125,24 +105,16 @@ public:
      *
      * @param[in] Mt_lat Number of time slices
      * @param[in] Mx_lat Number of points in spatial direction
-     * @param[in] T_lat Temporal extent of lattice
-     * @param[in] L_lat Spatial extent of lattice
      * @param[in] Coarsening type
      * @param[in] coarsening_level_ Coarsening level     
      */
     Lattice2D(const unsigned int Mt_lat_,
               const unsigned int Mx_lat_,
-              const double T_lat_,
-              const double L_lat_,
               const CoarseningType coarsening_type_,
               const int coarsening_level_=0) :
         Lattice(coarsening_level_),
         Mt_lat(Mt_lat_),
         Mx_lat(Mx_lat_),
-        T_lat(T_lat_),
-        L_lat(L_lat_),
-        at_lat(T_lat_/Mt_lat_),
-        ax_lat(L_lat_/Mx_lat_),
         coarsening_type(coarsening_type_),
         rotated(false),
         last_coarsening(-1) {}
@@ -155,26 +127,6 @@ public:
     /** @brief Return number of points in spatial direction \f$M_{x,lat}\f$ */
     unsigned int getMx_lat() const {
         return Mx_lat;
-    }
-
-    /** @return Return temporal extent of lattice  \f$T_{lat}\f$ */
-    double getT_lat() const {
-        return T_lat;
-    }
-
-    /** @return Return spatial extent of lattice  \f$L_{lat}\f$ */
-    double getL_lat() const {
-        return L_lat;
-    }
-    
-    /** @brief Return temporal lattice spacing \f$a_t\f$ */
-    double getat_lat() const {
-        return at_lat;
-    }
-
-    /** @brief Return spatial lattice spacing \f$a_x\f$ */
-    double getax_lat() const {
-        return ax_lat;
     }
     
     /** @brief Return number of edges (assuming periodic boundaries) */
@@ -411,8 +363,6 @@ public:
         std::shared_ptr<Lattice2D> coarse_lattice;
         coarse_lattice = std::make_shared<Lattice2D>(Mt_lat_coarse,
                                                      Mx_lat_coarse,
-                                                     T_lat,
-                                                     L_lat,
                                                      coarsening_type,
                                                      coarsening_level+1);
         // Rotate coarse lattice if necessary
@@ -460,14 +410,6 @@ protected:
     const unsigned int Mt_lat;
     /** @brief Number of points in spatial direction */
     const unsigned int Mx_lat;
-    /** @brief Temporal extent of lattice */
-    const double T_lat;
-    /** @brief Spatial extent of lattice */
-    const double L_lat;
-    /** @brief lattice spacing in temporal direction */
-    const double at_lat;
-    /** @brief lattice spacing in spatial direction */
-    const double ax_lat;
     /** @brief coarsening type of lattice */
     const CoarseningType coarsening_type;
     /** @brief is this lattice a rotated lattice? */

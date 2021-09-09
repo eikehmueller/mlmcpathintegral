@@ -187,8 +187,6 @@ int main(int argc, char* argv[]) {
     std::shared_ptr<Lattice2D> lattice;
     lattice = std::make_shared<Lattice2D>(param_lattice.Mt_lat(),
                                           param_lattice.Mx_lat(),
-                                          param_lattice.T_lat(),
-                                          param_lattice.L_lat(),
                                           param_lattice.coarsening_type());
 
     /* ====== Select quantity of interest and construct QoI factory ====== */
