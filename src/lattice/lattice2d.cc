@@ -13,6 +13,11 @@ Lattice2D::Lattice2D(const unsigned int Mt_lat_,
         coarsening_type(coarsening_type_),
         rotated( (coarsening_type_==CoarsenRotate) and (coarsening_level_%2) ) {            
     // Construct coarse lattice
+    if ( (rotated) and ( ( Mx_lat%2) or (Mt_lat%2) ) ) {
+        mpi_parallel::cerr << "ERROR: Both Mx_lat and Mt_lat have to be even for rotated lattices." << std::endl;
+        mpi_exit(EXIT_FAILURE);
+        throw std::runtime_error("...");
+    }
     int rho_coarsen_t;   // temporal coarsening factor
     int rho_coarsen_x;   // spatial coarsening factor
     bool coarsening_allowed = true;    

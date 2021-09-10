@@ -98,12 +98,31 @@ private:
 /** @class Lattice2D
  *
  * @brief Class for 2d lattice
+ * 
+ * 
  *
  */
 class Lattice2D : public Lattice {
 public:
     /** @brief Initialise class
      *
+     * The lattice can either be unrotated or rotated, as shown in the following
+     * figures:
+     * 
+     *   +---+---+---+---+      +       +       +
+     *   !   !   !   !   !        \   /   \   /
+     *   +---+---+---+---+          +       +
+     *   !   !   !   !   !        /   \   /   \ 
+     *   +---+---+---+---!      +       +       +
+     *   !   !   !   !   !        \   /   \   /
+     *   +---+---+---+---+          +       +
+     *   !   !   !   !   !        /   \   /   \
+     *   +---+---+---+---+      +       +       +
+     *     unrotated                 rotated
+     * 
+     * Rotated lattices are represented by only using some of the vertices in an
+     * unrotated lattice. More specifically, only vertices (i,j) with even i+j are
+     * taken into account.
      *
      * @param[in] Mt_lat Number of time slices
      * @param[in] Mx_lat Number of points in spatial direction
@@ -155,22 +174,65 @@ public:
     /** @brief Convert cartesian lattice index of vertex to linear index
      *
      * Given a lattice site \f$n=(i,j)\f$, work out the corresponding linear index \f$\ell\f$.
-     * The links are arranged such that
+     * 
+     * For an unrotated lattice the vertices are arranged such that
+     * 
      * \f[
      *   \ell = M_{t,lat}j + i
      * \f]
+     * 
+     *  This is illustrated in the following figure:
      *
-     *    ...   ...   ...   ...  
+     * (0)---(1)---(2)---(3)---(0)
      *  !     !     !     !     !
      *  !     !     !     !     !
-     *  4-----5-----6-----7----(8)
+     * 12----13----14----15---(12)
+     *  !     !     !     !     !
+     *  !     !     !     !     !
+     *  8-----9----10----11----(8)
+     *  !     !     !     !     !
+     *  !     !     !     !     !
+     *  4-----5-----6-----7----(4)
      *  !     !     !     !     !
      *  !     !     !     !     !
      *  0-----1-----2-----3----(0)
      *
      * temporal direction (index i) = horizontal
      * spatial direction (index j) = vertical
-     *
+     * 
+     * For a rotated lattice the arrangement is this:
+     * 
+     * (0)----+----(1)----+----(0)
+     *  !     !     !     !     !
+     *  !     !     !     !     !
+     *  +-----6-----+-----7-----+
+     *  !     !     !     !     !
+     *  !     !     !     !     !
+     *  2-----+-----3-----+----(8)
+     *  !     !     !     !     !
+     *  !     !     !     !     !
+     *  +-----4-----+-----5-----+
+     *  !     !     !     !     !
+     *  !     !     !     !     !
+     *  0-----+-----1-----+----(0)
+     * 
+     * In other words, first the indices are distributed over the lattice where both
+     * i and j are even, followed by the vertices where both i and j are odd.
+     * 
+     * The lattice can be coarsened in different ways:
+     * 
+     *   1. in both directions simultaneouly
+     *   2.(a) in the temporal direction only
+     *   2.(b) in the spatial direction only
+     *   3. in the temporal and spatial direction in subsequent coarsenings
+     *   4. by rotating the lattice by 45 degrees
+     * 
+     * The lattice also stores the following information:
+     *   1. a list of all vertices that are present on the next-coarser lattice
+     *   2. a list of all vertices that are NOT present on the next-coarser lattice
+     *   3. a list of all neighbouring vertices for a given vertex
+     *   4. a map from the coarse-only indices in 1. to the vertices on the 
+     *      next-coarser lattice
      *
      * @param[in] i Position index in temporal direction
      * @param[in] j Position index in spatial direction
@@ -229,8 +291,6 @@ public:
         /* Rotated indices are only allowed if the lattice contains an
          * even number of cells in both directions
          */
-        assert(Mx_lat%2==0);
-        assert(Mt_lat%2==0);        
         int Mt_lat_half = Mt_lat/2;
         int Mx_lat_half = Mx_lat/2;
         int i_shifted = ((i+Mt_lat)-(i&1))/2;
@@ -316,7 +376,7 @@ public:
         mu = r & 1; // mu = r % 2
     }
 
-    /** @brief Construct coarsened lattice
+    /** @brief Return coarse lattice
      *
      * Returns coarsened version of lattice
      */
@@ -356,16 +416,6 @@ public:
      */
     const std::vector<std::vector<unsigned int> >& get_neighbour_vertices() {
         return neighbour_vertices;
-    }
-
-    /** @brief return neighbour vertices of a particular vertex
-     * 
-     * Each entry is a list which contains the linear indices of the direct
-     * neighbour vertices.
-     */
-
-    const std::vector<unsigned int>& get_neighbour_vertices(const unsigned int ell) {
-        return neighbour_vertices[ell];
     }
 
     

@@ -136,7 +136,8 @@ public:
                          const double beta_)
         : QFTAction(lattice_,fine_lattice_,renormalisation_),
           beta(beta_),
-          uniform_dist(0.,2.*M_PI) {
+          uniform_dist(0.,2.*M_PI),
+          neighbour_vertices(lattice_->get_neighbour_vertices()) {
               engine.seed(2481317);
               CoarseningType coarsening_type = lattice->get_coarsening_type();
               if (not (coarsening_type == CoarsenRotate) ) {
@@ -387,10 +388,9 @@ private:
      */
     Eigen::Vector3d delta_neighbours(const std::shared_ptr<SampleState> phi_state,
                                      const unsigned int ell) const {
-        const std::vector<unsigned int>& neighbour_vertices = lattice->get_neighbour_vertices(ell);
         Eigen::Vector3d Delta_n(0.,0.,0.);
         for (int k=0;k<4;++k) {
-            add_sigma(phi_state,neighbour_vertices[k],Delta_n);
+            add_sigma(phi_state,neighbour_vertices[ell][k],Delta_n);
         }
         return Delta_n;
     }
@@ -406,6 +406,8 @@ protected:
     mutable std::uniform_real_distribution<double> uniform_dist;
     /** @brief distribution for drawing altitude angle from heat bath */
     const ExpSin2Distribution exp_sin2_dist;
+    /** @brief Reference to the neighbour-list of the underlying lattice */
+    const std::vector<std::vector<unsigned int> >& neighbour_vertices;
 };
 
 #endif // NONLINEARSIGMAACTION_HH
