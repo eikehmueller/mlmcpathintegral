@@ -1,16 +1,16 @@
-#ifndef CLUSTERACTION_HH
-#define CLUSTERACTION_HH CLUSTERACTION_HH
+#ifndef QMCLUSTERACTION_HH
+#define QMCLUSTERACTION_HH QMCLUSTERACTION_HH
 
 #include "lattice/lattice1d.hh"
 #include "action/qm/qmaction.hh"
 
-/** @file clusteraction.hh
- * @brief Header file for abstract cluster action class
+/** @file qmclusteraction.hh
+ * @brief Header file for abstract quantum mechanical cluster action class
  */
 
-/** @class Action
+/** @class QMClusterAction
  *
- * @brief Base class for cluster action
+ * @brief Base class for QM cluster action
  *
  * Extends the action class by methods which are required to implement the
  * cluster algorithm for one-dimensional quantum problem with periodic
@@ -23,20 +23,16 @@
  * This, of course, implies that \f$x^{(\ell)}_-=x_i\f$ and
  * \f$x^{(\ell)}_+=x_{i+1}\f$.
  */
-class ClusterAction : public QMAction {
+class QMClusterAction {
 public:
     /** @brief Initialise class
      *
      * Create new instance of class.
      *
-     * @param[in] lattice_ Underlying lattice
-     * @param[in] T_final_ Final time \f$T\f$
-     * @param[in] m0_ Mass of particle \f$m_0\f$
+     * @param[in] generic_lattice_ Underlying generic lattice
      */
-    ClusterAction(const std::shared_ptr<Lattice1D> lattice_,
-                  const RenormalisationType renormalisation_,
-                  const double m0_)
-        : QMAction(lattice_, renormalisation_, m0_) {}
+    QMClusterAction(const std::shared_ptr<Lattice> lattice_)
+        : generic_lattice(lattice_) {}
 
     /** @brief Change \f$S_{\ell}\f$ in energy used in bonding probabilities
      *
@@ -59,6 +55,18 @@ public:
      * @param[in] x value of site \f$x\f$
      */
     virtual double flip(const double x) const = 0;
+
+    /** @brief Initialise state */
+    virtual void initialise_state(std::shared_ptr<SampleState> x_path) const = 0;
+  
+    /** @brief return size of samples */
+    virtual unsigned int sample_size() const = 0;  
+
+    const std::shared_ptr<Lattice> get_generic_lattice() const { return generic_lattice; }
+  
+protected:
+    const std::shared_ptr<Lattice> generic_lattice;
+      
 };
 
-#endif // CLUSTERACTION_HH
+#endif // QMCLUSTERACTION_HH

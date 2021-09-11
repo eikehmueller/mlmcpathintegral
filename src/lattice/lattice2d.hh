@@ -154,7 +154,7 @@ public:
     }
 
     /** @brief Return number of vertices (assuming periodic boundaries) */
-    unsigned int getNvertices() const {
+    virtual const unsigned int getNvertices() const {
         if (rotated) {
             return Mt_lat*Mx_lat/2;
         } else {

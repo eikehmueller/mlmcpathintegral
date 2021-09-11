@@ -131,7 +131,7 @@ public:
      * return some information on this instance of the action
      */
     virtual std::string info_string() const = 0;
-    
+        
 protected:
     /** @brief Renormalisation */
     const RenormalisationType renormalisation;

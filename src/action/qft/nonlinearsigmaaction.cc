@@ -22,7 +22,8 @@ const double NonlinearSigmaAction::evaluate(const std::shared_ptr<SampleState> p
 /* local heat bath update */
 void NonlinearSigmaAction::heatbath_update(std::shared_ptr<SampleState> phi_state,
                                            const unsigned int ell) {
-    // ell is the index of the unknown, this needs to be convertex to a vertex index
+    // ell is the index of the unknown, this needs to be converted
+    // to a vertex index
     unsigned int ell_vertex = ell/2;
     // temporary vectors
     Eigen::Vector3d sigma_n;
@@ -75,7 +76,8 @@ void NonlinearSigmaAction::heatbath_update(std::shared_ptr<SampleState> phi_stat
 /* local overrelaxation update */
 void NonlinearSigmaAction::overrelaxation_update(std::shared_ptr<SampleState> phi_state,
                                                  const unsigned int ell) {
-    // ell is the index of the unknown, this needs to be convertex to a vertex index
+    // ell is the index of the unknown, this needs to be converted
+    // to a vertex index
     unsigned int ell_vertex = ell/2;
     // temporary vectors
     Eigen::Vector3d sigma_n;

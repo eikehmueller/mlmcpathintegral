@@ -12,7 +12,7 @@
 #include "mpi/mpi_wrapper.hh"
 #include "mpi/mpi_random.hh"
 #include "lattice/lattice1d.hh"
-#include "action/qm/clusteraction.hh"
+#include "action/qm/qmclusteraction.hh"
 #include "action/qm/rotorrenormalisation.hh"
 
 /** @file rotoraction.hh
@@ -94,7 +94,7 @@ private:
  * two subgroup elements are \f$h_1(x)=x\f$ and
  * \f$h_2(x)=\pi+2\overline{x}-x\f$.
  */
-class RotorAction : public ClusterAction {
+class RotorAction : public QMAction, public QMClusterAction {
 public:
     /** @brief Initialise class
      *
@@ -106,7 +106,8 @@ public:
     RotorAction(const std::shared_ptr<Lattice1D> lattice_,
                 const RenormalisationType renormalisation_,
                 const double m0_)
-        : ClusterAction(lattice_,renormalisation_,m0_),
+        : QMAction(lattice_,renormalisation_,m0_),
+          QMClusterAction(lattice_),
           uniform_dist(-M_PI,M_PI) {
         engine.seed(21172817);
     }
@@ -129,6 +130,11 @@ public:
                                              c_param.m0_coarse());
         return new_action;
     };
+    
+    /** @brief return size of samples */
+    virtual unsigned int sample_size() const {
+        return M_lat;
+    }
 
     /** @brief Evaluate action for a specific path
      *

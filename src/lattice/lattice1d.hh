@@ -51,7 +51,7 @@ public:
     double T_final() const {
         return T_final_;
     }
-
+    
 private:
     /** @brief Number of lattice sites */
     unsigned int M_lat_;
@@ -105,6 +105,9 @@ public:
         }
         return std::make_shared<Lattice1D>(M_lat/2,T_final,coarsening_level+1);
     };
+    
+    /** @brief Return the number of vertices */
+    virtual const unsigned int getNvertices() const { return M_lat; }
 
 protected:
     /** @brief Number of time slices */

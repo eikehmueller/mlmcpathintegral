@@ -7,9 +7,9 @@
 #include "common/timer.hh"
 #include "common/samplestate.hh"
 #include "mpi/mpi_random.hh"
-#include "lattice/lattice1d.hh"
+#include "lattice/lattice.hh"
 #include "action/action.hh"
-#include "action/qm/clusteraction.hh"
+#include "action/qm/qmclusteraction.hh"
 #include "sampler/sampler.hh"
 
 /** @file clustersampler.hh
@@ -59,30 +59,29 @@ private:
     unsigned int n_updates_;
 };
 
-/** @class ClusterSampler
- * @brief Cluster algorithm sampler
+/** @class QMClusterSampler
+ * @brief Cluster algorithm sampler for quantum mechanical systems
  *
  * Generates samples by using the cluster algorithm described in
  * Wolff, U., 1989. "Collective Monte Carlo updating for spin systems".
  * Physical Review Letters, 62(4), p.361. (see also
  * <a href="https://arxiv.org/abs/hep-lat/9704009">arXiv/hep-lat/9704009</a>).
  */
-class ClusterSampler : public Sampler {
+class QMClusterSampler : public Sampler {
 public:
     /** @brief Create new instance
      *
      * @param[in] action_ Action to sample from
-     * @param[in] n_burnin_ Number of burnin steps
-     * @param[in] n_updates_ Number of cluster updates between steps
+     * @param[in] cluster_param Parameters of cluster sample
      */
-    ClusterSampler(const std::shared_ptr<ClusterAction> action_,
-                   const ClusterParameters cluster_param);
+    QMClusterSampler(const std::shared_ptr<QMClusterAction> action_,
+                     const ClusterParameters cluster_param);
 
     /** @brief Destroy instance
      *
      * Deallocate memory
      */
-    virtual ~ClusterSampler() {}
+    virtual ~QMClusterSampler() {}
 
     /** @brief Draw a sample
      *
@@ -119,9 +118,11 @@ private:
 
 protected:
     /** @brief Action to sample from */
-    const std::shared_ptr<ClusterAction> action;
-    /** @brief Number of points on lattice */
-    const unsigned int M_lat;
+    const std::shared_ptr<QMClusterAction> action;
+    /** @brief Underlying lattice */
+    const std::shared_ptr<Lattice> lattice;
+    /** @brief Number of vertices on lattice */
+    const unsigned int n_vertices;
     /** @brief Number of burn-in steps */
     const unsigned int n_burnin;
     /** @brief Number of updates per step */
@@ -144,25 +145,25 @@ protected:
     double cost_per_sample_;
 };
 
-class ClusterSamplerFactory : public SamplerFactory {
+class QMClusterSamplerFactory : public SamplerFactory {
 public:
     /** @brief Create new instance
      *
      * @param[in] param_cluster Custer sampler parameters
      */
-    ClusterSamplerFactory(const ClusterParameters param_cluster_) :
+    QMClusterSamplerFactory(const ClusterParameters param_cluster_) :
         param_cluster(param_cluster_) {}
 
     /** @brief Destructor */
-    virtual ~ClusterSamplerFactory() {}
+    virtual ~QMClusterSamplerFactory() {}
 
     /** @brief Return sampler for a specific  action
      *
      * @param[in] action Action to sample from
      */
     virtual std::shared_ptr<Sampler> get(std::shared_ptr<Action> action) {
-        return std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(action),
-                                                param_cluster);
+        return std::make_shared<QMClusterSampler>(std::dynamic_pointer_cast<QMClusterAction>(action),
+                                                  param_cluster);
     }
 private:
     /** Cluster sampler parameters */

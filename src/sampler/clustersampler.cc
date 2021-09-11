@@ -5,19 +5,22 @@
  */
 
 /* Constructor */
-ClusterSampler::ClusterSampler(const std::shared_ptr<ClusterAction> action_,
-                               const ClusterParameters cluster_param) :
+QMClusterSampler::QMClusterSampler(const std::shared_ptr<QMClusterAction> action_,                                   
+                                   const ClusterParameters cluster_param) :
     Sampler(),
     action(action_),
-    M_lat(action_->get_lattice()->getM_lat()),
+    lattice(action->get_generic_lattice()),
+    n_vertices(lattice->getNvertices()),
     n_burnin(cluster_param.n_burnin()),
     n_updates(cluster_param.n_updates()),
     uniform_dist(0.0,1.0),
-    uniform_int_dist(0,M_lat-1) {
+    uniform_int_dist(0,n_vertices-1) {
     engine.seed(2141517);
     // Create temporary workspace
-    x_path_cur = std::make_shared<SampleState>(M_lat);
+    x_path_cur = std::make_shared<SampleState>(action->sample_size());
+    std::cout << "HERE before" << std::endl;
     action->initialise_state(x_path_cur);
+    std::cout << "HERE after" << std::endl;
     // Measure cost per sample
     Timer timer_meas;
     unsigned int n_meas = 10000;
@@ -28,17 +31,17 @@ ClusterSampler::ClusterSampler(const std::shared_ptr<ClusterAction> action_,
     timer_meas.stop();
     cost_per_sample_ = 1.E6*timer_meas.elapsed()/n_meas;
     // Burn in
-    std::shared_ptr<SampleState> x_path_tmp = std::make_shared<SampleState>(M_lat);
+    std::shared_ptr<SampleState> x_path_tmp = std::make_shared<SampleState>(action->sample_size());
     for (unsigned int i=0; i<n_burnin; ++i) {
         draw(x_path_tmp);
     }
 }
 
 /** Process next link */
-std::pair<bool,int> ClusterSampler::process_link(const int i,
+std::pair<bool,int> QMClusterSampler::process_link(const int i,
         const int direction) {
     // Neighbouring site
-    int i_neighbour = (i+direction + M_lat) % M_lat;
+    int i_neighbour = (i+direction + n_vertices) % n_vertices;
     // Check if neighbouring site is bonded
     double Sell = action->S_ell(x_path_cur->data[i],
                                 x_path_cur->data[i_neighbour]);
@@ -53,7 +56,7 @@ std::pair<bool,int> ClusterSampler::process_link(const int i,
 }
 
 /** Draw next sample */
-void ClusterSampler::draw(std::shared_ptr<SampleState> x_path) {
+void QMClusterSampler::draw(std::shared_ptr<SampleState> x_path) {
     for (unsigned int i=0; i<n_updates; i++) {
         // Pick new subgroup
         action->new_angle();

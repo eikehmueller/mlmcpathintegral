@@ -22,7 +22,8 @@ QuenchedSchwingerClusterSampler::QuenchedSchwingerClusterSampler(const std::shar
     rotor_action = std::make_shared<RotorAction>(lattice1d,
                                                  RenormalisationNone,
                                                  beta*lattice1d->geta_lat());
-    cluster_sampler = std::make_shared<ClusterSampler>(rotor_action,cluster_param);
+    cluster_sampler = std::make_shared<QMClusterSampler>(rotor_action,
+                                                         cluster_param);
     rotor_action->initialise_state(psi_cluster_state);
     // Measure cost per sample
     std::shared_ptr<SampleState> phi_state_tmp = std::make_shared<SampleState>(ndof);

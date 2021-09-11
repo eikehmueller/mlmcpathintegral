@@ -80,7 +80,7 @@ protected:
     /** @brief Underlying topological oscillator action */
     mutable std::shared_ptr<RotorAction> rotor_action;
     /** @brief underlying cluster sampler */
-    mutable std::shared_ptr<ClusterSampler> cluster_sampler;
+    mutable std::shared_ptr<QMClusterSampler> cluster_sampler;
     /** @brief cost per sample */
     double cost_per_sample_;
     /** @brief Random number engine */

@@ -28,6 +28,9 @@ public:
     const int get_coarsening_level() const {
         return coarsening_level;
     }
+    
+    /** @brief Return the number of vertices */
+    virtual const unsigned int getNvertices() const = 0;
 
 protected:
     /** @brief coarsening level (0=finest level) */
