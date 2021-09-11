@@ -134,6 +134,9 @@ public:
               const CoarseningType coarsening_type_,
               const int coarsening_level_=0);
 
+    /** @brief Return dimension of lattice */
+    virtual const int get_dim() const { return 2;};
+    
     /** @brief Return number of timeslices \f$M_{t,lat}\f$ */
     unsigned int getMt_lat() const {
         return Mt_lat;
@@ -445,8 +448,6 @@ protected:
     std::vector<unsigned int> coarse_vertices;
     /** @brief list of vertices that DO NOT exist on next-coarser lattice */
     std::vector<unsigned int> fineonly_vertices;
-    /** @brief list of direct neighbour vertices */
-    std::vector<std::vector<unsigned int> > neighbour_vertices;
     /** @brief map of coarse vertices to the corrresponding vertex on coarse lattice */
     std::map<unsigned int, unsigned int> fine2coarse_map;
 };

@@ -29,12 +29,17 @@ public:
         return coarsening_level;
     }
     
+    /** @brief Return dimension of lattice */
+    virtual const int get_dim() const = 0;
+        
     /** @brief Return the number of vertices */
     virtual const unsigned int getNvertices() const = 0;
-
+    
 protected:
     /** @brief coarsening level (0=finest level) */
     mutable int coarsening_level;
+    /** @brief list of direct neighbour vertices */
+    std::vector<std::vector<unsigned int> > neighbour_vertices;
 };
 
 #endif // LATTICE_HH
