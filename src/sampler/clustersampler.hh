@@ -9,7 +9,7 @@
 #include "mpi/mpi_random.hh"
 #include "lattice/lattice.hh"
 #include "action/action.hh"
-#include "action/qm/qmclusteraction.hh"
+#include "action/clusteraction.hh"
 #include "sampler/sampler.hh"
 
 /** @file clustersampler.hh
@@ -59,7 +59,7 @@ private:
     unsigned int n_updates_;
 };
 
-/** @class QMClusterSampler
+/** @class ClusterSampler
  * @brief Cluster algorithm sampler for quantum mechanical systems
  *
  * Generates samples by using the cluster algorithm described in
@@ -67,21 +67,21 @@ private:
  * Physical Review Letters, 62(4), p.361. (see also
  * <a href="https://arxiv.org/abs/hep-lat/9704009">arXiv/hep-lat/9704009</a>).
  */
-class QMClusterSampler : public Sampler {
+class ClusterSampler : public Sampler {
 public:
     /** @brief Create new instance
      *
      * @param[in] action_ Action to sample from
      * @param[in] cluster_param Parameters of cluster sample
      */
-    QMClusterSampler(const std::shared_ptr<QMClusterAction> action_,
-                     const ClusterParameters cluster_param);
+    ClusterSampler(const std::shared_ptr<ClusterAction> action_,
+                   const ClusterParameters cluster_param);
 
     /** @brief Destroy instance
      *
      * Deallocate memory
      */
-    virtual ~QMClusterSampler() {}
+    virtual ~ClusterSampler() {}
 
     /** @brief Draw a sample
      *
@@ -118,7 +118,7 @@ private:
 
 protected:
     /** @brief Action to sample from */
-    const std::shared_ptr<QMClusterAction> action;
+    const std::shared_ptr<ClusterAction> action;
     /** @brief Underlying lattice */
     const std::shared_ptr<Lattice> lattice;
     /** @brief Number of vertices on lattice */
@@ -145,25 +145,25 @@ protected:
     double cost_per_sample_;
 };
 
-class QMClusterSamplerFactory : public SamplerFactory {
+class ClusterSamplerFactory : public SamplerFactory {
 public:
     /** @brief Create new instance
      *
      * @param[in] param_cluster Custer sampler parameters
      */
-    QMClusterSamplerFactory(const ClusterParameters param_cluster_) :
+    ClusterSamplerFactory(const ClusterParameters param_cluster_) :
         param_cluster(param_cluster_) {}
 
     /** @brief Destructor */
-    virtual ~QMClusterSamplerFactory() {}
+    virtual ~ClusterSamplerFactory() {}
 
     /** @brief Return sampler for a specific  action
      *
      * @param[in] action Action to sample from
      */
     virtual std::shared_ptr<Sampler> get(std::shared_ptr<Action> action) {
-        return std::make_shared<QMClusterSampler>(std::dynamic_pointer_cast<QMClusterAction>(action),
-                                                  param_cluster);
+        return std::make_shared<ClusterSampler>(std::dynamic_pointer_cast<ClusterAction>(action),
+                                                param_cluster);
     }
 private:
     /** Cluster sampler parameters */

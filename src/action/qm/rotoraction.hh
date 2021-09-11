@@ -12,7 +12,8 @@
 #include "mpi/mpi_wrapper.hh"
 #include "mpi/mpi_random.hh"
 #include "lattice/lattice1d.hh"
-#include "action/qm/qmclusteraction.hh"
+#include "action/clusteraction.hh"
+#include "action/qm/qmaction.hh"
 #include "action/qm/rotorrenormalisation.hh"
 
 /** @file rotoraction.hh
@@ -94,7 +95,7 @@ private:
  * two subgroup elements are \f$h_1(x)=x\f$ and
  * \f$h_2(x)=\pi+2\overline{x}-x\f$.
  */
-class RotorAction : public QMAction, public QMClusterAction {
+class RotorAction : public QMAction, public ClusterAction {
 public:
     /** @brief Initialise class
      *
@@ -107,7 +108,7 @@ public:
                 const RenormalisationType renormalisation_,
                 const double m0_)
         : QMAction(lattice_,renormalisation_,m0_),
-          QMClusterAction(lattice_),
+          ClusterAction(lattice_),
           uniform_dist(-M_PI,M_PI) {
         engine.seed(21172817);
     }

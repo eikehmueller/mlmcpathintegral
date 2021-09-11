@@ -1,29 +1,27 @@
-#ifndef QMCLUSTERACTION_HH
-#define QMCLUSTERACTION_HH QMCLUSTERACTION_HH
+#ifndef CLUSTERACTION_HH
+#define CLUSTERACTION_HH CLUSTERACTION_HH
 
-#include "lattice/lattice1d.hh"
-#include "action/qm/qmaction.hh"
+#include "lattice/lattice.hh"
 
-/** @file qmclusteraction.hh
- * @brief Header file for abstract quantum mechanical cluster action class
+/** @file clusteraction.hh
+ * @brief Header file for abstract cluster action class
  */
 
-/** @class QMClusterAction
+/** @class ClusterAction
  *
- * @brief Base class for QM cluster action
+ * @brief Base class for QMcluster action
  *
  * Extends the action class by methods which are required to implement the
- * cluster algorithm for one-dimensional quantum problem with periodic
- * boundary conditions. This assumes that the energy can be written as the
+ * cluster algorithm. This assumes that the energy can be written as the
  * sum over links
  * \f[
  *   E = \sum_{\ell} E_{\ell}(x^{(\ell)}_-,x^{(\ell)}_+)
  * \f]
- * where a link \f$\ell=(i,i+1)\f$ connects two neighbouring sites.
+ * where a link \f$\ell=(x_i,x_j)\f$ connects two neighbouring sites.
  * This, of course, implies that \f$x^{(\ell)}_-=x_i\f$ and
- * \f$x^{(\ell)}_+=x_{i+1}\f$.
+ * \f$x^{(\ell)}_+=x_{j}\f$.
  */
-class QMClusterAction {
+class ClusterAction {
 public:
     /** @brief Initialise class
      *
@@ -31,7 +29,7 @@ public:
      *
      * @param[in] generic_lattice_ Underlying generic lattice
      */
-    QMClusterAction(const std::shared_ptr<Lattice> lattice_)
+    ClusterAction(const std::shared_ptr<Lattice> lattice_)
         : generic_lattice(lattice_) {}
 
     /** @brief Change \f$S_{\ell}\f$ in energy used in bonding probabilities
@@ -69,4 +67,4 @@ protected:
       
 };
 
-#endif // QMCLUSTERACTION_HH
+#endif // CLUSTERACTION_HH

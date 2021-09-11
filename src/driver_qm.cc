@@ -62,7 +62,7 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
             mpi_parallel::cerr << " ERROR: can only use cluster sampler for QM rotor action." << std::endl;
             mpi_exit(EXIT_FAILURE);
         }
-        sampler_factory = std::make_shared<QMClusterSamplerFactory>(param_cluster);
+        sampler_factory = std::make_shared<ClusterSamplerFactory>(param_cluster);
     } else if (samplerid == SamplerExact) {
         /* --- CASE 4: exact sampler (for HO action) ---- */
         if (param_qm.action() != ActionHarmonicOscillator) {

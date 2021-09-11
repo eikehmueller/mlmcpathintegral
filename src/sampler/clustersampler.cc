@@ -5,8 +5,8 @@
  */
 
 /* Constructor */
-QMClusterSampler::QMClusterSampler(const std::shared_ptr<QMClusterAction> action_,                                   
-                                   const ClusterParameters cluster_param) :
+ClusterSampler::ClusterSampler(const std::shared_ptr<ClusterAction> action_,                                   
+                               const ClusterParameters cluster_param) :
     Sampler(),
     action(action_),
     lattice(action->get_generic_lattice()),
@@ -38,7 +38,7 @@ QMClusterSampler::QMClusterSampler(const std::shared_ptr<QMClusterAction> action
 }
 
 /** Process next link */
-std::pair<bool,int> QMClusterSampler::process_link(const int i,
+std::pair<bool,int> ClusterSampler::process_link(const int i,
         const int direction) {
     // Neighbouring site
     int i_neighbour = (i+direction + n_vertices) % n_vertices;
@@ -56,7 +56,7 @@ std::pair<bool,int> QMClusterSampler::process_link(const int i,
 }
 
 /** Draw next sample */
-void QMClusterSampler::draw(std::shared_ptr<SampleState> x_path) {
+void ClusterSampler::draw(std::shared_ptr<SampleState> x_path) {
     for (unsigned int i=0; i<n_updates; i++) {
         // Pick new subgroup
         action->new_angle();
