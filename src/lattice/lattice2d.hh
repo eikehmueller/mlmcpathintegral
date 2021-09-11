@@ -411,16 +411,6 @@ public:
     const std::vector<unsigned int>& get_fineonly_vertices() {
         return fineonly_vertices;
     }
-
-    /** @brief return list of neighbour vertices
-     * 
-     * Each entry is a list which contains the linear indices of the direct
-     * neighbour vertices.
-     */
-    const std::vector<std::vector<unsigned int> >& get_neighbour_vertices() {
-        return neighbour_vertices;
-    }
-
     
     /** @brief return fine-to-coarse map 
      * 

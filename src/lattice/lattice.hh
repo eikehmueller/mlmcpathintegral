@@ -35,6 +35,15 @@ public:
     /** @brief Return the number of vertices */
     virtual const unsigned int getNvertices() const = 0;
     
+    /** @brief return list of neighbour vertices
+     *
+     * Each entry is a list which contains the linear indices of the direct
+     * neighbour vertices.
+     */
+    const std::vector<std::vector<unsigned int> >& get_neighbour_vertices() {
+        return neighbour_vertices;
+    }
+    
 protected:
     /** @brief coarsening level (0=finest level) */
     mutable int coarsening_level;
