@@ -34,25 +34,28 @@ public:
 
     /** @brief Change \f$S_{\ell}\f$ in energy used in bonding probabilities
      *
-     * The probability to have a bond between sites \f$i\f$ and \f$i+1\f$
+     * The probability to have a bond between sites \f$i\f$ and \f$j\f$
      * is given by \f$1-e^{\min(0,-S_{\ell})}\f$
      *
-     * @param[in] x_m Value of \f$x^{(\ell)}_- = x_i\f$
-     * @param[in] x_p Value of \f$x^{(\ell)}_+ = x_{i+1}\f$
+     * @param[in] x_path Sample state
+     * @param[in] i index of first vertex
+     * @param[in] i index of second vertex
      */
-    virtual double S_ell(const double x_m, const double x_p) const = 0;
+    virtual double S_ell(const std::shared_ptr<SampleState> x_path, 
+                         const unsigned int i, 
+                         const unsigned int j) const = 0;
 
     /** @brief Set angle for the next step of the cluster algorithm
      */
     virtual void new_angle() const = 0;
 
-    /** @brief Flip the current spin
+    /** @brief Flip the spin at a given site
      *
-     * Return \f$hx\f$
-     *
-     * @param[in] x value of site \f$x\f$
+     * @param[inout] x_path State to process
+     * @param[in] ell Vertex at which to flip the spin
      */
-    virtual double flip(const double x) const = 0;
+    virtual void flip(std::shared_ptr<SampleState> x_path, 
+                      const unsigned int ell) const = 0;
 
     /** @brief Initialise state */
     virtual void initialise_state(std::shared_ptr<SampleState> x_path) const = 0;

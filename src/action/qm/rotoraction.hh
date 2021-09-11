@@ -228,18 +228,29 @@ public:
      *    S_{\ell} = -2\frac{I}{a}\cos(\phi_i-\alpha_r)\cos(\phi_{i+1}-\alpha_r)
      * \f]
      *
-     * @param[in] x_m Value of \f$x^{(\ell)}_- = x_i\f$
-     * @param[in] x_p Value of \f$x^{(\ell)}_+ = x_{i+1}\f$
+     * @param[in] x_path Sample state
+     * @param[in] i index of first vertex
+     * @param[in] j index of second vertex (j=i+1)
      */
-    virtual double S_ell(const double x_m, const double x_p) const {
+    virtual double S_ell(const std::shared_ptr<SampleState> x_path, 
+                         const unsigned int i, 
+                         const unsigned int j) const {
+        double x_m = x_path->data[i];
+        double x_p = x_path->data[j];
         return -2.0*m0/a_lat*cos(x_m-xbar)*cos(x_p-xbar);
     }
-
+    
     /** @brief Pick angle for next step of cluster algorithm
      */
     virtual void new_angle() const {
         xbar = uniform_dist(engine);
     }
+
+    /** @brief Flip the spin at a given site
+     *
+     * @param[inout] x_path State to process
+     * @param[in] ell Vertex at which to flip the spin
+     */
 
     /** @brief Flip a site
      *
@@ -247,8 +258,10 @@ public:
      *
      * @param[in] x value of site \f$x\f$
      */
-    virtual double flip(const double x) const {
-        return mod_2pi(M_PI+2.*xbar-x);
+    virtual void flip(std::shared_ptr<SampleState> x_path, 
+                      const unsigned int ell) const {
+      double x = x_path->data[ell];
+      x_path->data[ell] = mod_2pi(M_PI+2.*xbar-x);
     }
 
     /** @brief Exact analytical expression for topological susceptibility
