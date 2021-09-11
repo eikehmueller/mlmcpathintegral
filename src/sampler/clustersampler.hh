@@ -3,6 +3,8 @@
 #include <random>
 #include <vector>
 #include <memory>
+#include <set>
+#include <queue>
 #include "common/parameters.hh"
 #include "common/timer.hh"
 #include "common/samplestate.hh"
@@ -83,7 +85,7 @@ public:
      */
     virtual ~ClusterSampler() {}
 
-    /** @brief Draw a sample
+    /** @brief Draw a sample by carrying out n_update cluster updates
      *
      * returns a sample path \f$X\f$
      *
@@ -98,7 +100,13 @@ public:
 
 private:
 
-    /** @brief Process next link
+    /** @brief Single cluster update */
+    virtual void single_cluster_update();
+
+    /** @brief Single 1d cluster update */
+    virtual void single_cluster_update1d();
+
+    /** @brief Process next link in 1d specialisation of algorithm
      *
      * Depending on direction, the neighbour is either site \f$i+1\f$ or
      * \f$i-1\f$. Connect the sites with the probability
@@ -108,8 +116,8 @@ private:
      * @param[in] Lattice site
      * @param[in] direction Direction to neighbour (has to be +1 or -1)
      */
-    std::pair<bool,int> process_link(const int i,
-                                     const int direction);
+    std::pair<bool,int> process_link1d(const int i,
+                                       const int direction);
     /** @brief Set current state to particular value
      *
      * @param[in] x_path
