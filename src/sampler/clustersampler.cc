@@ -41,10 +41,6 @@ std::pair<bool,int> ClusterSampler::process_link(const int i,
     // Neighbouring site
     int i_neighbour = (i+direction + n_vertices) % n_vertices;
     // Check if neighbouring site is bonded
-    /* OLD
-    double Sell = action->S_ell(x_path_cur->data[i],
-                                x_path_cur->data[i_neighbour);
-    */
     double Sell = action->S_ell(x_path_cur,i,i_neighbour);
     
     // Connection probability
@@ -52,7 +48,6 @@ std::pair<bool,int> ClusterSampler::process_link(const int i,
     // Flip neighbouring site if it is bonded
     bool bonded = (uniform_dist(engine)<p_connect);
     if (bonded) {
-        // OLD x_path_cur->data[i_neighbour] = action->flip(x_path_cur->data[i_neighbour]);
         action->flip(x_path_cur,i_neighbour);
         
     }
@@ -66,7 +61,6 @@ void ClusterSampler::draw(std::shared_ptr<SampleState> x_path) {
         action->new_angle();
         // Pick a random site and flip it
         int i0 = uniform_int_dist(engine);        
-        // OLD x_path_cur->data[i0] = action->flip(x_path_cur->data[i0]);
         action->flip(x_path_cur,i0);
         // Process cluster forward
         int i_p=i0;
