@@ -18,9 +18,7 @@ ClusterSampler::ClusterSampler(const std::shared_ptr<ClusterAction> action_,
     engine.seed(2141517);
     // Create temporary workspace
     x_path_cur = std::make_shared<SampleState>(action->sample_size());
-    std::cout << "HERE before" << std::endl;
     action->initialise_state(x_path_cur);
-    std::cout << "HERE after" << std::endl;
     // Measure cost per sample
     Timer timer_meas;
     unsigned int n_meas = 10000;
