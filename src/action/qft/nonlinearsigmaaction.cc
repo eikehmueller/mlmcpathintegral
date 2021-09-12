@@ -161,6 +161,54 @@ void NonlinearSigmaAction::initialise_state(std::shared_ptr<SampleState> phi_sta
     }
 }
 
+/* Draw new reflection vector for cluster flip */
+void NonlinearSigmaAction::new_angle() const {
+    std::uniform_real_distribution<double> uniform(-1.0,1.0);
+    double nrm_sq;
+    do {
+        sigma_spinflip[0] = uniform(engine);
+        sigma_spinflip[1] = uniform(engine);
+        sigma_spinflip[2] = uniform(engine);
+        nrm_sq = sigma_spinflip.norm();
+    } while ( (nrm_sq > 1.0) or (nrm_sq < 0.01) );
+    sigma_spinflip.normalize();
+}
+
+/* Local action contribution for bond probability computation */
+double NonlinearSigmaAction::S_ell(const std::shared_ptr<SampleState> phi_state,
+                                   const unsigned int i,
+                                   const unsigned int j) const {
+
+    double theta_i=phi_state->data[2*i];
+    double phi_i=phi_state->data[2*i+1];
+    double theta_j=phi_state->data[2*j];
+    double phi_j=phi_state->data[2*j+1];
+    double r_sigma_i = sigma_spinflip[0]*sin(theta_i)*cos(phi_i)
+                     + sigma_spinflip[1]*sin(theta_i)*sin(phi_i)
+                     + sigma_spinflip[2]*cos(theta_i);
+    double r_sigma_j = sigma_spinflip[0]*sin(theta_j)*cos(phi_j)
+                     + sigma_spinflip[1]*sin(theta_j)*sin(phi_j)
+                     + sigma_spinflip[2]*cos(theta_j);
+    return -2.*beta*r_sigma_i*r_sigma_j;
+}
+
+/* Flip local spin for cluster update */
+void NonlinearSigmaAction::flip(std::shared_ptr<SampleState> phi_state,
+                                const unsigned int ell) const {
+    double theta=phi_state->data[2*ell];
+    double phi=phi_state->data[2*ell+1];
+    Eigen::Vector3d sigma;
+    sigma[0] += sin(theta)*cos(phi);
+    sigma[1] += sin(theta)*sin(phi);
+    sigma[2] += cos(theta);
+    sigma -= 2.*sigma.dot(sigma_spinflip)*sigma_spinflip;
+    phi = atan2(sigma[1],sigma[0]);
+    theta = atan2(sqrt(sigma[0]*sigma[0]+sigma[1]*sigma[1]),sigma[2]);
+    phi_state->data[2*ell] = theta;
+    phi_state->data[2*ell+1] = phi;
+};
+
+
 /* Return lattice information */
 std::string NonlinearSigmaAction::info_string() const {
     std::stringstream sstr;

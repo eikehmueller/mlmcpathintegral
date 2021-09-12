@@ -17,6 +17,7 @@
 #include "distribution/expsin2distribution.hh"
 #include "lattice/lattice2d.hh"
 #include "action/action.hh"
+#include "action/clusteraction.hh"
 #include "action/qft/qftaction.hh"
 #include "action/qft/nonlinearsigmarenormalisation.hh"
 
@@ -118,7 +119,7 @@ private:
  * 
  */
 
-class NonlinearSigmaAction : public QFTAction {
+class NonlinearSigmaAction : public QFTAction, public ClusterAction {
     // The conditioned fine action class needs access to some private class 
     // methods to avoid code duplication
     friend class NonlinearSigmaConditionedFineAction;
@@ -135,6 +136,7 @@ public:
                          const RenormalisationType renormalisation_,
                          const double beta_)
         : QFTAction(lattice_,fine_lattice_,renormalisation_),
+          ClusterAction(lattice_),
           beta(beta_),
           uniform_dist(0.,2.*M_PI),
           neighbour_vertices(lattice_->get_neighbour_vertices()) {
@@ -394,6 +396,31 @@ private:
         }
         return Delta_n;
     }
+        
+    /** @brief Change \f$S_{\ell}\f$ in energy used in bonding probabilities
+     *
+     * The probability to have a bond between sites \f$i\f$ and \f$j\f$
+     * is given by \f$1-e^{\min(0,-S_{\ell})}\f$
+     *
+     * @param[in] x_path Sample state
+     * @param[in] i index of first vertex
+     * @param[in] i index of second vertex
+     */
+    virtual double S_ell(const std::shared_ptr<SampleState> phi_state,
+                         const unsigned int i,
+                         const unsigned int j) const;
+
+    
+    /** @brief Flip the spin at a given site with respect to the reflection plane
+     *
+     * @param[inout] phi_state State to process
+     * @param[in] ell Vertex at which to flip the spin
+     */
+    virtual void flip(std::shared_ptr<SampleState> phi_state,
+                      const unsigned int ell) const;
+
+    /** @brief Draw new reflection angle (normal for reflection plan) for cluster sampler */
+    virtual void new_angle() const;
 
 protected:
     /** @brief Dimensionless coupling constant \f$\beta=1/(a_t a_x g^2)\f$*/
@@ -408,6 +435,8 @@ protected:
     const ExpSin2Distribution exp_sin2_dist;
     /** @brief Reference to the neighbour-list of the underlying lattice */
     const std::vector<std::vector<unsigned int> >& neighbour_vertices;
+    /** @brief spin-flip vector for cluster updates */
+    mutable Eigen::Vector3d sigma_spinflip;
 };
 
 #endif // NONLINEARSIGMAACTION_HH
