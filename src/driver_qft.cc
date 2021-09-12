@@ -66,12 +66,15 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
                                                                      param_stats,
                                                                      param_hierarchical);
     } else if (samplerid == SamplerCluster) {
-        if (param_qft.action() != ActionQuenchedSchwinger) {
-            mpi_parallel::cerr << " ERROR: can only use cluster sampler for quenched schwinger action." << std::endl;
+        /* --- CASE 5: Cluster sampler */
+        if (param_qft.action() == ActionQuenchedSchwinger) {
+            sampler_factory = std::make_shared<QuenchedSchwingerClusterSamplerFactory>(param_cluster);
+        } else if (param_qft.action() == ActionNonlinearSigma) {
+            sampler_factory = std::make_shared<ClusterSamplerFactory>(param_cluster);
+        } else {
+            mpi_parallel::cerr << " ERROR: cluster not supported for chosen action." << std::endl;
             mpi_exit(EXIT_FAILURE);
         }
-        /* --- CASE 5: Cluster sampler */
-        sampler_factory = std::make_shared<QuenchedSchwingerClusterSamplerFactory>(param_cluster);
     } else {
         mpi_parallel::cerr << " ERROR: Unsupported sampler." << std::endl;
         mpi_exit(EXIT_FAILURE);
