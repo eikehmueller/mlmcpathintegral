@@ -162,7 +162,7 @@ void NonlinearSigmaAction::initialise_state(std::shared_ptr<SampleState> phi_sta
 }
 
 /* Draw new reflection vector for cluster flip */
-void NonlinearSigmaAction::new_angle() const {
+void NonlinearSigmaAction::new_reflection() const {
     std::uniform_real_distribution<double> uniform(-1.0,1.0);
     double nrm_sq;
     do {

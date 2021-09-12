@@ -54,7 +54,7 @@ void ClusterSampler::draw(std::shared_ptr<SampleState> x_path) {
 /* Carry out a single generic cluster update */
 void ClusterSampler::single_cluster_update() {
     // Pick new subgroup
-    action->new_angle();
+    action->new_reflection();
     // Get neighbour list
     const std::vector<std::vector<unsigned int> >& neighbour_vertices = lattice->get_neighbour_vertices();
     std::set<unsigned int> cluster;
@@ -92,7 +92,7 @@ void ClusterSampler::single_cluster_update() {
 /* Carry out a single 1d cluster update */
 void ClusterSampler::single_cluster_update1d() {
     // Pick new subgroup
-    action->new_angle();
+    action->new_reflection();
     // Pick a random site and flip it
     int i0 = uniform_int_dist(engine);
     action->flip(x_path_cur,i0);

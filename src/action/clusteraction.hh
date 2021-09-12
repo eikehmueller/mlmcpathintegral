@@ -45,9 +45,9 @@ public:
                          const unsigned int i, 
                          const unsigned int j) const = 0;
 
-    /** @brief Set angle for the next step of the cluster algorithm
+    /** @brief Set reflection direction for the next step of the cluster algorithm
      */
-    virtual void new_angle() const = 0;
+    virtual void new_reflection() const = 0;
 
     /** @brief Flip the spin at a given site
      *

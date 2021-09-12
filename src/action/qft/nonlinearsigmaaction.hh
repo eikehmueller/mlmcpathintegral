@@ -420,7 +420,7 @@ private:
                       const unsigned int ell) const;
 
     /** @brief Draw new reflection angle (normal for reflection plan) for cluster sampler */
-    virtual void new_angle() const;
+    virtual void new_reflection() const;
 
 protected:
     /** @brief Dimensionless coupling constant \f$\beta=1/(a_t a_x g^2)\f$*/

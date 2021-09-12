@@ -242,7 +242,7 @@ public:
     
     /** @brief Pick angle for next step of cluster algorithm
      */
-    virtual void new_angle() const {
+    virtual void new_reflection() const {
         xbar = uniform_dist(engine);
     }
 
