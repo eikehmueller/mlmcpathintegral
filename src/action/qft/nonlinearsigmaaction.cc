@@ -162,13 +162,13 @@ void NonlinearSigmaAction::initialise_state(std::shared_ptr<SampleState> phi_sta
 /* Draw new reflection vector for cluster flip */
 void NonlinearSigmaAction::new_reflection() const {
     std::uniform_real_distribution<double> uniform(-1.0,1.0);
-    double nrm_sq;
+    double nrm;
     do {
         sigma_spinflip[0] = uniform(engine);
         sigma_spinflip[1] = uniform(engine);
         sigma_spinflip[2] = uniform(engine);
-        nrm_sq = sigma_spinflip.norm();
-    } while ( (nrm_sq > 1.0) or (nrm_sq < 0.01) );
+        nrm = sigma_spinflip.norm();
+    } while ( (nrm > 1.0) or (nrm < 0.1) );
     sigma_spinflip.normalize();
 }
 
