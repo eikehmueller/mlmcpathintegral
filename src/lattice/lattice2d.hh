@@ -124,9 +124,9 @@ public:
      * unrotated lattice. More specifically, only vertices (i,j) with even i+j are
      * taken into account.
      *
-     * @param[in] Mt_lat Number of time slices
-     * @param[in] Mx_lat Number of points in spatial direction
-     * @param[in] Coarsening type (see enum CoarseningType )
+     * @param[in] Mt_lat_ Number of time slices
+     * @param[in] Mx_lat_ Number of points in spatial direction
+     * @param[in] coarsening_type_ (see enum CoarseningType )
      * @param[in] coarsening_level_ Coarsening level (0=finest lattice)
      */
     Lattice2D(const unsigned int Mt_lat_,

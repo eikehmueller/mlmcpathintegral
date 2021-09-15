@@ -18,7 +18,6 @@ class Lattice {
 public:
     /** @brief Initialise class
      *
-     *
      * @param[in] coarsening_level_ Coarsening level (0=finest)
      * @param[in] dimension_ Lattice dimension
      */
