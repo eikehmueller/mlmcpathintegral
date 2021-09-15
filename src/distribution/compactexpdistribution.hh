@@ -1,5 +1,5 @@
 #ifndef COMPACTEXPDISTRIBUTION_HH
-#define COMPACTDISTRIBUTION_HH COMPACTEXPDISTRIBUTIONHH
+#define COMPACTEXPDISTRIBUTION_HH COMPACTEXPDISTRIBUTION_HH
 #include <random>
 #include <cmath>
 
@@ -66,4 +66,4 @@ private:
   mutable std::uniform_real_distribution<double> uniform_distribution;
 };
 
-#endif // COMPACTEXPDISTRIBUTIONHH
+#endif // COMPACTEXPDISTRIBUTION_HH
