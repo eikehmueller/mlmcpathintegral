@@ -364,21 +364,19 @@ public:
 
 private:
 
-    /** @brief Extract 3d-vector at lattice vertex with index ell from sample
-     *         state and set the vector sigma to it.
+    /** @brief Extract and return 3d-vector at lattice vertex with index ell from state
      *
      * @param[in] phi_state State \f$\phi\f$
      * @param[in] ell linear index of vertex
-     * @param[out] sigma unit vector
      */
-    void set_sigma(const std::shared_ptr<SampleState> phi_state,
-                   const unsigned int ell,
-                   Eigen::Vector3d& sigma) const {        
+    Eigen::Vector3d get_sigma(const std::shared_ptr<SampleState> phi_state,
+                              const unsigned int ell) const {        
         double theta=phi_state->data[2*ell];
         double phi=phi_state->data[2*ell+1];
-        sigma[0] = sin(theta)*cos(phi);
-        sigma[1] = sin(theta)*sin(phi);
-        sigma[2] = cos(theta);
+        Eigen::Vector3d sigma = { sin(theta)*cos(phi),
+                                  sin(theta)*sin(phi),
+                                  cos(theta) };
+        return sigma;
     }
 
     /** @brief Extract 3d-vector at lattice vertex with index ell from sample
