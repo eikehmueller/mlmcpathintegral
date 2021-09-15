@@ -56,14 +56,16 @@ void NonlinearSigmaAction::heatbath_update(std::shared_ptr<SampleState> phi_stat
             Delta_n_perp[2] = 0.0;
             break;
     }
-    // Draw altitude and azimuth rotation angles
-    double theta = exp_sin2_dist.draw(engine,2.*beta*Delta_n_nrm);
+    // Draw projection of spin onto Sigma_n
+    double sigma_par = compact_exp_dist.draw(engine,beta*Delta_n_nrm);
+    double sigma_perp = sqrt(1.-sigma_par*sigma_par);
+    sigma_n = sigma_par*Delta_n + sigma_perp*Delta_n_perp;
+    // Draw azimuth rotation angle and rotate around Sigma_n
     double phi = uniform_dist(engine);
     sigma_n = Eigen::AngleAxisd(phi, Delta_n)
-            * Eigen::AngleAxisd(theta, Delta_n_perp)
-            * Delta_n;
+            * sigma_n;
     phi = atan2(sigma_n[1],sigma_n[0]);
-    theta = atan2(sqrt(sigma_n[0]*sigma_n[0]+sigma_n[1]*sigma_n[1]),sigma_n[2]);
+    double theta = atan2(sqrt(sigma_n[0]*sigma_n[0]+sigma_n[1]*sigma_n[1]),sigma_n[2]);
     phi_state->data[2*ell_vertex] = theta;
     phi_state->data[2*ell_vertex+1] = phi;
 }

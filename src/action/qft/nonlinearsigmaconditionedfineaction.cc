@@ -31,8 +31,9 @@ double NonlinearSigmaConditionedFineAction::evaluate(const std::shared_ptr<Sampl
         Delta_n = action->delta_neighbours(phi_state,ell);
         // Work out length of Delta_n and angle between Delta_n and sigma_n
         double Delta_n_nrm = Delta_n.norm();
-        double theta = acos(sigma_n.dot(Delta_n)/Delta_n_nrm);
-        S -= log(exp_sin2_dist.evaluate(theta,2.*beta*Delta_n_nrm));
+        Delta_n.normalize();
+        double z = sigma_n.dot(Delta_n); // projection of spin onto direction of neighbour sum
+        S -= log(compact_exp_dist.evaluate(z,beta*Delta_n_nrm));
     }
     return S;
 }

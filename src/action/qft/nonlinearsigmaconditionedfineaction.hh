@@ -6,7 +6,7 @@
 #include "common/auxilliary.hh"
 #include "common/samplestate.hh"
 #include "lattice/lattice2d.hh"
-#include "distribution/expsin2distribution.hh"
+#include "distribution/compactexpdistribution.hh"
 #include "action/action.hh"
 #include "action/conditionedfineaction.hh"
 #include "action/qft/nonlinearsigmaaction.hh"
@@ -80,7 +80,7 @@ private:
     /** @brief Random number engine */
     mutable mpi_parallel::mt19937_64 engine;
     /** @brief Probability distribution for evaluating conditional probabilities */
-    mutable ExpSin2Distribution exp_sin2_dist;
+    mutable CompactExpDistribution compact_exp_dist;
 };
 
 struct NonlinearSigmaConditionedFineActionFactory : public ConditionedFineActionFactory {

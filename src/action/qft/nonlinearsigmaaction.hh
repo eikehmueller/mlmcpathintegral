@@ -14,7 +14,7 @@
 #include "common/samplestate.hh"
 #include "mpi/mpi_wrapper.hh"
 #include "mpi/mpi_random.hh"
-#include "distribution/expsin2distribution.hh"
+#include "distribution/compactexpdistribution.hh"
 #include "lattice/lattice2d.hh"
 #include "action/action.hh"
 #include "action/clusteraction.hh"
@@ -447,8 +447,8 @@ protected:
     mutable Engine engine;
     /** @brief distribution for drawing azimuth angle from heat bath */
     mutable std::uniform_real_distribution<double> uniform_dist;
-    /** @brief distribution for drawing altitude angle from heat bath */
-    const ExpSin2Distribution exp_sin2_dist;
+    /** @brief distribution for drawing spin projection from heat bath */
+    const CompactExpDistribution compact_exp_dist;
     /** @brief Reference to the neighbour-list of the underlying lattice */
     const std::vector<std::vector<unsigned int> >& neighbour_vertices;
     /** @brief spin-flip vector for cluster updates */
