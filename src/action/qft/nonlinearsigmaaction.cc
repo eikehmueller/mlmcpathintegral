@@ -195,10 +195,9 @@ void NonlinearSigmaAction::flip(std::shared_ptr<SampleState> phi_state,
                                 const unsigned int ell) const {
     double theta=phi_state->data[2*ell];
     double phi=phi_state->data[2*ell+1];
-    Eigen::Vector3d sigma;
-    sigma[0] += sin(theta)*cos(phi);
-    sigma[1] += sin(theta)*sin(phi);
-    sigma[2] += cos(theta);
+    Eigen::Vector3d sigma = { sin(theta)*cos(phi),
+                              sin(theta)*sin(phi),
+                              cos(theta) };
     sigma -= 2.*sigma.dot(sigma_spinflip)*sigma_spinflip;
     phi = atan2(sigma[1],sigma[0]);
     theta = atan2(sqrt(sigma[0]*sigma[0]+sigma[1]*sigma[1]),sigma[2]);
