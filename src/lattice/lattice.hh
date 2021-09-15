@@ -20,17 +20,16 @@ public:
      *
      *
      * @param[in] coarsening_level_ Coarsening level (0=finest)
-     * @param[in] T_final_ Final time \f$T\f$
+     * @param[in] dimension_ Lattice dimension
      */
-    Lattice(const int coarsening_level_=0) : coarsening_level(coarsening_level_) {}
+    Lattice(const int coarsening_level_=0,
+            const int dimension_=-1) : coarsening_level(coarsening_level_),
+                                       dimension(dimension_) {}
 
     /** @brief Return coarsening level of action */
     const int get_coarsening_level() const {
         return coarsening_level;
     }
-    
-    /** @brief Return dimension of lattice */
-    virtual const int get_dim() const = 0;
         
     /** @brief Return the number of vertices */
     virtual const unsigned int getNvertices() const = 0;
@@ -43,6 +42,9 @@ public:
     const std::vector<std::vector<unsigned int> >& get_neighbour_vertices() {
         return neighbour_vertices;
     }
+    
+    /** Lattice dimension */
+    const int dimension;
     
 protected:
     /** @brief coarsening level (0=finest level) */

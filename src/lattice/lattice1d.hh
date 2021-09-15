@@ -51,7 +51,7 @@ public:
     double T_final() const {
         return T_final_;
     }
-    
+        
 private:
     /** @brief Number of lattice sites */
     unsigned int M_lat_;
@@ -75,9 +75,6 @@ public:
     Lattice1D(const unsigned int M_lat_,
               const double T_final_,
               const int coarsening_level_=0);
-
-    /** @brief Return dimension of lattice */
-    virtual const int get_dim() const { return 1;};
     
     /** @brief Return number of timeslices \f$M\f$ */
     unsigned int getM_lat() const {

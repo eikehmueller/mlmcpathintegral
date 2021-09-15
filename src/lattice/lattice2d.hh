@@ -133,9 +133,6 @@ public:
               const unsigned int Mx_lat_,
               const CoarseningType coarsening_type_,
               const int coarsening_level_=0);
-
-    /** @brief Return dimension of lattice */
-    virtual const int get_dim() const { return 2;};
     
     /** @brief Return number of timeslices \f$M_{t,lat}\f$ */
     unsigned int getMt_lat() const {
@@ -420,8 +417,6 @@ public:
     const std::map<unsigned int, unsigned int>& get_fine2coarse_map() {
         return fine2coarse_map;
     }
-    
-protected:
     
 protected:
     /** @brief Number of time slices */

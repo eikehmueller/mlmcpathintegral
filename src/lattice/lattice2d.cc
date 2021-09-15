@@ -7,7 +7,7 @@ Lattice2D::Lattice2D(const unsigned int Mt_lat_,
                      const unsigned int Mx_lat_,
                      const CoarseningType coarsening_type_,
                      const int coarsening_level_) : 
-        Lattice(coarsening_level_),
+        Lattice(coarsening_level_,2),
         Mt_lat(Mt_lat_),
         Mx_lat(Mx_lat_),
         coarsening_type(coarsening_type_),

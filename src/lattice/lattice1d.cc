@@ -6,7 +6,7 @@
 Lattice1D::Lattice1D(const unsigned int M_lat_,
                      const double T_final_,
                      const int coarsening_level_) :
-    Lattice(coarsening_level_),
+    Lattice(coarsening_level_,1),
     M_lat(M_lat_),
     T_final(T_final_),
     a_lat(T_final_/M_lat_) {
