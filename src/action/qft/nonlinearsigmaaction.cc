@@ -27,9 +27,8 @@ void NonlinearSigmaAction::heatbath_update(std::shared_ptr<SampleState> phi_stat
     Eigen::Vector3d sigma_n;
     Eigen::Vector3d Delta_n; // sum of nearest neighbour vectors
     Eigen::Vector3d Delta_n_perp; // vector perpendicular to Delta_n
-    double Delta_n_nrm;
     Delta_n = delta_neighbours(phi_state,ell_vertex);
-    Delta_n_nrm = Delta_n.norm();
+    double Delta_n_nrm = Delta_n.norm();
     // Unit vector pointing in same direction as Delta_n
     Delta_n.normalize();
     // Work out the 'best' vector which is perpendicular to Delta_n
