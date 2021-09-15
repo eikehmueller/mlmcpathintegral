@@ -9,8 +9,7 @@ const double NonlinearSigmaAction::evaluate(const std::shared_ptr<SampleState> p
     Eigen::Vector3d sigma_n;
     Eigen::Vector3d Delta_n;
     for (unsigned int ell=0;ell<lattice->getNvertices();++ell) {
-        sigma_n.setZero();
-        add_sigma(phi_state,ell,sigma_n);
+        set_sigma(phi_state,ell,sigma_n);
         // Sum of neighbouring fields at point n
         Delta_n = delta_neighbours(phi_state,ell);
         // Add dot-product of sigma_n and Delta_n to action
@@ -84,8 +83,7 @@ void NonlinearSigmaAction::overrelaxation_update(std::shared_ptr<SampleState> ph
     Eigen::Vector3d Delta_n; // sum of nearest neighbour vectors
     double Delta_n_nrm;
     // Field at point n
-    sigma_n.setZero();
-    add_sigma(phi_state,ell_vertex,sigma_n);
+    set_sigma(phi_state,ell_vertex,sigma_n);
     // Sum of nearest neihbours
     Delta_n = delta_neighbours(phi_state,ell_vertex);
     Delta_n.normalize();

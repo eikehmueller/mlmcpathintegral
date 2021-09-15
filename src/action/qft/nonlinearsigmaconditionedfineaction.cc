@@ -27,8 +27,7 @@ double NonlinearSigmaConditionedFineAction::evaluate(const std::shared_ptr<Sampl
     for (auto it=fineonly_vertices.begin();it!=fineonly_vertices.end();++it) {
         unsigned int ell = *it;
         // Field at point n
-        sigma_n.setZero();
-        action->add_sigma(phi_state,ell,sigma_n);
+        action->set_sigma(phi_state,ell,sigma_n);
         // Sum of neighbouring fields at point n
         Delta_n = action->delta_neighbours(phi_state,ell);
         // Work out length of Delta_n and angle between Delta_n and sigma_n

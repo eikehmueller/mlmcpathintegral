@@ -365,7 +365,25 @@ public:
 private:
 
     /** @brief Extract 3d-vector at lattice vertex with index ell from sample
-     *         state and add it to vector
+     *         state and set the vector sigma to it.
+     *
+     * @param[in] phi_state State \f$\phi\f$
+     * @param[in] ell linear index of vertex
+     * @param[out] sigma unit vector
+     */
+    void set_sigma(const std::shared_ptr<SampleState> phi_state,
+                   const unsigned int ell,
+                   Eigen::Vector3d& sigma) const {        
+        double theta=phi_state->data[2*ell];
+        double phi=phi_state->data[2*ell+1];
+        sigma[0] = sin(theta)*cos(phi);
+        sigma[1] = sin(theta)*sin(phi);
+        sigma[2] = cos(theta);
+    }
+
+    /** @brief Extract 3d-vector at lattice vertex with index ell from sample
+     *         state and add it to vector. NB: the only difference to the set_sigma()
+     *         is that here the vector is inremented, not just set.
      *
      * @param[in] phi_state State \f$\phi\f$
      * @param[in] ell linear index of vertex
