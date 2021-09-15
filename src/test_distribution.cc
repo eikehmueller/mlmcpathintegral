@@ -9,6 +9,7 @@
 #include "common/commandlineparser.hh"
 #include "distribution/expsin2distribution.hh"
 #include "distribution/expcosdistribution.hh"
+#include "distribution/compactexpdistribution.hh"
 #include "distribution/besselproductdistribution.hh"
 #include "distribution/approximatebesselproductdistribution.hh"
 
@@ -35,8 +36,14 @@
  */
 class DistributionWrapper {
 public:
-    /** @brief Create new instance */
-    DistributionWrapper() : uniform_dist(-M_PI,+M_PI) {}
+    /** @brief Create new instance
+     * 
+     * @param[in] x_min_ lower bound of domain
+     * @param[in] x_max_ upper bound of domain
+     */
+    DistributionWrapper(const int x_min_,
+                        const int x_max_) : uniform_dist(-M_PI,+M_PI), 
+                                            x_min(x_min_), x_max(x_max_) {}
     
     /** @brief Draw single sample
      *
@@ -82,7 +89,13 @@ public:
      * @param[inout] out Output stream
      */
     virtual void write_header(std::ostream& out) = 0;
-    
+
+public:
+    /** @brief lower bound of interval on which distribution is defined */
+    const double x_min;
+    /** @brief upper bound of interval on which distribution is defined */
+    const double x_max;
+
 protected:
     /** @brief Uniform distribution to allow drawing from \f$[-\pi,\pi]\f$*/
     std::uniform_real_distribution<double> uniform_dist;
@@ -101,6 +114,7 @@ public:
      */
     ExpSin2DistributionWrapper(const ExpSin2Distribution& dist_,
                                const double sigma_) :
+    DistributionWrapper(-M_PI,+M_PI),
     dist(dist_), sigma(sigma_) {}
     
     /** @brief Draw single sample
@@ -173,6 +187,93 @@ private:
     const double sigma;
 };
 
+/** @class CompactExpDistributionWrapper
+ *
+ * @brief Wrapper class for CompactExpDistribution
+ */
+class CompactExpDistributionWrapper : public DistributionWrapper {
+public:
+    /** @brief Create new instance
+     *
+     * @param[in] dist_ Distribution to wrap
+     * @param[in] sigma_ Parameter sigma
+     */
+    CompactExpDistributionWrapper(const CompactExpDistribution& dist_,
+                                  const double sigma_) :
+    DistributionWrapper(-1.0,+1.0),
+    dist(dist_), sigma(sigma_) {}
+    
+    /** @brief Draw single sample
+     *
+     * @param[inout] engine Random number engibe to use
+     */
+    virtual double draw(std::mt19937_64& engine) {
+        return dist.draw(engine,sigma);
+    }
+    
+    /** @brief Draw multiple samples
+     *
+     * Use this method for time measurements to avoid overheads from
+     * repeated calls.
+     *
+     * @param[inout] engine Random number engine to use
+     * @param[in] n_samples Number of samples to draw
+     */
+    virtual void draw(std::mt19937_64& engine,
+                      const unsigned long n_samples) {
+        for (unsigned long n=0;n<n_samples;++n) {
+            double x = dist.draw(engine,sigma);
+            (void) x;
+        }
+    }
+    
+    /** @brief Evaluate at a single point
+     *
+     * @param[in] x Point at which the distribution is evaluated
+     */
+    virtual double evaluate(const double x) {
+        return dist.evaluate(x,sigma);
+    }
+
+    /** @brief Evaluate at multiple points
+     *
+     * Evaluates the function a several randomly chosen points.
+     * Use this function for time measurements to avoid overheads from
+     * repeated calls.
+     *
+     * @param[inout] engine Random number engine to use
+     * @param[in] n_samples Number of points to evaluate
+     */
+    virtual void evaluate(std::mt19937_64& engine,
+                          const unsigned long n_samples) {
+        for (unsigned long j=0; j<n_samples; ++j) {
+            double x = uniform_dist(engine);
+            double y = dist.evaluate(x,sigma);
+            (void) y;
+        }
+    }
+   
+    /** @brief Write parameters to stream
+     *
+     * Write the name of the distribution and its parameters to an
+     * output stream. This will be used when saving the distribution to a
+     * file.
+     *
+     * @param[inout] out Output stream
+     */
+    virtual void write_header(std::ostream& out) {
+        out << "CompactExpDistribution" << std::endl;
+        out << "  sigma = " << sigma << std::endl;
+    }
+    
+private:
+    /** @brief Reference to distribution to wrap */
+    const CompactExpDistribution& dist;
+    /** @brief Parameter \f$\sigma\f$*/
+    const double sigma;
+};
+
+
 /** Common base class for BesselProductDistributionWrapper, ApproximateBesselProductDistributionWrapper and
  ExpCosDistributionWrapper */
 template <class DistT>
@@ -183,6 +284,7 @@ public:
                                    const double x_p_,
                                    const double x_m_,
                                    const std::string label_) :
+    DistributionWrapper(-M_PI,+M_PI),
     dist(dist_), x_p(x_p_), x_m(x_m_), label(label_) {}
 
     /** @brief Draw single sample
@@ -402,8 +504,10 @@ void save_distribution(DistributionWrapper& wrapper,
     outfile << std::endl;
     outfile << "==== points ====" << std::endl;
     // Generate points
+    double x_min = wrapper.x_min;
+    double x_max = wrapper.x_max;
     for (int n=0;n<n_intervals+1;++n) {
-        double x = -M_PI+(2.*M_PI/n_intervals)*n;
+        double x = x_min+(x_max-x_min)*n/(1.*n_intervals);
         double y = wrapper.evaluate(x);
         outfile << x << " " << y << std::endl;
     }
@@ -473,6 +577,17 @@ int main(int argc, char* argv[]) {
         ExpCosDistribution expcos_dist(beta);
         ExpCosDistributionWrapper expcos_wrapper(expcos_dist,x_p,x_m);
         assess_distribution(expcos_wrapper,
+                            n_samples,
+                            n_intervals,
+                            "distribution.txt");
+    } else if (distribution == "CompactExpDistribution") {
+        /* === CompactExpDistribution === */
+        double sigma = 2.0;
+        commandlineparser.getopt_double("sigma",sigma);
+        std::cout << "sigma = " << sigma << std::endl;
+        CompactExpDistribution compactexp_dist;
+        CompactExpDistributionWrapper compactexp_wrapper(compactexp_dist,sigma);
+        assess_distribution(compactexp_wrapper,
                             n_samples,
                             n_intervals,
                             "distribution.txt");

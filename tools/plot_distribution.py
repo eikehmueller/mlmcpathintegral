@@ -11,7 +11,7 @@ from scipy import integrate
 
   This script processes text files in the format given below. It plots
   a binned distribution and compares the evaluated distribution to the
-  analytical expression. The file header depends on the considered 
+  analytical expression. The file header depends on the considered
   distribution and is parsed to extract the relevant parameters.
 
   -------------------------------------------------
@@ -19,17 +19,17 @@ from scipy import integrate
     beta = 4
     x_p  = 2.82743
     x_m  = 0
- 
+
   n_samples = 1000
   n_points = 129
- 
+
   ==== samples ====
   2.05174
   1.82559
   0.806089
   [...]
   1.50355
- 
+
   ==== points ====
   -3.14159 0.0371872
   -3.09251 0.0364034
@@ -52,7 +52,7 @@ class Distribution(object):
         self.Y = Y
         self.label = 'UNKNOWN'
 
-    '''Plot a histogram of the samples and the distribution 
+    '''Plot a histogram of the samples and the distribution
        and save to file
 
     :arg filename: Name of file to write to
@@ -73,16 +73,15 @@ class Distribution(object):
                      label='distribution')
         self._plot_analytical()
         ax = plt.gca()
-        ax.set_xlim(-1.05*np.pi,1.05*np.pi)
-        ax.set_xticks((-np.pi,-0.5*np.pi,0,0.5*np.pi,np.pi))
-        ax.set_xticklabels((r'$-\pi$',r'$-\frac{\pi}{2}$','$0$',r'$\frac{\pi}{2}$',r'$\pi$'))
+        self._set_xaxis(ax)
+
         plt.legend(loc='upper right')
         plt.title(self.label)
         plt.savefig(filename,bbox_inches='tight')
 
     def _plot_analytical(self):
         '''Plot analytical expression for distribution'''
-        X_analytical = np.arange(-np.pi,np.pi,1.E-3)
+        X_analytical = np.arange(np.min(self.X),np.max(self.X),1.E-3)
         Y_analytical = np.vectorize(self.f_analytical)(X_analytical)
         plt.plot(X_analytical,Y_analytical,
                  linewidth=2,
@@ -90,13 +89,24 @@ class Distribution(object):
                  color='red',
                  label='analytical')
 
+    '''Set range and ticks on horizontal set_xaxis
+
+    overwrite this to use an interval which is not [-pi,+pi]
+
+    :arg ax: axis instance
+    '''
+    def _set_xaxis(self,ax):
+        ax.set_xlim(-1.05*np.pi,1.05*np.pi)
+        ax.set_xticks((-np.pi,-0.5*np.pi,0,0.5*np.pi,np.pi))
+        ax.set_xticklabels((r'$-\pi$',r'$-\frac{\pi}{2}$','$0$',r'$\frac{\pi}{2}$',r'$\pi$'))
+
 class ExpSin2Distribution(Distribution):
     '''Wrapper for ExpSin2Distribution
 
     :arg samples: Samples drawn for distribution
     :arg X: x-coordinates of points to be plotted
     :arg Y: y-coordinates of points to be plotted
-    :arg beta: parameter beta
+    :arg sigma: parameter sigma
     '''
     def __init__(self,samples,X,Y,sigma):
         super().__init__(samples,X,Y)
@@ -105,11 +115,41 @@ class ExpSin2Distribution(Distribution):
         self.Znorm_inv = np.exp(0.5*self.sigma)/(2.*np.pi*np.i0(0.5*self.sigma))
 
     '''Analytical value of distribution at a given point
-    
+
     :arg x: Point at which the distribution is evaluated
     '''
     def f_analytical(self,x):
         return self.Znorm_inv*np.exp(-self.sigma*np.sin(0.5*x)**2)
+
+class CompactExpDistribution(Distribution):
+    '''Wrapper for CompactExpDistribution
+
+    :arg samples: Samples drawn for distribution
+    :arg X: x-coordinates of points to be plotted
+    :arg Y: y-coordinates of points to be plotted
+    :arg sigma: parameter sigma
+    '''
+    def __init__(self,samples,X,Y,sigma):
+        super().__init__(samples,X,Y)
+        self.label = 'CompactExpDistribution'
+        self.sigma = sigma
+        self.Znorm_inv = 0.5*self.sigma/np.sinh(self.sigma)
+
+    '''Analytical value of distribution at a given point
+
+    :arg x: Point at which the distribution is evaluated
+    '''
+    def f_analytical(self,x):
+        return self.Znorm_inv*np.exp(self.sigma*x)
+
+    '''Set range and ticks on horizontal set_xaxis
+
+    :arg ax: axis instance
+    '''
+    def _set_xaxis(self,ax):
+        ax.set_xlim(-1.05,1.05)
+        ax.set_xticks((-1.0,-0.5,0.0,0.5,1.0))
+        ax.set_xticklabels((r'$-1$',r'$-\frac{1}{2}$','$0$',r'$\frac{1}{2}$',r'$1$'))
 
 class ExpCosDistribution(Distribution):
     def __init__(self,samples,X,Y,beta,x_p,x_m):
@@ -121,12 +161,12 @@ class ExpCosDistribution(Distribution):
         self.Znorm = 2.*np.pi*np.i0(2.*beta*np.cos(0.5*(self.x_p-self.x_m)))
 
     '''Analytical value of distribution at a given point
-    
+
     :arg x: Point at which the distribution is evaluated
     '''
     def f_analytical(self,x):
         return 1./self.Znorm*np.exp(self.beta*(np.cos(x-self.x_p)+np.cos(x-self.x_m)))
-    
+
 class BesselProductDistribution(Distribution):
     def __init__(self,samples,X,Y,beta,x_p,x_m):
         super().__init__(samples,X,Y)
@@ -144,9 +184,9 @@ class BesselProductDistribution(Distribution):
     def _i0_scaled(self,x):
         f = lambda phi: np.exp(2.0*self.beta*(x*np.cos(phi)-1))
         return 1./(2.*np.pi)*integrate.quad(f,-np.pi,+np.pi)[0]
-        
+
     '''Analytical value of distribution at a given point
-    
+
     :arg x: Point at which the distribution is evaluated
     '''
     def f_analytical(self,x):
@@ -197,9 +237,9 @@ class ApproximateBesselProductDistribution(Distribution):
                  color='green',
                  label='BesselProductDistribution')
 
-        
+
     '''Analytical value of distribution at a given point
-    
+
     :arg x: Point at which the distribution is evaluated
     '''
     def f_analytical(self,x):
@@ -276,6 +316,8 @@ def read_data(filename):
             print ('  ',key,' = ',value)
     if (distribution == 'ExpSin2Distribution'):
         return ExpSin2Distribution(samples,X,Y,float(param['sigma']))
+    elif (distribution == 'CompactExpDistribution'):
+        return CompactExpDistribution(samples,X,Y,float(param['sigma']))
     elif (distribution == 'ExpCosDistribution'):
         return ExpCosDistribution(samples,X,Y,
                                       float(param['beta']),
@@ -292,7 +334,7 @@ def read_data(filename):
                                                     float(param['x_p']),                                                 float(param['x_m']))
     else:
         print ('ERROR: Unknown distribution: ',distribution)
-        
+
 #################################################################
 ###                         M A I N                           ###
 #################################################################
