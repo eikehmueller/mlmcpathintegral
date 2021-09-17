@@ -150,18 +150,20 @@ public:
      * Update the local entry at position j of the path using a heat bath defined by the neighbouring sites
      *
      *  @param[inout] phi_state Path to update
-     *  @param[in] j index of dof to update
+     *  @param[in] ell index of dof to update
      */
-     virtual void heatbath_update(std::shared_ptr<SampleState> x_path, const unsigned int j);
+     virtual void heatbath_update(std::shared_ptr<SampleState> x_path,
+                                  const unsigned int ell);
   
     /** @brief Perform local overrelaxation update
      *
      * Update the local entry at position j of the state using overrelaxation
      *
      *  @param[inout] phi_state State to update
-     *  @param[in] j index of dof to update
+     *  @param[in] ell index of dof to update
      */
-     virtual void overrelaxation_update(std::shared_ptr<SampleState> x_path, const unsigned int j);
+     virtual void overrelaxation_update(std::shared_ptr<SampleState> x_path,
+                                        const unsigned int ell);
       
 
     

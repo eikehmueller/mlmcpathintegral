@@ -61,28 +61,39 @@ public:
 
     /** @brief Draw local value of state from heat bath
      *
-     * Update the local entry at position j of the state using a heat bath defined by the neighbouring sites
+     * Update the local entry at position ell of the state using a local heatbath
+     * (or Gibbs) step. Usually the index ell corresponds to a dof-index,
+     * but depending on the action it can also be the index of a topological
+     * entity.
      *
      *  @param[inout] phi_state State to update
-     *  @param[in] j index of dof to update
+     *  @param[in] ell index to update
      */
-    virtual void heatbath_update(std::shared_ptr<SampleState> phi_state, const unsigned int j) {
+    virtual void heatbath_update(std::shared_ptr<SampleState> phi_state,
+                                 const unsigned int ell) {
       mpi_parallel::cerr << "ERROR: heat bath update not implemented for this action " << std::endl;
       mpi_exit(EXIT_FAILURE);
     }
 
     /** @brief Perform local overrelaxation update
      *
-     * Update the local entry at position j of the state using overrelaxation
+     * Update the local entry at position ell of the state using overrelaxation.
+     * Usually the index ell corresponds to a dof-index, but depending on
+     * the action it can also be the index of a topological entity.
      *
      *  @param[inout] phi_state State to update
-     *  @param[in] j index of dof to update
+     *  @param[in] ell index to update
      */
-    virtual void overrelaxation_update(std::shared_ptr<SampleState> phi_state, const unsigned int j) {
+    virtual void overrelaxation_update(std::shared_ptr<SampleState> phi_state,
+                                       const unsigned int ell) {
       mpi_parallel::cerr << "ERROR: overrelaxation update not implemented for this action " << std::endl;
       mpi_exit(EXIT_FAILURE);
     }
   
+    /** @brief Return heatbath index set */
+    const std::vector<unsigned int>& get_heatbath_indexset() const {
+        return heatbath_indexset;
+    }
 
     /** @brief Calculate force for HMC integrator for a specific state
      *
@@ -135,6 +146,14 @@ public:
 protected:
     /** @brief Renormalisation */
     const RenormalisationType renormalisation;
+    /** @brief Set of overrelaxed heatbath indices
+     * 
+     * The OverrelaxedHeatBathSampler will only iterate over these indices,
+     * which normally represent dof-indices, but could also correspond
+     * to lattice entities if there is more than one dof per entity.
+     * If this vector has length zero, all dof-indices will be iterated over.
+     */
+    std::vector<unsigned int> heatbath_indexset;
 };
 
 #endif // ACTION_HH

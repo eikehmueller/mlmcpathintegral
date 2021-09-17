@@ -222,7 +222,7 @@ public:
      * overrelaxation step.
      *
      *  @param[inout] phi_state State to update
-     *  @param[in] ell index of site to update
+     *  @param[in] ell index of vertex to update
      */     
     virtual void heatbath_update(std::shared_ptr<SampleState> phi_state, const unsigned int ell);
 
@@ -234,7 +234,7 @@ public:
      * rotate \f$\sigma_n\f$ around \f$\Delta_n\f$ by this angle.
      *
      *  @param[inout] phi_state State to update
-     *  @param[in] ell index of dof to update
+     *  @param[in] ell index of vertex to update
      */
           
     virtual void overrelaxation_update(std::shared_ptr<SampleState> phi_state, const unsigned int ell);

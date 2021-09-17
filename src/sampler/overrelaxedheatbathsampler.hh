@@ -114,10 +114,13 @@ public:
         n_sweep_overrelax(heatbath_param_.n_sweep_overrelax()),
         n_burnin(heatbath_param_.n_burnin()),
         random_order(heatbath_param_.random_order()),
-        index_map(action_->sample_size()) {
+        index_map(action->get_heatbath_indexset()) {
         engine.seed(871417),
-        // Fill indirection map
-        std::iota(index_map.begin(),index_map.end(),0);
+        // If the index map is empty, fill it with consecutive numbers
+        if (index_map.empty()) {
+            index_map.resize(action->sample_size());
+            std::iota(index_map.begin(),index_map.end(),0);                
+        }
         // Create temporary workspace
         // current state
         phi_state_cur = std::make_shared<SampleState>(action->sample_size());
