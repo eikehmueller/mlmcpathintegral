@@ -332,10 +332,6 @@ int main(int argc, char* argv[]) {
      * Two level method                         *
      * **************************************** */
     if (param_general.method() == MethodTwoLevel) {
-        if (param_qft.action() == ActionNonlinearSigma) {
-            mpi_parallel::cerr << " ERROR: two-level method not yet supported for nonlinear sigma model." << std::endl;
-            mpi_exit(EXIT_FAILURE);
-        }
         mpi_parallel::cout << "+--------------------------------+" << std::endl;
         mpi_parallel::cout << "! Two level MC                   !" << std::endl;
         mpi_parallel::cout << "+--------------------------------+" << std::endl;
