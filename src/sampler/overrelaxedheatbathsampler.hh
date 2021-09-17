@@ -115,7 +115,7 @@ public:
         n_burnin(heatbath_param_.n_burnin()),
         random_order(heatbath_param_.random_order()),
         index_map(action->get_heatbath_indexset()) {
-        engine.seed(871417),
+        engine.seed(871417);
         // If the index map is empty, fill it with consecutive numbers
         if (index_map.empty()) {
             index_map.resize(action->sample_size());
