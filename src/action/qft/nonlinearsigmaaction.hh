@@ -4,6 +4,7 @@
 #include <cassert>
 #include <random>
 #include <vector>
+#include <numeric>
 #include <iostream>
 #include <algorithm>
 #include <iterator>
@@ -148,6 +149,11 @@ public:
                   mpi_exit(EXIT_FAILURE);
                   throw std::runtime_error("...");
               }
+              // Set iteration index set for overrelaxed heatbath updates
+              // Note that in this case we iterate over the indices of 
+              // all vertices, *not* the dof-indices
+              heatbath_indexset.resize(lattice->getNvertices());
+              std::iota(heatbath_indexset.begin(),heatbath_indexset.end(),0);                
           }
 
     /** @brief Return coupling constant \f$beta\f$ */

@@ -10,9 +10,7 @@ void NonlinearSigmaConditionedFineAction::fill_fine_points(std::shared_ptr<Sampl
     // Iterate only over the fine-only vertices
     for (auto it=fineonly_vertices.begin();it!=fineonly_vertices.end();++it) {
         unsigned int ell = *it;
-        // we need to use the _dof_-index in the call to the heatbath update. This
-        // changes both dof 2*ell and 2*ell+1
-        action->heatbath_update(phi_state,2*ell);
+        action->heatbath_update(phi_state,ell);
     }
 }
 

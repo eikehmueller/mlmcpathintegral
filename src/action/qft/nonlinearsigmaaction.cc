@@ -20,14 +20,11 @@ const double NonlinearSigmaAction::evaluate(const std::shared_ptr<SampleState> p
 /* local heat bath update */
 void NonlinearSigmaAction::heatbath_update(std::shared_ptr<SampleState> phi_state,
                                            const unsigned int ell) {
-    // ell is the index of the unknown, this needs to be converted
-    // to a vertex index
-    unsigned int ell_vertex = ell/2;
     // temporary vectors
     Eigen::Vector3d sigma_n;
     Eigen::Vector3d Delta_n; // sum of nearest neighbour vectors
     Eigen::Vector3d Delta_n_perp; // vector perpendicular to Delta_n
-    Delta_n = delta_neighbours(phi_state,ell_vertex);
+    Delta_n = delta_neighbours(phi_state,ell);
     double Delta_n_nrm = Delta_n.norm();
     // Unit vector pointing in same direction as Delta_n
     Delta_n.normalize();
@@ -66,29 +63,26 @@ void NonlinearSigmaAction::heatbath_update(std::shared_ptr<SampleState> phi_stat
             * sigma_n;
     phi = atan2(sigma_n[1],sigma_n[0]);
     double theta = atan2(sqrt(sigma_n[0]*sigma_n[0]+sigma_n[1]*sigma_n[1]),sigma_n[2]);
-    phi_state->data[2*ell_vertex] = theta;
-    phi_state->data[2*ell_vertex+1] = phi;
+    phi_state->data[2*ell] = theta;
+    phi_state->data[2*ell+1] = phi;
 }
 
 /* local overrelaxation update */
 void NonlinearSigmaAction::overrelaxation_update(std::shared_ptr<SampleState> phi_state,
                                                  const unsigned int ell) {
-    // ell is the index of the unknown, this needs to be converted
-    // to a vertex index
-    unsigned int ell_vertex = ell/2;
     // temporary vectors    
     Eigen::Vector3d Delta_n; // sum of nearest neighbour vectors
     double Delta_n_nrm;
     // Field at point n
-    Eigen::Vector3d sigma_n = get_sigma(phi_state,ell_vertex);
+    Eigen::Vector3d sigma_n = get_sigma(phi_state,ell);
     // Sum of nearest neihbours
-    Delta_n = delta_neighbours(phi_state,ell_vertex);
+    Delta_n = delta_neighbours(phi_state,ell);
     Delta_n.normalize();
     sigma_n = 2*sigma_n.dot(Delta_n)*Delta_n - sigma_n;
     double phi = atan2(sigma_n[1],sigma_n[0]);
     double theta = atan2(sqrt(sigma_n[0]*sigma_n[0]+sigma_n[1]*sigma_n[1]),sigma_n[2]);
-    phi_state->data[2*ell_vertex] = theta;
-    phi_state->data[2*ell_vertex+1] = phi;
+    phi_state->data[2*ell] = theta;
+    phi_state->data[2*ell+1] = phi;
 }
 
 /* Force for HMC integrator */
