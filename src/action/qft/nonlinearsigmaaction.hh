@@ -379,8 +379,9 @@ private:
                               const unsigned int ell) const {        
         double theta=phi_state->data[2*ell];
         double phi=phi_state->data[2*ell+1];
-        Eigen::Vector3d sigma = { sin(theta)*cos(phi),
-                                  sin(theta)*sin(phi),
+        double sin_theta = sin(theta);
+        Eigen::Vector3d sigma = { sin_theta*cos(phi),
+                                  sin_theta*sin(phi),
                                   cos(theta) };
         return sigma;
     }
@@ -398,8 +399,9 @@ private:
                    Eigen::Vector3d& sigma) const {        
         double theta=phi_state->data[2*ell];
         double phi=phi_state->data[2*ell+1];
-        sigma[0] += sin(theta)*cos(phi);
-        sigma[1] += sin(theta)*sin(phi);
+        double sin_theta = sin(theta);
+        sigma[0] += sin_theta*cos(phi);
+        sigma[1] += sin_theta*sin(phi);
         sigma[2] += cos(theta);
     }
 
