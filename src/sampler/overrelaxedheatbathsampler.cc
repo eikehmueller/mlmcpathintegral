@@ -11,8 +11,8 @@ void OverrelaxedHeatBathSampler::draw(std::shared_ptr<SampleState> phi_state) {
         if (random_order) {
             shuffle (index_map.begin(), index_map.end(), engine);
         }
-        for (unsigned int i_dof=0; i_dof<action->sample_size(); ++i_dof) {
-            action->overrelaxation_update(phi_state_cur,index_map[i_dof]);
+        for (auto it=index_map.begin();it!=index_map.end();++it) {
+            action->overrelaxation_update(phi_state_cur,*it);
         }
     }
     // Heat bath sweeps
@@ -20,8 +20,8 @@ void OverrelaxedHeatBathSampler::draw(std::shared_ptr<SampleState> phi_state) {
         if (random_order) {
             shuffle (index_map.begin(), index_map.end(), engine);
         }
-        for (unsigned int i_dof=0; i_dof<action->sample_size(); ++i_dof) {
-            action->heatbath_update(phi_state_cur,index_map[i_dof]);
+        for (auto it=index_map.begin();it!=index_map.end();++it) {
+            action->heatbath_update(phi_state_cur,*it);
         }
     }
     accept = true;
