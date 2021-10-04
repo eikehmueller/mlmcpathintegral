@@ -3,7 +3,7 @@
  * @brief Implementation of nonlinearsigmaconditionedfineaction.hh
  */
 
-/* Fill in fine links */
+/* Fill in unknowns at fine vertices */
 void NonlinearSigmaConditionedFineAction::fill_fine_points(std::shared_ptr<SampleState> phi_state) const {
     std::shared_ptr<Lattice2D> lattice = action->get_lattice();
     const std::vector<unsigned int>& fineonly_vertices = lattice->get_fineonly_vertices();
@@ -14,7 +14,7 @@ void NonlinearSigmaConditionedFineAction::fill_fine_points(std::shared_ptr<Sampl
     }
 }
 
-/* Evaluate conditioned action at fine links */
+/* Evaluate conditioned action at fine vertices */
 double NonlinearSigmaConditionedFineAction::evaluate(const std::shared_ptr<SampleState> phi_state) const {
     std::shared_ptr<Lattice2D> lattice = action->get_lattice();
     double S=0;

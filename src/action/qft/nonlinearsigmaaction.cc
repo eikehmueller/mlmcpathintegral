@@ -14,6 +14,7 @@ const double NonlinearSigmaAction::evaluate(const std::shared_ptr<SampleState> p
         // Add dot-product of sigma_n and Delta_n to action
         S += sigma_n.dot(Delta_n);
     }
+    // Factor 1/2 to avoid overcounting (each edge of the lattice only contributes once)
     return -0.5*beta*S;
 }
 
