@@ -41,8 +41,8 @@ public:
      * @param[in] x_min_ lower bound of domain
      * @param[in] x_max_ upper bound of domain
      */
-    DistributionWrapper(const int x_min_,
-                        const int x_max_) : uniform_dist(-M_PI,+M_PI), 
+    DistributionWrapper(const double x_min_,
+                        const double x_max_) : uniform_dist(-M_PI,+M_PI), 
                                             x_min(x_min_), x_max(x_max_) {}
     
     /** @brief Draw single sample
