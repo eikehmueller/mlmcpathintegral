@@ -251,4 +251,30 @@ protected:
     mutable Eigen::VectorXd rhs_sample;
 };
 
+/** @class GFFSamplerFactory
+ * 
+ * @brief Sampler factory for exact sampling from GFF distribution
+ */
+class GFFSamplerFactory : public SamplerFactory {
+public:
+    /** @brief Create new instance
+     *
+     * @param[in] param_gff GFF parameters
+     */
+    GFFSamplerFactory() {}
+
+    /** @brief Destructor */
+    virtual ~GFFSamplerFactory() {}
+
+    /** @brief Return sampler for a specific  action
+     *
+     * @param[in] action Action to sample from
+     */
+    virtual std::shared_ptr<Sampler> get(std::shared_ptr<Action> action) {
+        // All we need to do in this case is cast the action to a GFF action
+        return std::dynamic_pointer_cast<GFFAction>(action);
+    }
+};
+
+
 #endif // GFFACTION_HH
