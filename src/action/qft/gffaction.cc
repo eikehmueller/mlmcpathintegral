@@ -122,4 +122,6 @@ void GFFAction::draw(std::shared_ptr<SampleState> phi_state) {
     }
     // solve L^T.phi = psi to obtain correlated sample phi
     phi_state->data = choleskyLT.triangularView<Eigen::Upper>().solve(rhs_sample);
+    n_total_samples++;
+    n_accepted_samples++;
 }
