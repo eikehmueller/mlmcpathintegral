@@ -117,6 +117,7 @@ public:
           mu2(mu2_), sigma(1./sqrt(4.+mu2_)),normal_dist(0.0,1.0) {
               engine.seed(2481317);
               rhs_sample.resize(sample_size());
+              buildCholesky();
           }          
 
     /** @brief Return squared mass parameter \f$\mu^2\f$ */
