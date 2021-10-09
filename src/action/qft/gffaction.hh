@@ -113,7 +113,7 @@ public:
     GFFAction(const std::shared_ptr<Lattice2D> lattice_,
               const std::shared_ptr<Lattice2D> fine_lattice_,
               const double mu2_)
-        : QFTAction(lattice_,fine_lattice_,RenormalisationPerturbative),
+        : QFTAction(lattice_,fine_lattice_,RenormalisationNone),
           mu2(mu2_), sigma(1./sqrt(4.+mu2_)),normal_dist(0.0,1.0) {
               engine.seed(2481317);
               rhs_sample.resize(sample_size());
