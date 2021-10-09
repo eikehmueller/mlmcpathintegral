@@ -5,20 +5,20 @@
 
 /* Value of action for a given configuration */
 const double GFFAction::evaluate(const std::shared_ptr<SampleState> phi_state) const {
-    double S=0;
-    double kappa = 2. + 0.5*mu2;
+    double S=0.0;
+    double kappa = 4. + mu2;
     const std::vector<std::vector<unsigned int> >& neighbour_vertices = lattice->get_neighbour_vertices();
     unsigned int Nvertices = lattice->getNvertices();
-    for (unsigned int ell=0;ell<Nvertices;++ell) {
+    for (unsigned int ell=0;ell<Nvertices;++ell) {        
         double phi_n = phi_state->data[ell];
-        // zero order term
-        S += kappa*phi_n*phi_n;
-        // Finite difference terms
+        double S_local = kappa*phi_n;
+        // nearest neighbour terms
         for (int k=0;k<4;++k) {
-            S -= 0.5*phi_n * phi_state->data[neighbour_vertices[ell][k]];
+            S_local -= phi_state->data[neighbour_vertices[ell][k]];
         }
+        S += phi_n*S_local;
     }
-    return S;
+    return 0.5*S;
 }
 
 /* local heat bath update */
@@ -27,7 +27,7 @@ void GFFAction::heatbath_update(std::shared_ptr<SampleState> phi_state,
     const std::vector<std::vector<unsigned int> >& neighbour_vertices = lattice->get_neighbour_vertices();    
     double Delta =0.0;
     for (int k=0;k<4;++k) {
-        Delta += 0.5*phi_state->data[neighbour_vertices[ell][k]];
+        Delta += phi_state->data[neighbour_vertices[ell][k]];
     }
     phi_state->data[ell] = sigma*normal_dist(engine)+Delta/(4.+mu2);
 }
@@ -38,7 +38,7 @@ void GFFAction::overrelaxation_update(std::shared_ptr<SampleState> phi_state,
     const std::vector<std::vector<unsigned int> >& neighbour_vertices = lattice->get_neighbour_vertices();    
     double Delta =0.0;
     for (int k=0;k<4;++k) {
-        Delta += 0.5*phi_state->data[neighbour_vertices[ell][k]];
+        Delta += phi_state->data[neighbour_vertices[ell][k]];
     }
     phi_state->data[ell] = 2.*Delta/(4.+mu2)-phi_state->data[ell];
 }
