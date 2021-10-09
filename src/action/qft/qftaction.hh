@@ -20,10 +20,12 @@
 /** @brief Enum for different actions
  *  - 0: Quenched Schwinger model
  *  - 1: Nonlinear sigma model
+ *  - 2: Gaussian Free Field (GFF)
  */
 enum QFTActionType {
     ActionQuenchedSchwinger = 0,
-    ActionNonlinearSigma = 1
+    ActionNonlinearSigma = 1,
+    ActionGFF = 2
 };
 
 /** @class QFTParameters
@@ -53,6 +55,8 @@ public:
                 action_ = ActionQuenchedSchwinger;
             } else if (action_str=="nonlinearsigma") {
                 action_ = ActionNonlinearSigma;
+            } else if (action_str=="gff") {
+                action_ = ActionGFF;
             } else {
             }
         }

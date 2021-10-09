@@ -12,9 +12,11 @@
 #include "action/qft/quenchedschwingerconditionedfineaction.hh"
 #include "action/qft/nonlinearsigmaaction.hh"
 #include "action/qft/nonlinearsigmaconditionedfineaction.hh"
+#include "action/qft/gffaction.hh"
 #include "qoi/qft/qoiavgplaquette.hh"
 #include "qoi/qft/qoi2dsusceptibility.hh"
 #include "qoi/qft/qoi2dmagneticsusceptibility.hh"
+#include "qoi/qft/qoi2dphisquared.hh"
 #include "montecarlo/montecarlosinglelevel.hh"
 #include "montecarlo/montecarlotwolevel.hh"
 #include "montecarlo/montecarlomultilevel.hh"
@@ -75,6 +77,14 @@ std::shared_ptr<SamplerFactory> construct_sampler_factory(const int samplerid,
             mpi_parallel::cerr << " ERROR: cluster not supported for chosen action." << std::endl;
             mpi_exit(EXIT_FAILURE);
         }
+    } else if (samplerid == SamplerExact) {
+        /* --- CASE 6: Exact sampler */
+        if (param_qft.action() == ActionGFF) {
+            sampler_factory = std::make_shared<GFFSamplerFactory>();
+        } else {
+            mpi_parallel::cerr << " ERROR: exact sampler not supported for chosen action." << std::endl;
+            mpi_exit(EXIT_FAILURE);
+        }
     } else {
         mpi_parallel::cerr << " ERROR: Unsupported sampler." << std::endl;
         mpi_exit(EXIT_FAILURE);
@@ -129,6 +139,7 @@ int main(int argc, char* argv[]) {
     
     NonlinearSigmaParameters param_nonlinearsigma;
     SchwingerParameters param_schwinger;
+    GFFParameters param_gff;
     switch (param_qft.action()) {
     case (ActionQuenchedSchwinger): {
         if (param_schwinger.readFile(filename)) return 1;
@@ -138,6 +149,11 @@ int main(int argc, char* argv[]) {
     case (ActionNonlinearSigma): {
         if (param_nonlinearsigma.readFile(filename)) return 1;
         mpi_parallel::cout << param_nonlinearsigma << std::endl;
+        break;
+    }
+    case (ActionGFF): {
+        if (param_gff.readFile(filename)) return 1;
+        mpi_parallel::cout << param_gff << std::endl;
         break;
     }
     }
@@ -206,6 +222,11 @@ int main(int argc, char* argv[]) {
         qoi_factory = std::make_shared<QoI2DMagneticSusceptibilityFactory>();
         mpi_parallel::cout << "QoI = Average squared magnetisation 1/M*mu[phi]^2 " << std::endl;
     }
+    if ( (param_qft.action() == ActionGFF) ) {
+        qoi = std::make_shared<QoI2DPhiSquared>(lattice);
+        qoi_factory = std::make_shared<QoI2DPhiSquaredFactory>();
+        mpi_parallel::cout << "QoI = Mean squared field 1/M*sum phi^2 " << std::endl;
+    }
     
     /* ====== Select action ====== */
     std::shared_ptr<Action> action;
@@ -222,6 +243,12 @@ int main(int argc, char* argv[]) {
                                                             nullptr,
                                                             param_nonlinearsigma.renormalisation(),
                                                             param_nonlinearsigma.beta());
+            break;
+        }
+        case (ActionGFF): {
+            action = std::make_shared<GFFAction>(lattice,
+                                                 nullptr,
+                                                 param_gff.mu2());
             break;
         }
     } 
