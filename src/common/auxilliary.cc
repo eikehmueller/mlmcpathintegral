@@ -184,3 +184,18 @@ void compute_In(const double x,
     }
     gsl_integration_workspace_free(workspace);
 }
+
+/* exact expectation value of phi^2 for GFF */
+double gff_phi_squared_analytical(const double mu2,
+                                  const double Mt_lat,
+                                  const double Mx_lat) {
+    double sum_spectral = 0.0;
+    for (unsigned int k1=0;k1<Mt_lat;++k1) {
+        for (unsigned int k2=0;k2<Mx_lat;++k2) {
+            double sin_k1 = sin(0.5*M_PI*k1/Mt_lat);
+            double sin_k2 = sin(0.5*M_PI*k2/Mx_lat);
+            sum_spectral += 1./(4.*(sin_k1*sin_k1+sin_k2*sin_k2)+mu2);
+        }
+    }
+    return sum_spectral/(Mt_lat*Mx_lat);
+}

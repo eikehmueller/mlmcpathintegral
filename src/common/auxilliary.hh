@@ -163,4 +163,18 @@ void compute_In(const double x,
                 std::vector<double>& dIn,
                 std::vector<double>& ddIn);
 
+/** @brief Exact expectation value of \f$\phi^2\f$ for Gaussian Free Field
+ *
+ * For the GFF expectation value of the squared field value \f$\phi^2\f$ on a \f$M\times M\f$ lattice is
+ *
+ * \f[
+ * \mathbb{E}[\phi^2] = \frac{1}{M^2} \sum_{k_1=0}^{M} \sum_{k_2=0}^{M}
+ *          \frac{1}{4\left(\sin^2\left(\frac{\pi}{2M}k_1\right)+\sin^2\left(\frac{\pi}{2M}k_2\right)\right)+\mu^2}
+ * \f]
+ */
+double gff_phi_squared_analytical(const double mu2,
+                                  const double Mt_lat,
+                                  const double Mx_lat);
+
+
 #endif // AUXILLIARY_HH

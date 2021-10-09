@@ -271,7 +271,7 @@ int main(int argc, char* argv[]) {
                                                                   lattice->getNcells());
         }
         double analytical_result_variance = quenchedschwinger_var_chit_continuum_analytical(param_schwinger.beta(),
-                                                                                        lattice->getNcells());
+                                                                                            lattice->getNcells());
         mpi_parallel::cout << std::endl;
         mpi_parallel::cout << std::setprecision(8) << std::fixed;
         mpi_parallel::cout << " Analytical results"  << std::endl;
@@ -281,6 +281,16 @@ int main(int argc, char* argv[]) {
         }
         mpi_parallel::cout << std::endl;
         mpi_parallel::cout << "      lim_{a->0} Var[V*chi_t] = " << analytical_result_variance << std::endl;
+        mpi_parallel::cout << std::endl;
+    } else if (param_qft.action() == ActionGFF) {
+        do_analytical_comparison = true;
+        analytical_result = gff_phi_squared_analytical(param_schwinger.beta(),
+                                                       lattice->getMt_lat(),
+                                                       lattice->getMx_lat());
+        mpi_parallel::cout << std::endl;
+        mpi_parallel::cout << std::setprecision(8) << std::fixed;
+        mpi_parallel::cout << " Analytical result"  << std::endl;
+        mpi_parallel::cout << "      E[Q^2]              = " << analytical_result;
         mpi_parallel::cout << std::endl;
     }
 
