@@ -92,3 +92,34 @@ std::string GFFAction::info_string() const {
     sstr << QFTAction::info_string() << ", mu2 = " << mu2;
     return sstr.str();
 }
+
+/* Build Cholesky factorisation for direct sampling */ 
+void GFFAction::buildCholesky() {
+    unsigned int Nvertices = lattice->getNvertices();
+    const std::vector<std::vector<unsigned int> >& neighbour_vertices = lattice->get_neighbour_vertices();
+    // Construct the precision matrix
+    typedef Eigen::Triplet<double> T;
+    std::vector<T> tripletlist(5*Nvertices);
+    double kappa = 4. + mu2;
+    for (unsigned int ell=0;ell<Nvertices;++ell) {        
+        tripletlist[5*ell]   = T(ell,ell,kappa);
+        for (int k=0;k<4;++k) {
+            tripletlist[5*ell+1+k] = T(ell,neighbour_vertices[ell][k],-1.0);
+        }
+    }    
+    Eigen::SparseMatrix<double> Q_precision(Nvertices,Nvertices);
+    Q_precision.setFromTriplets(tripletlist.begin(),tripletlist.end());
+    Eigen::SimplicialLLT<Eigen::SparseMatrix<double> > sparse_cholesky(Q_precision);
+    choleskyLT = sparse_cholesky.matrixU();
+}
+
+/* Draw sample from true distribution */
+void GFFAction::draw(std::shared_ptr<SampleState> phi_state) {
+    unsigned int Nvertices = lattice->getNvertices();
+    // Draw uncorrelated sample vector psi
+    for (unsigned int ell=0;ell<Nvertices;++ell) {
+        rhs_sample[ell] = normal_dist(engine);
+    }
+    // solve L^T.phi = psi to obtain correlated sample phi
+    phi_state->data = choleskyLT.triangularView<Eigen::Upper>().solve(rhs_sample);
+}

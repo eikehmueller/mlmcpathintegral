@@ -5,6 +5,7 @@
 #include <random>
 #include <vector>
 #include <iostream>
+#include <Eigen/Sparse>
 #include "common/auxilliary.hh"
 #include "common/parameters.hh"
 #include "common/samplestate.hh"
@@ -13,6 +14,7 @@
 #include "lattice/lattice2d.hh"
 #include "action/action.hh"
 #include "action/qft/qftaction.hh"
+#include "sampler/sampler.hh"
 
 /** @file gffaction.hh
  * @brief Header file for action of the 2d Gaussian Free Field (GFF)
@@ -84,11 +86,22 @@ private:
  *              + \sum_n \frac{1}{2} \mu^2 \phi_n^2
  * \f]
  *
- * with the dimensionless squared mass \f$\mu^2\f$
+ * with the dimensionless squared mass \f$\mu^2\f$.
  * 
+ * To sample directly from the multivariate normal distribution
+ * 
+ * \f[
+ *    \pi(\phi)\sim \exp\left[-\frac{1}{2}\phi^T Q \phi\right]
+ * \f]
+ *
+ * with precision matrix \f$Q\f$, the Cholesky factor \f$L^T\f$ with
+ * \f$Q=L L^T\f$ is stored. Samples \f$\phi\f$ from \f$\pi\f$ can
+ * then be drawn by drawing a vector \f$\psi\f$ of uncorrelated
+ * normal values with mean 0 and variance 1 and solving 
+ * \f$L^T\phi=\psi\f$.
  */
 
-class GFFAction : public QFTAction {
+class GFFAction : public QFTAction, public Sampler {
     friend class GFFConditionedFineAction;
 public:
     /** @brief Initialise class
@@ -101,9 +114,10 @@ public:
               const std::shared_ptr<Lattice2D> fine_lattice_,
               const double mu2_)
         : QFTAction(lattice_,fine_lattice_,RenormalisationPerturbative),
-          mu2(mu2_), sigma(1./sqrt(4.+mu2_)) {
+          mu2(mu2_), sigma(1./sqrt(4.+mu2_)),normal_dist(0.0,1.0) {
               engine.seed(2481317);
-          }
+              rhs_sample.resize(sample_size());
+          }          
 
     /** @brief Return squared mass parameter \f$\mu^2\f$ */
     double getmu2() const {
@@ -204,12 +218,23 @@ public:
      */
     virtual std::string info_string() const;
     
+    /** @brief Build (sparse) Cholesky decomposition for exact sampler
+     */
+    void buildCholesky();
+    
     /** @brief Draw new sample
      * 
      * If the action is Gaussian (\f$\lambda=0\f$ and \f$\mu_0^2<0\f$),
      * draw a direct sample using the Cholesky-decomposition of the 
      * covariance matrix
      */
+     virtual void draw(std::shared_ptr<SampleState> phi_state);
+     
+     /** @brief Set current sample state
+      * 
+      * This does not do anything since the sample is exact.
+      */
+     virtual void set_state(std::shared_ptr<SampleState> phi_state) {};
         
 protected:
     /** @brief Squared parameter \f$\mu^2\f$*/
@@ -220,6 +245,10 @@ protected:
     mutable mpi_parallel::mt19937_64 engine;
     /** @brief Distribution for heat-bath update */
     mutable std::normal_distribution<double> normal_dist;
+    /** @brief Sparse Cholesky matrix L^T for direct sampling */
+    mutable Eigen::SparseMatrix<double> choleskyLT;
+    /** @brief Vector used for direct sampling*/
+    mutable Eigen::VectorXd rhs_sample;
 };
 
 #endif // GFFACTION_HH
