@@ -13,6 +13,7 @@
 #include "action/qft/nonlinearsigmaaction.hh"
 #include "action/qft/nonlinearsigmaconditionedfineaction.hh"
 #include "action/qft/gffaction.hh"
+#include "action/qft/gffconditionedfineaction.hh"
 #include "qoi/qft/qoiavgplaquette.hh"
 #include "qoi/qft/qoi2dsusceptibility.hh"
 #include "qoi/qft/qoi2dmagneticsusceptibility.hh"
@@ -292,6 +293,10 @@ int main(int argc, char* argv[]) {
         }
         case (ActionNonlinearSigma): {
             conditioned_fine_action_factory = std::make_shared<NonlinearSigmaConditionedFineActionFactory>();
+            break;
+        }
+        case (ActionGFF): {
+            conditioned_fine_action_factory = std::make_shared<GFFConditionedFineActionFactory>();
             break;
         }
     } 
