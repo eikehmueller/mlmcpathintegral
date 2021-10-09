@@ -6,7 +6,6 @@
 #include <vector>
 #include <iostream>
 #include <Eigen/Sparse>
-#include "common/auxilliary.hh"
 #include "common/parameters.hh"
 #include "common/samplestate.hh"
 #include "mpi/mpi_wrapper.hh"

@@ -3,7 +3,6 @@
 #include <random>
 #include <memory>
 #include <algorithm>
-#include "common/auxilliary.hh"
 #include "common/samplestate.hh"
 #include "lattice/lattice2d.hh"
 #include "action/action.hh"
