@@ -83,7 +83,7 @@ void GFFAction::copy_from_fine(const std::shared_ptr<SampleState> phi_fine,
 
 /* Initialise state with random entries */
 void GFFAction::initialise_state(std::shared_ptr<SampleState> phi_state) const {
-    // IMPLEMENT THIS
+    const_cast<GFFAction *>(this)->draw(phi_state);
 }
 
 /* Return lattice information */
