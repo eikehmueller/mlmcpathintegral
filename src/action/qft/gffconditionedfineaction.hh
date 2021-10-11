@@ -46,7 +46,8 @@ public:
      */
     GFFConditionedFineAction (const std::shared_ptr<GFFAction> action_) :
         action(action_),
-        mu2(action_->mu2) { engine.seed(115147); }
+        mu2(action_->mu2),
+        normal_dist(0.0,1.0) { engine.seed(115147); }
 
     /** @brief Destructor */
     virtual ~GFFConditionedFineAction() {}
