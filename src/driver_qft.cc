@@ -284,7 +284,7 @@ int main(int argc, char* argv[]) {
         mpi_parallel::cout << std::endl;
     } else if (param_qft.action() == ActionGFF) {
         do_analytical_comparison = true;
-        analytical_result = gff_phi_squared_analytical(param_schwinger.beta(),
+        analytical_result = gff_phi_squared_analytical(param_gff.mu2(),
                                                        lattice->getMt_lat(),
                                                        lattice->getMx_lat());
         mpi_parallel::cout << std::endl;
