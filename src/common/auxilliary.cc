@@ -186,9 +186,10 @@ void compute_In(const double x,
 }
 
 /* exact expectation value of phi^2 for GFF */
-double gff_phi_squared_analytical(const double mu2,
+double gff_phi_squared_analytical(const double mass,
                                   const double Mt_lat,
                                   const double Mx_lat) {
+    double mu2 = mass*mass/(Mt_lat*Mx_lat);
     double sum_spectral = 0.0;
     for (unsigned int k1=0;k1<Mt_lat;++k1) {
         for (unsigned int k2=0;k2<Mx_lat;++k2) {

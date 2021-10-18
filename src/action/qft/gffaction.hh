@@ -30,9 +30,9 @@ public:
     /** @brief Construct a new instance */
     GFFParameters() :
         Parameters("gff"),
-        mu2_(1.0), 
+        mass_(1.0), 
         renormalisation_(RenormalisationNone) {
-          addKey("mu2",Double,Positive);
+          addKey("mass",Double,Positive);
           addKey("renormalisation",String);
     }
 
@@ -44,7 +44,7 @@ public:
 
         int readSuccess = Parameters::readFile(filename);
         if (!readSuccess) {
-            mu2_ = getContents("mu2")->getDouble();
+            mass_ = getContents("mass")->getDouble();
             std::string renormalisation_str = getContents("renormalisation")->getString();
             if (renormalisation_str == "none") {
                 renormalisation_ = RenormalisationNone;
@@ -57,9 +57,9 @@ public:
         return readSuccess;
     }
 
-    /** @brief Return squared non-dimensionalised mass \f$\mu^2\f$ */
-    double mu2() const {
-        return mu2_;
+    /** @brief Return mass (in units of the inverse physical lattice size) \f$m\f$ */
+    double mass() const {
+        return mass_;
     }
 
     /** @brief Return renormalisation */
@@ -68,8 +68,8 @@ public:
     }
     
 private:
-    /** @brief Mass parameter \f$\mu^2\f$ */
-    double mu2_;
+    /** @brief Mass parameter \f$m\f$ */
+    double mass_;
     /** @brief Renormalisation */
     RenormalisationType renormalisation_;
 };
@@ -85,7 +85,10 @@ private:
  *              + \sum_n \frac{1}{2} \mu^2 \phi_n^2
  * \f]
  *
- * with the dimensionless squared mass \f$\mu^2\f$.
+ * with the dimensionless squared mass \f$\mu^2=a^2\mu^2\f$.
+ * We assume that all length are measured in units of the lattice
+ * size \f$L\f$. Since the correlation length is \f$m^{-1}\f$, this 
+ * means that finite volume effects are suppressed provided \f$m\gg1\f$.
  * 
  * To sample directly from the multivariate normal distribution
  * 
@@ -107,13 +110,25 @@ public:
      *
      * @param[in] lattice_ Underlying two-dimensional lattice
      * @param[in] lattice_ Underlying fine level two-dimensional lattice
-     * @param[in] mu2_ Mass parameter \f$\mu^2\f$
+     * @param[in] mass_ Mass parameter \f$m\f$
      */
     GFFAction(const std::shared_ptr<Lattice2D> lattice_,
               const std::shared_ptr<Lattice2D> fine_lattice_,
-              const double mu2_)
+              const double mass_)
         : QFTAction(lattice_,fine_lattice_,RenormalisationNone),
-          mu2(mu2_), sigma(1./sqrt(4.+mu2_)),normal_dist(0.0,1.0) {
+          mass(mass_), normal_dist(0.0,1.0) {
+              if (lattice->getMt_lat() != lattice->getMx_lat()) {
+                  mpi_parallel::cerr << "ERROR: Lattice has to be squared for GFF action " << std::endl;
+                  mpi_exit(EXIT_FAILURE);
+              }
+              double a_lat;
+              if (lattice->is_rotated()) {
+                  a_lat = sqrt(2.)/lattice->getMt_lat();
+              } else {
+                  a_lat = 1./lattice->getMt_lat();
+              }
+              mu2 = a_lat*a_lat*mass*mass;
+              sigma = 1./sqrt(4.+mu2);
               engine.seed(2481317);
               rhs_sample.resize(sample_size());
               buildCholesky();
@@ -145,7 +160,7 @@ public:
         // Construct coarse action based on this lattice
         std::shared_ptr<Action> new_action = std::make_shared<GFFAction>(coarse_lattice,
                                                                          lattice,
-                                                                         2.*mu2);
+                                                                         mass);
         return new_action;
     };
 
@@ -237,10 +252,13 @@ public:
      virtual void set_state(std::shared_ptr<SampleState> phi_state) {};
         
 protected:
-    /** @brief Squared parameter \f$\mu^2\f$*/
-    const double mu2;
-    /** @brief Width of Gaussian \f$\sigma = 1\sqrt{4+\mu^2}\f$ */
-    const double sigma;
+    /** @brief Mass parameter \f$m\f$*/
+    const double mass;
+    /** @brief Non-dimensionalised mass \f$\mu^2 = a^2m^2\f$*/
+    double mu2;
+    /** @brief Width of Gaussian for heat-bath update: 
+      * \f$\sigma = 1/\sqrt{1+\mu^2}\f$ */
+    double sigma;
     /** @brief Random number engine */
     mutable mpi_parallel::mt19937_64 engine;
     /** @brief Distribution for heat-bath update */

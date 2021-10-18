@@ -249,7 +249,7 @@ int main(int argc, char* argv[]) {
         case (ActionGFF): {
             action = std::make_shared<GFFAction>(lattice,
                                                  nullptr,
-                                                 param_gff.mu2());
+                                                 param_gff.mass());
             break;
         }
     } 
@@ -284,7 +284,7 @@ int main(int argc, char* argv[]) {
         mpi_parallel::cout << std::endl;
     } else if (param_qft.action() == ActionGFF) {
         do_analytical_comparison = true;
-        analytical_result = gff_phi_squared_analytical(param_gff.mu2(),
+        analytical_result = gff_phi_squared_analytical(param_gff.mass(),
                                                        lattice->getMt_lat(),
                                                        lattice->getMx_lat());
         mpi_parallel::cout << std::endl;

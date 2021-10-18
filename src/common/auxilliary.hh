@@ -172,7 +172,7 @@ void compute_In(const double x,
  *          \frac{1}{4\left(\sin^2\left(\frac{\pi}{2M}k_1\right)+\sin^2\left(\frac{\pi}{2M}k_2\right)\right)+\mu^2}
  * \f]
  */
-double gff_phi_squared_analytical(const double mu2,
+double gff_phi_squared_analytical(const double mass,
                                   const double Mt_lat,
                                   const double Mx_lat);
 
