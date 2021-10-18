@@ -109,7 +109,7 @@ void GFFAction::buildCholesky() {
     }    
     Eigen::SparseMatrix<double> Q_precision(Nvertices,Nvertices);
     Q_precision.setFromTriplets(tripletlist.begin(),tripletlist.end());
-    Eigen::SimplicialLLT<Eigen::SparseMatrix<double> > sparse_cholesky(Q_precision);
+    Eigen::SimplicialLLT<Eigen::SparseMatrix<double>,Eigen::Lower,Eigen::NaturalOrdering<int>> sparse_cholesky(Q_precision);
     choleskyLT = sparse_cholesky.matrixU();
 }
 
