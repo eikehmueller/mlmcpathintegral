@@ -251,6 +251,9 @@ public:
       */
      virtual void set_state(std::shared_ptr<SampleState> phi_state) {};
         
+     /** @brief print out correlation function */
+     void print_correlation_function() const;
+    
 protected:
     /** @brief Mass parameter \f$m\f$*/
     const double mass;
@@ -265,6 +268,7 @@ protected:
     mutable std::normal_distribution<double> normal_dist;
     /** @brief Sparse Cholesky matrix L^T for direct sampling */
     mutable Eigen::SparseMatrix<double> choleskyLT;
+    mutable Eigen::SparseMatrix<double> choleskyL;
     /** @brief Vector used for direct sampling*/
     mutable Eigen::VectorXd rhs_sample;
 };

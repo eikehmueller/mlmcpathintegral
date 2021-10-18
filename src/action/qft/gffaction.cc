@@ -111,6 +111,7 @@ void GFFAction::buildCholesky() {
     Q_precision.setFromTriplets(tripletlist.begin(),tripletlist.end());
     Eigen::SimplicialLLT<Eigen::SparseMatrix<double>,Eigen::Lower,Eigen::NaturalOrdering<int>> sparse_cholesky(Q_precision);
     choleskyLT = sparse_cholesky.matrixU();
+    choleskyL = sparse_cholesky.matrixL();
 }
 
 /* Draw sample from true distribution */
@@ -124,4 +125,27 @@ void GFFAction::draw(std::shared_ptr<SampleState> phi_state) {
     phi_state->data = choleskyLT.triangularView<Eigen::Upper>().solve(rhs_sample);
     n_total_samples++;
     n_accepted_samples++;
+}
+
+void GFFAction::print_correlation_function() const {
+    unsigned int Nvertices = lattice->getNvertices();
+    Eigen::VectorXd rhs;
+    rhs.resize(Nvertices);
+    // Draw uncorrelated sample vector psi
+    for (unsigned int ell=0;ell<Nvertices;++ell) {
+        rhs[ell] = 0.0;
+    }    
+    rhs[0] = 1.0;
+    Eigen::VectorXd u = choleskyLT.triangularView<Eigen::Upper>().solve(choleskyL.triangularView<Eigen::Lower>().solve(rhs));
+    std::vector<double> X;
+    std::vector<double> Y;
+    for (int i=0;i<lattice->getMt_lat();++i) {
+        unsigned int ell = lattice->vertex_cart2lin(i,i);
+        X.push_back(sqrt(2.)*i/(1.*lattice->getMt_lat()));
+        Y.push_back(u[ell]);
+    }
+    printf("=== correlation function ===\n");
+    for (int i=0;i<lattice->getMt_lat();++i) {
+        printf("%8.4f %12.6e\n",X[i],Y[i]);
+    }
 }
