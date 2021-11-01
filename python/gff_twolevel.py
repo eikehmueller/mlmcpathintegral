@@ -38,13 +38,13 @@ class GFFAction(object):
         '''
         Q = np.zeros((self.ndof,self.ndof))
         # coarse level non-dimensionaled squared mass
-        mu2_coarse = (2.*self.alat*self.mass)**2
+        mu2_coarse = 2.*(self.alat*self.mass)**2
         for i in range(self.Mlat):
             for j in range(self.Mlat):
                 ell =  self._cart2lin_idx(i,j)
-                if ( (i%2==0) and (j%2==0) ):
+                if (i+j)%2==0:
                     Q[ell,ell] = 4.+mu2_coarse
-                    for offset in ((+2,0),(-2,0),(0,+2),(0,-2)):
+                    for offset in ((+1,+1),(+1,-1),(-1,+1),(-1,-1)):
                         ell_prime = self._cart2lin_idx(i+offset[0],j+offset[1])
                         Q[ell,ell_prime] = -1.0
                 else:
@@ -57,14 +57,15 @@ class GFFAction(object):
         :arg phi_state: state to evaluate
         '''
         S = 0.0
-        mu2_coarse = (2.*self.alat*self.mass)**2
-        for i in range(self.Mlat//2):
-            for j in range(self.Mlat//2):
-                phi_local = phi_state[2*i,2*j]
-                S_local = (4.+mu2_coarse)*phi_local
-                for offset in ((+2,0),(-2,0),(0,+2),(0,-2)):
-                    S_local -= phi_state[(2*i+offset[0])%self.Mlat,(2*j+offset[1])%self.Mlat]
-                S += S_local*phi_local
+        mu2_coarse = 2.*(self.alat*self.mass)**2
+        for i in range(self.Mlat):
+            for j in range(self.Mlat):
+                if (i+j)%2==0:
+                    phi_local = phi_state[i,j]
+                    S_local = (4.+mu2_coarse)*phi_local
+                    for offset in ((+1,+1),(+1,-1),(-1,+1),(-1,-1)):
+                        S_local -= phi_state[(i+offset[0])%self.Mlat,(j+offset[1])%self.Mlat]
+                    S += S_local*phi_local
         return 0.5*S
 
     def evaluate(self,phi_state):
@@ -83,24 +84,7 @@ class GFFAction(object):
                 S += S_local*phi_local
         return 0.5*S
 
-    def evaluate_fillin_center(self,phi_state):
-        '''Evaluate the total value of the fill-in action at the centres
-
-        :arg phi_state: state to evaluate
-        '''
-        sigma2_inv = 4.+2.*(self.alat*self.mass)**2
-        sigma2 = 1./sigma2_inv
-        S = 0.0
-        for i in range(self.Mlat):
-            for j in range(self.Mlat):
-                if ( (i%2==1) and (j%2==1)):
-                    Delta = 0.0
-                    for offset in ((+1,+1),(+1,-1),(-1,+1),(-1,-1)):
-                        Delta += phi_state[(i+offset[0])%self.Mlat,(j+offset[1])%self.Mlat]
-                    S += (phi_state[i,j]-sigma2*Delta)**2
-        return 0.5*sigma2_inv*S
-
-    def evaluate_fillin_edge(self,phi_state):
+    def evaluate_fillin(self,phi_state):
         '''Evaluate the total value of the fill-in action at the edges
 
         :arg phi_state: state to evaluate
@@ -135,23 +119,7 @@ class GFFAction(object):
         psi = np.random.normal(size=self.ndof)
         phi_state[:,:] = la.solve_triangular(self.cholesky_coarse_LT,psi).reshape(self.Mlat,self.Mlat)
 
-    def draw_fillin_center_dofs(self,phi_state):
-        '''Draw the unknowns at the centre lattice sites from the fill-in
-        distribution
-
-        :arg phi_state: State to populate
-        '''
-        sigma2 = 1./(4.+2.*(self.alat*self.mass)**2)
-        sigma = np.sqrt(sigma2)
-        for i in range(self.Mlat):
-            for j in range(self.Mlat):
-                if ((i%2==1) and (j%2==1)):
-                    Delta = 0.0
-                    for offset in ((+1,+1),(+1,-1),(-1,+1),(-1,-1)):
-                        Delta += phi_state[(i+offset[0])%self.Mlat,(j+offset[1])%self.Mlat]
-                    phi_state[i,j] = np.random.normal(sigma2*Delta,sigma)
-
-    def draw_fillin_edge_dofs(self,phi_state):
+    def draw_fillin_dofs(self,phi_state):
         '''Draw the unknowns at the edge lattice sites from the fill-in
         distribution
 
@@ -201,24 +169,20 @@ class TwoLevelSampler(object):
         self.action.draw(self.phi_current)
         self.S_fine = self.action.evaluate(self.phi_current)
         self.S_coarse = self.action.evaluate_coarse(self.phi_current)
-        self.S_fillin_center = self.action.evaluate_fillin_center(self.phi_current)
-        self.S_fillin_edge = self.action.evaluate_fillin_edge(self.phi_current)
+        self.S_fillin = self.action.evaluate_fillin(self.phi_current)
         self.nsamples = 0
         self.naccepted = 0
 
     def step(self):
         self.action.draw_coarse_dofs(self.phi_proposal)
-        self.action.draw_fillin_center_dofs(self.phi_proposal)
-        self.action.draw_fillin_edge_dofs(self.phi_proposal)
+        self.action.draw_fillin_dofs(self.phi_proposal)
         S_fine_proposal = self.action.evaluate(self.phi_proposal)
         S_coarse_proposal = self.action.evaluate_coarse(self.phi_proposal)
-        S_fillin_center_proposal = self.action.evaluate_fillin_center(self.phi_proposal)
-        S_fillin_edge_proposal = self.action.evaluate_fillin_edge(self.phi_proposal)
+        S_fillin_proposal = self.action.evaluate_fillin(self.phi_proposal)
         DeltaS = 0
         DeltaS += S_fine_proposal - self.S_fine
         DeltaS += self.S_coarse - S_coarse_proposal
-        DeltaS += self.S_fillin_center - S_fillin_center_proposal
-        DeltaS += self.S_fillin_edge - S_fillin_edge_proposal
+        DeltaS += self.S_fillin - S_fillin_proposal
         accept = False
         if (DeltaS < 0):
             accept = True
@@ -228,14 +192,13 @@ class TwoLevelSampler(object):
             self.naccepted += 1
             self.S_fine = S_fine_proposal
             self.S_coarse = S_coarse_proposal
-            self.S_fillin_center = S_fillin_center_proposal
-            self.S_fillin_edge = S_fillin_edge_proposal
+            self.S_fillin = S_fillin_proposal
         self.nsamples += 1
 
     def rho_accept(self):
         return self.naccepted/self.nsamples
 
-Mlat = 4
+Mlat = 8
 mass = 10.0
 nsamples = 10000
 action = GFFAction(Mlat,mass)
