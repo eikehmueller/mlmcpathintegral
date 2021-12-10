@@ -52,7 +52,7 @@ void GFFAction::global_heatbath_update_eff(std::shared_ptr<SampleState> phi_stat
         for (int k=4;k<8;++k) {
             Delta += kappa*phi_state->data[neighbour_vertices[ell][k]];
         }
-        phi_state->data[ell] = sigma_eff*(normal_dist(engine)+Delta*sigma_eff);
+        phi_state->data[ell] = sigma_eff*(normal_dist(engine)+sigma_eff*Delta);
     }
 }
 
@@ -141,7 +141,7 @@ void GFFAction::buildMatrices() {
         Eigen::MatrixXd G_mat_tmp = (M_mat.inverse()*Q_precision_eff
                                     - Eigen::MatrixXd::Identity(Nvertices, Nvertices));
         for (int k=0;k<n_gibbs_smooth;++k) {
-            G_mat = G_mat_tmp*G_mat;
+            G_mat *= G_mat_tmp;
         }
     }
     
@@ -168,7 +168,7 @@ Eigen::SparseMatrix<double> GFFAction::buildPrecisionMatrix(std::vector<double> 
                 tripletlist[stencil_size*ell+4*j+k+1] = T(ell,neighbour_vertices[ell][k],stencil[j+1]);
             }
         }
-    }    
+    }
     Eigen::SparseMatrix<double> Q_prec(Nvertices,Nvertices);
     Q_prec.setFromTriplets(tripletlist.begin(),tripletlist.end());
     return Q_prec;
