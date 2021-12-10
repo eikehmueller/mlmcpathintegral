@@ -115,7 +115,7 @@ private:
  *
  * \f]
  *
- * with the non-dimensionalised fine-level mass \f$\mu^f=\frac{1}{2}\mu\f$.
+ * with the non-dimensionalised fine-level mass \f$\mu^f=\frac{1}{\sqrt{2}}\mu\f$.
  * 
  * To approximately sample from this action, one can proceed as follows:
  * 

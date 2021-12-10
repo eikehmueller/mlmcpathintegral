@@ -42,8 +42,8 @@ void GFFAction::heatbath_update(std::shared_ptr<SampleState> phi_state,
 void GFFAction::global_heatbath_update_eff(std::shared_ptr<SampleState> phi_state) const {
     const std::vector<std::vector<unsigned int> >& neighbour_vertices = lattice->get_neighbour_vertices();
     unsigned int Nvertices = lattice->getNvertices();
-    double sigma_eff = 1./sqrt(4.+0.25*mu2 - 4./(4.+0.25*mu2));
-    double kappa = 1./(4.+0.25*mu2);
+    double sigma_eff = 1./sqrt(4.+0.5*mu2 - 4./(4.+0.5*mu2));
+    double kappa = 1./(4.+0.5*mu2);
     for (unsigned int ell=0;ell<Nvertices;++ell) {
         double Delta = 0.0;
         for (int k=0;k<4;++k) {
@@ -128,9 +128,9 @@ void GFFAction::buildMatrices() {
     Eigen::MatrixXd Sigma = Eigen::MatrixXd(Q_precision).inverse();
 
     // Effective precision- and covariance- matrices
-    std::vector<double> stencil_eff {4.+0.25*mu2 - 4./(4.+0.25*mu2),
-                                     -2./(4.+0.25*mu2),
-                                     -1./(4.+0.25*mu2)};
+    std::vector<double> stencil_eff {4.+0.5*mu2 - 4./(4.+0.5*mu2),
+                                     -2./(4.+0.5*mu2),
+                                     -1./(4.+0.5*mu2)};
     Eigen::SparseMatrix<double> Q_precision_eff;
     Q_precision_eff = buildPrecisionMatrix(stencil_eff);
     Eigen::MatrixXd Sigma_eff = Eigen::MatrixXd(Q_precision_eff).inverse();
@@ -138,7 +138,7 @@ void GFFAction::buildMatrices() {
     Eigen::MatrixXd M_mat = Q_precision_eff.triangularView<Eigen::Lower>();
     Eigen::MatrixXd G_mat = Eigen::MatrixXd::Identity(Nvertices, Nvertices);
     if (n_gibbs_smooth>0) {
-        Eigen::MatrixXd G_mat_tmp = (M_mat.inverse()*Q_precision_eff 
+        Eigen::MatrixXd G_mat_tmp = (M_mat.inverse()*Q_precision_eff
                                     - Eigen::MatrixXd::Identity(Nvertices, Nvertices));
         for (int k=0;k<n_gibbs_smooth;++k) {
             G_mat = G_mat_tmp*G_mat;
