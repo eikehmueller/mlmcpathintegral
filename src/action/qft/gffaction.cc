@@ -165,7 +165,7 @@ Eigen::SparseMatrix<double> GFFAction::buildPrecisionMatrix(std::vector<double> 
         tripletlist[stencil_size*ell] = T(ell,ell,stencil[0]);
         for (int j=0;j<stencil.size()-1;++j) {
             for (int k=0;k<4;++k) {
-                tripletlist[stencil_size*ell+4*j+k+1] = T(ell,neighbour_vertices[ell][k],stencil[j+1]);
+                tripletlist[stencil_size*ell+4*j+k+1] = T(ell,neighbour_vertices[ell][4*j+k],stencil[j+1]);
             }
         }
     }
