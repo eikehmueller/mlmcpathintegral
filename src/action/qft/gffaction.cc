@@ -6,17 +6,23 @@
 /* Value of action for a given configuration */
 const double GFFAction::evaluate(const std::shared_ptr<SampleState> phi_state) const {
     double S=0.0;
-    double kappa = 4. + mu2;
-    const std::vector<std::vector<unsigned int> >& neighbour_vertices = lattice->get_neighbour_vertices();
-    unsigned int Nvertices = lattice->getNvertices();
-    for (unsigned int ell=0;ell<Nvertices;++ell) {        
-        double phi_n = phi_state->data[ell];
-        double S_local = kappa*phi_n;
-        // nearest neighbour terms
-        for (int k=0;k<4;++k) {
-            S_local -= phi_state->data[neighbour_vertices[ell][k]];
+    if (n_gibbs_smooth==0) {        
+        // No Gibbs smoothing
+        double kappa = 4. + mu2;
+        const std::vector<std::vector<unsigned int> >& neighbour_vertices = lattice->get_neighbour_vertices();
+        unsigned int Nvertices = lattice->getNvertices();
+        for (unsigned int ell=0;ell<Nvertices;++ell) {        
+            double phi_n = phi_state->data[ell];
+            double S_local = kappa*phi_n;
+            // nearest neighbour terms
+            for (int k=0;k<4;++k) {
+                S_local -= phi_state->data[neighbour_vertices[ell][k]];
+            }
+            S += phi_n*S_local;
         }
-        S += phi_n*S_local;
+    } else {
+        // Compute \phi^T.\hat{Q}.\phi
+        S = phi_state->data.dot(Q_precision_hat*phi_state->data);
     }
     return 0.5*S;
 }
@@ -30,6 +36,24 @@ void GFFAction::heatbath_update(std::shared_ptr<SampleState> phi_state,
         Delta += phi_state->data[neighbour_vertices[ell][k]];
     }
     phi_state->data[ell] = sigma*normal_dist(engine)+Delta/(4.+mu2);
+}
+
+/* global heat bath update with effective action */
+void GFFAction::global_heatbath_update_eff(std::shared_ptr<SampleState> phi_state) const {
+    const std::vector<std::vector<unsigned int> >& neighbour_vertices = lattice->get_neighbour_vertices();
+    unsigned int Nvertices = lattice->getNvertices();
+    double sigma_eff = 1./sqrt(4.+0.25*mu2 - 4./(4.+0.25*mu2));
+    double kappa = 1./(4.+0.25*mu2);
+    for (unsigned int ell=0;ell<Nvertices;++ell) {
+        double Delta = 0.0;
+        for (int k=0;k<4;++k) {
+            Delta += 2.*kappa*phi_state->data[neighbour_vertices[ell][k]];
+        }
+        for (int k=4;k<8;++k) {
+            Delta += kappa*phi_state->data[neighbour_vertices[ell][k]];
+        }
+        phi_state->data[ell] = sigma_eff*(normal_dist(engine)+Delta*sigma_eff);
+    }
 }
 
 /* local overrelaxation update */
@@ -93,25 +117,61 @@ std::string GFFAction::info_string() const {
     return sstr.str();
 }
 
-/* Build Cholesky factorisation for direct sampling */ 
-void GFFAction::buildCholesky() {
+/* Build matrices required for direct sampling and Gibbs acceleration */ 
+void GFFAction::buildMatrices() {
     unsigned int Nvertices = lattice->getNvertices();
-    const std::vector<std::vector<unsigned int> >& neighbour_vertices = lattice->get_neighbour_vertices();
-    // Construct the precision matrix
-    typedef Eigen::Triplet<double> T;
-    std::vector<T> tripletlist(5*Nvertices);
-    double kappa = 4. + mu2;
-    for (unsigned int ell=0;ell<Nvertices;++ell) {        
-        tripletlist[5*ell]   = T(ell,ell,kappa);
-        for (int k=0;k<4;++k) {
-            tripletlist[5*ell+1+k] = T(ell,neighbour_vertices[ell][k],-1.0);
+    
+    // Precision- and covariance- matrices
+    std::vector<double> stencil {4.+mu2,-1.};
+    Eigen::SparseMatrix<double> Q_precision;
+    Q_precision = buildPrecisionMatrix(stencil);
+    Eigen::MatrixXd Sigma = Eigen::MatrixXd(Q_precision).inverse();
+
+    // Effective precision- and covariance- matrices
+    std::vector<double> stencil_eff {4.+0.25*mu2 - 4./(4.+0.25*mu2),
+                                     -2./(4.+0.25*mu2),
+                                     -1./(4.+0.25*mu2)};
+    Eigen::SparseMatrix<double> Q_precision_eff;
+    Q_precision_eff = buildPrecisionMatrix(stencil_eff);
+    Eigen::MatrixXd Sigma_eff = Eigen::MatrixXd(Q_precision_eff).inverse();
+    
+    Eigen::MatrixXd M_mat = Q_precision_eff.triangularView<Eigen::Lower>();
+    Eigen::MatrixXd G_mat = Eigen::MatrixXd::Identity(Nvertices, Nvertices);
+    if (n_gibbs_smooth>0) {
+        Eigen::MatrixXd G_mat_tmp = (M_mat.inverse()*Q_precision_eff 
+                                    - Eigen::MatrixXd::Identity(Nvertices, Nvertices));
+        for (int k=0;k<n_gibbs_smooth;++k) {
+            G_mat = G_mat_tmp*G_mat;
         }
-    }    
-    Eigen::SparseMatrix<double> Q_precision(Nvertices,Nvertices);
-    Q_precision.setFromTriplets(tripletlist.begin(),tripletlist.end());
+    }
+    
+    // Precision matrix after Gibbs smoothing
+    Q_precision_hat = (Sigma_eff + G_mat*(Sigma-Sigma_eff)*G_mat.transpose()).inverse();
+    
+    // Cholesky factorisation for exact sampling
     Eigen::SimplicialLLT<Eigen::SparseMatrix<double>,Eigen::Lower,Eigen::NaturalOrdering<int>> sparse_cholesky(Q_precision);
     choleskyLT = sparse_cholesky.matrixU();
     choleskyL = sparse_cholesky.matrixL();
+}
+
+/* Build precision matrix based on a given stencil */
+Eigen::SparseMatrix<double> GFFAction::buildPrecisionMatrix(std::vector<double> stencil) {        
+    unsigned int Nvertices = lattice->getNvertices();
+    const std::vector<std::vector<unsigned int> >& neighbour_vertices = lattice->get_neighbour_vertices();
+    size_t stencil_size = 1+4*(stencil.size()-1);
+    typedef Eigen::Triplet<double> T;
+    std::vector<T> tripletlist(stencil_size*Nvertices);
+    for (unsigned int ell=0;ell<Nvertices;++ell) {        
+        tripletlist[stencil_size*ell] = T(ell,ell,stencil[0]);
+        for (int j=0;j<stencil.size()-1;++j) {
+            for (int k=0;k<4;++k) {
+                tripletlist[stencil_size*ell+4*j+k+1] = T(ell,neighbour_vertices[ell][k],stencil[j+1]);
+            }
+        }
+    }    
+    Eigen::SparseMatrix<double> Q_prec(Nvertices,Nvertices);
+    Q_prec.setFromTriplets(tripletlist.begin(),tripletlist.end());
+    return Q_prec;
 }
 
 /* Draw sample from true distribution */
@@ -123,6 +183,9 @@ void GFFAction::draw(std::shared_ptr<SampleState> phi_state) {
     }
     // solve L^T.phi = psi to obtain correlated sample phi
     phi_state->data = choleskyLT.triangularView<Eigen::Upper>().solve(rhs_sample);
+    for (int k=0;k<n_gibbs_smooth;++k) {
+        global_heatbath_update_eff(phi_state);
+    }
     n_total_samples++;
     n_accepted_samples++;
 }

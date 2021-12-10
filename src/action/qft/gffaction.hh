@@ -101,6 +101,47 @@ private:
  * then be drawn by drawing a vector \f$\psi\f$ of uncorrelated
  * normal values with mean 0 and variance 1 and solving 
  * \f$L^T\phi=\psi\f$.
+ * 
+ * On a given level the action can be seen as an approximation of the
+ * effective action ontained by integrating out the 'fine' unknowns on
+ * the next finer level. This effective action is described by a nine-point
+ * stencil and it can be written down as follows:
+ * 
+ * \f[
+ *      S_{eff}[\phi] = \sum_n \frac{1}{2}\left[ \left(4+\mu_f^2 - \frac{4}{4+\mu_f^2}\right) \phi_n^2
+ *                                             - \frac{2}{4+\mu_f^2}\left(\phi_{n+\hat{0}}+\phi_{n-\hat{0}}+\phi_{n+\hat{1}}+\phi_{n-\hat{1}}\right) \phi_n
+*                                              - \frac{1}{4+\mu_f^2}\left(\phi_{n+\hat{0}+\hat{1}}+\phi_{n+\hat{0}-\hat{1}}+\phi_{n-\hat{0}+\hat{1}}+\phi_{n-\hat{0}-\hat{1}}\right) \phi_n
+ *                                         \right]
+ *
+ * \f]
+ *
+ * with the non-dimensionalised fine-level mass \f$\mu^f=\frac{1}{2}\mu\f$.
+ * 
+ * To approximately sample from this action, one can proceed as follows:
+ * 
+ *   1. Draw a sample from the action \f$S\f$
+ *   2. Apply \f$n_{Gibbs}\f$ steps of a Gibbs sampler with the stencil of \f$S_{eff}\f$
+ * 
+ * As shown in [1], the resulting sample comes from a normal distribution with
+ * mean zero and covariance matrix
+ * \f[
+ *      \hat{\Sigma} = \Sigma_{eff} + G \left(\Sigma - \Sigma_{\eff}\right) G^T
+ * \f]
+ * 
+ * where \f$\Sigma\f$ and \f$\Sigma_{eff}\f$ are the covariance matrices of
+ * the actions \f$S\f$ and \f$S_{eff}\f$ respectively and
+ * 
+ * \f[ 
+ *      G = \left((D+L)^{-1}Q_{eff}-I\right)^{n_{Gibbs}}.
+ * \f]
+ *
+ * Here we assumed that the (symmetric) effective precision matrix can be split
+ * into a diagonal part \f$D\f$ and a lower triangular part \f$L\f$ as
+ * \f$Q_{eff} = D+L+L^T\f$.
+ * 
+ * [1] Fox, C. and Parker, A., 2017. Accelerated Gibbs sampling of normal
+ * distributions using matrix splittings and polynomials. 
+ * Bernoulli, 23(4B), pp.3711-3743.
  */
 
 class GFFAction : public QFTAction, public Sampler {
@@ -111,12 +152,14 @@ public:
      * @param[in] lattice_ Underlying two-dimensional lattice
      * @param[in] lattice_ Underlying fine level two-dimensional lattice
      * @param[in] mass_ Mass parameter \f$m\f$
+     * @param[in] n_gibbs_smooth
      */
     GFFAction(const std::shared_ptr<Lattice2D> lattice_,
               const std::shared_ptr<Lattice2D> fine_lattice_,
-              const double mass_)
+              const double mass_,
+              const int n_gibbs_smooth_=0)
         : QFTAction(lattice_,fine_lattice_,RenormalisationNone),
-          mass(mass_), normal_dist(0.0,1.0) {
+          mass(mass_), n_gibbs_smooth(n_gibbs_smooth_), normal_dist(0.0,1.0) {
               if (lattice->getMt_lat() != lattice->getMx_lat()) {
                   mpi_parallel::cerr << "ERROR: Lattice has to be squared for GFF action " << std::endl;
                   mpi_exit(EXIT_FAILURE);
@@ -131,7 +174,7 @@ public:
               sigma = 1./sqrt(4.+mu2);
               engine.seed(2481317);
               rhs_sample.resize(sample_size());
-              buildCholesky();
+              buildMatrices();
           }          
 
     /** @brief Return squared mass parameter \f$\mu^2\f$ */
@@ -160,7 +203,7 @@ public:
         // Construct coarse action based on this lattice
         std::shared_ptr<Action> new_action = std::make_shared<GFFAction>(coarse_lattice,
                                                                          lattice,
-                                                                         mass);
+                                                                         mass,1);
         return new_action;
     };
 
@@ -227,6 +270,27 @@ public:
      */
     virtual void initialise_state(std::shared_ptr<SampleState> phi_state) const;
     
+    /** @brief Global heat bath update with effective action
+     * 
+     * Carry out a global Gibbs update of the state, traversing the unknowns in
+     * lexicographic order.
+     * 
+     * @param[inout] phi_state Sample state to be updated
+     */
+    void global_heatbath_update_eff(std::shared_ptr<SampleState> phi_state) const;
+    
+    /** @brief Build precision matrix based on a given stencil
+     * 
+     * The stencil is given as a list of entries, which decsribe the
+     * coupling on the diagonal (index 0), the nearest neighbours
+     * (index 1) and the diagonal nearest neighbours (index 2).
+     * For a five-point stencil, the list contains only two entries,
+     * for a nine-point stencil it has three entries.
+     * 
+     * @param[in] stencil List of stencil entries, can have any length
+     */
+    Eigen::SparseMatrix<double> buildPrecisionMatrix(std::vector<double> stencil);
+    
     /** @brief Action information string
      *
      * return some information on this instance of the action
@@ -234,8 +298,9 @@ public:
     virtual std::string info_string() const;
     
     /** @brief Build (sparse) Cholesky decomposition for exact sampler
+     * as well as covariance matrices used for Gibbs acceleration.
      */
-    void buildCholesky();
+    void buildMatrices();
     
     /** @brief Draw new sample
      * 
@@ -259,6 +324,8 @@ protected:
     const double mass;
     /** @brief Non-dimensionalised mass \f$\mu^2 = a^2m^2\f$*/
     double mu2;
+    /** @brief Number of Gibbs smoothing steps */
+    const int n_gibbs_smooth;
     /** @brief Width of Gaussian for heat-bath update: 
       * \f$\sigma = 1/\sqrt{1+\mu^2}\f$ */
     double sigma;
@@ -269,6 +336,8 @@ protected:
     /** @brief Sparse Cholesky matrix L^T for direct sampling */
     mutable Eigen::SparseMatrix<double> choleskyLT;
     mutable Eigen::SparseMatrix<double> choleskyL;
+    /** @brief Precision matrix after Gibbs smoothing */
+    mutable Eigen::MatrixXd Q_precision_hat;
     /** @brief Vector used for direct sampling*/
     mutable Eigen::VectorXd rhs_sample;
 };
