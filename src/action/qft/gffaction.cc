@@ -43,16 +43,17 @@ void GFFAction::global_heatbath_update_eff(std::shared_ptr<SampleState> phi_stat
     const std::vector<std::vector<unsigned int> >& neighbour_vertices = lattice->get_neighbour_vertices();
     unsigned int Nvertices = lattice->getNvertices();
     double sigma_eff = 1./sqrt(4.+0.5*mu2 - 4./(4.+0.5*mu2));
-    double kappa = 1./(4.+0.5*mu2);
+    double kappa = omega/(4.+0.5*mu2);
+    double gamma = sqrt(omega*(2.-omega));
     for (unsigned int ell=0;ell<Nvertices;++ell) {
-        double Delta = 0.0;
+        double Delta = (1.-omega)*(4.+0.5*mu2 - 4./(4.+0.5*mu2))*phi_state->data[ell];
         for (int k=0;k<4;++k) {
             Delta += 2.*kappa*phi_state->data[neighbour_vertices[ell][k]];
         }
         for (int k=4;k<8;++k) {
             Delta += kappa*phi_state->data[neighbour_vertices[ell][k]];
         }
-        phi_state->data[ell] = sigma_eff*(normal_dist(engine)+sigma_eff*Delta);
+        phi_state->data[ell] = sigma_eff*(gamma*normal_dist(engine)+sigma_eff*Delta);
     }
 }
 
@@ -136,6 +137,9 @@ void GFFAction::buildMatrices() {
     Eigen::MatrixXd Sigma_eff = Eigen::MatrixXd(Q_precision_eff).inverse();
     
     Eigen::MatrixXd M_mat = Q_precision_eff.triangularView<Eigen::Lower>();
+    if (fabs(omega-1.0) > 1.E-14) {
+        M_mat += ((1./omega-1)*Q_precision_eff.diagonal()).asDiagonal();        
+    }
     Eigen::MatrixXd G_mat = Eigen::MatrixXd::Identity(Nvertices, Nvertices);
     if (n_gibbs_smooth>0) {
         Eigen::MatrixXd G_mat_tmp = (Eigen::MatrixXd::Identity(Nvertices, Nvertices)
