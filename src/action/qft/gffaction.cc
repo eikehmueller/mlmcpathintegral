@@ -138,8 +138,8 @@ void GFFAction::buildMatrices() {
     Eigen::MatrixXd M_mat = Q_precision_eff.triangularView<Eigen::Lower>();
     Eigen::MatrixXd G_mat = Eigen::MatrixXd::Identity(Nvertices, Nvertices);
     if (n_gibbs_smooth>0) {
-        Eigen::MatrixXd G_mat_tmp = (M_mat.inverse()*Q_precision_eff
-                                    - Eigen::MatrixXd::Identity(Nvertices, Nvertices));
+        Eigen::MatrixXd G_mat_tmp = (Eigen::MatrixXd::Identity(Nvertices, Nvertices)
+                                     - M_mat.inverse()*Q_precision_eff);
         for (int k=0;k<n_gibbs_smooth;++k) {
             G_mat *= G_mat_tmp;
         }
