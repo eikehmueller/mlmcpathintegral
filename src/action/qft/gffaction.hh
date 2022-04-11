@@ -152,14 +152,16 @@ public:
      * @param[in] lattice_ Underlying two-dimensional lattice
      * @param[in] lattice_ Underlying fine level two-dimensional lattice
      * @param[in] mass_ Mass parameter \f$m\f$
-     * @param[in] n_gibbs_smooth
+     * @param[in] n_gibbs_smooth Number of Gibbs smoothing steps
+     * @param[in] omega_ Overrelaxation factor for Gibbs smoother
      */
     GFFAction(const std::shared_ptr<Lattice2D> lattice_,
               const std::shared_ptr<Lattice2D> fine_lattice_,
               const double mass_,
-              const int n_gibbs_smooth_=0)
+              const int n_gibbs_smooth_=0,
+              const double omega_=1.0)
         : QFTAction(lattice_,fine_lattice_,RenormalisationNone),
-          mass(mass_), n_gibbs_smooth(n_gibbs_smooth_), normal_dist(0.0,1.0) {
+          mass(mass_), n_gibbs_smooth(n_gibbs_smooth_), omega(omega_), normal_dist(0.0,1.0) {
               if (lattice->getMt_lat() != lattice->getMx_lat()) {
                   mpi_parallel::cerr << "ERROR: Lattice has to be squared for GFF action " << std::endl;
                   mpi_exit(EXIT_FAILURE);
@@ -203,7 +205,7 @@ public:
         // Construct coarse action based on this lattice
         std::shared_ptr<Action> new_action = std::make_shared<GFFAction>(coarse_lattice,
                                                                          lattice,
-                                                                         mass,1);
+                                                                         mass,2,1.0);
         return new_action;
     };
 
@@ -326,6 +328,8 @@ protected:
     double mu2;
     /** @brief Number of Gibbs smoothing steps */
     const int n_gibbs_smooth;
+    /** @brief Overrelaxation factor for Gibbs smoother */
+    const double omega;
     /** @brief Width of Gaussian for heat-bath update: 
       * \f$\sigma = 1/\sqrt{1+\mu^2}\f$ */
     double sigma;
