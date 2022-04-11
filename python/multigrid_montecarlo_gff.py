@@ -66,11 +66,11 @@ class GFFAction(object):
         h_coarse = np.zeros((self.Mlat_coarse,self.Mlat_coarse))
         for i in range(self.Mlat_coarse):
             for j in range(self.Mlat_coarse):
-                h_ij = (self.alpha+self.beta)*( phi_state[(2*i-1)%self.Mlat,(2*j-1)%self.Mlat]
+                h_ij = (2.*self.alpha+self.beta)*( phi_state[(2*i-1)%self.Mlat,(2*j-1)%self.Mlat]
                                               + phi_state[(2*i-1)%self.Mlat,(2*j+1)%self.Mlat]
                                               + phi_state[(2*i+1)%self.Mlat,(2*j-1)%self.Mlat]
                                               + phi_state[(2*i+1)%self.Mlat,(2*j+1)%self.Mlat] )
-                h_ij -= 0.5*self.alpha * ( phi_state[(2*i-3)%self.Mlat,(2*j-1)%self.Mlat]
+                h_ij -= self.alpha * ( phi_state[(2*i-3)%self.Mlat,(2*j-1)%self.Mlat]
                                          + phi_state[(2*i-3)%self.Mlat,(2*j+1)%self.Mlat]
                                          + phi_state[(2*i+3)%self.Mlat,(2*j-1)%self.Mlat]
                                          + phi_state[(2*i+3)%self.Mlat,(2*j+1)%self.Mlat]
