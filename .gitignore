@@ -8,3 +8,7 @@ build
 MLMCPathintegral
 qoi.dat
 state_*.dat
+*.cmake
+CMakeFiles
+CMakeCache.txt
+Makefile
