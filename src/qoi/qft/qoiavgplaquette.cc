@@ -4,21 +4,24 @@
  */
 
 /* Evaluate QoI */
-const double QoIAvgPlaquette::evaluate(const std::shared_ptr<SampleState> phi_state) {
-    // lambda function for working out linear index of link
-    if (phi_state->data.size() != 2*Mt_lat*Mx_lat) {
-        mpi_parallel::cout << "ERROR: Evaluating QoIAvgPlaquette on state of wrong size." << std::endl;
-        mpi_exit(EXIT_FAILURE);
+const double
+QoIAvgPlaquette::evaluate(const std::shared_ptr<SampleState> phi_state) {
+  // lambda function for working out linear index of link
+  if (phi_state->data.size() != 2 * Mt_lat * Mx_lat) {
+    mpi_parallel::cout
+        << "ERROR: Evaluating QoIAvgPlaquette on state of wrong size."
+        << std::endl;
+    mpi_exit(EXIT_FAILURE);
+  }
+  double S_plaq = 0.0;
+  for (int i = 0; i < Mt_lat; ++i) {
+    for (int j = 0; j < Mx_lat; ++j) {
+      double theta = phi_state->data[lattice->link_cart2lin(i, j, 0)] +
+                     phi_state->data[lattice->link_cart2lin(i + 1, j, 1)] -
+                     phi_state->data[lattice->link_cart2lin(i, j + 1, 0)] -
+                     phi_state->data[lattice->link_cart2lin(i, j, 1)];
+      S_plaq += cos(theta);
     }
-    double S_plaq = 0.0;
-    for (int i=0;i<Mt_lat;++i) {
-        for (int j=0;j<Mx_lat;++j) {
-            double theta = phi_state->data[lattice->link_cart2lin(i,  j,  0)]
-                         + phi_state->data[lattice->link_cart2lin(i+1,j,  1)]
-                         - phi_state->data[lattice->link_cart2lin(i,  j+1,0)]
-                         - phi_state->data[lattice->link_cart2lin(i,  j  ,1)];
-            S_plaq += cos(theta);
-        }
-    }
-    return S_plaq/(Mx_lat*Mt_lat);
+  }
+  return S_plaq / (Mx_lat * Mt_lat);
 }

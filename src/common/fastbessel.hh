@@ -17,8 +17,8 @@
  * the following (truncation) series representation is used:
  *
  * \f[
- *   e^{-z} I_0(z) \approx \frac{1}{2\pi z_{\text{inv}}} \sum_{k=0}^{k_{\max}} a_k z^{-k}
- * \f]
+ *   e^{-z} I_0(z) \approx \frac{1}{2\pi z_{\text{inv}}} \sum_{k=0}^{k_{\max}}
+ * a_k z^{-k} \f]
  *
  * The coefficients are given by \f$a_k=\frac{((2k-1)!!)^2}{8^k k!}\f$.
  */
@@ -32,25 +32,21 @@ const double fast_bessel_I0_scaled(const double z);
 /** @brief Template for evaluating the asymptotic expansion coefficients
  *
  * The asymptotic expansion coefficient \f$a_k\f$ satisfy the recursion relation
- * \f$a_k = \frac{(2k-1)^2}{8n}a_{n-1}\f$ with \f$a_0\f$ This is implemented using
- * template metaprogramming.
+ * \f$a_k = \frac{(2k-1)^2}{8n}a_{n-1}\f$ with \f$a_0\f$ This is implemented
+ * using template metaprogramming.
  */
-template <int N>
-struct ModifiedBesselCoefficient
-{
-    static constexpr double value = 0.125*(2.0*N-1.0)*(2.0*N-1.0)/N
-                                  * ModifiedBesselCoefficient<N-1>::value;
+template <int N> struct ModifiedBesselCoefficient {
+  static constexpr double value = 0.125 * (2.0 * N - 1.0) * (2.0 * N - 1.0) /
+                                  N * ModifiedBesselCoefficient<N - 1>::value;
 };
 
-/** @brief Base case template for evaluating the asymptotic expansion coefficient \f$a_0\f$
+/** @brief Base case template for evaluating the asymptotic expansion
+ * coefficient \f$a_0\f$
  *
  * The base case is given by \f$a_0=1\f$.
  */
-template <>
-struct ModifiedBesselCoefficient<0>
-{
-    static constexpr double value = 1.0;
+template <> struct ModifiedBesselCoefficient<0> {
+  static constexpr double value = 1.0;
 };
-
 
 #endif // FASTBESSEL_HH

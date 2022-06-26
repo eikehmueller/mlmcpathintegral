@@ -1,11 +1,11 @@
 #ifndef MPI_RANDOM
 #define MPI_RANDOM MPI_RANDOM
 
-#include <set>
-#include <random>
-#include <algorithm>
-#include <type_traits>
 #include "mpi/mpi_wrapper.hh"
+#include <algorithm>
+#include <random>
+#include <set>
+#include <type_traits>
 
 /** @file mpi_random.hh
  * @brief Header file for parallel random number generation
@@ -25,31 +25,26 @@
  */
 class parallel_mt19937_64 : public std::mt19937_64 {
 public:
-    /** @brief Constructor */
-    parallel_mt19937_64(result_type value = default_seed) { seed(value); };
-    
-    /** @brief Seed random number generator
-     *
-     * @param[in] value Seed to be used on master process.
-     */
-    void seed(result_type value = default_seed);
+  /** @brief Constructor */
+  parallel_mt19937_64(result_type value = default_seed) { seed(value); };
 
-    /** @brief Return next random number */
-    result_type operator()() {
-        return base_engine();
-    }
+  /** @brief Seed random number generator
+   *
+   * @param[in] value Seed to be used on master process.
+   */
+  void seed(result_type value = default_seed);
 
-    /** @brief Advances the internal state a number of times
-     *
-     * @param[in] z Number of random numbers to discard
-     */
-    void discard( unsigned long long z ) {
-        base_engine.discard(z);
-    }
+  /** @brief Return next random number */
+  result_type operator()() { return base_engine(); }
 
+  /** @brief Advances the internal state a number of times
+   *
+   * @param[in] z Number of random numbers to discard
+   */
+  void discard(unsigned long long z) { base_engine.discard(z); }
 
 protected:
-    std::mt19937_64 base_engine;
+  std::mt19937_64 base_engine;
 };
 
 namespace mpi_parallel {
@@ -58,6 +53,6 @@ typedef parallel_mt19937_64 mt19937_64;
 #else
 typedef std::mt19937_64 mt19937_64;
 #endif
-}
+} // namespace mpi_parallel
 
 #endif // MPI_RANDOM

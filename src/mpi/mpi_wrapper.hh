@@ -1,12 +1,12 @@
 #ifndef MPI_WRAPPER_HH
 #define MPI_WRAPPER_HH MPI_WRAPPER_HH
 
-#include <string>
+#include <cmath>
 #include <iostream>
 #include <ostream>
-#include <vector>
-#include <cmath>
 #include <stdlib.h>
+#include <string>
+#include <vector>
 
 #ifdef USE_MPI
 #include <mpi.h>
@@ -74,28 +74,28 @@ bool mpi_allreduce_and(const bool x);
  * @param x value to broadcast
  * @param root processor to broadcast from
  */
-void mpi_bcast(double& x,const int root=0);
+void mpi_bcast(double &x, const int root = 0);
 
 /** @brief Broadcast integer value to all processes
  *
  * @param x value to broadcast
  * @param root processor to broadcast from
  */
-void mpi_bcast(int& x,const int root=0);
+void mpi_bcast(int &x, const int root = 0);
 
 /** @brief Broadcast bool value to all processes
  *
  * @param x value to broadcast
  * @param root processor to broadcast from
  */
-void mpi_bcast(bool& x,const int root=0);
+void mpi_bcast(bool &x, const int root = 0);
 
 /** @brief Broadcast string value to all processes
  *
  * @param x value to broadcast
  * @param root processor to broadcast from
  */
-void mpi_bcast(std::string& x,const int root=0);
+void mpi_bcast(std::string &x, const int root = 0);
 
 /** @brief Scatter values to all processes
  *
@@ -104,7 +104,7 @@ void mpi_bcast(std::string& x,const int root=0);
  *
  * This takes the list [x[0],x[1],x[2],...,x[nproc-1]] and scatters it.
  */
-void mpi_scatter(unsigned int* data, unsigned int& x);
+void mpi_scatter(unsigned int *data, unsigned int &x);
 
 /** @brief Call mpi_finalize and exit
  *
@@ -139,56 +139,56 @@ namespace mpi_parallel {
  */
 class MPIMasterStream {
 public:
-    /** @brief Constructor
-     *
-     * @param[in] out_ Stream to wrap
-     */
-    MPIMasterStream(std::ostream& out_) : is_dummy(true) {
-        mpi_init();
-        if (not mpi_master()) {
-            out = new(std::ostream)(nullptr);
-            out->setstate(std::ios_base::badbit);
-        } else {
-            is_dummy = false;
-            out = &out_;
-        }
+  /** @brief Constructor
+   *
+   * @param[in] out_ Stream to wrap
+   */
+  MPIMasterStream(std::ostream &out_) : is_dummy(true) {
+    mpi_init();
+    if (not mpi_master()) {
+      out = new (std::ostream)(nullptr);
+      out->setstate(std::ios_base::badbit);
+    } else {
+      is_dummy = false;
+      out = &out_;
     }
+  }
 
-    /** @brief Destructor, free memory if it has been allocated */
-    ~MPIMasterStream() {
-        if (is_dummy) {
-            delete(out);
-        }
+  /** @brief Destructor, free memory if it has been allocated */
+  ~MPIMasterStream() {
+    if (is_dummy) {
+      delete (out);
     }
+  }
 
-    template <typename T>
-    /** @brief Output only on MPI master
-     *
-     * @param[in] v Object to pass to << operator
-     */
-    const MPIMasterStream& operator<<(const T& v) const {
-        *out << v;
-        return *this;
-    }
+  template <typename T>
+  /** @brief Output only on MPI master
+   *
+   * @param[in] v Object to pass to << operator
+   */
+  const MPIMasterStream &operator<<(const T &v) const {
+    *out << v;
+    return *this;
+  }
 
-    /** @brief Output only on MPI master
-     *
-     * @param[in] F Functor to use
-     */
-    MPIMasterStream const& operator<<(std::ostream& (*F)(std::ostream&)) const {
-        F(*out);
-        return *this;
-    }
+  /** @brief Output only on MPI master
+   *
+   * @param[in] F Functor to use
+   */
+  MPIMasterStream const &operator<<(std::ostream &(*F)(std::ostream &)) const {
+    F(*out);
+    return *this;
+  }
 
 protected:
-    std::ostream* out; /** @brief Wrapped output stream */
-    bool is_dummy; /** @brief Set to true if not master process */
+  std::ostream *out; /** @brief Wrapped output stream */
+  bool is_dummy;     /** @brief Set to true if not master process */
 };
 
 /** @brief wrapped std::cout object */
 static MPIMasterStream cout(std::cout);
 /** @brief wrapped std::cerr object */
 static MPIMasterStream cerr(std::cerr);
-}
+} // namespace mpi_parallel
 
 #endif // MPI_HH

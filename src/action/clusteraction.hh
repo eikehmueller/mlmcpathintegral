@@ -23,51 +23,51 @@
  */
 class ClusterAction {
 public:
-    /** @brief Initialise class
-     *
-     * Create new instance of class.
-     *
-     * @param[in] generic_lattice_ Underlying generic lattice
-     */
-    ClusterAction(const std::shared_ptr<Lattice> lattice_)
-        : generic_lattice(lattice_) {}
+  /** @brief Initialise class
+   *
+   * Create new instance of class.
+   *
+   * @param[in] generic_lattice_ Underlying generic lattice
+   */
+  ClusterAction(const std::shared_ptr<Lattice> lattice_)
+      : generic_lattice(lattice_) {}
 
-    /** @brief Change \f$S_{\ell}\f$ in energy used in bonding probabilities
-     *
-     * The probability to have a bond between sites \f$i\f$ and \f$j\f$
-     * is given by \f$1-e^{\min(0,-S_{\ell})}\f$
-     *
-     * @param[in] x_path Sample state
-     * @param[in] i index of first vertex
-     * @param[in] i index of second vertex
-     */
-    virtual double S_ell(const std::shared_ptr<SampleState> x_path, 
-                         const unsigned int i, 
-                         const unsigned int j) const = 0;
+  /** @brief Change \f$S_{\ell}\f$ in energy used in bonding probabilities
+   *
+   * The probability to have a bond between sites \f$i\f$ and \f$j\f$
+   * is given by \f$1-e^{\min(0,-S_{\ell})}\f$
+   *
+   * @param[in] x_path Sample state
+   * @param[in] i index of first vertex
+   * @param[in] i index of second vertex
+   */
+  virtual double S_ell(const std::shared_ptr<SampleState> x_path,
+                       const unsigned int i, const unsigned int j) const = 0;
 
-    /** @brief Set reflection direction for the next step of the cluster algorithm
-     */
-    virtual void new_reflection() const = 0;
+  /** @brief Set reflection direction for the next step of the cluster algorithm
+   */
+  virtual void new_reflection() const = 0;
 
-    /** @brief Flip the spin at a given site
-     *
-     * @param[inout] x_path State to process
-     * @param[in] ell Vertex at which to flip the spin
-     */
-    virtual void flip(std::shared_ptr<SampleState> x_path, 
-                      const unsigned int ell) const = 0;
+  /** @brief Flip the spin at a given site
+   *
+   * @param[inout] x_path State to process
+   * @param[in] ell Vertex at which to flip the spin
+   */
+  virtual void flip(std::shared_ptr<SampleState> x_path,
+                    const unsigned int ell) const = 0;
 
-    /** @brief Initialise state */
-    virtual void initialise_state(std::shared_ptr<SampleState> x_path) const = 0;
-  
-    /** @brief return size of samples */
-    virtual unsigned int sample_size() const = 0;  
+  /** @brief Initialise state */
+  virtual void initialise_state(std::shared_ptr<SampleState> x_path) const = 0;
 
-    const std::shared_ptr<Lattice> get_generic_lattice() const { return generic_lattice; }
-  
+  /** @brief return size of samples */
+  virtual unsigned int sample_size() const = 0;
+
+  const std::shared_ptr<Lattice> get_generic_lattice() const {
+    return generic_lattice;
+  }
+
 protected:
-    const std::shared_ptr<Lattice> generic_lattice;
-      
+  const std::shared_ptr<Lattice> generic_lattice;
 };
 
 #endif // CLUSTERACTION_HH
