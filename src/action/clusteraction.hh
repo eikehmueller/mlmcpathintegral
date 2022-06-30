@@ -1,6 +1,7 @@
 #ifndef CLUSTERACTION_HH
 #define CLUSTERACTION_HH CLUSTERACTION_HH
 
+#include "common/samplestate.hh"
 #include "lattice/lattice.hh"
 
 /** @file clusteraction.hh
