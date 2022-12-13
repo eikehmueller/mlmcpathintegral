@@ -1,6 +1,7 @@
 from itertools import product
 import numpy as np
-from sympy import Indexed, Symbol, Add, Mul, Pow, expand
+from sympy import Indexed, IndexedBase, Symbol, Add, Mul, Pow, expand
+from index_flattener import IndexFlattener2D
 
 
 class Action:
@@ -16,7 +17,7 @@ class Action:
     involving phi, which can depend on the summation indices.
     """
 
-    def __init__(self, expr, phi, sidxs):
+    def __init__(self, expr, phi, sidxs, stencil_size=1):
         """Create new instance
 
         :arg expr: expression describing the action
@@ -28,6 +29,7 @@ class Action:
         self.dim = len(sidxs)
         assert self._is_valid_expr(expr), "Not a valid expression " + str(expr)
         self.expr = expand(expr)
+        self.stencil_size = stencil_size
 
     def _get_factors(self, expr):
         """Get a list of factors in a given product expression, separated
@@ -172,9 +174,16 @@ class Action:
         :arg other: other action to multiply by
         """
         if type(other) is type(self):
-            return Action(self._mul_expr(self.expr, other.expr), self.phi, self.sidxs)
+            return Action(
+                self._mul_expr(self.expr, other.expr),
+                self.phi,
+                self.sidxs,
+                stencil_size=self.stencil_size + other.stencil_size,
+            )
         else:
-            return Action(other * self.expr, self.phi, self.sidxs)
+            return Action(
+                other * self.expr, self.phi, self.sidxs, stencil_size=self.stencil_size
+            )
 
     def __pow__(self, n):
         """Raise action to n-th integer power
@@ -186,7 +195,28 @@ class Action:
         expr = self.expr
         for _ in range(n - 1):
             expr = self._mul_expr(self.expr, expr)
-        return Action(expr, self.phi, self.sidxs)
+        return Action(expr, self.phi, self.sidxs, stencil_size=n * self.stencil_size)
+
+    def get_stencil(self):
+        index_flattener = IndexFlattener2D()
+        generated_code = ""
+        eexpr = expand(self.expr)
+        k = 0
+        for alpha in range(-self.stencil_size, self.stencil_size + 1):
+            for beta in range(-self.stencil_size, self.stencil_size + 1):
+                coeff = eexpr.coeff(
+                    self.phi[self.sidxs[0], self.sidxs[1]]
+                    * self.phi[self.sidxs[0] + alpha, self.sidxs[1] + beta]
+                )
+                rhs_code = index_flattener.apply(coeff)
+                S = IndexedBase(f"S[{k}]")
+                lhs = S[self.sidxs[0], self.sidxs[1]]
+                lhs_code = index_flattener.apply(lhs)
+                if not rhs_code == "0":
+                    generated_code += f"{lhs_code}= {rhs_code};\n"
+                k += 1
+
+        return generated_code
 
 
 class Coarsener:
